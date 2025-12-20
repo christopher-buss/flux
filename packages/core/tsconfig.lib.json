@@ -1,0 +1,10 @@
+{
+	"extends": "@isentinel/tsconfig/roblox",
+	"compilerOptions": {
+		"tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
+		"declaration": true,
+		"outDir": "dist"
+	},
+	"include": ["./src/*", "../../types/**/*.d.ts"],
+	"exclude": ["./node_modules", "./src/**/*.spec.ts"]
+}

@@ -1,0 +1,63 @@
+autoInstallPeers: true
+catalogMode: prefer
+cleanupUnusedCatalogs: true
+ignoreWorkspaceRootCheck: true
+saveExact: true
+
+publicHoistPattern:
+  - "*@rbxts*"
+
+shellEmulator: true
+trustPolicy: no-downgrade
+
+trustPolicyExclude:
+  - eslint-config-prettier@9.1.2
+  - semver@6.3.1
+  - chokidar@4.0.3
+
+packages:
+  - packages/*
+
+catalogs:
+  build:
+    roblox-ts: 3.0.0
+  cli:
+    pncat: 0.7.7
+  lint:
+    "@eslint/config-inspector": 1.4.2
+    "@isentinel/eslint-config": 4.7.4
+    eslint: 9.39.2
+    eslint-plugin-jest: 29.5.0
+    eslint-plugin-pnpm: 1.4.3
+    eslint-plugin-react-hooks: 7.0.1
+    eslint-plugin-react-naming-convention: 2.3.13
+    eslint-plugin-react-x: 2.3.13
+    eslint_d: 14.3.0
+    husky: 9.1.7
+    lint-staged: 16.2.7
+  node:
+    rimraf: 6.1.2
+  peer:
+    "@rbxts/jecs": 0.9.0
+  prod:
+    "@rbxts/services": 1.6.0
+  script:
+    git-pull-run: 1.6.2
+    jiti: 2.6.1
+  test:
+    "@rbxts/jest": 3.13.3-ts.1
+    "@rbxts/jest-globals": 3.13.3-ts.1
+  tsc:
+    "@isentinel/tsconfig": 1.2.0
+    "@typescript/native-preview": latest
+    typescript: 5.9.3
+  types:
+    "@rbxts/compiler-types": 3.0.0-types.0
+    "@rbxts/types": 1.0.896
+    type-fest: 5.3.1
+
+configDependencies:
+  "@pnpm/plugin-trusted-deps": 0.2.0+sha512-jqiCC8kyrwOERwMWPo2RB1YlDMMS5WsPSA8Uwi3EXAYwyOSNtqKhrB9bs543JGUiz4yaA9h6nE3q98fG14AEyQ==
+
+onlyBuiltDependencies:
+  - unrs-resolver

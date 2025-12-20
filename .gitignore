@@ -1,0 +1,19 @@
+node_modules/
+out/
+dist/
+include/
+.vscode/mise-tools/
+
+*.tsbuildinfo
+
+# Misc
+.DS_Store
+
+sourcemap.json
+*.rbxl.lock
+*.rbxl
+*.rbxlx
+
+.env
+.eslintcache
+.tsconfig-cache.txt

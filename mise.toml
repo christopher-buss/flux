@@ -1,0 +1,11 @@
+[env]
+_.path = [ '{{config_root}}/node_modules/.bin' ]
+_.file = { path = ".env", redact = true }
+
+[settings]
+experimental = true
+
+[tools]
+"github:rojo-rbx/rojo" = "v7.7.0-rc.1"
+"github:seaofvoices/darklua" = "0.17.3"
+node = { version = "lts", postinstall = "corepack enable" }

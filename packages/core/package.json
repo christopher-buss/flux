@@ -1,0 +1,45 @@
+{
+	"name": "@rbxts/flux",
+	"version": "0.1.0",
+	"description": "Input Action System wrapper for Roblox",
+	"keywords": ["roblox", "input", "rbxts"],
+	"license": "MIT",
+	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/init.luau",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"main": "./dist/init.luau",
+	"types": "./dist/index.d.ts",
+	"files": ["dist"],
+	"scripts": {
+		"build": "rbxtsc --project tsconfig.lib.json",
+		"clean": "npx rimraf out/ && npx rimraf dist/",
+		"darklua": "darklua process out dist --verbose",
+		"dev:build": "rbxtsc --project tsconfig.spec.json",
+		"dev:watch": "rbxtsc --watch --project tsconfig.spec.json",
+		"typecheck": "tsgo --noEmit"
+	},
+	"dependencies": {
+		"@rbxts/services": "catalog:prod"
+	},
+	"devDependencies": {
+		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/jecs": "catalog:peer",
+		"@rbxts/jest": "catalog:test",
+		"@rbxts/jest-globals": "catalog:test",
+		"@rbxts/types": "catalog:types",
+		"@typescript/native-preview": "catalog:tsc",
+		"rimraf": "catalog:node",
+		"roblox-ts": "catalog:build",
+		"type-fest": "catalog:types",
+		"typescript": "catalog:tsc"
+	},
+	"peerDependencies": {
+		"@rbxts/jecs": "^0.9.0"
+	}
+}

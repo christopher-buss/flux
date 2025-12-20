@@ -1,0 +1,22 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:recommended",
+		":pinAllExceptPeerDependencies",
+		"helpers:pinGitHubActionDigests",
+		"npm:unpublishSafe"
+	],
+	"schedule": ["* 0-23 * * 1,4,6"],
+	"packageRules": [
+		{
+			"matchUpdateTypes": ["minor", "patch"],
+			"matchCurrentVersion": "!/^0/",
+			"automerge": true
+		},
+		{
+			"matchPackageNames": ["@rbxts/types"],
+			"automerge": true,
+			"minimumReleaseAge": "0 days"
+		}
+	]
+}

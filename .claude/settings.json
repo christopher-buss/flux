@@ -1,0 +1,46 @@
+{
+	"includeCoAuthoredBy": true,
+	"permissions": {
+		"allow": [
+			"Bash(gh:*)",
+			"Bash(gh pr:*)",
+			"Bash(gh pr create:*)",
+			"Bash(gh pr view:*)",
+			"Bash(gh run list:*)",
+			"Bash(gh run view:*)",
+			"Glob",
+			"Grep",
+			"LS",
+			"Read",
+			"Read(*)",
+			"TodoWrite",
+			"WebFetch",
+			"WebSearch"
+		],
+		"deny": [],
+		"ask": [],
+		"defaultMode": "plan",
+		"additionalDirectories": []
+	},
+	"enabledPlugins": {
+		"elements-of-style@superpowers-marketplace": true,
+		"superpowers@superpowers-marketplace": true
+	},
+	"hooks": {
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "sh .claude/hooks/lint.sh",
+						"type": "command"
+					},
+					{
+						"command": "sh .claude/hooks/type-check.sh",
+						"type": "command"
+					}
+				],
+				"matcher": "Edit|Write|MultiEdit"
+			}
+		]
+	}
+}

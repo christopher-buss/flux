@@ -1,0 +1,9 @@
+{
+	"extends": "@isentinel/tsconfig/roblox",
+	"compilerOptions": {
+		"composite": true,
+		"rootDir": "."
+	},
+	"include": ["./**/*", "../../types/**/*.d.ts"],
+	"exclude": ["./node_modules", "./**/.*/", "./out"]
+}
