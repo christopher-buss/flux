@@ -1,0 +1,12 @@
+{
+	"name": "scripts",
+	"private": true,
+	"description": "Scripts for Flux monorepo",
+	"keywords": ["roblox", "rbxts", "monorepo"],
+	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
+	"type": "module",
+	"devDependencies": {
+		"@types/node": "catalog:types",
+		"confbox": "catalog:dev"
+	}
+}

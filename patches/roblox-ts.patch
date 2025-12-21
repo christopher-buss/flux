@@ -1,0 +1,83 @@
+diff --git a/out/TSTransformer/util/createImportExpression.js b/out/TSTransformer/util/createImportExpression.js
+index cb6cbf00b5d7902021d4d33b7057fb7eccea32ca..c740f7882bef39c55ac7a9b23f752608e81819f5 100644
+--- a/out/TSTransformer/util/createImportExpression.js
++++ b/out/TSTransformer/util/createImportExpression.js
+@@ -44,10 +44,10 @@ function getRelativeImport(sourceRbxPath, moduleRbxPath) {
+     return pathExpressions;
+ }
+ function validateModule(state, scope) {
+-    const scopedModules = path_1.default.join(state.data.nodeModulesPath, scope);
+     if (state.compilerOptions.typeRoots) {
+         for (const typeRoot of state.compilerOptions.typeRoots) {
+-            if (path_1.default.normalize(scopedModules) === path_1.default.normalize(typeRoot)) {
++            const normalizedTypeRoot = path_1.default.normalize(typeRoot);
++            if (normalizedTypeRoot.endsWith(path_1.default.normalize(scope))) {
+                 return true;
+             }
+         }
+@@ -62,6 +62,17 @@ function findRelativeRbxPath(moduleOutPath, pkgRojoResolvers) {
+         }
+     }
+ }
++function getPathsWithScope(rojoResolver, moduleScope) {
++    const pathsWithScope = new Set();
++    for (const partition of rojoResolver.getPartitions()) {
++        const fsPath = partition.fsPath;
++        const normalized = path_1.default.normalize(fsPath);
++        if (normalized.endsWith(moduleScope) && !normalized.includes(constants_1.NODE_MODULES)) {
++            pathsWithScope.add(normalized);
++        }
++    }
++    return Array.from(pathsWithScope);
++}
+ function getNodeModulesImportParts(state, sourceFile, moduleSpecifier, moduleOutPath) {
+     const moduleScope = path_1.default.relative(state.data.nodeModulesPath, moduleOutPath).split(path_1.default.sep)[0];
+     (0, assert_1.assert)(moduleScope);
+@@ -74,7 +85,19 @@ function getNodeModulesImportParts(state, sourceFile, moduleSpecifier, moduleOut
+         return [luau_ast_1.default.none()];
+     }
+     if (state.projectType === constants_1.ProjectType.Package) {
+-        const relativeRbxPath = findRelativeRbxPath(moduleOutPath, state.pkgRojoResolvers);
++        let resolvedModuleOutPath = moduleOutPath;
++        const nodeModulesIndex = moduleOutPath.lastIndexOf(constants_1.NODE_MODULES);
++        if (nodeModulesIndex !== -1 && state.compilerOptions.typeRoots) {
++            const afterNodeModules = moduleOutPath.substring(nodeModulesIndex + constants_1.NODE_MODULES.length + 1);
++            const scope = afterNodeModules.split(path_1.default.sep)[0];
++            for (const typeRoot of state.compilerOptions.typeRoots) {
++                if (path_1.default.normalize(typeRoot).endsWith(path_1.default.normalize(scope))) {
++                    resolvedModuleOutPath = path_1.default.join(typeRoot, afterNodeModules.substring(scope.length + 1));
++                    break;
++                }
++            }
++        }
++        const relativeRbxPath = findRelativeRbxPath(resolvedModuleOutPath, state.pkgRojoResolvers);
+         if (!relativeRbxPath) {
+             DiagnosticService_1.DiagnosticService.addDiagnostic(diagnostics_1.errors.noRojoData(moduleSpecifier, path_1.default.relative(state.data.projectPath, moduleOutPath), true));
+             return [luau_ast_1.default.none()];
+@@ -90,7 +113,25 @@ function getNodeModulesImportParts(state, sourceFile, moduleSpecifier, moduleOut
+         ];
+     }
+     else {
+-        const moduleRbxPath = state.rojoResolver.getRbxPathFromFilePath(moduleOutPath);
++        let moduleRbxPath = state.rojoResolver.getRbxPathFromFilePath(moduleOutPath);
++        if (!moduleRbxPath) {
++            const pathsWithScope = getPathsWithScope(state.rojoResolver, moduleScope);
++            if (pathsWithScope.length === 0) {
++                DiagnosticService_1.DiagnosticService.addDiagnostic(diagnostics_1.errors.noRojoData(moduleSpecifier, path_1.default.relative(state.data.projectPath, moduleOutPath), true));
++                return [luau_ast_1.default.none()];
++            }
++            const nodeModulesIndex = moduleOutPath.lastIndexOf(constants_1.NODE_MODULES);
++            const afterNodeModules = moduleOutPath.substring(nodeModulesIndex + constants_1.NODE_MODULES.length + 1);
++            const packageName = afterNodeModules.split(path_1.default.sep).slice(1).join(path_1.default.sep);
++            for (const pathWithScope of pathsWithScope) {
++                const alternativePath = path_1.default.join(pathWithScope, packageName);
++                const testRbxPath = state.rojoResolver.getRbxPathFromFilePath(alternativePath);
++                if (testRbxPath) {
++                    moduleRbxPath = testRbxPath;
++                    break;
++                }
++            }
++        }
+         if (!moduleRbxPath) {
+             DiagnosticService_1.DiagnosticService.addDiagnostic(diagnostics_1.errors.noRojoData(moduleSpecifier, path_1.default.relative(state.data.projectPath, moduleOutPath), true));
+             return [luau_ast_1.default.none()];

@@ -2,11 +2,8 @@ autoInstallPeers: true
 catalogMode: prefer
 cleanupUnusedCatalogs: true
 ignoreWorkspaceRootCheck: true
+
 saveExact: true
-
-publicHoistPattern:
-  - "*@rbxts*"
-
 shellEmulator: true
 trustPolicy: no-downgrade
 
@@ -17,15 +14,21 @@ trustPolicyExclude:
 
 packages:
   - packages/*
+  - scripts
+
+patchedDependencies:
+  roblox-ts: patches/roblox-ts.patch
 
 catalogs:
   build:
     roblox-ts: 3.0.0
   cli:
     pncat: 0.7.7
+  dev:
+    confbox: 0.2.2
   lint:
     "@eslint/config-inspector": 1.4.2
-    "@isentinel/eslint-config": 4.7.4
+    "@isentinel/eslint-config": 4.7.6
     eslint: 9.39.2
     eslint-plugin-jest: 29.5.0
     eslint-plugin-pnpm: 1.4.3
@@ -54,6 +57,7 @@ catalogs:
   types:
     "@rbxts/compiler-types": 3.0.0-types.0
     "@rbxts/types": 1.0.896
+    "@types/node": 24.10.4
     type-fest: 5.3.1
 
 configDependencies:
@@ -61,3 +65,7 @@ configDependencies:
 
 onlyBuiltDependencies:
   - unrs-resolver
+
+updateConfig:
+  ignoreDependencies:
+    - "@types/node" # We want to keep this at LTS

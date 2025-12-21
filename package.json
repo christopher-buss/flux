@@ -37,6 +37,7 @@
 		"jiti": "catalog:script",
 		"lint-staged": "catalog:lint",
 		"pncat": "catalog:cli",
+		"roblox-ts": "catalog:build",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
 	},

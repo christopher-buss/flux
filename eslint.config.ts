@@ -1,4 +1,4 @@
-import style from "@isentinel/eslint-config";
+import style, { GLOB_ROOT_SRC } from "@isentinel/eslint-config";
 
 export default style({
 	name: "flux/root",
@@ -6,6 +6,10 @@ export default style({
 	ignores: ["!.claude"],
 	namedConfigs: true,
 	react: true,
+	roblox: {
+		files: [...GLOB_ROOT_SRC],
+		filesTypeAware: [...GLOB_ROOT_SRC],
+	},
 	test: true,
 	type: "package",
 });
