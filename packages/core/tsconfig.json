@@ -4,6 +4,6 @@
 		"composite": true,
 		"rootDir": "."
 	},
-	"include": ["./**/*", "../../types/**/*.d.ts"],
-	"exclude": ["./node_modules", "./**/.*/", "./out"]
+	"include": ["**/*", "../../types/**/*.d.ts"],
+	"exclude": ["node_modules", "out", "**/.*/", "dist", "test"]
 }

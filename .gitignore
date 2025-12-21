@@ -1,6 +1,7 @@
 node_modules/
 out/
 dist/
+test/
 include/
 .vscode/mise-tools/
 
@@ -17,3 +18,5 @@ sourcemap.json
 .env
 .eslintcache
 .tsconfig-cache.txt
+
+rojo-sync/

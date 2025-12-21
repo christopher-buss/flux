@@ -6,6 +6,7 @@ _.file = { path = ".env", redact = true }
 experimental = true
 
 [tools]
+"github:JackTabsCode/jest-companion" = "latest"
 "github:rojo-rbx/rojo" = "v7.7.0-rc.1"
 "github:seaofvoices/darklua" = "0.17.3"
 node = { version = "lts", postinstall = "corepack enable" }

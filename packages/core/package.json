@@ -14,13 +14,14 @@
 	},
 	"main": "./dist/init.luau",
 	"types": "./dist/index.d.ts",
-	"files": ["dist"],
+	"files": ["dist", "!**/*tsconfig.tsbuildinfo"],
 	"scripts": {
 		"build": "rbxtsc --project tsconfig.lib.json",
 		"clean": "npx rimraf out/ && npx rimraf dist/",
 		"darklua": "darklua process out dist --verbose",
-		"dev:build": "rbxtsc --project tsconfig.spec.json",
-		"dev:watch": "rbxtsc --watch --project tsconfig.spec.json",
+		"dev:build": "rbxtsc --type=game --rojo test.project.json --project tsconfig.spec.json --includePath test/include",
+		"dev:serve": "rojo serve test.project.json",
+		"dev:watch": "rbxtsc --watch --type=game --rojo test.project.json --project tsconfig.spec.json --includePath test/include",
 		"typecheck": "tsgo --noEmit"
 	},
 	"dependencies": {
@@ -41,5 +42,9 @@
 	},
 	"peerDependencies": {
 		"@rbxts/jecs": "^0.9.0"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
 	}
 }
