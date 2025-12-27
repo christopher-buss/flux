@@ -36,7 +36,9 @@
 		"source.fixAll.eslint": "always",
 		"source.organizeImports": "never"
 	},
+	// Npm settings
 	"npm.packageManager": "pnpm",
+	"npm.exclude": "**/rojo-sync/**",
 	// Mise Tools settings
 	"mise.configureExtensionsUseSymLinks": true,
 	"debug.javascript.defaultRuntimeExecutable": {
