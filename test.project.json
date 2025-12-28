@@ -1,0 +1,34 @@
+{
+	"name": "test",
+	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"flux": {
+				"$path": "packages/core/out"
+			},
+			"jest.config": {
+				"$path": "packages/core/jest.config.luau"
+			},
+			"rbxts_include": {
+				"$path": "packages/core/test/include",
+				"node_modules": {
+					"$className": "Folder",
+					"@rbxts": {
+						"$path": "rojo-sync/@rbxts",
+						"flux-test-utils": {
+							"$className": "Folder",
+							"dist": {
+								"$path": "packages/test-utils/dist"
+							}
+						}
+					},
+					"@rbxts-js": {
+						"$path": "rojo-sync/@rbxts-js"
+					}
+				}
+			}
+		}
+	}
+}
