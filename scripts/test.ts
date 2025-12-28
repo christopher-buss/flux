@@ -42,4 +42,8 @@ if (needsCompile()) {
 	run("pnpm dev:build", CORE_DIR);
 }
 
-run("jest-companion --projects ReplicatedStorage", CORE_DIR);
+try {
+	run("jest-companion --projects ReplicatedStorage", CORE_DIR);
+} catch {
+	process.exit(1);
+}
