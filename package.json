@@ -10,6 +10,7 @@
 	"scripts": {
 		"commit": "commit",
 		"eslint-config": "npx @eslint/config-inspector",
+		"postinstall": "jiti scripts/rojo-sync.ts",
 		"lint": "eslint --cache",
 		"lint:ci": "eslint --cache --cache-strategy content",
 		"prepare": "node .husky/install.js",
