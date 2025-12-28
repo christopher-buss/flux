@@ -19,9 +19,9 @@
 		"build": "rbxtsc --project tsconfig.lib.json",
 		"clean": "npx rimraf out/ && npx rimraf dist/",
 		"darklua": "darklua process out dist --verbose",
-		"dev:build": "rbxtsc --type=game --rojo test.project.json --project tsconfig.spec.json --includePath test/include",
-		"dev:serve": "rojo serve test.project.json",
-		"dev:watch": "rbxtsc --watch --type=game --rojo test.project.json --project tsconfig.spec.json --includePath test/include",
+		"dev:build": "rbxtsc --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath test/include",
+		"dev:serve": "rojo serve ../../test.project.json",
+		"dev:watch": "rbxtsc --watch --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath test/include",
 		"typecheck": "tsgo --noEmit"
 	},
 	"dependencies": {
@@ -30,6 +30,7 @@
 	"devDependencies": {
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/flux-test-utils": "workspace:*",
 		"@rbxts/jecs": "catalog:peer",
 		"@rbxts/jest": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",
