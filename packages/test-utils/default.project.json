@@ -1,0 +1,15 @@
+{
+	"name": "@rbxts/flux-test-utils",
+	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
+	"tree": {
+		"$path": "dist",
+		"node_modules": {
+			"$className": "Folder",
+			"@rbxts": {
+				"$path": {
+					"optional": "node_modules/@rbxts"
+				}
+			}
+		}
+	}
+}

@@ -77,6 +77,9 @@ catalogs:
     '@rbxts/jest-globals':
       specifier: 3.13.3-ts.1
       version: 3.13.3-ts.1
+    '@rbxts/luau-polyfill':
+      specifier: 1.1.3
+      version: 1.1.3
   tsc:
     '@isentinel/tsconfig':
       specifier: 1.2.0
@@ -188,6 +191,9 @@ importers:
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0
+      '@rbxts/flux-test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@rbxts/jecs':
         specifier: catalog:peer
         version: 0.9.0
@@ -212,6 +218,30 @@ importers:
       type-fest:
         specifier: catalog:types
         version: 5.3.1
+      typescript:
+        specifier: catalog:tsc
+        version: 5.9.3
+
+  packages/test-utils:
+    devDependencies:
+      '@isentinel/tsconfig':
+        specifier: catalog:tsc
+        version: 1.2.0(typescript@5.9.3)
+      '@rbxts/compiler-types':
+        specifier: catalog:types
+        version: 3.0.0-types.0
+      '@rbxts/jest-globals':
+        specifier: catalog:test
+        version: 3.13.3-ts.1
+      '@rbxts/luau-polyfill':
+        specifier: catalog:test
+        version: 1.1.3
+      '@rbxts/types':
+        specifier: catalog:types
+        version: 1.0.896
+      roblox-ts:
+        specifier: catalog:build
+        version: 3.0.0(patch_hash=0b24751451dc8ab4caf832d5cb2c5bf15737df258a1e47186f0ece6e8e22c67e)
       typescript:
         specifier: catalog:tsc
         version: 5.9.3
@@ -1207,6 +1237,9 @@ packages:
 
   '@rbxts/jest@3.13.3-ts.1':
     resolution: {integrity: sha512-3Nd0PTYG+Dej1Gz0MSJlzirycbaahZtGFKXvFnu2pNZKqvti9QCzFVHsMZ2GYWAYG3DwlgYRsaxNfLsQ/gMy8A==}
+
+  '@rbxts/luau-polyfill@1.1.3':
+    resolution: {integrity: sha512-HhTeV1aeCDrr6PoTCc0khnAAxyBcDm0iXeu/t7l96u2Mr1fyA+0ugZd66A1xpThZwz/7YbTSFpiFp5SIFeu2Ug==}
 
   '@rbxts/pretty-format@3.13.3-ts.1':
     resolution: {integrity: sha512-uTSxVdfQv/cD+kvttLzw/LfyNC35mxAsJrSqom+F94etDYlz7ZRvG75izSPfzG2oVRSrhv6roaeWPeTqkpcIug==}
@@ -5449,6 +5482,8 @@ snapshots:
       '@rbxts/emittery': 3.13.3-ts.1
       '@rbxts/jest-globals': 3.13.3-ts.1
       '@rbxts/pretty-format': 3.13.3-ts.1
+
+  '@rbxts/luau-polyfill@1.1.3': {}
 
   '@rbxts/pretty-format@3.13.3-ts.1':
     dependencies:

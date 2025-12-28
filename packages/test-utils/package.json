@@ -1,0 +1,24 @@
+{
+	"name": "@rbxts/flux-test-utils",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Test utilities for Flux",
+	"keywords": ["test"],
+	"license": "MIT",
+	"author": "Christopher Buss <christopher.buss@pm.me>",
+	"type": "module",
+	"main": "./dist/init.luau",
+	"types": "./dist/index.d.ts",
+	"scripts": {
+		"dev:build": "rbxtsc --type=package --rojo default.project.json --project tsconfig.lib.json --includePath ../core/test/include"
+	},
+	"devDependencies": {
+		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/jest-globals": "catalog:test",
+		"@rbxts/luau-polyfill": "catalog:test",
+		"@rbxts/types": "catalog:types",
+		"roblox-ts": "catalog:build",
+		"typescript": "catalog:tsc"
+	}
+}
