@@ -13,7 +13,7 @@
 		"lint": "eslint --cache",
 		"lint:ci": "eslint --cache --cache-strategy content",
 		"prepare": "node .husky/install.js",
-		"test": "jest-companion --projects ReplicatedStorage",
+		"test": "jiti scripts/test.ts",
 		"typecheck": "tsgo --noEmit"
 	},
 	"lint-staged": {
