@@ -56,7 +56,7 @@ catalogs:
     typescript: 5.9.3
   types:
     "@rbxts/compiler-types": 3.0.0-types.0
-    "@rbxts/types": 1.0.896
+    "@rbxts/types": 1.0.911
     "@types/node": 24.10.4
     type-fest: 5.3.1
 
