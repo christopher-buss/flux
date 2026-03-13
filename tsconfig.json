@@ -9,7 +9,11 @@
 		},
 		{
 			"path": "scripts"
+		},
+		{
+			"path": "tsconfig.node.json"
 		}
 	],
-	"files": []
+	"files": [],
+	"include": []
 }

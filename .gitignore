@@ -17,6 +17,6 @@ sourcemap.json
 
 .env
 .eslintcache
-.tsconfig-cache.txt
+/.claude/state
 
 rojo-sync/
