@@ -23,24 +23,25 @@
 		"additionalDirectories": []
 	},
 	"enabledPlugins": {
-		"elements-of-style@superpowers-marketplace": true,
-		"superpowers@superpowers-marketplace": true
+		"sentinel@isentinel": true
 	},
-	"hooks": {
-		"PostToolUse": [
-			{
-				"hooks": [
-					{
-						"command": "sh .claude/hooks/lint.sh",
-						"type": "command"
-					},
-					{
-						"command": "sh .claude/hooks/type-check.sh",
-						"type": "command"
-					}
-				],
-				"matcher": "Edit|Write|MultiEdit"
+	"env": {
+		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "true",
+		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+	},
+	"extraKnownMarketplaces": {
+		"claude-plugins-official": {
+			"source": {
+				"source": "github",
+				"repo": "anthropics/claude-plugins-official"
 			}
-		]
-	}
+		},
+		"isentinel": {
+			"source": {
+				"source": "github",
+				"repo": "christopher-buss/skills"
+			}
+		}
+	},
+	"outputStyle": "sentinel:XP Programmer"
 }

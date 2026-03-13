@@ -1,0 +1,45 @@
+{
+	"version": 1,
+	"skills": {
+		"ecs-design": {
+			"source": "christopher-buss/skills",
+			"sourceType": "github",
+			"computedHash": "49fe6a5f11fa8718b7663d784228bfb23329bf3a768cee8b8595443e1d0c91e5"
+		},
+		"humanizer": {
+			"source": "christopher-buss/skills",
+			"sourceType": "github",
+			"computedHash": "24b85c7365abdf5d13b42954eff132095d619e9dbd2d980deb00c368054f4ce6"
+		},
+		"isentinel": {
+			"source": "christopher-buss/skills",
+			"sourceType": "github",
+			"computedHash": "18e0863146c362895e36dd2a8d77199b1d9c044415fe5a2fedf318b87873f302"
+		},
+		"jecs": {
+			"source": "christopher-buss/skills",
+			"sourceType": "github",
+			"computedHash": "f7a9169ed12918d4bff9a845c5ac38428ba163981a458c06996eec725c9feb20"
+		},
+		"jest": {
+			"source": "christopher-buss/skills",
+			"sourceType": "github",
+			"computedHash": "752ff9c728d89ef7b237b3cbb8cd45b41100ccd8a112940303e6a9b34c7056e7"
+		},
+		"pnpm": {
+			"source": "christopher-buss/skills",
+			"sourceType": "github",
+			"computedHash": "57b44178faeb6a0eeb2b56d5fdea211b9107b7542b5c6a74c83ea88041286c67"
+		},
+		"roblox-ts": {
+			"source": "christopher-buss/skills",
+			"sourceType": "github",
+			"computedHash": "eb79a7e8425a6babffb08e147712f27195e861ae3f50de104e59727a098cb910"
+		},
+		"test-driven-development": {
+			"source": "christopher-buss/skills",
+			"sourceType": "github",
+			"computedHash": "0b09231cf8bdbccff2efdfa367a3e1162f22693636bb48ae3e690f013443727e"
+		}
+	}
+}
