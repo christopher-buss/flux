@@ -28,7 +28,7 @@ catalogs:
     confbox: 0.2.2
   lint:
     "@eslint/config-inspector": 1.4.2
-    "@isentinel/eslint-config": 4.7.6
+    "@isentinel/eslint-config": 4.9.0
     eslint: 9.39.2
     eslint-plugin-jest: 29.5.0
     eslint-plugin-pnpm: 1.4.3
