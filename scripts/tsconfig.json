@@ -1,8 +1,4 @@
 {
-	"extends": "@isentinel/tsconfig/typescript",
-	"compilerOptions": {
-		"composite": true,
-		"noEmit": false
-	},
+	"extends": "../tsconfig.node.json",
 	"include": ["*.ts"]
 }

@@ -2,7 +2,19 @@
 	"name": "@rbxts/flux",
 	"version": "0.1.0",
 	"description": "Input Action System wrapper for Roblox",
-	"keywords": ["roblox", "input", "rbxts"],
+	"keywords": [
+		"roblox",
+		"input",
+		"rbxts"
+	],
+	"homepage": "https://github.com/christopher-buss/flux/",
+	"bugs": {
+		"url": "https://github.com/christopher-buss/flux/issues"
+	},
+	"repository": {
+		"url": "https://github.com/christopher-buss/flux/",
+		"type": "git"
+	},
 	"license": "MIT",
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
@@ -14,7 +26,10 @@
 	},
 	"main": "./dist/init.luau",
 	"types": "./dist/index.d.ts",
-	"files": ["dist", "!**/*tsconfig.tsbuildinfo"],
+	"files": [
+		"dist",
+		"!**/*tsconfig.tsbuildinfo"
+	],
 	"scripts": {
 		"build": "rbxtsc --project tsconfig.lib.json",
 		"clean": "npx rimraf out/ && npx rimraf dist/",

@@ -57,6 +57,55 @@ function createLink(sourcePath: string, targetPath: string): boolean {
 }
 
 /**
+ * Find package location in .pnpm virtual store. Handles truncated package names
+ * and hash suffixes used by pnpm.
+ *
+ * @param packageName - Package name to find.
+ * @param version - The version string to match in the .pnpm directory
+ *   structure.
+ * @returns Path to package or null if not found.
+ */
+function findPackageInVirtualStore(packageName: string, version: string): string | undefined {
+	const pnpmDirectory = path.join(NODE_MODULES, ".pnpm");
+	if (!fs.existsSync(pnpmDirectory)) {
+		throw new Error(".pnpm virtual store not found. Run pnpm install first.");
+	}
+
+	// pnpm stores packages like:
+	// .pnpm/@rbxts+services@1.5.4/node_modules/@rbxts/services
+	// or (when truncated with hash):
+	// .pnpm/@rbxts+flamework-binary-ser_40c4ef7be6e7e40ec981989f4560872e/node_modules/@rbxts/flamework-binary-serializer
+	const encodedName = packageName.replace("/", "+");
+	const entries = fs.readdirSync(pnpmDirectory);
+
+	// First try: exact match with version
+	let matchingDirectory = entries.find((entry) => entry.startsWith(`${encodedName}@${version}`));
+	// Second try: match without version (any version of the package)
+	matchingDirectory ??= entries.find((entry) => entry.startsWith(`${encodedName}@`));
+
+	// Third try: partial match for truncated names (e.g.,
+	// "@rbxts+flamework-binary-ser_hash") pnpm truncates long package names
+	// and adds a hash suffix with underscore
+	matchingDirectory ??= entries.find((entry) => {
+		// Check if entry starts with the beginning of encoded name
+		// and contains the package after node_modules
+		if (entry.startsWith(encodedName.substring(0, 20))) {
+			const testPath = path.join(pnpmDirectory, entry, "node_modules", packageName);
+			return fs.existsSync(testPath);
+		}
+
+		return false;
+	});
+
+	if (matchingDirectory === undefined) {
+		return undefined;
+	}
+
+	const packagePath = path.join(pnpmDirectory, matchingDirectory, "node_modules", packageName);
+	return fs.existsSync(packagePath) ? packagePath : undefined;
+}
+
+/**
  * Create links for all discovered packages.
  *
  * @param allPackages - Map of package names to versions.
@@ -143,55 +192,6 @@ function discoverAllPackages(): Map<string, string> {
 	}
 
 	return allPackages;
-}
-
-/**
- * Find package location in .pnpm virtual store. Handles truncated package names
- * and hash suffixes used by pnpm.
- *
- * @param packageName - Package name to find.
- * @param version - The version string to match in the .pnpm directory
- *   structure.
- * @returns Path to package or null if not found.
- */
-function findPackageInVirtualStore(packageName: string, version: string): string | undefined {
-	const pnpmDirectory = path.join(NODE_MODULES, ".pnpm");
-	if (!fs.existsSync(pnpmDirectory)) {
-		throw new Error(".pnpm virtual store not found. Run pnpm install first.");
-	}
-
-	// pnpm stores packages like:
-	// .pnpm/@rbxts+services@1.5.4/node_modules/@rbxts/services
-	// or (when truncated with hash):
-	// .pnpm/@rbxts+flamework-binary-ser_40c4ef7be6e7e40ec981989f4560872e/node_modules/@rbxts/flamework-binary-serializer
-	const encodedName = packageName.replace("/", "+");
-	const entries = fs.readdirSync(pnpmDirectory);
-
-	// First try: exact match with version
-	let matchingDirectory = entries.find((entry) => entry.startsWith(`${encodedName}@${version}`));
-	// Second try: match without version (any version of the package)
-	matchingDirectory ??= entries.find((entry) => entry.startsWith(`${encodedName}@`));
-
-	// Third try: partial match for truncated names (e.g.,
-	// "@rbxts+flamework-binary-ser_hash") pnpm truncates long package names
-	// and adds a hash suffix with underscore
-	matchingDirectory ??= entries.find((entry) => {
-		// Check if entry starts with the beginning of encoded name
-		// and contains the package after node_modules
-		if (entry.startsWith(encodedName.substring(0, 20))) {
-			const testPath = path.join(pnpmDirectory, entry, "node_modules", packageName);
-			return fs.existsSync(testPath);
-		}
-
-		return false;
-	});
-
-	if (matchingDirectory === undefined) {
-		return undefined;
-	}
-
-	const packagePath = path.join(pnpmDirectory, matchingDirectory, "node_modules", packageName);
-	return fs.existsSync(packagePath) ? packagePath : undefined;
 }
 
 async function syncPackages(): Promise<void> {

@@ -1,5 +1,5 @@
 {
-	"extends": "@isentinel/tsconfig/roblox",
+	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
 		"declaration": true,

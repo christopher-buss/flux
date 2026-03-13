@@ -1,9 +1,9 @@
-import style, { GLOB_ROOT_SRC } from "@isentinel/eslint-config";
+import isentinel, { GLOB_ROOT_SRC } from "@isentinel/eslint-config";
 
-export default style({
+export default isentinel({
 	name: "flux/root",
 	flawless: true,
-	ignores: ["!.claude"],
+	ignores: ["!.claude", "flux"],
 	namedConfigs: true,
 	react: true,
 	roblox: {
@@ -12,4 +12,12 @@ export default style({
 	},
 	test: true,
 	type: "package",
+	typescript: {
+		parserOptionsTypeAware: {
+			projectService: {
+				allowDefaultProject: ["eslint.config.ts", "jest.config.ts"],
+				defaultProject: "tsconfig.node.json",
+			},
+		},
+	},
 });

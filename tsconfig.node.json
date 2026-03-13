@@ -1,0 +1,10 @@
+{
+	"extends": ["./tsconfig.json", "@isentinel/tsconfig/typescript"],
+	"compilerOptions": {
+		"tsBuildInfoFile": "out/tsconfig.node.tsbuildinfo",
+		"noLib": false,
+		"rootDir": "${configDir}",
+		"typeRoots": ["./node_modules/@types"]
+	},
+	"include": ["jest.config.ts", "eslint.config.ts"]
+}

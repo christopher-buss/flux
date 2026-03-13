@@ -3,17 +3,20 @@
 	"version": "0.1.0",
 	"private": true,
 	"description": "Input Action System wrapper for Roblox",
-	"keywords": ["roblox", "input"],
+	"keywords": [
+		"roblox",
+		"input"
+	],
 	"license": "MIT",
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
 	"scripts": {
 		"commit": "commit",
 		"eslint-config": "npx @eslint/config-inspector",
-		"lint": "eslint --cache",
+		"lint": "eslint",
 		"lint:ci": "eslint --cache --cache-strategy content",
 		"prepare": "node .husky/install.js",
-		"typecheck": "tsgo --noEmit"
+		"typecheck": "tsc --build --noEmit"
 	},
 	"lint-staged": {
 		"*": "eslint_d --fix --max-warnings 0 --no-warn-ignored --cache --cache-strategy content"
@@ -21,9 +24,13 @@
 	"devDependencies": {
 		"@eslint/config-inspector": "catalog:lint",
 		"@isentinel/eslint-config": "catalog:lint",
+		"@isentinel/jest-roblox": "catalog:test",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/jest-extended": "catalog:test",
+		"@rbxts/jest-utils": "catalog:test",
 		"@rbxts/types": "catalog:types",
+		"@types/node": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
 		"eslint": "catalog:lint",
 		"eslint-plugin-jest": "catalog:lint",
@@ -37,6 +44,7 @@
 		"jiti": "catalog:script",
 		"lint-staged": "catalog:lint",
 		"pncat": "catalog:cli",
+		"rbxts-transformer-jest": "catalog:test",
 		"roblox-ts": "catalog:build",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
