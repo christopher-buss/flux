@@ -1,0 +1,53 @@
+{
+	"name": "test",
+	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"packages": {
+				"$className": "Folder",
+				"core": {
+					"$className": "Folder",
+					"jest.config": {
+						"$path": "packages/core/jest.config.luau"
+					},
+					"src": {
+						"$path": "packages/core/out"
+					}
+				}
+			},
+			"rbxts_include": {
+				"$path": "packages/core/test/include",
+				"node_modules": {
+					"$className": "Folder",
+					"@rbxts": {
+						"$path": "rojo-sync/@rbxts"
+					},
+					"@rbxts-js": {
+						"$path": "rojo-sync/@rbxts-js"
+					}
+				}
+			},
+			"test-utils": {
+				"$className": "Folder",
+				"src": {
+					"$path": "packages/test-utils/out"
+				}
+			}
+		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"$properties": {
+				"LoadStringEnabled": true
+			}
+		},
+		"TestService": {
+			"$className": "TestService",
+			"$path": "test",
+			"$properties": {
+				"AutoRuns": false,
+				"ExecuteWithStudioRun": false
+			}
+		}
+	}
+}

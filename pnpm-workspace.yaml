@@ -22,6 +22,7 @@ catalogs:
     pncat: 0.10.4
   dev:
     confbox: 0.2.2
+    update-ts-references: ^4.0.0
   lint:
     "@eslint/config-inspector": 1.4.2
     "@isentinel/eslint-config": 5.0.0-beta.8
@@ -49,6 +50,7 @@ catalogs:
     "@rbxts/jest-extended": 1.0.1
     "@rbxts/jest-globals": 3.13.3-ts.2
     "@rbxts/jest-utils": 0.1.2
+    "@rbxts/react-roblox-fire": ^0.1.4
     rbxts-transformer-jest: 0.0.5
   tsc:
     "@isentinel/tsconfig": 1.2.0

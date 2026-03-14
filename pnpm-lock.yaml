@@ -17,6 +17,9 @@ catalogs:
     confbox:
       specifier: 0.2.2
       version: 0.2.2
+    update-ts-references:
+      specifier: ^4.0.0
+      version: 4.0.0
   lint:
     '@eslint/config-inspector':
       specifier: 1.4.2
@@ -86,6 +89,9 @@ catalogs:
     '@rbxts/jest-utils':
       specifier: 0.1.2
       version: 0.1.2
+    '@rbxts/react-roblox-fire':
+      specifier: ^0.1.4
+      version: 0.1.4
     rbxts-transformer-jest:
       specifier: 0.0.5
       version: 0.0.5
@@ -134,9 +140,6 @@ importers:
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
-      '@rbxts/compiler-types':
-        specifier: catalog:types
-        version: 3.0.0-types.0
       '@types/node':
         specifier: catalog:types
         version: 24.10.4
@@ -185,6 +188,9 @@ importers:
       typescript:
         specifier: catalog:tsc
         version: 5.9.3
+      update-ts-references:
+        specifier: catalog:dev
+        version: 4.0.0
 
   packages/core:
     dependencies:
@@ -192,6 +198,9 @@ importers:
         specifier: catalog:prod
         version: 1.6.0
     devDependencies:
+      '@flux/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 3.1.0
@@ -246,6 +255,9 @@ importers:
       '@rbxts/jest-utils':
         specifier: catalog:test
         version: 0.1.2(@rbxts/jest-globals@3.13.3-ts.2)
+      '@rbxts/react-roblox-fire':
+        specifier: catalog:test
+        version: 0.1.4
       '@rbxts/types':
         specifier: catalog:types
         version: 1.0.911
@@ -1682,6 +1694,15 @@ packages:
   '@rbxts-js/react-is@17.3.7-ts.1':
     resolution: {integrity: sha512-jTGn3lJWCrFhQ2kMogQXb430+JMSZhsD0VgM1HDYDGwmQpNQhnal5/ERa4Fa0B40HrZFvUbDvZsDX2tB6mqO+w==}
 
+  '@rbxts-js/react-reconciler@17.3.7-ts.1':
+    resolution: {integrity: sha512-MxKU48i1gv4djcgHTq3geMvl6MzXPW85FO+itLg0YCvqT3WgE3jsMAc0nneOFi5Mwd5tqybQY6UFF1SbQtBopA==}
+
+  '@rbxts-js/react-roblox@17.3.7-ts.1':
+    resolution: {integrity: sha512-xiJQXmJAho/mStcWYC7AXFqgUqW78whUMacaNeODMimQXgoVqaIfo0sEhLtLtS/N3qZRs1KR64nsNG/0n1r/NQ==}
+
+  '@rbxts-js/react@17.3.7-ts.1':
+    resolution: {integrity: sha512-nRHYoBzk9DSbOvk281jmN5EM3TlmKv2jOzLgSIGtmNMuwZKi9yEjjxdluS1wHmjSvus1YiPHhBUwrKnbu01Obg==}
+
   '@rbxts-js/roblox-lua-promise@3.5.0-ts.2':
     resolution: {integrity: sha512-H8fxKVJkRnM60yTZ/riO4X43GZD/MViFm+ftCzzAALkAhE4vSaBDNv9E7IUjZZoWi21bG6vZ8mGIiYfavaljvw==}
 
@@ -1690,6 +1711,9 @@ packages:
 
   '@rbxts-js/safe-flags@17.3.7-ts.1':
     resolution: {integrity: sha512-aQ/5aQ/wQO5npifAbTEpR3jQRMeyGsVc91AQEyhBW461lPv6ZEg+Ad2HJFSzg4eeK2mb8Z9WyIMBrb01Jt+GnQ==}
+
+  '@rbxts-js/scheduler@17.3.7-ts.1':
+    resolution: {integrity: sha512-WCgGQqH9/+A5oJd6HpxMj7Vp1VGqhycnJK0CZTsJl/Ceyf/VH/vif8fo1FrBWkxYEgz/7y0q3LOeRj8ArhyDWQ==}
 
   '@rbxts-js/shared@17.3.7-ts.1':
     resolution: {integrity: sha512-B/OCkRmbR6ho1yuf0M0hQIb78coDY//2XdmNBaX2XCN5pKa7dquiX6ufk4dizJ/OMBoy9br/cnxqcI0PLvla3w==}
@@ -1747,6 +1771,17 @@ packages:
 
   '@rbxts/pretty-format@3.13.3-ts.1':
     resolution: {integrity: sha512-uTSxVdfQv/cD+kvttLzw/LfyNC35mxAsJrSqom+F94etDYlz7ZRvG75izSPfzG2oVRSrhv6roaeWPeTqkpcIug==}
+
+  '@rbxts/react-roblox-fire@0.1.4':
+    resolution: {integrity: sha512-P9QaPMaUilxeg/1HvkDXXNPlicqutjp3w7sOJVfE3jFwCoYC5/GSfwPDXprrGc5JVAm5rjDdfhWR9L+k2lBCHg==}
+
+  '@rbxts/react-roblox@17.3.7-ts.1':
+    resolution: {integrity: sha512-lsH3lP+X0JUS/6Fg5MJfP8OjMn7bjxapbg3r1ajrpvwZGPGU1WOFcFDS/xMMk/2RK/GNYRmkduNM8pQ9vHw54Q==}
+    peerDependencies:
+      '@rbxts/react': ^17.3.7-ts.1
+
+  '@rbxts/react@17.3.7-ts.1':
+    resolution: {integrity: sha512-/jqZ2TvyLSAPwC30h95loUmy4XN2PwPhv6fBARJKtZfyozFx2RuxC9FiQSjpEZ2uOOPzr60It0MBUf94D+tsMg==}
 
   '@rbxts/regexp@0.2.1-ts.4':
     resolution: {integrity: sha512-UGHGq9xJ86ObpfY4bKkOeoBSQz6GpCwhfYteoxh5M15QFNS1MG8Ut9BPp8m3r8VOKftk94yY5X0hZ1bKYm439g==}
@@ -3152,6 +3187,9 @@ packages:
     resolution: {integrity: sha512-VWSRii4t0AFm6ixFFmLLx1t7wS1gh+ckoa84aOeapGum0h+EZd1EhEumSB+ZdDLnEPuucsVB9oB7cxJHap6Afg==}
     engines: {node: '>=14.14'}
 
+  fs.realpath@1.0.0:
+    resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -3217,6 +3255,10 @@ packages:
   glob@13.0.0:
     resolution: {integrity: sha512-tvZgpqk6fz4BaNZ66ZsRaZnbHvP/jG3uKJvAZOwEVUL4RTA5nJeeLYfyN9/VA8NX/V3IBG+hkeuGpKjvELkVhA==}
     engines: {node: 20 || >=22}
+
+  glob@7.2.3:
+    resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-directory@5.0.0:
     resolution: {integrity: sha512-1pgFdhK3J2LeM+dVf2Pd424yHx2ou338lC0ErNP2hPx4j8eW1Sp0XqSjNxtk6Tc4Kr5wlWtSvz8cn2yb7/SG/w==}
@@ -3314,6 +3356,10 @@ packages:
   indent-string@5.0.0:
     resolution: {integrity: sha512-m6FAo/spmsW2Ab2fU35JTYwtOKa2yAwXSwgjSv1TJzh4Mh7mC3lzAOVLBprb72XsTrgkEIsl7YrFNAiDiRhIGg==}
     engines: {node: '>=12'}
+
+  inflight@1.0.6:
+    resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -3758,6 +3804,9 @@ packages:
   object-deep-merge@2.0.0:
     resolution: {integrity: sha512-3DC3UMpeffLTHiuXSy/UG4NOIYTLlY9u3V82+djSCLYClWobZiS4ivYzpIUWrRY/nfsJ8cWsKyG3QfyLePmhvg==}
 
+  once@1.4.0:
+    resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
+
   onetime@5.1.2:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
@@ -3845,6 +3894,10 @@ packages:
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
+
+  path-is-absolute@1.0.1:
+    resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
+    engines: {node: '>=0.10.0'}
 
   path-key@3.1.1:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
@@ -4353,6 +4406,11 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
+  update-ts-references@4.0.0:
+    resolution: {integrity: sha512-f9dHWEDOapl83Ef4d2fyaosCzlI4q/HM3ub/tIfPus8ddQfhLylVn+Vtu9NQwnwxS/WGKPtFdqaN5kNT7d1oaQ==}
+    engines: {node: '>=14.0.0'}
+    hasBin: true
+
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
@@ -4391,6 +4449,9 @@ packages:
   wrap-ansi@9.0.2:
     resolution: {integrity: sha512-42AtmgqjV+X1VpdOfyTGOYRi0/zsoLqtXQckTmqTeybT+BDIbM/Guxo7x3pE2vtpr1ok6xRqM9OpBe+Jyoqyww==}
     engines: {node: '>=18'}
+
+  wrappy@1.0.2:
+    resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
@@ -5910,6 +5971,31 @@ snapshots:
       '@rbxts-js/safe-flags': 17.3.7-ts.1
       '@rbxts-js/shared': 17.3.7-ts.1
 
+  '@rbxts-js/react-reconciler@17.3.7-ts.1':
+    dependencies:
+      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
+      '@rbxts-js/react': 17.3.7-ts.1
+      '@rbxts-js/react-globals': 17.3.7-ts.1
+      '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
+      '@rbxts-js/safe-flags': 17.3.7-ts.1
+      '@rbxts-js/scheduler': 17.3.7-ts.1
+      '@rbxts-js/shared': 17.3.7-ts.1
+
+  '@rbxts-js/react-roblox@17.3.7-ts.1':
+    dependencies:
+      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
+      '@rbxts-js/react': 17.3.7-ts.1
+      '@rbxts-js/react-globals': 17.3.7-ts.1
+      '@rbxts-js/react-reconciler': 17.3.7-ts.1
+      '@rbxts-js/scheduler': 17.3.7-ts.1
+      '@rbxts-js/shared': 17.3.7-ts.1
+
+  '@rbxts-js/react@17.3.7-ts.1':
+    dependencies:
+      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
+      '@rbxts-js/react-globals': 17.3.7-ts.1
+      '@rbxts-js/shared': 17.3.7-ts.1
+
   '@rbxts-js/roblox-lua-promise@3.5.0-ts.2': {}
 
   '@rbxts-js/roblox-shared@3.13.3-ts.3':
@@ -5919,6 +6005,13 @@ snapshots:
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
 
   '@rbxts-js/safe-flags@17.3.7-ts.1': {}
+
+  '@rbxts-js/scheduler@17.3.7-ts.1':
+    dependencies:
+      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
+      '@rbxts-js/react-globals': 17.3.7-ts.1
+      '@rbxts-js/safe-flags': 17.3.7-ts.1
+      '@rbxts-js/shared': 17.3.7-ts.1
 
   '@rbxts-js/shared@17.3.7-ts.1':
     dependencies:
@@ -6003,6 +6096,21 @@ snapshots:
   '@rbxts/pretty-format@3.13.3-ts.1':
     dependencies:
       '@rbxts-js/pretty-format': 3.13.3-ts.3
+
+  '@rbxts/react-roblox-fire@0.1.4':
+    dependencies:
+      '@rbxts/react': 17.3.7-ts.1
+      '@rbxts/react-roblox': 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
+      '@rbxts/services': 1.6.0
+
+  '@rbxts/react-roblox@17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)':
+    dependencies:
+      '@rbxts-js/react-roblox': 17.3.7-ts.1
+      '@rbxts/react': 17.3.7-ts.1
+
+  '@rbxts/react@17.3.7-ts.1':
+    dependencies:
+      '@rbxts-js/react': 17.3.7-ts.1
 
   '@rbxts/regexp@0.2.1-ts.4': {}
 
@@ -7678,6 +7786,8 @@ snapshots:
       jsonfile: 6.2.0
       universalify: 2.0.1
 
+  fs.realpath@1.0.0: {}
+
   fsevents@2.3.3:
     optional: true
 
@@ -7741,6 +7851,15 @@ snapshots:
       minimatch: 10.1.1
       minipass: 7.1.2
       path-scurry: 2.0.0
+
+  glob@7.2.3:
+    dependencies:
+      fs.realpath: 1.0.0
+      inflight: 1.0.6
+      inherits: 2.0.4
+      minimatch: 3.1.2
+      once: 1.4.0
+      path-is-absolute: 1.0.1
 
   global-directory@5.0.0:
     dependencies:
@@ -7818,6 +7937,11 @@ snapshots:
   imurmurhash@0.1.4: {}
 
   indent-string@5.0.0: {}
+
+  inflight@1.0.6:
+    dependencies:
+      once: 1.4.0
+      wrappy: 1.0.2
 
   inherits@2.0.4: {}
 
@@ -8427,6 +8551,10 @@ snapshots:
 
   object-deep-merge@2.0.0: {}
 
+  once@1.4.0:
+    dependencies:
+      wrappy: 1.0.2
+
   onetime@5.1.2:
     dependencies:
       mimic-fn: 2.1.0
@@ -8601,6 +8729,8 @@ snapshots:
   parse-statements@1.0.11: {}
 
   path-exists@4.0.0: {}
+
+  path-is-absolute@1.0.1: {}
 
   path-key@3.1.1: {}
 
@@ -9099,6 +9229,14 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
+  update-ts-references@4.0.0:
+    dependencies:
+      comment-json: 4.6.2
+      glob: 7.2.3
+      js-yaml: 4.1.1
+      minimatch: 3.1.2
+      minimist: 1.2.8
+
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
@@ -9133,6 +9271,8 @@ snapshots:
       ansi-styles: 6.2.3
       string-width: 7.2.0
       strip-ansi: 7.1.2
+
+  wrappy@1.0.2: {}
 
   ws@8.18.0: {}
 

@@ -13,9 +13,10 @@ const config: Config = {
 	compact: IS_IN_AGENT_SESSION,
 	gameOutput: "game-output.log",
 	outputFile: "jest-output.log",
-	projects: ["ReplicatedStorage/client", "ServerScriptService/server"],
+	placeFile: "test.rbxl",
+	projects: ["ReplicatedStorage/packages/core"],
 	setupFiles: ["TestService/setup"],
-	setupFilesAfterEnv: ["ReplicatedStorage/shared/test/setup/jest-extended"],
+	setupFilesAfterEnv: ["ReplicatedStorage/test-utils/src/jest-extended"],
 	verbose: true,
 } satisfies Config;
 

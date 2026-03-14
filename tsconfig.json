@@ -1,11 +1,16 @@
 {
 	"extends": "@isentinel/tsconfig/roblox",
 	"compilerOptions": {
-		"composite": true
+		"composite": true,
+		"tsBuildInfoFile": "${configDir}/tsconfig.tsbuildinfo",
+		"types": ["compiler-types"]
 	},
 	"references": [
 		{
 			"path": "packages/core"
+		},
+		{
+			"path": "packages/test-utils"
 		},
 		{
 			"path": "scripts"

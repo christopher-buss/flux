@@ -1,7 +1,7 @@
 {
 	"extends": ["./tsconfig.json", "@isentinel/tsconfig/typescript"],
 	"compilerOptions": {
-		"tsBuildInfoFile": "out/tsconfig.node.tsbuildinfo",
+		"tsBuildInfoFile": "${configDir}/tsconfig.node.tsbuildinfo",
 		"noLib": false,
 		"rootDir": "${configDir}",
 		"typeRoots": ["./node_modules/@types"]
