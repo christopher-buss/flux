@@ -1,7 +1,6 @@
 node_modules/
 out/
 dist/
-test/
 include/
 .vscode/mise-tools/
 
@@ -20,3 +19,5 @@ sourcemap.json
 /.claude/state
 
 rojo-sync/
+game-output.log
+jest-output.log

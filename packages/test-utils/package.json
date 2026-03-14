@@ -1,0 +1,35 @@
+{
+	"name": "@flux/test-utils",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Shared test utilities for Flux",
+	"keywords": [
+		"roblox",
+		"rbxts",
+		"test"
+	],
+	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/init.luau",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"main": "./dist/init.luau",
+	"types": "./dist/index.d.ts",
+	"scripts": {
+		"dev:build": "rbxtsc --type=game --rojo ../../test.project.json --project tsconfig.json --includePath ../core/test/include"
+	},
+	"devDependencies": {
+		"@isentinel/roblox-ts": "catalog:build",
+		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/jest-extended": "catalog:test",
+		"@rbxts/jest-globals": "catalog:test",
+		"@rbxts/jest-utils": "catalog:test",
+		"@rbxts/react-roblox-fire": "catalog:test",
+		"@rbxts/types": "catalog:types",
+		"typescript": "catalog:tsc"
+	}
+}

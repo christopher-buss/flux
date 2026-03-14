@@ -14,10 +14,7 @@ export default isentinel({
 	type: "package",
 	typescript: {
 		parserOptionsTypeAware: {
-			projectService: {
-				allowDefaultProject: ["eslint.config.ts", "jest.config.ts"],
-				defaultProject: "tsconfig.node.json",
-			},
+			projectService: true,
 		},
 	},
 });

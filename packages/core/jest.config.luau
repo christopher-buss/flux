@@ -1,5 +1,5 @@
 return {
-	displayName = "JADE",
+	displayName = "core",
 	mockDataModel = true,
 	testMatch = { "**/*.spec" },
 }

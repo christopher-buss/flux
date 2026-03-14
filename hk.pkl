@@ -1,0 +1,54 @@
+amends "package://github.com/jdx/hk/releases/download/v1.38.0/hk@1.38.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.38.0/hk@1.38.0#/Builtins.pkl"
+
+// Workaround: hk util commands fail on Windows via cmd.exe, bash -c fixes it
+local bash: String = "bash -c"
+
+local guards = new Mapping<String, Step> {
+    ["check-merge-conflict"] = (Builtins.check_merge_conflict) { shell = bash }
+    ["detect-private-key"] = (Builtins.detect_private_key) { shell = bash }
+    ["check-added-large-files"] = (Builtins.check_added_large_files) { shell = bash }
+}
+
+local linters = new Mapping<String, Step> {
+    ["eslint"] = Builtins.eslint
+    ["typecheck"] {
+        glob = List("*.ts", "*.tsx")
+        check = "pnpm typecheck"
+        exclusive = true
+    }
+}
+
+hooks {
+    ["pre-commit"] {
+        fix = true
+        stash = "git"
+        steps {
+            ...guards
+            ...linters
+        }
+    }
+    ["commit-msg"] {
+        steps {
+            ["conventional-commit"] = Builtins.check_conventional_commit
+        }
+    }
+    ["post-merge"] {
+        steps {
+            ["install"] {
+                glob = "pnpm-lock.yaml"
+                check = "pnpm install"
+            }
+        }
+    }
+    ["fix"] {
+        fix = true
+        steps = linters
+    }
+    ["check"] {
+        steps {
+            ...guards
+            ...linters
+        }
+    }
+}
