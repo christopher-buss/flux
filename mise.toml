@@ -9,4 +9,6 @@ experimental = true
 "github:rojo-rbx/rojo" = "v7.7.0-rc.1"
 "github:seaofvoices/darklua" = "0.17.3"
 "npm:@antfu/ni" = "latest"
+hk = "latest"
 node = { version = "lts", postinstall = "corepack enable" }
+pkl = "latest"

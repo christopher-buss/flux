@@ -16,16 +16,9 @@
 		"postinstall": "node scripts/rojo-sync.ts && update-ts-references --withoutRootConfig",
 		"lint": "node scripts/lint.ts",
 		"lint:ci": "eslint --cache --cache-strategy content",
-		"prepare": "node .husky/install.js",
 		"rojo-sync": "node scripts/rojo-sync.ts",
 		"test": "pnpm -r dev:build && rojo build test.project.json -o test.rbxl && jest-roblox",
 		"typecheck": "tsgo --build --emitDeclarationOnly"
-	},
-	"lint-staged": {
-		"*": "pnpm exec eslint --fix --cache --no-warn-ignored",
-		"*.ts": [
-			"sh -c 'pnpm typecheck'"
-		]
 	},
 	"devDependencies": {
 		"@eslint/config-inspector": "catalog:lint",
@@ -41,10 +34,7 @@
 		"eslint-plugin-react-hooks": "catalog:lint",
 		"eslint-plugin-react-naming-convention": "catalog:lint",
 		"eslint-plugin-react-x": "catalog:lint",
-		"git-pull-run": "catalog:script",
-		"husky": "catalog:lint",
 		"jiti": "catalog:script",
-		"lint-staged": "catalog:lint",
 		"pncat": "catalog:cli",
 		"rbxts-transformer-jest": "catalog:test",
 		"type-fest": "catalog:types",
