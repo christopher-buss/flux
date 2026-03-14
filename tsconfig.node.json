@@ -6,5 +6,6 @@
 		"rootDir": "${configDir}",
 		"typeRoots": ["./node_modules/@types"]
 	},
+	"files": [],
 	"include": ["jest.config.ts", "eslint.config.ts"]
 }

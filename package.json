@@ -13,23 +13,24 @@
 	"scripts": {
 		"commit": "commit",
 		"eslint-config": "npx @eslint/config-inspector",
-		"lint": "eslint",
+		"postinstall": "node scripts/rojo-sync.ts",
+		"lint": "node scripts/lint.ts",
 		"lint:ci": "eslint --cache --cache-strategy content",
 		"prepare": "node .husky/install.js",
+		"rojo-sync": "jiti scripts/rojo-sync.ts",
+		"test": "pnpm -r dev:build && rojo build test.project.json -o test.rbxl && jest-roblox",
 		"typecheck": "tsc --build --noEmit"
 	},
 	"lint-staged": {
-		"*": "eslint_d --fix --max-warnings 0 --no-warn-ignored --cache --cache-strategy content"
+		"*": "eslint --fix --max-warnings 0 --no-warn-ignored --cache --cache-strategy content"
 	},
 	"devDependencies": {
 		"@eslint/config-inspector": "catalog:lint",
 		"@isentinel/eslint-config": "catalog:lint",
+		"@isentinel/hooks": "catalog:lint",
 		"@isentinel/jest-roblox": "catalog:test",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
-		"@rbxts/jest-extended": "catalog:test",
-		"@rbxts/jest-utils": "catalog:test",
-		"@rbxts/types": "catalog:types",
 		"@types/node": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
 		"eslint": "catalog:lint",
@@ -38,14 +39,12 @@
 		"eslint-plugin-react-hooks": "catalog:lint",
 		"eslint-plugin-react-naming-convention": "catalog:lint",
 		"eslint-plugin-react-x": "catalog:lint",
-		"eslint_d": "catalog:lint",
 		"git-pull-run": "catalog:script",
 		"husky": "catalog:lint",
 		"jiti": "catalog:script",
 		"lint-staged": "catalog:lint",
 		"pncat": "catalog:cli",
 		"rbxts-transformer-jest": "catalog:test",
-		"roblox-ts": "catalog:build",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
 	},

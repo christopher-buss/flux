@@ -10,6 +10,7 @@
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
 	"devDependencies": {
+		"@isentinel/hooks": "catalog:lint",
 		"@types/node": "catalog:types",
 		"confbox": "catalog:dev"
 	}

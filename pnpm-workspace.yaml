@@ -15,12 +15,9 @@ packages:
   - packages/*
   - scripts
 
-patchedDependencies:
-  roblox-ts: patches/roblox-ts.patch
-
 catalogs:
   build:
-    roblox-ts: 3.0.0
+    "@isentinel/roblox-ts": 3.1.0
   cli:
     pncat: 0.10.4
   dev:
@@ -28,31 +25,31 @@ catalogs:
   lint:
     "@eslint/config-inspector": 1.4.2
     "@isentinel/eslint-config": 5.0.0-beta.8
+    "@isentinel/hooks": 1.2.3
     eslint: 9.39.2
     eslint-plugin-jest: 29.15.0
     eslint-plugin-pnpm: 1.6.0
     eslint-plugin-react-hooks: 7.0.1
     eslint-plugin-react-naming-convention: 2.13.0
     eslint-plugin-react-x: 2.13.0
-    eslint_d: 14.3.0
     husky: 9.1.7
     lint-staged: 16.2.7
   node:
     rimraf: 6.1.2
   peer:
-    "@rbxts/jecs": 0.9.0
+    "@rbxts/jecs": 0.11.0
   prod:
     "@rbxts/services": 1.6.0
   script:
     git-pull-run: 1.6.2
     jiti: 2.6.1
   test:
-    "@isentinel/jest-roblox": ^0.0.4
+    "@isentinel/jest-roblox": 0.0.5
     "@rbxts/jest": 3.13.3-ts.1
-    "@rbxts/jest-extended": ^1.0.1-beta.3
-    "@rbxts/jest-globals": 3.13.3-ts.1
-    "@rbxts/jest-utils": ^0.1.2
-    rbxts-transformer-jest: ^0.0.5
+    "@rbxts/jest-extended": 1.0.1
+    "@rbxts/jest-globals": 3.13.3-ts.2
+    "@rbxts/jest-utils": 0.1.2
+    rbxts-transformer-jest: 0.0.5
   tsc:
     "@isentinel/tsconfig": 1.2.0
     "@typescript/native-preview": latest
@@ -71,4 +68,4 @@ onlyBuiltDependencies:
 
 updateConfig:
   ignoreDependencies:
-    - "@types/node" # We want to keep this at LTS
+    - "@types/node"
