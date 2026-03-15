@@ -1,18 +1,8 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with
-code in this repository.
-
 ## Project Overview
 
 Flux is an Input Action System wrapper for Roblox built with roblox-ts. Uses
 JECS (ECS) for entity-component architecture. Provides type-safe input handling
 with context switching, custom triggers, and network replication.
-
-## Commands
-
-- `pnpm lint` - Lint all files with ESLint
-- `pnpm typecheck` - Type check all packages (uses tsgo)
 
 ## Repository Structure
 

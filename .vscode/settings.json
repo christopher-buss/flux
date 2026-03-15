@@ -36,6 +36,8 @@
 		"source.fixAll.eslint": "always",
 		"source.organizeImports": "never"
 	},
+	// npm
+	"npm.exclude": "**/rojo-sync/**",
 	"npm.packageManager": "pnpm",
 	// Mise Tools settings
 	"mise.configureExtensionsUseSymLinks": true,
