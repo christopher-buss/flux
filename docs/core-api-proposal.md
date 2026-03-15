@@ -131,7 +131,7 @@ type Direction1dActions<T extends ActionMap> = {
 	[K in keyof T]: T[K] extends ActionConfig<"Direction1D"> ? K : never;
 }[keyof T];
 
-type Direction2DActions<T extends ActionMap> = {
+type Direction2dActions<T extends ActionMap> = {
 	[K in keyof T]: T[K] extends ActionConfig<"Direction2D"> ? K : never;
 }[keyof T];
 
@@ -145,7 +145,7 @@ type ViewportPositionActions<T extends ActionMap> = {
 
 type AxisActions<T extends ActionMap> =
 	| Direction1dActions<T>
-	| Direction2DActions<T>
+	| Direction2dActions<T>
 	| Direction3dActions<T>;
 
 type AllActions<T extends ActionMap> = keyof T & string;
@@ -275,6 +275,15 @@ interface CoreConfig<
 - Only `remote` transport is implemented initially; `native` is reserved for
   future use
 
+## InputHandle
+
+Opaque branded number identifying a registered input owner. Decouples core from
+ECS entities, player instances, etc.
+
+```ts
+type InputHandle = number & { readonly __brand: unique symbol };
+```
+
 ## Core Runtime API
 
 ```ts
@@ -290,7 +299,6 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 	hasContext(handle: InputHandle, context: string): boolean;
 
 	loadBindings(handle: InputHandle, data: BindingState<TActions>): void;
-	query(...contexts: ReadonlyArray<string>): Iterable<[InputHandle, ActionState<TActions>]>;
 	rebind(
 		handle: InputHandle,
 		action: AllActions<TActions>,
@@ -320,7 +328,7 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 - `register(...contexts)` is the simplest spawn/setup path
 - `register()` returns an `InputHandle`, not a player/entity instance
 - `update(deltaTime)` is the canonical per-frame entry point
-- `query(...contexts)` is the core iteration API for registered owners
+- `getState(handle)` is the primary way to read input — caller maps handles to players/entities
 - `simulateAction()` is the only method for script-driven input injection
 - `getContexts()` is runtime/controller state, not `ActionState`
 - `rebind()` updates one action
@@ -378,7 +386,7 @@ type ActionValue<TActions extends ActionMap, A extends AllActions<TActions>> =
 		? boolean
 		: A extends Direction1dActions<TActions>
 			? number
-			: A extends Direction2DActions<TActions>
+			: A extends Direction2dActions<TActions>
 				? Vector2
 				: A extends Direction3dActions<TActions>
 					? Vector3
@@ -397,7 +405,7 @@ interface ActionState<TActions extends ActionMap = ActionMap> {
 	canceled(action: AllActions<TActions>): boolean;
 	claim(action: AllActions<TActions>): boolean;
 	currentDuration(action: AllActions<TActions>): number;
-	direction2d(action: Direction2DActions<TActions>): Vector2;
+	direction2d(action: Direction2dActions<TActions>): Vector2;
 	getState<A extends AllActions<TActions>>(action: A): ActionValue<TActions, A>;
 
 	isAvailable(action: AllActions<TActions>): boolean;
@@ -698,35 +706,33 @@ const core = createCore({
 // core is FluxCore<typeof actions>
 // All action names and types are inferred.
 
-interface Context {
-	flux: typeof core;
-}
+// Caller manages handle ownership
+const handle = core.register("gameplay");
 
-function update({ flux }: Context, deltaTime: number): void {
-	flux.update(deltaTime);
+function update(deltaTime: number): void {
+	core.update(deltaTime);
 
-	for (const [inputHandle, state] of flux.query("gameplay")) {
-		// state is ActionState<typeof actions>
+	const state = core.getState(handle);
+	// state is ActionState<typeof actions>
 
-		if (state.justPressed("jump")) {
-			// ✓ "jump" is Bool
-			print("Jump", inputHandle);
-		}
-
-		// state.justPressed("move");           // ✗ compile error — "move" is Direction2D
-
-		if (state.triggered("heavyAttack")) {
-			// ✓ triggered() accepts any action
-			print("Heavy Attack", inputHandle);
-		}
-
-		const move = state.direction2d("move"); // ✓ returns Vector2
-		const aim = state.position2d("aim"); // ✓ returns Vector2
-
-		// state.direction2d("jump");            // ✗ compile error — "jump" is Bool
-
-		print(move, aim);
+	if (state.justPressed("jump")) {
+		// ✓ "jump" is Bool
+		print("Jump");
 	}
+
+	// state.justPressed("move");           // ✗ compile error — "move" is Direction2D
+
+	if (state.triggered("heavyAttack")) {
+		// ✓ triggered() accepts any action
+		print("Heavy Attack");
+	}
+
+	const move = state.direction2d("move"); // ✓ returns Vector2
+	const aim = state.position2d("aim"); // ✓ returns Vector2
+
+	// state.direction2d("jump");            // ✗ compile error — "jump" is Bool
+
+	print(move, aim);
 }
 ```
 
