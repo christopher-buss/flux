@@ -1,0 +1,30 @@
+#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
+
+blocked() {
+  echo "BLOCKED: '$COMMAND' matches dangerous pattern '$1'. The user has prevented you from doing this.${2:+ Use '$2' instead.}" >&2
+  exit 2
+}
+
+# pattern|suggestion (suggestion is optional)
+RULES=(
+  "push --force($| )|push --force-with-lease"
+  "--no-verify|"
+  "git reset --hard|git stash"
+  "reset --hard|git stash"
+  "git clean -fd|"
+  "git clean -f|"
+  "git checkout \.|git stash"
+  "git restore \.|git stash"
+)
+
+for rule in "${RULES[@]}"; do
+  pattern="${rule%%|*}"
+  suggestion="${rule#*|}"
+  if echo "$COMMAND" | grep -qE "$pattern"; then
+    blocked "$pattern" "$suggestion"
+  fi
+done
+
+exit 0

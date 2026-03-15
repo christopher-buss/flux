@@ -1,0 +1,34 @@
+#!/bin/bash
+if [[ -z "$CLAUDE_TEST_STOP" ]]; then
+  exit 0
+fi
+
+INPUT=$(cat)
+STOP_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active')
+
+has_prod_changes() {
+  local prod_files
+  prod_files=$({
+    git diff --name-only -- 'src/'
+    git diff --name-only --cached -- 'src/'
+    git ls-files --others --exclude-standard -- 'src/'
+  } | sort -u | grep -v '\.spec\.' | grep -v '\.test\.')
+  [[ -n "$prod_files" ]]
+}
+
+if ! has_prod_changes; then
+  exit 0
+fi
+
+if [[ "$STOP_ACTIVE" == "true" ]]; then
+  exit 0
+fi
+
+if pnpm run test >&2 2>&1; then
+  exit 0
+fi
+
+cat <<STOP_EOF
+{"decision":"block","reason":"AUTOMATED: There are failing tests. If related to your changes, please fix them before stopping.","systemMessage":"Tests failed — blocking stopped."}
+STOP_EOF
+exit 2

@@ -1,0 +1,36 @@
+#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
+
+# Strip single-quoted, double-quoted strings, and heredoc bodies to avoid
+# false positives on commit messages, echo arguments, etc.
+STRIPPED=$(echo "$COMMAND" | sed -E "
+  s/<<'[^']*'.*//g
+  s/'[^']*'//g
+  s/\"[^\"]*\"//g
+")
+
+blocked() {
+  echo "BLOCKED: '$COMMAND' matches dangerous pattern '$1'. The user has prevented you from doing this.${2:+ $2}" >&2
+  exit 2
+}
+
+# pattern|instruction
+RULES=(
+  "\brm\s+-rf\b|Rename the target to a .backup extension instead of deleting."
+  "\brm\s+-r\b|Rename the target to a .backup extension instead of deleting."
+  "\brm\s+-f\b|Rename the target to a .backup extension instead of deleting."
+  "\bdd\s+if=|"
+  "\bmkfs\b|"
+  "\bformat\s+[A-Z]:|"
+)
+
+for rule in "${RULES[@]}"; do
+  pattern="${rule%%|*}"
+  instruction="${rule#*|}"
+  if echo "$STRIPPED" | grep -qP "$pattern"; then
+    blocked "$pattern" "$instruction"
+  fi
+done
+
+exit 0

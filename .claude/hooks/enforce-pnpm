@@ -1,0 +1,11 @@
+#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
+
+MATCH=$(echo "$COMMAND" | grep -oE '(^|\s|&&|\|\||;)(npm|yarn|bun|npx)(\s|$)' | head -1 | tr -d ' ;|&')
+if [ -n "$MATCH" ]; then
+  echo "Blocked: use pnpm instead of $MATCH" >&2
+  exit 2
+fi
+
+exit 0

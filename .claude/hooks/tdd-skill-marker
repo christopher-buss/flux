@@ -1,0 +1,19 @@
+#!/bin/bash
+INPUT=$(cat)
+SKILL_NAME=$(echo "$INPUT" | jq -r '.tool_input.skill')
+
+if [[ "$SKILL_NAME" == "test-driven-development" ]]; then
+  STATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)/state"
+  mkdir -p "$STATE_DIR"
+  SESSION_ID=$(echo "$INPUT" | jq -r '.session_id')
+  TIMESTAMP=$(date +%s)
+
+  STATE_FILE="${STATE_DIR}/tdd.json"
+  EXISTING=$(cat "$STATE_FILE" 2>/dev/null)
+  if ! echo "$EXISTING" | jq -e 'type' >/dev/null 2>&1; then
+    EXISTING='{}'
+  fi
+  echo "$EXISTING" | jq --arg sid "$SESSION_ID" --arg ts "$TIMESTAMP" '.[$sid] = ($ts | tonumber)' > "$STATE_FILE"
+fi
+
+exit 0

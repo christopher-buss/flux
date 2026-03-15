@@ -1,0 +1,31 @@
+#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
+
+blocked() {
+  echo "BLOCKED: raw '$1' detected. The user has prevented you from doing this.${2:+ Use '$2' instead.}" >&2
+  exit 2
+}
+
+# tool_regex|suggestion (suggestion is optional)
+RULES=(
+  "jest|pnpm run test"
+  "eslint|pnpm run lint"
+  "oxlint|pnpm run lint"
+  "prettier|pnpm run lint"
+  "tsc|pnpm run typecheck or pnpm run build"
+  "tsgo|pnpm run typecheck"
+  "rbxtsc|pnpm run build"
+)
+
+for rule in "${RULES[@]}"; do
+  tool="${rule%%|*}"
+  suggestion="${rule#*|}"
+  if echo "$COMMAND" | grep -qE "(^|\s|&&|\|\||;)${tool}(\s|$)"; then
+    if ! echo "$COMMAND" | grep -qE "(pnpm run|pnpmx|pnpm x|pnpx|nr)"; then
+      blocked "$tool" "$suggestion"
+    fi
+  fi
+done
+
+exit 0

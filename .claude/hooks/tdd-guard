@@ -1,0 +1,31 @@
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path')
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id')
+
+# Normalize backslashes to forward slashes for Windows compatibility
+FILE_PATH="${FILE_PATH//\\//}"
+
+# Only apply to ECS files
+if ! [[ "$FILE_PATH" =~ /ecs/.*\.(ts|tsx)$ ]]; then
+  exit 0
+fi
+
+# Skip if editing test files
+if [[ "$FILE_PATH" == *".spec.ts"* ]] || [[ "$FILE_PATH" == *".spec.tsx"* ]] || [[ "$FILE_PATH" == *"/test/"* ]] || [[ "$FILE_PATH" == *"/tests/"* ]]; then
+  exit 0
+fi
+
+# Skip if editing config/docs
+if [[ "$FILE_PATH" == *.md ]] || [[ "$FILE_PATH" == *.json ]] || [[ "$FILE_PATH" == *.yaml ]]; then
+  exit 0
+fi
+
+# Check if TDD skill was invoked in this session
+STATE_FILE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)/state/tdd.json"
+STATE_CONTENT=$(cat "$STATE_FILE" 2>/dev/null)
+if ! echo "$STATE_CONTENT" | jq -e 'type' >/dev/null 2>&1 || ! echo "$STATE_CONTENT" | jq -e --arg sid "$SESSION_ID" 'has($sid)' >/dev/null 2>&1; then
+  echo "TDD Guard: You're editing production code without invoking test-driven-development first." >&2
+  echo "Please invoke the test-driven-development skill before implementation. If you think 'I dont need tdd', the skill also covers best practices forbug fixes and refactoring." >&2
+  exit 2
+fi

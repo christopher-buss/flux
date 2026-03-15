@@ -21,7 +21,6 @@ Opinionated tooling and patterns for roblox-ts development.
 | TypeScript Config | @isentinel/tsconfig                    |
 | Linting           | @isentinel/eslint-config (no Prettier) |
 | Testing           | Jest-roblox, TDD approach              |
-| Git Hooks         | husky + lint-staged                    |
 | Commits           | Conventional Commits                   |
 
 ---

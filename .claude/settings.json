@@ -43,5 +43,72 @@
 			}
 		}
 	},
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": ".claude/hooks/run-hook.cmd enforce-pnpm"
+					},
+					{
+						"type": "command",
+						"command": ".claude/hooks/run-hook.cmd enforce-pnpm-scripts"
+					},
+					{
+						"type": "command",
+						"command": ".claude/hooks/run-hook.cmd enforce-safe-git"
+					},
+					{
+						"type": "command",
+						"command": ".claude/hooks/run-hook.cmd block-destructive-commands"
+					}
+				]
+			},
+			{
+				"matcher": "Edit|Write",
+				"hooks": [
+					{
+						"type": "command",
+						"command": ".claude/hooks/run-hook.cmd tdd-guard"
+					}
+				]
+			}
+		],
+		"SessionStart": [
+			{
+				"matcher": "startup|resume|clear|compact",
+				"hooks": [
+					{
+						"type": "command",
+						"command": ".claude/hooks/run-hook.cmd session-start",
+						"async": false
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": ".claude/hooks/run-hook.cmd test-stop"
+					}
+				]
+			}
+		],
+		"PostToolUse": [
+			{
+				"matcher": "Skill",
+				"hooks": [
+					{
+						"type": "command",
+						"command": ".claude/hooks/run-hook.cmd tdd-skill-marker"
+					}
+				]
+			}
+		]
+	},
 	"outputStyle": "sentinel:XP Programmer"
 }

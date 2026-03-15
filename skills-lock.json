@@ -1,6 +1,16 @@
 {
 	"version": 1,
 	"skills": {
+		"code-simplification": {
+			"source": "addyosmani/agent-skills",
+			"sourceType": "github",
+			"computedHash": "d80d0fb5c61824207f451d26930d51b193d55adebd80c1e9f7cc74748e8dc4a0"
+		},
+		"documentation-and-adrs": {
+			"source": "addyosmani/agent-skills",
+			"sourceType": "github",
+			"computedHash": "ec63bd6d5e4668a5a382b03e8a69469b4b8e305f87595dcedcf81c98ca3ff8ba"
+		},
 		"ecs-design": {
 			"source": "christopher-buss/skills",
 			"sourceType": "github",
@@ -26,6 +36,11 @@
 			"sourceType": "github",
 			"computedHash": "752ff9c728d89ef7b237b3cbb8cd45b41100ccd8a112940303e6a9b34c7056e7"
 		},
+		"planning-and-task-breakdown": {
+			"source": "addyosmani/agent-skills",
+			"sourceType": "github",
+			"computedHash": "e28b3f80e4f281ecf78c99e5572032ce38dec4b365dbbe5f52e7c182b970d837"
+		},
 		"pnpm": {
 			"source": "christopher-buss/skills",
 			"sourceType": "github",
@@ -36,10 +51,20 @@
 			"sourceType": "github",
 			"computedHash": "eb79a7e8425a6babffb08e147712f27195e861ae3f50de104e59727a098cb910"
 		},
+		"spec-driven-development": {
+			"source": "addyosmani/agent-skills",
+			"sourceType": "github",
+			"computedHash": "21c10481233b4a08ce3aba2b70a7e0d6582828ead4f5b9006642ea43d2401fbc"
+		},
 		"test-driven-development": {
 			"source": "christopher-buss/skills",
 			"sourceType": "github",
 			"computedHash": "0b09231cf8bdbccff2efdfa367a3e1162f22693636bb48ae3e690f013443727e"
+		},
+		"write-prd": {
+			"source": "yonatangross/orchestkit",
+			"sourceType": "github",
+			"computedHash": "a481cea9ff72a281d7875d84de9888eec8b93a49c9c5ca5baa6f97ca8a93db98"
 		}
 	}
 }
