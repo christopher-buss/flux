@@ -19,7 +19,7 @@
 	"main": "./dist/init.luau",
 	"types": "./dist/index.d.ts",
 	"scripts": {
-		"dev:build": "rbxtsc --type=game --rojo ../../test.project.json --project tsconfig.json --includePath ../core/test/include"
+		"dev:build": "rbxtsc --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath ../core/test/include"
 	},
 	"devDependencies": {
 		"@isentinel/roblox-ts": "catalog:build",

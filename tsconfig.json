@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"composite": true,
 		"tsBuildInfoFile": "${configDir}/tsconfig.tsbuildinfo",
-		"types": ["compiler-types"]
+		"types": ["compiler-types"],
+		"sourceMap": true
 	},
 	"references": [
 		{

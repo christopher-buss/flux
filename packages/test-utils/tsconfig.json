@@ -1,9 +1,9 @@
 {
 	"extends": "../../tsconfig.json",
-	"compilerOptions": {
-		"rootDir": "src",
-		"declaration": true,
-		"outDir": "out"
-	},
+	"references": [
+		{
+			"path": "../test-utils"
+		}
+	],
 	"include": ["src/**/*", "../../types/**/*.d.ts"]
 }
