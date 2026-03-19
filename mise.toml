@@ -12,3 +12,4 @@ experimental = true
 hk = "latest"
 node = { version = "lts", postinstall = "corepack enable" }
 pkl = "latest"
+"ubi:luau-lang/lute" = "latest"
