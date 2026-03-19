@@ -25,7 +25,7 @@ describe("defineContexts", () => {
 			},
 		});
 
-		expectTypeOf(contexts.gameplay).toMatchTypeOf<ContextConfig>();
+		expectTypeOf(contexts.gameplay).toExtend<ContextConfig>();
 	});
 
 	it("should reject invalid context config", () => {
