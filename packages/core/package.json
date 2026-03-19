@@ -37,7 +37,8 @@
 		"dev:build": "rbxtsc --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath test/include",
 		"dev:serve": "rojo serve ../../test.project.json",
 		"dev:watch": "rbxtsc --watch --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath test/include",
-		"typecheck": "tsgo --noEmit"
+		"typecheck": "tsgo --noEmit",
+		"typecheck:types": "tsc --project tsconfig.typetest.json --noEmit"
 	},
 	"dependencies": {
 		"@rbxts/services": "catalog:prod"
