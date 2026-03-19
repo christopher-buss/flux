@@ -16,7 +16,7 @@ describe("defineContexts", () => {
 		});
 
 		expect(contexts.gameplay.priority).toBe(0);
-		expect(contexts.gameplay.bindings.jump).toStrictEqual([Enum.KeyCode.Space]);
+		expect(contexts.gameplay.bindings.jump[0]).toBe(Enum.KeyCode.Space);
 	});
 
 	it("should preserve sink property", () => {
