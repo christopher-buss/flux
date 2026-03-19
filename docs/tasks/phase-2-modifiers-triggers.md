@@ -16,9 +16,8 @@ project -- no default exports, uses Roblox globals (`Vector2`, `Vector3`,
 Phase 1 must be complete. The following files must exist:
 
 - `packages/core/src/types/actions.ts` -- ActionType, ActionConfig, ActionMap, type extractors
-- `packages/core/src/types/bindings.ts` -- BindingLike, BindingState
-- `packages/core/src/types/core.ts` -- FluxCore, CoreConfig, InputHandle, ContextConfig
-- `packages/core/src/types/state.ts` -- ActionState, ActionValue
+- `packages/core/src/types/bindings.ts` -- BindingLike
+- `packages/core/src/types/contexts.ts` -- ContextConfig
 - `packages/core/src/modifiers/types.ts` -- Modifier, ModifierContext (stub from Phase 1)
 - `packages/core/src/triggers/types.ts` -- Trigger, TriggerState, TypedTrigger (stub from Phase 1)
 
