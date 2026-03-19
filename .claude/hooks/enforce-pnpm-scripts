@@ -18,11 +18,13 @@ RULES=(
   "rbxtsc|pnpm run build"
 )
 
+STRIPPED=$(echo "$COMMAND" | sed -E "s/\"[^\"]*\"//g; s/'[^']*'//g")
+
 for rule in "${RULES[@]}"; do
   tool="${rule%%|*}"
   suggestion="${rule#*|}"
-  if echo "$COMMAND" | grep -qE "(^|\s|&&|\|\||;)${tool}(\s|$)"; then
-    if ! echo "$COMMAND" | grep -qE "(pnpm run|pnpmx|pnpm x|pnpx|nr)"; then
+  if echo "$STRIPPED" | grep -qE "(^|\s|&&|\|\||;)${tool}(\s|$)"; then
+    if ! echo "$STRIPPED" | grep -qE "(pnpm run|pnpmx|pnpm x|pnpx|nr)"; then
       blocked "$tool" "$suggestion"
     fi
   fi
