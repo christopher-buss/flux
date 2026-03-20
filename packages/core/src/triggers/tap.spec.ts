@@ -29,6 +29,14 @@ describe("tap", () => {
 		expect(trigger.update(0, 0.5, deltaTime)).toBe("none");
 	});
 
+	it("should return 'none' on release if duration equals threshold exactly", () => {
+		expect.assertions(1);
+
+		const trigger = tap({ threshold: 0.3 });
+
+		expect(trigger.update(0, 0.3, deltaTime)).toBe("none");
+	});
+
 	it("should return 'none' when magnitude is 0 and no prior duration", () => {
 		expect.assertions(1);
 
