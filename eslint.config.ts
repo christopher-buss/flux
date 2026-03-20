@@ -13,6 +13,9 @@ export default isentinel({
 	test: true,
 	type: "package",
 	typescript: {
+		overridesTypeAware: {
+			"ts/no-deprecated": "error",
+		},
 		parserOptionsTypeAware: {
 			projectService: true,
 		},

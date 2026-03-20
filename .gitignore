@@ -21,3 +21,5 @@ sourcemap.json
 rojo-sync/
 game-output.log
 jest-output.log
+.jest-roblox-coverage/
+coverage/

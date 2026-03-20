@@ -11,6 +11,7 @@
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
 	"scripts": {
+		"build": "pnpm -r run build",
 		"commit": "commit",
 		"eslint-config": "npx @eslint/config-inspector",
 		"postinstall": "node scripts/rojo-sync.ts && update-ts-references --withoutRootConfig",
@@ -26,6 +27,7 @@
 		"@isentinel/hooks": "catalog:lint",
 		"@isentinel/jest-roblox": "catalog:test",
 		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts/jest-utils": "catalog:test",
 		"@types/node": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
 		"eslint": "catalog:lint",
