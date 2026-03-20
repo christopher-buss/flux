@@ -9,6 +9,8 @@ export {
 } from "./actions/define";
 export { defineContexts } from "./contexts/define";
 
+export { deadZone, negate, scale } from "./modifiers";
+export type { Modifier, ModifierContext } from "./modifiers";
 export type {
 	ActionConfig,
 	ActionMap,
@@ -21,5 +23,6 @@ export type {
 	Direction3dActions,
 	ViewportPositionActions,
 } from "./types/actions";
+
 export type { BindingLike } from "./types/bindings";
 export type { ContextConfig } from "./types/contexts";
