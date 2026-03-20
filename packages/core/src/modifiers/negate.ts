@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext } from "./types";
+import type { Modifier, ModifierValue } from "./types";
 
 /**
  * Creates a modifier that negates the input value.
@@ -6,13 +6,8 @@ import type { Modifier, ModifierContext } from "./types";
  * @returns A modifier that multiplies the value by -1.
  */
 export function negate(): Modifier {
-	// Cast needed: roblox-ts cannot satisfy overloaded Modifier.modify signatures
-	// with a single union-typed implementation method.
 	return {
-		modify(
-			value: number | Vector2 | Vector3,
-			_context: ModifierContext,
-		): number | Vector2 | Vector3 {
+		modify(value: ModifierValue): ModifierValue {
 			if (typeIs(value, "number")) {
 				return -value;
 			}

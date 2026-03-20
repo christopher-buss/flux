@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext } from "./types";
+import type { Modifier, ModifierValue } from "./types";
 
 /**
  * Creates a modifier that scales the input value by a constant factor.
@@ -7,13 +7,8 @@ import type { Modifier, ModifierContext } from "./types";
  * @returns A modifier that multiplies the value by `factor`.
  */
 export function scale(factor: number): Modifier {
-	// Cast needed: roblox-ts cannot satisfy overloaded Modifier.modify signatures
-	// with a single union-typed implementation method.
 	return {
-		modify(
-			value: number | Vector2 | Vector3,
-			_context: ModifierContext,
-		): number | Vector2 | Vector3 {
+		modify(value: ModifierValue): ModifierValue {
 			if (typeIs(value, "number")) {
 				return value * factor;
 			}

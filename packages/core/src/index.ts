@@ -10,7 +10,7 @@ export {
 export { defineContexts } from "./contexts/define";
 
 export { deadZone, negate, scale } from "./modifiers";
-export type { Modifier, ModifierContext } from "./modifiers";
+export type { Modifier, ModifierContext, ModifierValue } from "./modifiers";
 export { blocker, doubleTap, explicit, hold, implicit, tap } from "./triggers";
 
 export type {

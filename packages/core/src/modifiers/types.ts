@@ -4,6 +4,9 @@ export interface ModifierContext {
 	readonly deltaTime: number;
 }
 
+/** Union of all value types that modifiers operate on. */
+export type ModifierValue = number | Vector2 | Vector3;
+
 /** Stateless value transform in the input pipeline. */
 export interface Modifier {
 	/** Transforms a scalar value. */

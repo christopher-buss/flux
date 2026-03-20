@@ -1,4 +1,4 @@
-import type { Modifier, ModifierContext } from "./types";
+import type { Modifier, ModifierValue } from "./types";
 
 /**
  * Creates a dead zone modifier that zeroes input below a threshold and rescales above it.
@@ -13,13 +13,8 @@ export function deadZone(threshold: number): Modifier {
 		`deadZone threshold must be in (0, 1), got ${threshold}`,
 	);
 
-	// Cast needed: roblox-ts cannot satisfy overloaded Modifier.modify signatures
-	// with a single union-typed implementation method.
 	return {
-		modify(
-			value: number | Vector2 | Vector3,
-			_context: ModifierContext,
-		): number | Vector2 | Vector3 {
+		modify(value: ModifierValue): ModifierValue {
 			if (typeIs(value, "number")) {
 				if (math.abs(value) < threshold) {
 					return 0;
