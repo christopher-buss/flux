@@ -23,3 +23,7 @@ runs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile --ignore-scripts
       shell: bash
+
+    - name: Rojo Sync
+      run: pnpm rojo-sync
+      shell: bash
