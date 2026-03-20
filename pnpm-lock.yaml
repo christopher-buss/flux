@@ -48,6 +48,18 @@ catalogs:
     eslint-plugin-react-x:
       specifier: 2.13.0
       version: 2.13.0
+    eslint_d:
+      specifier: 15.0.0
+      version: 15.0.0
+    file-entry-cache:
+      specifier: 11.1.2
+      version: 11.1.2
+    get-tsconfig:
+      specifier: 4.13.6
+      version: 4.13.6
+    madge:
+      specifier: 8.0.0
+      version: 8.0.0
   node:
     rimraf:
       specifier: 6.1.2
@@ -154,9 +166,21 @@ importers:
       eslint-plugin-react-x:
         specifier: catalog:lint
         version: 2.13.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint_d:
+        specifier: catalog:lint
+        version: 15.0.0(jiti@2.6.1)
+      file-entry-cache:
+        specifier: catalog:lint
+        version: 11.1.2
+      get-tsconfig:
+        specifier: catalog:lint
+        version: 4.13.6
       jiti:
         specifier: catalog:script
         version: 2.6.1
+      madge:
+        specifier: catalog:lint
+        version: 8.0.0(typescript@5.9.3)
       pncat:
         specifier: catalog:cli
         version: 0.10.4
