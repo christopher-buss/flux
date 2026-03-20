@@ -15,28 +15,31 @@ export interface DoubleTapOptions {
 export function doubleTap({ window: tapWindow }: DoubleTapOptions): Trigger {
 	let lastTapTime = 0;
 	let tapCount = 0;
+	let didPress = false;
 
 	return {
 		reset(): void {
 			lastTapTime = 0;
 			tapCount = 0;
+			didPress = false;
 		},
 
 		update(magnitude: number, _duration: number, _deltaTime: number): TriggerState {
+			const isPressed = magnitude > 0;
+			const isRisingEdge = isPressed && !didPress;
+			didPress = isPressed;
+			if (!isRisingEdge) {
+				return "none";
+			}
+
 			const now = os.clock();
+			const isWithinWindow = now - lastTapTime < tapWindow;
+			lastTapTime = now;
+			tapCount = isWithinWindow ? tapCount + 1 : 1;
 
-			if (magnitude > 0) {
-				if (now - lastTapTime < tapWindow) {
-					tapCount += 1;
-					if (tapCount >= 2) {
-						tapCount = 0;
-						return "triggered";
-					}
-				} else {
-					tapCount = 1;
-				}
-
-				lastTapTime = now;
+			if (tapCount >= 2) {
+				tapCount = 0;
+				return "triggered";
 			}
 
 			return "none";

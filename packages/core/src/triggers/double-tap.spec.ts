@@ -18,6 +18,7 @@ describe("doubleTap", () => {
 
 		const trigger = doubleTap({ window: 0.5 });
 		trigger.update(1, 0, deltaTime);
+		trigger.update(0, 0, deltaTime);
 
 		expect(trigger.update(1, 0, deltaTime)).toBe("triggered");
 	});
@@ -28,6 +29,7 @@ describe("doubleTap", () => {
 		const trigger = doubleTap({ window: 0 });
 
 		trigger.update(1, 0, deltaTime);
+		trigger.update(0, 0, deltaTime);
 
 		expect(trigger.update(1, 0, deltaTime)).toBe("none");
 	});
@@ -39,6 +41,16 @@ describe("doubleTap", () => {
 		trigger.update(1, 0, deltaTime);
 		trigger.reset();
 
+		expect(trigger.update(1, 0, deltaTime)).toBe("none");
+	});
+
+	it("should not count sustained holds as multiple taps", () => {
+		expect.assertions(3);
+
+		const trigger = doubleTap({ window: 0.5 });
+
+		expect(trigger.update(1, 0, deltaTime)).toBe("none");
+		expect(trigger.update(1, 0, deltaTime)).toBe("none");
 		expect(trigger.update(1, 0, deltaTime)).toBe("none");
 	});
 });
