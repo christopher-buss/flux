@@ -11,6 +11,17 @@ export { defineContexts } from "./contexts/define";
 
 export { deadZone, negate, scale } from "./modifiers";
 export type { Modifier, ModifierContext } from "./modifiers";
+export { blocker, doubleTap, explicit, hold, implicit, tap } from "./triggers";
+
+export type {
+	DoubleTapOptions,
+	HoldOptions,
+	TapOptions,
+	Trigger,
+	TriggerState,
+	TriggerType,
+	TypedTrigger,
+} from "./triggers";
 export type {
 	ActionConfig,
 	ActionMap,
@@ -23,6 +34,5 @@ export type {
 	Direction3dActions,
 	ViewportPositionActions,
 } from "./types/actions";
-
 export type { BindingLike } from "./types/bindings";
 export type { ContextConfig } from "./types/contexts";
