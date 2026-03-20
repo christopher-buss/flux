@@ -57,6 +57,15 @@ describe("hold", () => {
 		expect(trigger.update(0, 0.3, deltaTime)).toBe("canceled");
 	});
 
+	it("should return 'none' when released before attempting duration", () => {
+		expect.assertions(1);
+
+		const trigger = hold(options);
+		trigger.update(1, 0.05, deltaTime);
+
+		expect(trigger.update(0, 0.05, deltaTime)).toBe("none");
+	});
+
 	it("should reset hasTriggered state", () => {
 		expect.assertions(2);
 

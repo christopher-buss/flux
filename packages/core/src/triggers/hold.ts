@@ -2,7 +2,7 @@ import type { Trigger, TriggerState } from "./types";
 
 /** Options for the hold trigger. */
 export interface HoldOptions {
-	/** Minimum duration before "ongoing" state begins. */
+	/** Minimum hold duration before release counts as "canceled" instead of "none". */
 	readonly attempting: number;
 	/**
 	 * If true, only triggers once until released.
