@@ -64,7 +64,7 @@ jobs:
           ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
           ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}
         name: Test
-        run: pnpm test
+        run: pnpm test --coverage --coverageReporters json-summary --coverageReporters json
 
       - if: always()
         name: Coverage Report
