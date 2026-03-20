@@ -24,7 +24,7 @@ if [[ "$STOP_ACTIVE" == "true" ]]; then
   exit 0
 fi
 
-if pnpm run test >&2 2>&1; then
+if pnpm run test --coverage >&2 2>&1; then
   exit 0
 fi
 

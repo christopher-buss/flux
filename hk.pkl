@@ -11,7 +11,7 @@ local guards = new Mapping<String, Step> {
 }
 
 local linters = new Mapping<String, Step> {
-    ["eslint"] = Builtins.eslint
+    ["eslint"] = (Builtins.eslint) { shell = bash }
     ["typecheck"] {
         glob = List("*.ts", "*.tsx")
         check = "pnpm typecheck"

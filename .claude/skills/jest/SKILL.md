@@ -7,7 +7,7 @@ description:
     two values, 0 is truthy.
 metadata:
     author: Christopher Buss
-    version: "2026.2.7"
+    version: "2026.3.15"
     source:
         Generated from https://github.com/Roblox/jest-roblox, scripts located at
         https://github.com/christopher-buss/skills
@@ -60,6 +60,12 @@ this codebase.
 | Timer Mocks    | useFakeTimers, Roblox timers, engineFrameTime | [feature-timer-mocks](references/feature-timer-mocks.md)       |
 | Global Mocks   | jest.globalEnv, spyOn globals, library mocks  | [feature-global-mocks](references/feature-global-mocks.md)     |
 | Module Mocking | jest.mock(), isolateModules, resetModules     | [feature-module-mocking](references/feature-module-mocking.md) |
+
+### Extended Matchers
+
+| Topic         | Description                                                   | Reference                                                        |
+| ------------- | ------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Jest Extended | When core matchers aren't expressive enough: exact booleans, ranges, membership, entries, call order, side effects | [feature-jest-extended](references/feature-jest-extended.md) |
 
 ### Advanced
 

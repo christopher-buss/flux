@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"composite": true,
 		"tsBuildInfoFile": "${configDir}/tsconfig.tsbuildinfo",
-		"types": ["compiler-types"],
+		"types": ["compiler-types", "jest-extended"],
 		"sourceMap": true
 	},
 	"references": [

@@ -14,6 +14,7 @@ on:
 permissions:
   contents: write
   packages: write
+  pull-requests: write
 
 env:
   CI: true
@@ -34,7 +35,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Cache ESLint
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           key: eslint-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml', 'eslint.config.*') }}
           path: .eslintcache
@@ -47,3 +48,29 @@ jobs:
         run: pnpm lint:ci
 
     timeout-minutes: 5
+
+  test:
+    name: Test
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - env:
+          ROBLOX_OPEN_CLOUD_API_KEY: ${{ secrets.ROBLOX_OPEN_CLOUD_API_KEY }}
+          ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
+          ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}
+        name: Test
+        run: pnpm test --coverage --coverageReporters json-summary --coverageReporters json
+
+      - if: always()
+        name: Coverage Report
+        uses: davelosert/vitest-coverage-report-action@2500dafcee7dd64f85ab689c0b83798a8359770e # v2.9.3
+        with:
+          json-final-path: coverage/coverage-final.json
+          json-summary-path: coverage/coverage-summary.json
+
+    timeout-minutes: 10

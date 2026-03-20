@@ -4,5 +4,5 @@
 		"tsBuildInfoFile": "out/tsconfig.tsbuildinfo"
 	},
 	"include": ["src/**/*", "../../types/**/*.d.ts"],
-	"exclude": ["node_modules", "out", "**/.*/", "dist", "test"]
+	"exclude": ["node_modules", "out", "**/.*/", "dist", "test", "src/**/*.spec-d.ts"]
 }

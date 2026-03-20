@@ -37,7 +37,8 @@
 		"dev:build": "rbxtsc --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath test/include",
 		"dev:serve": "rojo serve ../../test.project.json",
 		"dev:watch": "rbxtsc --watch --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath test/include",
-		"typecheck": "tsgo --noEmit"
+		"typecheck": "tsgo --noEmit",
+		"typecheck:types": "tsc --project tsconfig.typetest.json --noEmit"
 	},
 	"dependencies": {
 		"@rbxts/services": "catalog:prod"
@@ -47,17 +48,14 @@
 		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
-		"@rbxts/jecs": "catalog:peer",
 		"@rbxts/jest": "catalog:test",
+		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
 		"rimraf": "catalog:node",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
-	},
-	"peerDependencies": {
-		"@rbxts/jecs": "^0.9.0"
 	},
 	"publishConfig": {
 		"access": "public",

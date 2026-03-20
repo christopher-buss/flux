@@ -1,0 +1,15 @@
+/** Runtime context passed to modifiers during value transformation. */
+export interface ModifierContext {
+	/** Time elapsed since last frame in seconds. */
+	readonly deltaTime: number;
+}
+
+/** Stateless value transform in the input pipeline. */
+export interface Modifier {
+	/** Transforms a scalar value. */
+	modify(value: number, context: ModifierContext): number;
+	/** Transforms a 2D vector value. */
+	modify(value: Vector2, context: ModifierContext): Vector2;
+	/** Transforms a 3D vector value. */
+	modify(value: Vector3, context: ModifierContext): Vector3;
+}
