@@ -74,8 +74,8 @@ catalogs:
       version: 2.6.1
   test:
     '@isentinel/jest-roblox':
-      specifier: 0.0.7
-      version: 0.0.7
+      specifier: 0.0.8
+      version: 0.0.8
     '@rbxts/jest':
       specifier: 3.13.3-ts.1
       version: 3.13.3-ts.1
@@ -135,7 +135,7 @@ importers:
         version: 1.2.5(@typescript/native-preview@7.0.0-dev.20260320.1)(jiti@2.6.1)(typescript@5.9.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.0.7
+        version: 0.0.8
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -991,8 +991,8 @@ packages:
       '@typescript/native-preview':
         optional: true
 
-  '@isentinel/jest-roblox@0.0.7':
-    resolution: {integrity: sha512-bBccXPCCRsu7dgUflZmUTOnqbaCP/PKcmhEL4wi963q/vvGNsTBLBvn0xuOCEKLLPT4lCfdMjJ6jZS8DhgVeAw==}
+  '@isentinel/jest-roblox@0.0.8':
+    resolution: {integrity: sha512-b4CboB8o+8aRG8BWwIXsS0BWdrlWYAf9UXt5ChVooSNlYnQdlRhqvxchIE6YqWuVjMbsPgv099qZFqT7SQwR/g==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -5184,7 +5184,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/jest-roblox@0.0.7':
+  '@isentinel/jest-roblox@0.0.8':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       arktype: 2.1.29
