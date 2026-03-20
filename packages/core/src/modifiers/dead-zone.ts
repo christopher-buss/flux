@@ -8,6 +8,13 @@ import type { Modifier, ModifierContext } from "./types";
  * @returns A modifier that applies the dead zone.
  */
 export function deadZone(threshold: number): Modifier {
+	assert(
+		threshold > 0 && threshold < 1,
+		`deadZone threshold must be in (0, 1), got ${threshold}`,
+	);
+
+	// Cast needed: roblox-ts cannot satisfy overloaded Modifier.modify signatures
+	// with a single union-typed implementation method.
 	return {
 		modify(
 			value: number | Vector2 | Vector3,
