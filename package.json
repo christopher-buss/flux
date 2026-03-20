@@ -32,6 +32,7 @@
 		"@typescript/native-preview": "catalog:tsc",
 		"eslint": "catalog:lint",
 		"eslint-plugin-jest": "catalog:lint",
+		"eslint-plugin-jest-extended": "catalog:lint",
 		"eslint-plugin-pnpm": "catalog:lint",
 		"eslint-plugin-react-hooks": "catalog:lint",
 		"eslint-plugin-react-naming-convention": "catalog:lint",

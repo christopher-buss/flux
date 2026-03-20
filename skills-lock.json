@@ -34,7 +34,7 @@
 		"jest": {
 			"source": "christopher-buss/skills",
 			"sourceType": "github",
-			"computedHash": "752ff9c728d89ef7b237b3cbb8cd45b41100ccd8a112940303e6a9b34c7056e7"
+			"computedHash": "db74fc9e5cad37a9692e008af967e52076ff37b77437795797b1b79db52b3cba"
 		},
 		"planning-and-task-breakdown": {
 			"source": "addyosmani/agent-skills",

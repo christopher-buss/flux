@@ -49,6 +49,7 @@
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
 		"@rbxts/jest": "catalog:test",
+		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",

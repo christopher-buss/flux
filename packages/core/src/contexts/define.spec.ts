@@ -30,7 +30,7 @@ describe("defineContexts", () => {
 			},
 		});
 
-		expect(contexts.ui.sink).toBe(true);
+		expect(contexts.ui.sink).toBeTrue();
 		expect(contexts.ui.priority).toBe(10);
 	});
 

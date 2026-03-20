@@ -57,7 +57,7 @@ describe("action", () => {
 		});
 
 		expect(config.description).toBe("Jump action");
-		expect(config.enabled).toBe(false);
+		expect(config.enabled).toBeFalse();
 	});
 });
 
