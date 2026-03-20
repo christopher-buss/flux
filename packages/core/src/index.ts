@@ -1,4 +1,3 @@
-// Runtime
 export {
 	action,
 	bool,
@@ -10,7 +9,6 @@ export {
 } from "./actions/define";
 export { defineContexts } from "./contexts/define";
 
-// Types
 export type {
 	ActionConfig,
 	ActionMap,
