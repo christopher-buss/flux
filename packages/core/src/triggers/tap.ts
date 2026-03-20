@@ -18,7 +18,7 @@ export function tap({ threshold }: TapOptions): Trigger {
 			// Stateless — no-op.
 		},
 
-		update(magnitude: number, duration: number, _deltaTime: number): TriggerState {
+		update(magnitude: number, duration: number): TriggerState {
 			if (magnitude === 0 && duration > 0 && duration < threshold) {
 				return "triggered";
 			}

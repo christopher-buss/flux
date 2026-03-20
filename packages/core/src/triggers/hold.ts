@@ -27,7 +27,7 @@ export function hold({ attempting, oneShot, threshold }: HoldOptions): Trigger {
 			hasTriggered = false;
 		},
 
-		update(magnitude: number, duration: number, _deltaTime: number): TriggerState {
+		update(magnitude: number, duration: number): TriggerState {
 			if (magnitude === 0) {
 				const didAttempt = duration > attempting && !hasTriggered;
 				hasTriggered = false;

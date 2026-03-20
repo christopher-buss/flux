@@ -24,7 +24,7 @@ export function doubleTap({ window: tapWindow }: DoubleTapOptions): Trigger {
 			didPress = false;
 		},
 
-		update(magnitude: number, _duration: number, _deltaTime: number): TriggerState {
+		update(magnitude: number): TriggerState {
 			const isPressed = magnitude > 0;
 			const isRisingEdge = isPressed && !didPress;
 			didPress = isPressed;
