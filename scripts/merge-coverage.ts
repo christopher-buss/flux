@@ -1,35 +1,36 @@
-import CoverageReport from "monocart-coverage-reports";
-import { globSync } from "node:fs";
+import libCoverage from "istanbul-lib-coverage";
+import libReport from "istanbul-lib-report";
+import reports from "istanbul-reports";
+import { globSync, readFileSync } from "node:fs";
 import process from "node:process";
 
-async function mergeCoverage(): Promise<void> {
-	const coverageDirectories = globSync("{packages,apps}/*/coverage").map(
-		(directory) => `./${directory}`,
-	);
+function mergeCoverage(): void {
+	const coverageFiles = globSync("{packages,apps}/*/coverage/coverage-final.json");
 
-	if (coverageDirectories.length === 0) {
-		console.log("No coverage directories found");
+	if (coverageFiles.length === 0) {
+		console.log("No coverage files found");
 		process.exit(0);
 	}
 
-	console.log("Merging coverage from:", coverageDirectories);
+	console.log("Merging coverage from:", coverageFiles);
 
-	const report = CoverageReport({
-		inputDir: coverageDirectories,
-		outputDir: "./coverage",
-		reports: [
-			["json", { file: "coverage-final.json" }],
-			["json-summary", { file: "coverage-summary.json" }],
-			["lcov"],
-			["console-details"],
-		],
+	const map = libCoverage.createCoverageMap({});
+
+	for (const file of coverageFiles) {
+		const data = JSON.parse(readFileSync(file, "utf8")) as libCoverage.CoverageMapData;
+		map.merge(data);
+	}
+
+	const context = libReport.createContext({
+		coverageMap: map,
+		dir: "./coverage",
 	});
 
-	await report.generate();
+	reports.create("json", { file: "coverage-final.json" }).execute(context);
+	reports.create("json-summary", { file: "coverage-summary.json" }).execute(context);
+	reports.create("lcov").execute(context);
+
 	console.log("Coverage reports merged to ./coverage");
 }
 
-mergeCoverage().catch((err: unknown) => {
-	console.error("Failed to merge coverage:", err);
-	process.exit(1);
-});
+mergeCoverage();
