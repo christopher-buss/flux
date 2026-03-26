@@ -1,6 +1,7 @@
 import { defineConfig } from "@isentinel/jest-roblox";
 
 export default defineConfig({
+	coverageDirectory: "../../coverage",
 	extends: "../../jest.shared.ts",
 	projects: [
 		{
