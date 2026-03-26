@@ -1,8 +1,16 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"tsBuildInfoFile": "out/tsconfig.tsbuildinfo"
+		"tsBuildInfoFile": "out-test/tsconfig.tsbuildinfo",
+		"rootDir": null,
+		"rootDirs": ["src", "test"],
+		"outDir": "out-test"
 	},
-	"include": ["src/**/*", "../../types/**/*.d.ts"],
-	"exclude": ["node_modules", "out", "**/.*/", "dist", "test"]
+	"references": [
+		{
+			"path": "tsconfig.lib.json"
+		}
+	],
+	"include": ["src/**/*.spec.ts", "test/**/*", "../../types/**/*.d.ts"],
+	"exclude": ["node_modules", "out", "out-test", "**/.*/", "dist"]
 }

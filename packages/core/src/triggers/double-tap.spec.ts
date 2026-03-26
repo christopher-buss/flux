@@ -39,7 +39,7 @@ describe("doubleTap", () => {
 
 		const trigger = doubleTap({ window: 0.5 });
 		trigger.update(1, 0, deltaTime);
-		trigger.reset();
+		trigger.reset!();
 
 		expect(trigger.update(1, 0, deltaTime)).toBe("none");
 	});

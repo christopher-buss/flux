@@ -70,26 +70,30 @@ describe("convenience wrappers", () => {
 	});
 
 	it("should create Direction1D config with direction1d", () => {
-		expect.assertions(1);
+		expect.assertions(2);
 
 		expect(direction1d().type).toBe("Direction1D");
+		expect(direction1d({ description: "Strafe" }).description).toBe("Strafe");
 	});
 
 	it("should create Direction2D config with direction2d", () => {
-		expect.assertions(1);
+		expect.assertions(2);
 
 		expect(direction2d().type).toBe("Direction2D");
+		expect(direction2d({ description: "Move" }).description).toBe("Move");
 	});
 
 	it("should create Direction3D config with direction3d", () => {
-		expect.assertions(1);
+		expect.assertions(2);
 
 		expect(direction3d().type).toBe("Direction3D");
+		expect(direction3d({ description: "Fly" }).description).toBe("Fly");
 	});
 
 	it("should create ViewportPosition config with position2d", () => {
-		expect.assertions(1);
+		expect.assertions(2);
 
 		expect(position2d().type).toBe("ViewportPosition");
+		expect(position2d({ description: "Aim" }).description).toBe("Aim");
 	});
 });

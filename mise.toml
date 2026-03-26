@@ -1,5 +1,8 @@
 [env]
-_.path = [ '{{config_root}}/node_modules/.bin' ]
+_.path = [
+  '{{config_root}}/node_modules/.bin',
+  '{{cwd}}/node_modules/.bin',  
+]
 _.file = { path = ".env", redact = true }
 
 [settings]

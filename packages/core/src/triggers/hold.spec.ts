@@ -72,7 +72,7 @@ describe("hold", () => {
 		const trigger = hold({ ...options, oneShot: true });
 		trigger.update(1, 0.5, deltaTime);
 		trigger.update(1, 0.6, deltaTime);
-		trigger.reset();
+		trigger.reset!();
 
 		expect(trigger.update(1, 0.5, deltaTime)).toBe("triggered");
 		expect(trigger.update(1, 0.6, deltaTime)).toBe("none");

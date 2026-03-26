@@ -14,10 +14,6 @@ export interface TapOptions {
  */
 export function tap({ threshold }: TapOptions): Trigger {
 	return {
-		reset(): void {
-			// Stateless — no-op.
-		},
-
 		update(magnitude: number, duration: number): TriggerState {
 			if (magnitude === 0 && duration > 0 && duration < threshold) {
 				return "triggered";
