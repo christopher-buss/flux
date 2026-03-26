@@ -11,7 +11,13 @@
 	"type": "module",
 	"devDependencies": {
 		"@isentinel/hooks": "catalog:lint",
+		"@types/istanbul-lib-coverage": "catalog:types",
+		"@types/istanbul-lib-report": "catalog:types",
+		"@types/istanbul-reports": "catalog:types",
 		"@types/node": "catalog:types",
-		"confbox": "catalog:dev"
+		"confbox": "catalog:dev",
+		"istanbul-lib-coverage": "catalog:test",
+		"istanbul-lib-report": "catalog:test",
+		"istanbul-reports": "catalog:test"
 	}
 }

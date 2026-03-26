@@ -11,17 +11,18 @@
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
 	"exports": {
-		".": {
-			"import": "./dist/init.luau",
-			"types": "./dist/index.d.ts"
-		}
+		"./out/*": "./out/*"
 	},
 	"main": "./dist/init.luau",
 	"types": "./dist/index.d.ts",
 	"scripts": {
-		"dev:build": "rbxtsc --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath ../core/test/include"
+		"build": "rbxtsc --project tsconfig.lib.json",
+		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
+		"dev:build": "rbxtsc --build --type=game --rojo test.project.json --project tsconfig.spec.json",
+		"test": "pnpm dev:build && jest-roblox"
 	},
 	"devDependencies": {
+		"@isentinel/jest-roblox": "catalog:test",
 		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
@@ -30,6 +31,7 @@
 		"@rbxts/jest-utils": "catalog:test",
 		"@rbxts/react-roblox-fire": "catalog:test",
 		"@rbxts/types": "catalog:types",
+		"rimraf": "catalog:node",
 		"typescript": "catalog:tsc"
 	}
 }

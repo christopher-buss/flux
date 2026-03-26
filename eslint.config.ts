@@ -1,4 +1,4 @@
-import isentinel, { GLOB_MARKDOWN_CODE, GLOB_ROOT_SRC, GLOB_SRC } from "@isentinel/eslint-config";
+import isentinel, { GLOB_MARKDOWN_CODE, GLOB_SRC } from "@isentinel/eslint-config";
 
 export default isentinel(
 	{
@@ -8,8 +8,8 @@ export default isentinel(
 		namedConfigs: true,
 		react: true,
 		roblox: {
-			files: [...GLOB_ROOT_SRC],
-			filesTypeAware: [...GLOB_ROOT_SRC],
+			files: [`packages/*/*/${GLOB_SRC}`],
+			filesTypeAware: [`packages/*/*/${GLOB_SRC}`],
 		},
 		test: {
 			jest: {

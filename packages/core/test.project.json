@@ -4,34 +4,26 @@
 	"tree": {
 		"$className": "DataModel",
 		"ReplicatedStorage": {
-			"packages": {
-				"$className": "Folder",
-				"core": {
-					"$className": "Folder",
-					"jest.config": {
-						"$path": "packages/core/jest.config.luau"
-					},
-					"src": {
-						"$path": "packages/core/out"
-					}
-				}
+			"$className": "ReplicatedStorage",
+			"flux": {
+				"$path": "out"
+			},
+			"flux:tests": {
+				"$path": "out-test"
 			},
 			"rbxts_include": {
-				"$path": "packages/core/test/include",
+				"$path": "include",
 				"node_modules": {
 					"$className": "Folder",
+					"@flux": {
+						"$path": "node_modules/@flux"
+					},
 					"@rbxts": {
-						"$path": "rojo-sync/@rbxts"
+						"$path": "../../rojo-sync/@rbxts"
 					},
 					"@rbxts-js": {
-						"$path": "rojo-sync/@rbxts-js"
+						"$path": "../../rojo-sync/@rbxts-js"
 					}
-				}
-			},
-			"test-utils": {
-				"$className": "Folder",
-				"src": {
-					"$path": "packages/test-utils/out"
 				}
 			}
 		},
@@ -43,7 +35,6 @@
 		},
 		"TestService": {
 			"$className": "TestService",
-			"$path": "test",
 			"$properties": {
 				"AutoRuns": false,
 				"ExecuteWithStudioRun": false

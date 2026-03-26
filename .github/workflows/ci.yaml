@@ -66,6 +66,9 @@ jobs:
         name: Test
         run: pnpm test --coverage --coverageReporters json-summary --coverageReporters json
 
+      - name: Merge Coverage
+        run: node scripts/merge-coverage.ts
+
       - if: always()
         name: Coverage Report
         uses: davelosert/vitest-coverage-report-action@2500dafcee7dd64f85ab689c0b83798a8359770e # v2.9.3

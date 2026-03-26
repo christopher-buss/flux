@@ -4,7 +4,7 @@ export type TriggerState = "canceled" | "none" | "ongoing" | "triggered";
 /** Stateful gate that determines when an action fires based on input magnitude and timing. */
 export interface Trigger {
 	/** Resets internal state (e.g., after context switch or action release). */
-	reset(): void;
+	reset?(): void;
 	/**
 	 * Evaluates the trigger for the current frame.
 	 * @param magnitude - Post-modifier input magnitude (0/1 for bool, vector length for axis).

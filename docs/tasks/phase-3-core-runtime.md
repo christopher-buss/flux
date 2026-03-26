@@ -19,18 +19,27 @@ system is validated from authoring to runtime.
 
 Phases 1 and 2 must be complete. The following must exist and pass typechecking:
 
-- `packages/core/src/types/` -- all type files (actions, bindings, core, state)
+- `packages/core/src/types/actions.ts` -- ActionType, ActionConfig, ActionMap, type extractors
+- `packages/core/src/types/bindings.ts` -- BindingLike
+- `packages/core/src/types/contexts.ts` -- ContextConfig
 - `packages/core/src/actions/define.ts` -- defineActions, action, bool, etc.
 - `packages/core/src/contexts/define.ts` -- defineContexts
 - `packages/core/src/modifiers/` -- deadZone, negate, scale, Modifier interface
 - `packages/core/src/triggers/` -- hold, tap, doubleTap, implicit/explicit/blocker, Trigger interface
 
+**Note**: `types/core.ts` and `types/state.ts` are created in this phase.
+
 ## Target File Structure
 
-After this phase, new files:
+After this phase, new/modified files:
 
 ```text
 packages/core/src/
+  types/
+    core.ts                     # InputHandle, FluxCore, ActionDiff
+    state.ts                    # ActionState, ActionValue
+  modifiers/
+    types.ts                    # (modify: add `handle: InputHandle` to ModifierContext)
   core/
     create-core.ts              # createCore implementation
     create-core.spec.ts         # tests
@@ -150,9 +159,14 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 }
 ```
 
-**Modifier** (from `modifiers/types.ts`):
+**Modifier** (from `modifiers/types.ts` -- updated in this phase to add `handle`):
 
 ```ts
+interface ModifierContext {
+	readonly deltaTime: number;
+	readonly handle: InputHandle;
+}
+
 interface Modifier {
 	modify(value: number, context: ModifierContext): number;
 	modify(value: Vector2, context: ModifierContext): Vector2;
@@ -184,7 +198,21 @@ interface TypedTrigger {
 
 ### Task 3.1 What to Build
 
-Two foundational pieces the core runtime needs.
+Three things: the handle factory, the ActionState implementation, and extending
+`ModifierContext` with the handle.
+
+#### `packages/core/src/modifiers/types.ts` (modify existing)
+
+Add `handle: InputHandle` to `ModifierContext` now that `InputHandle` exists:
+
+```ts
+import type { InputHandle } from "../types/core";
+
+export interface ModifierContext {
+	readonly deltaTime: number;
+	readonly handle: InputHandle;
+}
+```
 
 #### `packages/core/src/core/handle-factory.ts`
 

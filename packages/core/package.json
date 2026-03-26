@@ -32,19 +32,19 @@
 	],
 	"scripts": {
 		"build": "rbxtsc --project tsconfig.lib.json",
-		"clean": "npx rimraf out/ && npx rimraf dist/",
+		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
 		"darklua": "darklua process out dist --verbose",
-		"dev:build": "rbxtsc --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath test/include",
-		"dev:serve": "rojo serve ../../test.project.json",
-		"dev:watch": "rbxtsc --watch --type=game --rojo ../../test.project.json --project tsconfig.spec.json --includePath test/include",
+		"dev:build": "rbxtsc --build --type=game --rojo test.project.json --project tsconfig.spec.json",
+		"test": "pnpm dev:build && jest-roblox",
 		"typecheck": "tsgo --noEmit",
-		"typecheck:types": "tsc --project tsconfig.typetest.json --noEmit"
+		"typecheck:types": "tsgo --project tsconfig.typetest.json --noEmit"
 	},
 	"dependencies": {
 		"@rbxts/services": "catalog:prod"
 	},
 	"devDependencies": {
 		"@flux/test-utils": "workspace:*",
+		"@isentinel/jest-roblox": "catalog:test",
 		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",

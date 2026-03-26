@@ -13,13 +13,13 @@ project -- no default exports, uses Roblox globals (`Vector2`, `Vector3`,
 
 ## Prerequisites
 
-Phase 1 must be complete. The following files must exist:
+Phase 1 must be complete. The following files must exist with full JSDoc:
 
 - `packages/core/src/types/actions.ts` -- ActionType, ActionConfig, ActionMap, type extractors
 - `packages/core/src/types/bindings.ts` -- BindingLike
 - `packages/core/src/types/contexts.ts` -- ContextConfig
-- `packages/core/src/modifiers/types.ts` -- Modifier, ModifierContext (stub from Phase 1)
-- `packages/core/src/triggers/types.ts` -- Trigger, TriggerState, TypedTrigger (stub from Phase 1)
+- `packages/core/src/modifiers/types.ts` -- Modifier, ModifierContext (full interfaces)
+- `packages/core/src/triggers/types.ts` -- Trigger, TriggerState, TriggerType, TypedTrigger (full interfaces)
 
 ## Target File Structure
 
@@ -28,7 +28,7 @@ After this phase, new/modified files:
 ```text
 packages/core/src/
   modifiers/
-    types.ts                    # (already exists as stub -- replace with full version)
+    types.ts                    # (already exists -- no changes needed)
     dead-zone.ts                # deadZone modifier
     negate.ts                   # negate modifier
     scale.ts                    # scale modifier
@@ -37,7 +37,7 @@ packages/core/src/
     negate.spec.ts              # tests
     scale.spec.ts               # tests
   triggers/
-    types.ts                    # (already exists as stub -- replace with full version)
+    types.ts                    # (already exists -- no changes needed)
     hold.ts                     # hold trigger
     tap.ts                      # tap trigger
     double-tap.ts               # doubleTap trigger
@@ -76,28 +76,12 @@ Test files are `.spec.ts`, co-located with source files.
 
 ### Task 2.1 Description
 
-Replace the stub `modifiers/types.ts` with the full version, then implement
-`deadZone`, `negate`, and `scale` modifier helpers.
+Implement `deadZone`, `negate`, and `scale` modifier helpers. The `Modifier` and
+`ModifierContext` interfaces already exist at `packages/core/src/modifiers/types.ts`
+with full JSDoc from Phase 1 -- no changes needed.
 
-### Task 2.1 Type Definitions
-
-The `Modifier` and `ModifierContext` interfaces (replace the Phase 1 stub at
-`packages/core/src/modifiers/types.ts`):
-
-```ts
-import type { InputHandle } from "../types/core";
-
-export interface ModifierContext {
-	readonly deltaTime: number;
-	readonly handle: InputHandle;
-}
-
-export interface Modifier {
-	modify(value: number, context: ModifierContext): number;
-	modify(value: Vector2, context: ModifierContext): Vector2;
-	modify(value: Vector3, context: ModifierContext): Vector3;
-}
-```
+**Note**: `ModifierContext.handle` will be added in Phase 3 when `InputHandle`
+is introduced.
 
 ### Task 2.1 Files to Create
 
@@ -247,7 +231,6 @@ Test cases:
 
 ### Task 2.1 Acceptance Criteria
 
-- [ ] `Modifier` interface has typed `modify()` overloads for number, Vector2, Vector3
 - [ ] `deadZone(threshold)` uses scaled output with no jump discontinuity
 - [ ] `negate()` negates all value types
 - [ ] `scale(factor)` scales all value types
@@ -267,34 +250,14 @@ pnpm test
 
 ### Task 2.2 Description
 
-Replace the stub `triggers/types.ts` with the full version, then implement
-`hold`, `tap`, `doubleTap` triggers and `implicit`/`explicit`/`blocker`
-wrappers.
+Implement `hold`, `tap`, `doubleTap` triggers and `implicit`/`explicit`/`blocker`
+wrappers. The trigger type interfaces already exist at
+`packages/core/src/triggers/types.ts` with full JSDoc from Phase 1 -- no changes
+needed.
 
 ### Task 2.2 Dependencies
 
 - Task 2.1 should be complete (but triggers are independent of modifiers)
-
-### Task 2.2 Type Definitions
-
-The trigger types (replace the Phase 1 stub at
-`packages/core/src/triggers/types.ts`):
-
-```ts
-export type TriggerState = "canceled" | "none" | "ongoing" | "triggered";
-
-export interface Trigger {
-	reset(): void;
-	update(magnitude: number, duration: number, deltaTime: number): TriggerState;
-}
-
-export type TriggerType = "blocker" | "explicit" | "implicit";
-
-export interface TypedTrigger {
-	readonly trigger: Trigger;
-	readonly type: TriggerType;
-}
-```
 
 ### Magnitude Approach
 
@@ -490,8 +453,6 @@ Test cases:
 
 ### Task 2.2 Acceptance Criteria
 
-- [ ] `Trigger` interface with `update(magnitude, duration, deltaTime)` and `reset()`
-- [ ] `TypedTrigger` wraps a `Trigger` with `"implicit" | "explicit" | "blocker"` type
 - [ ] `hold({ attempting, oneShot, threshold })` implemented correctly
 - [ ] `tap({ threshold })` implemented correctly
 - [ ] `doubleTap({ window })` implemented correctly
@@ -512,10 +473,8 @@ pnpm test
 
 All of the following must be true before moving to Phase 3:
 
-- [ ] `Modifier` interface has typed overloads for number, Vector2, Vector3
 - [ ] `deadZone`, `negate`, `scale` modifiers implemented with tests
 - [ ] `deadZone` uses rescaled output (no jump discontinuity at threshold)
-- [ ] `Trigger` interface uses magnitude-based approach
 - [ ] `hold`, `tap`, `doubleTap` triggers implemented with tests
 - [ ] `implicit`, `explicit`, `blocker` wrappers implemented with tests
 - [ ] All modifier and trigger types exported from barrel files
