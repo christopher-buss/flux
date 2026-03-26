@@ -12,6 +12,7 @@
 	"devDependencies": {
 		"@isentinel/hooks": "catalog:lint",
 		"@types/node": "catalog:types",
-		"confbox": "catalog:dev"
+		"confbox": "catalog:dev",
+		"monocart-coverage-reports": "catalog:test"
 	}
 }
