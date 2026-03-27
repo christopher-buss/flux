@@ -1,7 +1,11 @@
+import type { InputHandle } from "../types/core";
+
 /** Runtime context passed to modifiers during value transformation. */
 export interface ModifierContext {
 	/** Time elapsed since last frame in seconds. */
 	readonly deltaTime: number;
+	/** The input consumer handle this modifier is processing for. */
+	readonly handle: InputHandle;
 }
 
 /** Union of all value types that modifiers operate on. */

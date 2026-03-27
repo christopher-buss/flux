@@ -1,9 +1,14 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
+import type { InputHandle } from "../types/core";
 import { negate } from "./negate";
+import type { ModifierContext } from "./types";
 
 describe("negate", () => {
-	const context = { deltaTime: 0.016 };
+	const context = {
+		deltaTime: 0.016,
+		handle: 0 as InputHandle,
+	} satisfies ModifierContext;
 	const modifier = negate();
 
 	it("should negate a positive number", () => {

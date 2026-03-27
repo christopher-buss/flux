@@ -44,41 +44,46 @@ export type ActionMap = Record<string, ActionConfig>;
  * Extracts action names typed as `"Bool"` from an action map.
  * @template T - The action map to filter.
  */
-export type BoolActions<T extends ActionMap> = {
-	[K in keyof T]: T[K] extends ActionConfig<"Bool"> ? K : never;
-}[keyof T];
+export type BoolActions<T extends ActionMap> = string &
+	{
+		[K in keyof T]: T[K] extends ActionConfig<"Bool"> ? K : never;
+	}[keyof T];
 
 /**
  * Extracts action names typed as `"Direction1D"` from an action map.
  * @template T - The action map to filter.
  */
-export type Direction1dActions<T extends ActionMap> = {
-	[K in keyof T]: T[K] extends ActionConfig<"Direction1D"> ? K : never;
-}[keyof T];
+export type Direction1dActions<T extends ActionMap> = string &
+	{
+		[K in keyof T]: T[K] extends ActionConfig<"Direction1D"> ? K : never;
+	}[keyof T];
 
 /**
  * Extracts action names typed as `"Direction2D"` from an action map.
  * @template T - The action map to filter.
  */
-export type Direction2dActions<T extends ActionMap> = {
-	[K in keyof T]: T[K] extends ActionConfig<"Direction2D"> ? K : never;
-}[keyof T];
+export type Direction2dActions<T extends ActionMap> = string &
+	{
+		[K in keyof T]: T[K] extends ActionConfig<"Direction2D"> ? K : never;
+	}[keyof T];
 
 /**
  * Extracts action names typed as `"Direction3D"` from an action map.
  * @template T - The action map to filter.
  */
-export type Direction3dActions<T extends ActionMap> = {
-	[K in keyof T]: T[K] extends ActionConfig<"Direction3D"> ? K : never;
-}[keyof T];
+export type Direction3dActions<T extends ActionMap> = string &
+	{
+		[K in keyof T]: T[K] extends ActionConfig<"Direction3D"> ? K : never;
+	}[keyof T];
 
 /**
  * Extracts action names typed as `"ViewportPosition"` from an action map.
  * @template T - The action map to filter.
  */
-export type ViewportPositionActions<T extends ActionMap> = {
-	[K in keyof T]: T[K] extends ActionConfig<"ViewportPosition"> ? K : never;
-}[keyof T];
+export type ViewportPositionActions<T extends ActionMap> = string &
+	{
+		[K in keyof T]: T[K] extends ActionConfig<"ViewportPosition"> ? K : never;
+	}[keyof T];
 
 /**
  * Union of all directional action name extractors (1D, 2D, 3D).

@@ -36,15 +36,16 @@ After this phase, new/modified files:
 ```text
 packages/core/src/
   types/
-    core.ts                     # InputHandle, FluxCore, ActionDiff
-    state.ts                    # ActionState, ActionValue
+    bindings.ts                 # (modify: add BindingState)
+    core.ts                     # InputHandle, FluxCore
+    state.ts                    # ActionState, ActionValue, ActionValueMap
   modifiers/
     types.ts                    # (modify: add `handle: InputHandle` to ModifierContext)
   core/
     create-core.ts              # createCore implementation
     create-core.spec.ts         # tests
-    action-state-impl.ts        # ActionState implementation class
-    action-state-impl.spec.ts   # tests
+    action-state.ts        # ActionState implementation class
+    action-state.spec.ts   # tests
     pipeline.ts                 # modifier -> trigger pipeline processing
     pipeline.spec.ts            # tests
     handle-factory.ts           # InputHandle allocation
@@ -100,6 +101,29 @@ interface ActionConfig<T extends ActionType = ActionType> {
 type ActionMap = Record<string, ActionConfig>;
 ```
 
+**ActionValue** (from `types/state.ts`):
+
+```ts
+interface ActionValueMap {
+	Bool: boolean;
+	Direction1D: number;
+	Direction2D: Vector2;
+	Direction3D: Vector3;
+	ViewportPosition: Vector2;
+}
+
+type ActionValue<TActions extends ActionMap, A extends AllActions<TActions>> =
+	TActions[A] extends ActionConfig<infer T> ? ActionValueMap[T] : never;
+```
+
+**BindingState** (from `types/bindings.ts`):
+
+```ts
+type BindingState<TActions extends ActionMap = ActionMap> = Partial<
+	Record<AllActions<TActions>, ReadonlyArray<BindingLike>>
+>;
+```
+
 **ActionState** (from `types/state.ts`):
 
 ```ts
@@ -131,9 +155,7 @@ interface ActionState<TActions extends ActionMap = ActionMap> {
 ```ts
 interface FluxCore<TActions extends ActionMap = ActionMap> {
 	addContext(handle: InputHandle, context: string): void;
-	applyDiff(handle: InputHandle, diff: ActionDiff): void;
 	destroy(): void;
-	flushDiffs(handle: InputHandle): ReadonlyArray<ActionDiff>;
 	getContexts(handle: InputHandle): ReadonlyArray<string>;
 	getState(handle: InputHandle): ActionState<TActions>;
 	hasContext(handle: InputHandle, context: string): boolean;
@@ -144,7 +166,7 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 		bindings: ReadonlyArray<BindingLike>,
 	): void;
 	rebindAll(handle: InputHandle, bindings: BindingState<TActions>): void;
-	register(...contexts: ReadonlyArray<string>): InputHandle;
+	register(context: string, ...contexts: ReadonlyArray<string>): InputHandle;
 	removeContext(handle: InputHandle, context: string): void;
 	resetAllBindings(handle: InputHandle): void;
 	resetBindings(handle: InputHandle, action: AllActions<TActions>): void;
@@ -162,6 +184,8 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 **Modifier** (from `modifiers/types.ts` -- updated in this phase to add `handle`):
 
 ```ts
+type ModifierValue = number | Vector2 | Vector3;
+
 interface ModifierContext {
 	readonly deltaTime: number;
 	readonly handle: InputHandle;
@@ -174,13 +198,16 @@ interface Modifier {
 }
 ```
 
+Note: `ModifierValue` already exists from Phase 2. Use it in pipeline code
+instead of inlining the union.
+
 **Trigger types** (from `triggers/types.ts`):
 
 ```ts
 type TriggerState = "canceled" | "none" | "ongoing" | "triggered";
 
 interface Trigger {
-	reset(): void;
+	reset?(): void;
 	update(magnitude: number, duration: number, deltaTime: number): TriggerState;
 }
 
@@ -198,8 +225,28 @@ interface TypedTrigger {
 
 ### Task 3.1 What to Build
 
-Three things: the handle factory, the ActionState implementation, and extending
-`ModifierContext` with the handle.
+Four things: new type definitions, the handle factory, the ActionState
+implementation, and extending `ModifierContext` with the handle.
+
+#### `packages/core/src/types/state.ts` (new)
+
+Define `ActionValueMap`, `ActionValue`, and the `ActionState` interface as
+shown in the Key Type Definitions section above.
+
+#### `packages/core/src/types/bindings.ts` (modify existing)
+
+Add `BindingState` type:
+
+```ts
+export type BindingState<TActions extends ActionMap = ActionMap> = Partial<
+	Record<AllActions<TActions>, ReadonlyArray<BindingLike>>
+>;
+```
+
+#### `packages/core/src/types/core.ts` (new)
+
+Define `InputHandle` and `FluxCore` interface as shown in the Key Type
+Definitions section above. `ActionDiff` is deferred to Phase 4.
 
 #### `packages/core/src/modifiers/types.ts` (modify existing)
 
@@ -220,17 +267,18 @@ A simple monotonically increasing ID allocator that returns branded
 `InputHandle` values.
 
 Implementation notes:
-- Start at 1 (0 is falsy in Lua)
+- Start at 0 (roblox-ts handles Lua truthiness translation)
 - `allocate()` returns the next handle
 - `release(handle)` marks it available (optional: can just increment forever)
 - Brand the number: `return nextId++ as unknown as InputHandle`
 
-#### `packages/core/src/core/action-state-impl.ts`
+#### `packages/core/src/core/action-state.ts`
 
-A concrete class implementing the `ActionState<TActions>` interface. This is
-the internal mutable state object that `createCore` updates each frame.
+Factory function `createActionState()` returning an object that satisfies
+`ActionState<TActions>`. No classes -- uses closure-captured state for Luau
+perf (avoids metatables).
 
-Internal storage per action (keyed by action name string):
+**Internal closure state** per action (keyed by action name string):
 - `value`: `boolean | number | Vector2 | Vector3` -- current post-pipeline value
 - `previousValue`: same type -- value from previous frame
 - `triggerState`: `TriggerState` -- current trigger output
@@ -240,7 +288,7 @@ Internal storage per action (keyed by action name string):
 - `enabled`: `boolean` -- whether the action is active
 - `claimed`: `boolean` -- exclusive consumption flag
 
-Method implementations:
+**Public methods** (on returned `ActionState`):
 - `pressed(action)` -- returns `value === true`
 - `justPressed(action)` -- `value === true && previousValue === false`
 - `justReleased(action)` -- `value === false && previousValue === true`
@@ -261,19 +309,24 @@ Method implementations:
 - `isAvailable(action)` -- `enabled && !claimed`
 - `isEnabled(action)` -- returns `enabled`
 
-Internal mutation methods (not on the public interface, used by `createCore`):
-- `_updateAction(name, value, triggerState, deltaTime)` -- called by pipeline
-- `_endFrame()` -- shifts current to previous, resets claimed flags
-- `_setEnabled(name, enabled)` -- sets enabled state
+**Internal mutation methods** (returned separately or on an extended internal
+type, not exposed on the public `ActionState` interface):
+- `updateAction(name, value, triggerState, deltaTime)` -- called by pipeline
+- `endFrame()` -- shifts current to previous, resets claimed flags
+- `setEnabled(name, enabled)` -- sets enabled state
+
+The factory returns both the public `ActionState` and the internal mutators,
+e.g. via a tuple or an internal-only extended interface that `createCore` uses
+but consumers never see.
 
 ### Task 3.1 Test Files
 
 **`packages/core/src/core/handle-factory.spec.ts`**:
 - Allocates unique handles
 - Handles are sequential
-- First handle is non-zero
+- First handle is 0
 
-**`packages/core/src/core/action-state-impl.spec.ts`**:
+**`packages/core/src/core/action-state.spec.ts`**:
 - `pressed` returns true when bool value is true
 - `justPressed` detects frame transition false->true
 - `justReleased` detects frame transition true->false
@@ -284,12 +337,12 @@ Internal mutation methods (not on the public interface, used by `createCore`):
 - `claim` returns true first time, sets isClaimed
 - `claim` returns false if already claimed
 - `isAvailable` is true when enabled and not claimed
-- `_endFrame` shifts current to previous
+- `endFrame` shifts current to previous
 
 ### Task 3.1 Acceptance Criteria
 
-- [ ] `InputHandle` factory allocates unique, non-zero handles
-- [ ] `ActionStateImpl` implements all `ActionState` interface methods
+- [ ] `InputHandle` factory allocates unique handles (starting at 0)
+- [ ] `createActionState()` factory returns object satisfying `ActionState` interface
 - [ ] Internal mutation methods work correctly for frame updates
 - [ ] All tests pass
 - [ ] `pnpm typecheck` passes
@@ -326,7 +379,7 @@ The pipeline for a single action per frame:
    - If all `implicit` triggers return `"triggered"` -> final state is `"triggered"`
    - Otherwise combine: ongoing > none, canceled overrides none
    - If no triggers defined -> default triggered when magnitude > 0
-6. **Return** `{ value, triggerState }` for ActionStateImpl to consume
+6. **Return** `{ value, triggerState }` for ActionState to consume
 
 Export a function like:
 
@@ -361,6 +414,13 @@ Test cases:
 - Axis action: magnitude is vector length
 - No triggers + zero magnitude = "none" state
 
+**`packages/core/test/integration/pipeline.spec.ts`**:
+
+Integration tests using real modifier and trigger instances:
+- deadZone + hold trigger: input below dead zone threshold never triggers hold
+- scale + implicit trigger: scaled magnitude affects trigger evaluation
+- negate modifier preserves trigger behavior (negated value, same magnitude)
+
 ### Task 3.2 Acceptance Criteria
 
 - [ ] Modifiers applied in order before triggers
@@ -390,7 +450,7 @@ This is the central runtime. It wires everything together.
 Implement `createCore` matching the `FluxCore` interface.
 
 **Internal state per handle:**
-- `ActionStateImpl` instance
+- `createActionState()` result (public ActionState + internal mutators)
 - Active context names (set)
 - Per-action Roblox IAS instances (created at register time)
 - Per-action duration accumulator
@@ -398,7 +458,7 @@ Implement `createCore` matching the `FluxCore` interface.
 
 **`register(...contexts)`**:
 1. Allocate an `InputHandle` via the handle factory
-2. Create an `ActionStateImpl` for this handle
+2. Create action state via `createActionState()` for this handle
 3. For each action in the config:
    - Create a Roblox `InputAction` instance (via `new Instance("InputAction")`)
    - Set its `Type` from `ActionConfig.type`
@@ -416,12 +476,11 @@ For each registered handle:
 1. For each action:
    - Read the current value from the Roblox `InputAction`
    - Run the pipeline (`processPipeline`)
-   - Update the `ActionStateImpl` with the result
-2. After all actions processed, call `_endFrame()` on the ActionStateImpl
-3. If replication is `"auto"`, flush diffs
+   - Update action state with the result via internal mutators
+2. After all actions processed, call `endFrame()` on the action state
 
 **`getState(handle)`**:
-Return the `ActionStateImpl` for the handle (cast to `ActionState<TActions>`).
+Return the public `ActionState` for the handle.
 
 **`addContext(handle, context)` / `removeContext(handle, context)`**:
 - Add/remove context from the handle's active set
@@ -441,7 +500,6 @@ Return the `ActionStateImpl` for the handle (cast to `ActionState<TActions>`).
 **P1 methods** (stub with `error("Not implemented")` for now):
 - `rebind`, `rebindAll`, `resetBindings`, `resetAllBindings`
 - `serializeBindings`, `loadBindings`
-- `flushDiffs`, `applyDiff`
 - `simulateAction`
 
 ### Context Priority Resolution with Sink
@@ -472,6 +530,14 @@ Test cases (these test the public API, mocking Roblox instances as needed):
 Note: Roblox `InputAction`, `InputBinding`, `InputContext` are engine types.
 Tests will need to either mock these or use the roblox-ts test environment that
 provides them. Use the project's existing test infrastructure.
+
+**`packages/core/test/integration/core-lifecycle.spec.ts`**:
+
+End-to-end integration tests:
+- Full lifecycle: defineActions -> defineContexts -> createCore -> register -> update -> getState -> pressed/triggered
+- Context switch: register two contexts, remove one mid-frame, verify only active context's actions fire
+- Sink blocking: high-priority sink context blocks lower-priority context's actions
+- Multi-handle: two handles with independent state (one pressed doesn't affect the other)
 
 ### Task 3.3 Acceptance Criteria
 
@@ -510,4 +576,5 @@ This is the P0 milestone. All of the following must be true:
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm build` passes
 - [ ] `pnpm test` passes
+- [ ] `ActionDiff`, `applyDiff`, `flushDiffs` deferred to Phase 4
 - [ ] No `any` casts in any source file

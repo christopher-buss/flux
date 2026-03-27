@@ -9,10 +9,14 @@ export {
 } from "./actions/define";
 export { defineContexts } from "./contexts/define";
 
+export { createActionState } from "./core/action-state";
+export type { InternalActionState, UpdateActionOptions } from "./core/action-state";
+export { createHandleFactory } from "./core/handle-factory";
+
+export type { HandleFactory } from "./core/handle-factory";
 export { deadZone, negate, scale } from "./modifiers";
 export type { Modifier, ModifierContext, ModifierValue } from "./modifiers";
 export { blocker, doubleTap, explicit, hold, implicit, tap } from "./triggers";
-
 export type {
 	DoubleTapOptions,
 	HoldOptions,
@@ -34,5 +38,7 @@ export type {
 	Direction3dActions,
 	ViewportPositionActions,
 } from "./types/actions";
-export type { BindingLike } from "./types/bindings";
+export type { BindingLike, BindingState } from "./types/bindings";
 export type { ContextConfig } from "./types/contexts";
+export type { FluxCore, InputHandle } from "./types/core";
+export type { ActionState, ActionValue, ActionValueMap } from "./types/state";
