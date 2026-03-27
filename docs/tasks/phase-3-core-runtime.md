@@ -36,8 +36,9 @@ After this phase, new/modified files:
 ```text
 packages/core/src/
   types/
+    bindings.ts                 # (modify: add BindingState)
     core.ts                     # InputHandle, FluxCore, ActionDiff
-    state.ts                    # ActionState, ActionValue
+    state.ts                    # ActionState, ActionValue, ActionValueMap
   modifiers/
     types.ts                    # (modify: add `handle: InputHandle` to ModifierContext)
   core/
@@ -98,6 +99,29 @@ interface ActionConfig<T extends ActionType = ActionType> {
 }
 
 type ActionMap = Record<string, ActionConfig>;
+```
+
+**ActionValue** (from `types/state.ts`):
+
+```ts
+interface ActionValueMap {
+	Bool: boolean;
+	Direction1D: number;
+	Direction2D: Vector2;
+	Direction3D: Vector3;
+	ViewportPosition: Vector2;
+}
+
+type ActionValue<TActions extends ActionMap, A extends AllActions<TActions>> =
+	TActions[A] extends ActionConfig<infer T> ? ActionValueMap[T] : never;
+```
+
+**BindingState** (from `types/bindings.ts`):
+
+```ts
+type BindingState<TActions extends ActionMap = ActionMap> = Partial<
+	Record<AllActions<TActions>, ReadonlyArray<BindingLike>>
+>;
 ```
 
 **ActionState** (from `types/state.ts`):
@@ -162,6 +186,8 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 **Modifier** (from `modifiers/types.ts` -- updated in this phase to add `handle`):
 
 ```ts
+type ModifierValue = number | Vector2 | Vector3;
+
 interface ModifierContext {
 	readonly deltaTime: number;
 	readonly handle: InputHandle;
@@ -174,13 +200,16 @@ interface Modifier {
 }
 ```
 
+Note: `ModifierValue` already exists from Phase 2. Use it in pipeline code
+instead of inlining the union.
+
 **Trigger types** (from `triggers/types.ts`):
 
 ```ts
 type TriggerState = "canceled" | "none" | "ongoing" | "triggered";
 
 interface Trigger {
-	reset(): void;
+	reset?(): void;
 	update(magnitude: number, duration: number, deltaTime: number): TriggerState;
 }
 
@@ -198,8 +227,28 @@ interface TypedTrigger {
 
 ### Task 3.1 What to Build
 
-Three things: the handle factory, the ActionState implementation, and extending
-`ModifierContext` with the handle.
+Four things: new type definitions, the handle factory, the ActionState
+implementation, and extending `ModifierContext` with the handle.
+
+#### `packages/core/src/types/state.ts` (new)
+
+Define `ActionValueMap`, `ActionValue`, and `ActionState` interface as shown
+in the Key Type Definitions section above.
+
+#### `packages/core/src/types/bindings.ts` (modify existing)
+
+Add `BindingState` type:
+
+```ts
+export type BindingState<TActions extends ActionMap = ActionMap> = Partial<
+	Record<AllActions<TActions>, ReadonlyArray<BindingLike>>
+>;
+```
+
+#### `packages/core/src/types/core.ts` (new)
+
+Define `InputHandle`, `ActionDiff`, and `FluxCore` interface as shown in the
+Key Type Definitions section above.
 
 #### `packages/core/src/modifiers/types.ts` (modify existing)
 
