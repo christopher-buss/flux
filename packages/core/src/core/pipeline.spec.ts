@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
-import type { Modifier, ModifierContext, ModifierValue } from "../modifiers/types";
+import type { Modifier, ModifierContext } from "../modifiers/types";
 import type { Trigger, TriggerState, TypedTrigger } from "../triggers/types";
 import type { ActionConfig } from "../types/actions";
 import type { InputHandle } from "../types/core";
@@ -26,27 +26,25 @@ function createTypedTrigger(
 	return { trigger: mockTrigger(returnState), type: triggerKind };
 }
 
-function createModifier(transform: (value: ModifierValue) => ModifierValue): Modifier {
-	return {
-		modify: transform as Modifier["modify"],
-	};
-}
+const doubleModifier: Modifier = {
+	modify(value: never): never {
+		if (typeIs(value, "number")) {
+			return (value * 2) as never;
+		}
 
-const doubleModifier = createModifier((value) => {
-	if (typeIs(value, "number")) {
-		return value * 2;
-	}
+		return value;
+	},
+};
 
-	return value;
-});
+const addOneModifier: Modifier = {
+	modify(value: never): never {
+		if (typeIs(value, "number")) {
+			return ((value as number) + 1) as never;
+		}
 
-const addOneModifier = createModifier((value) => {
-	if (typeIs(value, "number")) {
-		return value + 1;
-	}
-
-	return value;
-});
+		return value;
+	},
+};
 
 describe("processPipeline", () => {
 	it("should pass value through with no modifiers or triggers, triggered when magnitude > 0", () => {
