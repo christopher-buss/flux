@@ -51,4 +51,11 @@ export default isentinel(
 			],
 		},
 	},
+	{
+		name: "project/markdown",
+		files: [GLOB_MARKDOWN_CODE],
+		rules: {
+			"ts/no-unused-private-class-members": "off",
+		},
+	},
 );
