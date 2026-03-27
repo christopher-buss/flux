@@ -8,4 +8,10 @@ if [ -n "$MATCH" ]; then
   exit 2
 fi
 
+# Block pnpm install/i/add in favor of pncat
+if echo "$COMMAND" | grep -qE '(^|\s|&&|\|\||;)pnpm\s+(install|i|add)(\s|$)'; then
+  echo "Blocked: use pncat instead of pnpm install/add" >&2
+  exit 2
+fi
+
 exit 0
