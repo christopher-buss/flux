@@ -14,6 +14,8 @@ export type { InternalActionState, UpdateActionOptions } from "./core/action-sta
 export { createHandleFactory } from "./core/handle-factory";
 
 export type { HandleFactory } from "./core/handle-factory";
+export { processPipeline } from "./core/pipeline";
+export type { PipelineOptions, PipelineResult } from "./core/pipeline";
 export { deadZone, negate, scale } from "./modifiers";
 export type { Modifier, ModifierContext, ModifierValue } from "./modifiers";
 export { blocker, doubleTap, explicit, hold, implicit, tap } from "./triggers";
