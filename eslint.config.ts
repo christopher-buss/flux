@@ -58,4 +58,11 @@ export default isentinel(
 			"ts/no-unused-private-class-members": "off",
 		},
 	},
+	{
+		name: "project/type-tests",
+		files: ["**/*.spec-d.ts"],
+		rules: {
+			"max-lines-per-function": "off",
+		},
+	},
 );
