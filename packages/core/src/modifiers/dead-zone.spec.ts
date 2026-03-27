@@ -1,9 +1,14 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
+import type { InputHandle } from "../types/core";
 import { deadZone } from "./dead-zone";
+import type { ModifierContext } from "./types";
 
 describe("deadZone", () => {
-	const context = { deltaTime: 0.016 };
+	const context = {
+		deltaTime: 0.016,
+		handle: 0 as InputHandle,
+	} satisfies ModifierContext;
 	const modifier = deadZone(0.2);
 
 	describe("number", () => {
@@ -58,9 +63,6 @@ describe("deadZone", () => {
 		it("should rescale vector above threshold", () => {
 			expect.assertions(1);
 
-			/**
-			 * Magnitude = 1.0.
-			 */
 			const input = new Vector2(0.6, 0.8);
 			const result = modifier.modify(input, context);
 
@@ -81,9 +83,6 @@ describe("deadZone", () => {
 		it("should rescale vector above threshold", () => {
 			expect.assertions(1);
 
-			/**
-			 * Magnitude = 1.0.
-			 */
 			const input = new Vector3(0, 0.6, 0.8);
 			const result = modifier.modify(input, context);
 

@@ -1,9 +1,14 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
+import type { InputHandle } from "../types/core";
 import { scale } from "./scale";
+import type { ModifierContext } from "./types";
 
 describe("scale", () => {
-	const context = { deltaTime: 0.016 };
+	const context = {
+		deltaTime: 0.016,
+		handle: 0 as InputHandle,
+	} satisfies ModifierContext;
 
 	it("should scale a number by factor", () => {
 		expect.assertions(1);

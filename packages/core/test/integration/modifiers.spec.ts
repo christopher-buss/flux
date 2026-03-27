@@ -1,9 +1,14 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
+import type { ModifierContext } from "../../src/modifiers";
 import { deadZone, negate, scale } from "../../src/modifiers";
+import type { InputHandle } from "../types/core";
 
 describe("modifier chaining", () => {
-	const context = { deltaTime: 0.016 };
+	const context = {
+		deltaTime: 0.016,
+		handle: 0 as InputHandle,
+	} satisfies ModifierContext;
 
 	it("should chain deadZone then scale", () => {
 		expect.assertions(1);
