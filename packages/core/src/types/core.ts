@@ -21,14 +21,16 @@ export type InputHandle = Tagged<number, "InputHandle">;
  * binding configuration, and per-frame state queries.
  *
  * @template Actions - The action map defining available input actions.
+ * @template Contexts - Union of valid context name literals.
  */
-export interface FluxCore<Actions extends ActionMap = ActionMap> {
+export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extends string = string> {
 	/**
 	 * Activates a context for the given handle.
 	 * @param handle - The input consumer handle.
 	 * @param context - The context name to activate.
+	 * @throws Error if the context is already active for this handle.
 	 */
-	addContext(handle: InputHandle, context: string): void;
+	addContext(handle: InputHandle, context: Contexts): void;
 
 	/**
 	 * Tears down the core instance and releases all resources.
@@ -40,7 +42,7 @@ export interface FluxCore<Actions extends ActionMap = ActionMap> {
 	 * @param handle - The input consumer handle.
 	 * @returns Read-only array of active context names.
 	 */
-	getContexts(handle: InputHandle): ReadonlyArray<string>;
+	getContexts(handle: InputHandle): ReadonlyArray<Contexts>;
 
 	/**
 	 * Returns the action state query interface for the given handle.
@@ -55,7 +57,7 @@ export interface FluxCore<Actions extends ActionMap = ActionMap> {
 	 * @param context - The context name to check.
 	 * @returns True if the context is active.
 	 */
-	hasContext(handle: InputHandle, context: string): boolean;
+	hasContext(handle: InputHandle, context: Contexts): boolean;
 
 	/**
 	 * Loads serialized bindings for the given handle, merging with defaults.
@@ -89,14 +91,15 @@ export interface FluxCore<Actions extends ActionMap = ActionMap> {
 	 * @param contexts - Additional context names to activate.
 	 * @returns An opaque handle identifying the consumer.
 	 */
-	register(context: string, ...contexts: ReadonlyArray<string>): InputHandle;
+	register(context: Contexts, ...contexts: ReadonlyArray<Contexts>): InputHandle;
 
 	/**
 	 * Deactivates a context for the given handle.
 	 * @param handle - The input consumer handle.
 	 * @param context - The context name to deactivate.
+	 * @throws Error if the context is not active for this handle.
 	 */
-	removeContext(handle: InputHandle, context: string): void;
+	removeContext(handle: InputHandle, context: Contexts): void;
 
 	/**
 	 * Resets all action bindings for the given handle to their defaults.

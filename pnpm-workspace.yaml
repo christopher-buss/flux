@@ -40,6 +40,7 @@ catalogs:
   node:
     rimraf: 6.1.2
   prod:
+    "@rbxts/luau-polyfill": 1.1.3
     "@rbxts/services": 1.6.0
   script:
     jiti: 2.6.1
