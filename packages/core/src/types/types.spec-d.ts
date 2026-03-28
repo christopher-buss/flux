@@ -11,7 +11,13 @@ import {
 } from "../actions/define";
 import { createActionState } from "../core/action-state";
 import type { AllActions } from "./actions";
-import type { BindingLike, BindingState } from "./bindings";
+import type {
+	BindingForAction,
+	BindingLike,
+	BindingState,
+	BoolBindingConfig,
+	Direction2dBindingConfig,
+} from "./bindings";
 import type { FluxCore, InputHandle } from "./core";
 import type { ActionState, ActionValue, ActionValueMap } from "./state";
 
@@ -171,13 +177,29 @@ describe("BindingLike", () => {
 		expectTypeOf<Enum.UserInputType>().toExtend<BindingLike>();
 	});
 
-	it("should accept directional preset record", () => {
-		expectTypeOf<Record<string, Enum.KeyCode>>().toExtend<BindingLike>();
+	it("should accept Direction2dBindingConfig", () => {
+		expectTypeOf<Direction2dBindingConfig>().toExtend<BindingLike>();
+	});
+
+	it("should accept BoolBindingConfig", () => {
+		expectTypeOf<BoolBindingConfig>().toExtend<BindingLike>();
 	});
 
 	it("should reject plain string", () => {
 		// @ts-expect-error string is not a BindingLike
 		const _binding: BindingLike = "Space";
+	});
+});
+
+describe("BindingForAction", () => {
+	it("should resolve Bool to KeyCode | UserInputType | BoolBindingConfig", () => {
+		expectTypeOf<BoolBindingConfig>().toExtend<BindingForAction<"Bool">>();
+		expectTypeOf<Enum.KeyCode>().toExtend<BindingForAction<"Bool">>();
+	});
+
+	it("should resolve Direction2D to KeyCode | UserInputType | Direction2dBindingConfig", () => {
+		expectTypeOf<Direction2dBindingConfig>().toExtend<BindingForAction<"Direction2D">>();
+		expectTypeOf<Enum.KeyCode>().toExtend<BindingForAction<"Direction2D">>();
 	});
 });
 

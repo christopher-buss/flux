@@ -117,10 +117,10 @@ describe("createInputInstances", () => {
 				bindings: {
 					move: [
 						{
-							Backward: Enum.KeyCode.S,
-							Forward: Enum.KeyCode.W,
-							Left: Enum.KeyCode.A,
-							Right: Enum.KeyCode.D,
+							down: Enum.KeyCode.S,
+							left: Enum.KeyCode.A,
+							right: Enum.KeyCode.D,
+							up: Enum.KeyCode.W,
 						},
 					],
 				},

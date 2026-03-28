@@ -1,7 +1,7 @@
 import type { Tagged } from "type-fest";
 
 import type { ActionMap, AllActions } from "./actions";
-import type { BindingLike, BindingState } from "./bindings";
+import type { BindingForAction, BindingState } from "./bindings";
 import type { ActionState, ActionValue } from "./state";
 
 /**
@@ -68,14 +68,15 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 
 	/**
 	 * Replaces all bindings for a single action.
+	 * @template A - The action name.
 	 * @param handle - The input consumer handle.
 	 * @param action - The action to rebind.
 	 * @param bindings - The new bindings for the action.
 	 */
-	rebind(
+	rebind<A extends AllActions<Actions>>(
 		handle: InputHandle,
-		action: AllActions<Actions>,
-		bindings: ReadonlyArray<BindingLike>,
+		action: A,
+		bindings: ReadonlyArray<BindingForAction<Actions[A]["type"]>>,
 	): void;
 
 	/**

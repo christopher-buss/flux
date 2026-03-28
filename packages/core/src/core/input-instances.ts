@@ -1,5 +1,7 @@
+import type { KeysOfUnion } from "type-fest";
+
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
-import type { BindingLike } from "../types/bindings";
+import type { BindingConfig, BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 
 /** Stores all IAS instances created for a single handle. */
@@ -37,6 +39,10 @@ interface CreateContextOptions {
 	readonly instances: Array<Instance>;
 }
 
+type BindingConfigKey = Extract<KeysOfUnion<BindingConfig>, string>;
+
+type BindingProperty = WritablePropertyNames<InputBinding>;
+
 /**
  * Creates all IAS instances for a handle's registered contexts.
  * @param options - Context names, context configs, and action configs.
@@ -67,14 +73,13 @@ export function createInputInstances(options: CreateInstancesOptions): InputInst
 		inputContexts.set(contextName, inputContext);
 	}
 
-	const data: InputInstanceData = { inputActions, inputContexts, instances };
-	if (parent !== undefined) {
-		(data as { parent?: Instance }).parent = parent;
-	}
-
-	return data;
+	return {
+		inputActions,
+		inputContexts,
+		instances,
+		...(parent !== undefined && { parent }),
+	};
 }
-
 /**
  * Destroys all IAS instances stored in the given data.
  * @param data - The instance data to clean up.
@@ -84,7 +89,6 @@ export function destroyInputInstances(data: InputInstanceData): void {
 		instance.Destroy();
 	}
 }
-
 /**
  * Creates an InputContext instance for a newly added context.
  * @param contextName - The name of the context to add.
@@ -112,7 +116,6 @@ export function addContextInstances(
 
 	data.inputContexts.set(contextName, inputContext);
 }
-
 /**
  * Sets the Enabled property on an InputContext instance.
  * @param data - The instance data containing context instances.
@@ -155,18 +158,26 @@ function toInputActionType(actionType: ActionType): Enum.InputActionType {
 	}
 }
 
-function configureKeyCodeBinding(binding: InputBinding, keyCode: Enum.KeyCode): void {
-	binding.KeyCode = keyCode;
-}
-
-function configureDirectionalBinding(
-	binding: InputBinding,
-	preset: Record<string, Enum.KeyCode>,
-): void {
-	for (const [property, keyCode] of pairs(preset)) {
-		(binding as unknown as Record<string, Enum.KeyCode>)[property] = keyCode;
-	}
-}
+const PROPERTY_MAP = {
+	backward: "Backward",
+	clampMagnitudeToOne: "ClampMagnitudeToOne",
+	down: "Down",
+	forward: "Forward",
+	keyCode: "KeyCode",
+	left: "Left",
+	pointerIndex: "PointerIndex",
+	pressedThreshold: "PressedThreshold",
+	primaryModifier: "PrimaryModifier",
+	releasedThreshold: "ReleasedThreshold",
+	responseCurve: "ResponseCurve",
+	right: "Right",
+	scale: "Scale",
+	secondaryModifier: "SecondaryModifier",
+	uiButton: "UIButton",
+	up: "Up",
+	vector2Scale: "Vector2Scale",
+	vector3Scale: "Vector3Scale",
+} as const satisfies Record<BindingConfigKey, BindingProperty>;
 
 function isKeyCode(value: BindingLike): value is Enum.KeyCode {
 	return typeIs(value, "EnumItem") && value.EnumType === Enum.KeyCode;
@@ -187,9 +198,11 @@ function createBinding(
 
 	const binding = new Instance("InputBinding");
 	if (isKeyCode(bindingLike)) {
-		configureKeyCodeBinding(binding, bindingLike);
+		binding.KeyCode = bindingLike;
 	} else {
-		configureDirectionalBinding(binding, bindingLike);
+		for (const [key, value] of pairs(bindingLike)) {
+			binding[PROPERTY_MAP[key]] = value;
+		}
 	}
 
 	binding.Parent = parent;

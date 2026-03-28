@@ -1,7 +1,7 @@
 import { ContextError } from "../errors/context-error";
 import { HandleError } from "../errors/handle-error";
 import type { ActionMap } from "../types/actions";
-import type { BindingLike, BindingState } from "../types/bindings";
+import type { BindingForAction, BindingState, TypedBindings } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
@@ -24,10 +24,23 @@ import { updateHandle } from "./update-handle";
  */
 export interface CreateCoreOptions<T extends ActionMap, C extends Record<string, ContextConfig>> {
 	readonly actions: T;
-	readonly contexts: C;
+	readonly contexts: C & ValidatedContexts<T, C>;
 	/** Parent instance for InputContext network ownership (e.g. Players.LocalPlayer). */
 	readonly parent?: Instance;
 }
+
+/**
+ * Validates that each context's bindings use the correct binding shape for each action type.
+ * @template T - The action map type.
+ * @template C - The context configuration record type.
+ */
+type ValidatedContexts<T extends ActionMap, C extends Record<string, ContextConfig>> = {
+	readonly [K in keyof C]: {
+		readonly bindings: TypedBindings<T>;
+		readonly priority: number;
+		readonly sink?: boolean;
+	};
+};
 
 interface HandleData<T extends ActionMap> extends CoreHandleData {
 	readonly publicState: ActionState<T>;
@@ -66,9 +79,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				throw new ContextError(`context already active: ${context}`, context);
 			}
 
-			const contextConfig = contexts[context];
-			assert(contextConfig, `missing context config: ${context}`);
-			addContextInstances(context, contextConfig, actions, data.instanceData);
+			addContextInstances(context, contexts[context], actions, data.instanceData);
 			setContextEnabled(data.instanceData, context, true);
 			data.activeContexts.add(context);
 		},
@@ -97,10 +108,10 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		loadBindings(_handle: InputHandle, _data: BindingState<T>): void {
 			error("Not implemented");
 		},
-		rebind(
+		rebind<A extends keyof T & string>(
 			_handle: InputHandle,
-			_action: keyof T & string,
-			_bindings: ReadonlyArray<BindingLike>,
+			_action: A,
+			_bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
 		): void {
 			error("Not implemented");
 		},

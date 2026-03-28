@@ -44,7 +44,18 @@ export type {
 	Direction3dActions,
 	ViewportPositionActions,
 } from "./types/actions";
-export type { BindingLike, BindingState } from "./types/bindings";
+export type {
+	BindingConfig,
+	BindingForAction,
+	BindingLike,
+	BindingState,
+	BoolBindingConfig,
+	Direction1dBindingConfig,
+	Direction2dBindingConfig,
+	Direction3dBindingConfig,
+	TypedBindings,
+	ViewportPositionBindingConfig,
+} from "./types/bindings";
 export type { ContextConfig } from "./types/contexts";
 export type { FluxCore, InputHandle } from "./types/core";
 export type { ActionState, ActionValue, ActionValueMap } from "./types/state";

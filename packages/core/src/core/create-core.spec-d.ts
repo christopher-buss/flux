@@ -38,6 +38,48 @@ describe("CreateCoreOptions", () => {
 		// @ts-expect-error missing actions
 		createCore({ contexts });
 	});
+
+	it("should accept correct binding shapes for action types", () => {
+		const validContexts = defineContexts({
+			gameplay: {
+				bindings: {
+					jump: [Enum.KeyCode.Space],
+					move: [
+						{
+							down: Enum.KeyCode.S,
+							left: Enum.KeyCode.A,
+							right: Enum.KeyCode.D,
+							up: Enum.KeyCode.W,
+						},
+					],
+				},
+				priority: 0,
+			},
+		});
+
+		createCore({ actions, contexts: validContexts });
+	});
+
+	it("should reject wrong binding shape for action type", () => {
+		const wrongContexts = defineContexts({
+			gameplay: {
+				bindings: {
+					jump: [
+						{
+							down: Enum.KeyCode.S,
+							left: Enum.KeyCode.A,
+							right: Enum.KeyCode.D,
+							up: Enum.KeyCode.W,
+						},
+					],
+				},
+				priority: 0,
+			},
+		});
+
+		// @ts-expect-error Direction2D preset on Bool action
+		createCore({ actions, contexts: wrongContexts });
+	});
 });
 
 describe("createCore", () => {
@@ -161,6 +203,19 @@ describe("createCore", () => {
 		it("should constrain action to AllActions", () => {
 			const handle = {} as InputHandle;
 			expectTypeOf<typeof core.rebind>().toBeCallableWith(handle, "jump", []);
+		});
+
+		it("should accept correct binding config for action type", () => {
+			const handle = {} as InputHandle;
+			core.rebind(handle, "move", [
+				{
+					down: Enum.KeyCode.S,
+					left: Enum.KeyCode.A,
+					right: Enum.KeyCode.D,
+					up: Enum.KeyCode.W,
+				},
+			]);
+			core.rebind(handle, "jump", [Enum.KeyCode.Space]);
 		});
 
 		it("should reject invalid action on rebind", () => {
