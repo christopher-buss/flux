@@ -1,0 +1,10 @@
+{
+	"extends": "../tsconfig.json",
+	"references": [
+		{
+			"path": "tsconfig.game.json"
+		}
+	],
+	"files": [],
+	"include": []
+}

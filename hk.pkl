@@ -5,50 +5,50 @@ import "package://github.com/jdx/hk/releases/download/v1.38.0/hk@1.38.0#/Builtin
 local bash: String = "bash -c"
 
 local guards = new Mapping<String, Step> {
-    ["check-merge-conflict"] = (Builtins.check_merge_conflict) { shell = bash }
-    ["detect-private-key"] = (Builtins.detect_private_key) { shell = bash }
-    ["check-added-large-files"] = (Builtins.check_added_large_files) { shell = bash }
+  ["check-merge-conflict"] = (Builtins.check_merge_conflict) { shell = bash }
+  ["detect-private-key"] = (Builtins.detect_private_key) { shell = bash }
+  ["check-added-large-files"] = (Builtins.check_added_large_files) { shell = bash }
 }
 
 local linters = new Mapping<String, Step> {
-    ["eslint"] = (Builtins.eslint) { shell = bash }
-    ["typecheck"] {
-        glob = List("*.ts", "*.tsx")
-        check = "pnpm typecheck"
-        exclusive = true
-    }
+  ["eslint"] = (Builtins.eslint) { shell = bash }
+  ["typecheck"] {
+    glob = List("*.ts", "*.tsx")
+    check = "pnpm typecheck"
+    exclusive = true
+  }
 }
 
 hooks {
-    ["pre-commit"] {
-        fix = true
-        stash = "patch-file"
-        steps {
-            ...guards
-            ...linters
-        }
+  ["pre-commit"] {
+    fix = true
+    stash = "none"
+    steps {
+      ...guards
+      ...linters
     }
-    ["commit-msg"] {
-        steps {
-            ["conventional-commit"] = Builtins.check_conventional_commit
-        }
+  }
+  ["commit-msg"] {
+    steps {
+      ["conventional-commit"] = Builtins.check_conventional_commit
     }
-    ["post-merge"] {
-        steps {
-            ["install"] {
-                glob = "pnpm-lock.yaml"
-                check = "pnpm install"
-            }
-        }
+  }
+  ["post-merge"] {
+    steps {
+      ["install"] {
+        glob = "pnpm-lock.yaml"
+        check = "pnpm install"
+      }
     }
-    ["fix"] {
-        fix = true
-        steps = linters
+  }
+  ["fix"] {
+    fix = true
+    steps = linters
+  }
+  ["check"] {
+    steps {
+      ...guards
+      ...linters
     }
-    ["check"] {
-        steps {
-            ...guards
-            ...linters
-        }
-    }
+  }
 }

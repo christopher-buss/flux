@@ -1,0 +1,28 @@
+{
+	"name": "@flux/e2e",
+	"version": "0.0.0",
+	"private": true,
+	"description": "End-to-end playable test game for Flux",
+	"keywords": [
+		"roblox",
+		"e2e",
+		"flux"
+	],
+	"type": "commonjs",
+	"scripts": {
+		"build": "rbxtsc --build .\\tsconfig.game.json --type \"game\" && rojo build e2e.project.json -o flux-e2e.rbxl",
+		"typecheck": "tsgo --noEmit --project tsconfig.game.json"
+	},
+	"dependencies": {
+		"@flux/core": "workspace:@rbxts/flux@*",
+		"@rbxts/services": "catalog:prod"
+	},
+	"devDependencies": {
+		"@isentinel/roblox-ts": "catalog:build",
+		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/types": "catalog:types",
+		"@typescript/native-preview": "catalog:tsc",
+		"typescript": "catalog:tsc"
+	}
+}

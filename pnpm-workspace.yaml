@@ -12,6 +12,7 @@ trustPolicyExclude:
   - chokidar@4.0.3
 
 packages:
+  - e2e
   - packages/*
   - scripts
 
@@ -57,7 +58,7 @@ catalogs:
     rbxts-transformer-jest: 0.0.5
   tsc:
     "@isentinel/tsconfig": 1.2.0
-    "@typescript/native-preview": 7.0.0-dev.20260325.1
+    "@typescript/native-preview": 7.0.0-dev.20260324.1
     typescript: 5.9.3
   types:
     "@rbxts/compiler-types": 3.0.0-types.0
