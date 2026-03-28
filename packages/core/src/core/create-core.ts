@@ -1,5 +1,5 @@
-import { Error } from "@rbxts/luau-polyfill";
-
+import { ContextError } from "../errors/context-error";
+import { HandleError } from "../errors/handle-error";
 import type { ModifierContext } from "../modifiers/types";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingLike, BindingState } from "../types/bindings";
@@ -21,12 +21,15 @@ export interface CreateCoreOptions<T extends ActionMap, C extends Record<string,
 	readonly contexts: C;
 }
 
-interface HandleData<T extends ActionMap> {
+interface CoreHandleData {
 	readonly activeContexts: Set<string>;
 	readonly durations: Map<string, number>;
 	readonly internalState: InternalActionState;
-	readonly publicState: ActionState<T>;
 	readonly simulatedValues: Map<string, ActionValueType>;
+}
+
+interface HandleData<T extends ActionMap> extends CoreHandleData {
+	readonly publicState: ActionState<T>;
 }
 
 interface ActionUpdateOptions {
@@ -34,7 +37,7 @@ interface ActionUpdateOptions {
 	readonly actionName: string;
 	readonly deltaTime: number;
 	readonly handle: InputHandle;
-	readonly handleData: HandleData<ActionMap>;
+	readonly handleData: CoreHandleData;
 }
 
 interface ContextActionsOptions {
@@ -42,7 +45,7 @@ interface ContextActionsOptions {
 	readonly contextConfig: ContextConfig;
 	readonly deltaTime: number;
 	readonly handle: InputHandle;
-	readonly handleData: HandleData<ActionMap>;
+	readonly handleData: CoreHandleData;
 	readonly processedActions: Set<string>;
 }
 
@@ -51,7 +54,7 @@ interface HandleUpdateOptions {
 	readonly contexts: Record<string, ContextConfig>;
 	readonly deltaTime: number;
 	readonly handle: InputHandle;
-	readonly handleData: HandleData<ActionMap>;
+	readonly handleData: CoreHandleData;
 }
 
 /**
@@ -75,7 +78,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			validateContextName(contexts, context);
 			const data = getHandleData(handles, handle);
 			if (data.activeContexts.has(context)) {
-				throw new Error(`context already active: ${context}`);
+				throw new ContextError(`context already active: ${context}`, context);
 			}
 
 			data.activeContexts.add(context);
@@ -99,17 +102,17 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			return getHandleData(handles, handle).activeContexts.has(context);
 		},
 		loadBindings(_handle: InputHandle, _data: BindingState<T>): void {
-			throw new Error("Not implemented");
+			error("Not implemented");
 		},
 		rebind(
 			_handle: InputHandle,
 			_action: keyof T & string,
 			_bindings: ReadonlyArray<BindingLike>,
 		): void {
-			throw new Error("Not implemented");
+			error("Not implemented");
 		},
 		rebindAll(_handle: InputHandle, _bindings: BindingState<T>): void {
-			throw new Error("Not implemented");
+			error("Not implemented");
 		},
 		register(context: Contexts, ...rest: ReadonlyArray<Contexts>): InputHandle {
 			validateContextName(contexts, context);
@@ -122,29 +125,26 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		removeContext(handle: InputHandle, context: Contexts): void {
 			const data = getHandleData(handles, handle);
 			if (!data.activeContexts.has(context)) {
-				throw new Error(`context not active: ${context}`);
+				throw new ContextError(`context not active: ${context}`, context);
 			}
 
 			data.activeContexts.delete(context);
 		},
 		resetAllBindings(_handle: InputHandle): void {
-			throw new Error("Not implemented");
+			error("Not implemented");
 		},
 		resetBindings(_handle: InputHandle, _action: keyof T & string): void {
-			throw new Error("Not implemented");
+			error("Not implemented");
 		},
 		serializeBindings(_handle: InputHandle): BindingState<T> {
-			throw new Error("Not implemented");
+			error("Not implemented");
 		},
 		simulateAction<A extends keyof T & string>(
 			handle: InputHandle,
 			action: A,
 			value: ActionValue<T, A>,
 		): void {
-			getHandleData(handles, handle).simulatedValues.set(
-				action,
-				value as unknown as ActionValueType,
-			);
+			getHandleData(handles, handle).simulatedValues.set(action, value);
 		},
 		unregister(handle: InputHandle): void {
 			getHandleData(handles, handle);
@@ -157,7 +157,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 					contexts,
 					deltaTime,
 					handle,
-					handleData: handleData as unknown as HandleData<ActionMap>,
+					handleData,
 				});
 			}
 		},
@@ -166,7 +166,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 
 function validateContextName(contexts: Record<string, ContextConfig>, name: string): void {
 	if (contexts[name] === undefined) {
-		throw new Error(`unknown context: ${name}`);
+		throw new ContextError(`unknown context: ${name}`, name);
 	}
 }
 
@@ -175,7 +175,10 @@ function getHandleData<T extends ActionMap>(
 	handle: InputHandle,
 ): HandleData<T> {
 	const data = handles.get(handle);
-	assert(data, `handle not registered: ${handle}`);
+	if (data === undefined) {
+		throw new HandleError(`handle not registered: ${handle}`);
+	}
+
 	return data;
 }
 
@@ -213,7 +216,7 @@ function getDefaultValue(actionType: ActionType): ActionValueType {
 }
 
 function getRawValue(
-	handleData: HandleData<ActionMap>,
+	handleData: CoreHandleData,
 	actionName: string,
 	actionConfig: ActionConfig,
 ): ActionValueType {
@@ -221,7 +224,7 @@ function getRawValue(
 }
 
 function updateDuration(
-	handleData: HandleData<ActionMap>,
+	handleData: CoreHandleData,
 	actionName: string,
 	rawValue: ActionValueType,
 	deltaTime: number,
@@ -274,7 +277,7 @@ function processContextActions(options: ContextActionsOptions): void {
 function updateUnprocessedActions(
 	actions: ActionMap,
 	processedActions: Set<string>,
-	handleData: HandleData<ActionMap>,
+	handleData: CoreHandleData,
 	deltaTime: number,
 ): void {
 	for (const [actionName, actionConfig] of pairs(actions)) {

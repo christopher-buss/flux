@@ -52,6 +52,7 @@
 		"@rbxts/jest": "catalog:test",
 		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",
+		"@rbxts/regexp": "catalog:test",
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
 		"rimraf": "catalog:node",

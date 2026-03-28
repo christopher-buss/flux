@@ -1,6 +1,7 @@
 import { defineConfig } from "@isentinel/jest-roblox";
 
 export default defineConfig({
+	coveragePathIgnorePatterns: ["**/test/", "ReplicatedStorage/flux/errors/error"],
 	extends: "../../jest.shared.ts",
 	projects: [
 		{

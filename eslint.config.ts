@@ -20,6 +20,17 @@ export default isentinel(
 		typescript: {
 			overridesTypeAware: {
 				"ts/no-deprecated": "error",
+				"ts/only-throw-error": [
+					"error",
+					{
+						allow: [
+							{ name: "Error", from: "file" },
+							{ name: "FluxError", from: "file" },
+							{ name: "ContextError", from: "file" },
+							{ name: "HandleError", from: "file" },
+						],
+					},
+				],
 			},
 			parserOptionsTypeAware: {
 				projectService: true,

@@ -94,6 +94,9 @@ catalogs:
     '@rbxts/react-roblox-fire':
       specifier: 0.1.4
       version: 0.1.4
+    '@rbxts/regexp':
+      specifier: 0.2.1-ts.4
+      version: 0.2.1-ts.4
     istanbul-lib-coverage:
       specifier: 3.2.2
       version: 3.2.2
@@ -254,6 +257,9 @@ importers:
       '@rbxts/jest-globals':
         specifier: catalog:test
         version: 3.13.3-ts.2
+      '@rbxts/regexp':
+        specifier: catalog:test
+        version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
         version: 1.0.913

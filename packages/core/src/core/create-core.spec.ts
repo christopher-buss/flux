@@ -1,5 +1,9 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
+import RegExp from "@rbxts/regexp";
 
+import { ContextError } from "../errors/context-error";
+import { FluxError } from "../errors/flux-error";
+import { HandleError } from "../errors/handle-error";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import { createCore } from "./create-core";
@@ -421,6 +425,75 @@ describe("createCore", () => {
 			};
 
 			expect(loadBindings).toThrow("Not implemented");
+		});
+	});
+
+	describe("error types", () => {
+		it("should throw ContextError for unknown context", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const register = () => {
+				core.register("nonexistent" as never);
+			};
+
+			expect(register).toThrowWithMessage(ContextError, RegExp("unknown context"));
+		});
+
+		it("should throw ContextError for duplicate context", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay");
+			const addContext = () => {
+				core.addContext(handle, "gameplay");
+			};
+
+			expect(addContext).toThrowWithMessage(ContextError, RegExp("context already active"));
+		});
+
+		it("should throw ContextError for inactive context removal", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay");
+			const removeContext = () => {
+				core.removeContext(handle, "ui");
+			};
+
+			expect(removeContext).toThrowWithMessage(ContextError, RegExp("context not active"));
+		});
+
+		it("should throw HandleError for unregistered handle", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay");
+			core.unregister(handle);
+			const getState = () => {
+				core.getState(handle);
+			};
+
+			expect(getState).toThrowWithMessage(HandleError, RegExp("handle not registered"));
+		});
+
+		it("should produce FluxError-compatible inheritance chain", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const register = () => {
+				core.register("nonexistent" as never);
+			};
+
+			expect(register).toThrowWithMessage(FluxError, RegExp("unknown context"));
+		});
+
+		it("should format toString as name and message", () => {
+			expect.assertions(1);
+
+			const thrown = new ContextError("unknown context: nonexistent", "nonexistent");
+
+			expect(thrown.toString()).toBe("ContextError: unknown context: nonexistent");
 		});
 	});
 });
