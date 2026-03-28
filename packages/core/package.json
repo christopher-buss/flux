@@ -40,7 +40,6 @@
 		"typecheck:types": "tsgo --project tsconfig.typetest.json --noEmit"
 	},
 	"dependencies": {
-		"@rbxts/luau-polyfill": "catalog:prod",
 		"@rbxts/services": "catalog:prod"
 	},
 	"devDependencies": {
