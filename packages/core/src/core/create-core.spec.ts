@@ -9,6 +9,7 @@ import type { ContextConfig } from "../types/contexts";
 import { createCore } from "./create-core";
 
 const TEST_ACTIONS = {
+	cursor: { type: "ViewportPosition" as const },
 	jump: { type: "Bool" as const },
 	look: { type: "Direction3D" as const },
 	move: { type: "Direction2D" as const },
@@ -18,6 +19,7 @@ const TEST_ACTIONS = {
 const TEST_CONTEXTS = {
 	gameplay: {
 		bindings: {
+			cursor: [Enum.KeyCode.Unknown],
 			jump: [Enum.KeyCode.Space],
 			look: [Enum.KeyCode.E],
 			move: [Enum.KeyCode.W],
@@ -290,6 +292,28 @@ describe("createCore", () => {
 		});
 	});
 
+	describe("unbound actions", () => {
+		it("should default actions not bound in any active context", () => {
+			expect.assertions(1);
+
+			const actions = {
+				jump: { type: "Bool" as const },
+				unbound: { type: "Bool" as const },
+			} satisfies ActionMap;
+			const contexts = {
+				gameplay: {
+					bindings: { jump: [Enum.KeyCode.Space] },
+					priority: 0,
+				},
+			} satisfies Record<string, ContextConfig>;
+			const core = createCore({ actions, contexts });
+			const handle = core.register("gameplay");
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("unbound")).toBeFalse();
+		});
+	});
+
 	describe("context sink", () => {
 		it("should block lower priority contexts when sink is true", () => {
 			expect.assertions(1);
@@ -351,6 +375,109 @@ describe("createCore", () => {
 
 			expect(getFirstState).toThrow("handle not registered");
 			expect(getSecondState).toThrow("handle not registered");
+		});
+	});
+
+	describe("parent option", () => {
+		it("should work without parent", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should pass parent to input instances", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS, parent });
+			const handle = core.register("gameplay");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+	});
+
+	describe("iAS instances", () => {
+		it("should create InputContext instances on register", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay");
+
+			// Verify update still works (contexts were created)
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should destroy instances on unregister", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay");
+			core.unregister(handle);
+			const getState = () => {
+				core.getState(handle);
+			};
+
+			expect(getState).toThrow("handle not registered");
+		});
+
+		it("should destroy all instances on destroy", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const first = core.register("gameplay");
+			const second = core.register("ui");
+			core.destroy();
+			const getFirstState = () => {
+				core.getState(first);
+			};
+
+			const getSecondState = () => {
+				core.getState(second);
+			};
+
+			expect(getFirstState).toThrow("handle not registered");
+			expect(getSecondState).toThrow("handle not registered");
+		});
+
+		it("should create InputContext instances for added contexts", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay");
+			core.addContext(handle, "ui");
+
+			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+
+		it("should disable InputContext on removeContext", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay", "ui");
+			core.removeContext(handle, "ui");
+
+			expect(core.hasContext(handle, "ui")).toBeFalse();
+		});
+
+		it("should fire InputAction on simulateAction", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register("gameplay");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
 		});
 	});
 

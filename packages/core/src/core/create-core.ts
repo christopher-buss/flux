@@ -1,15 +1,21 @@
 import { ContextError } from "../errors/context-error";
 import { HandleError } from "../errors/handle-error";
-import type { ModifierContext } from "../modifiers/types";
-import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
+import type { ActionMap } from "../types/actions";
 import type { BindingLike, BindingState } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
-import type { ActionValueType, InternalActionState } from "./action-state";
-import { createActionState, getMagnitude } from "./action-state";
+import type { ActionValueType } from "./action-state";
+import { createActionState } from "./action-state";
 import { createHandleFactory } from "./handle-factory";
-import { processPipeline } from "./pipeline";
+import {
+	addContextInstances,
+	createInputInstances,
+	destroyInputInstances,
+	setContextEnabled,
+} from "./input-instances";
+import type { CoreHandleData } from "./update-handle";
+import { updateHandle } from "./update-handle";
 
 /**
  * Options for creating a Flux core instance.
@@ -19,42 +25,21 @@ import { processPipeline } from "./pipeline";
 export interface CreateCoreOptions<T extends ActionMap, C extends Record<string, ContextConfig>> {
 	readonly actions: T;
 	readonly contexts: C;
-}
-
-interface CoreHandleData {
-	readonly activeContexts: Set<string>;
-	readonly durations: Map<string, number>;
-	readonly internalState: InternalActionState;
-	readonly simulatedValues: Map<string, ActionValueType>;
+	/** Parent instance for InputContext network ownership (e.g. Players.LocalPlayer). */
+	readonly parent?: Instance;
 }
 
 interface HandleData<T extends ActionMap> extends CoreHandleData {
 	readonly publicState: ActionState<T>;
 }
 
-interface ActionUpdateOptions {
-	readonly actionConfig: ActionConfig;
-	readonly actionName: string;
-	readonly deltaTime: number;
-	readonly handle: InputHandle;
-	readonly handleData: CoreHandleData;
-}
-
-interface ContextActionsOptions {
-	readonly actions: ActionMap;
-	readonly contextConfig: ContextConfig;
-	readonly deltaTime: number;
-	readonly handle: InputHandle;
-	readonly handleData: CoreHandleData;
-	readonly processedActions: Set<string>;
-}
-
-interface HandleUpdateOptions {
-	readonly actions: ActionMap;
+interface RegisterHandleOptions<T extends ActionMap> {
+	readonly actions: T;
+	readonly contextNames: ReadonlyArray<string>;
 	readonly contexts: Record<string, ContextConfig>;
-	readonly deltaTime: number;
-	readonly handle: InputHandle;
-	readonly handleData: CoreHandleData;
+	readonly factory: ReturnType<typeof createHandleFactory>;
+	readonly handles: Map<InputHandle, HandleData<T>>;
+	readonly parent?: Instance;
 }
 
 /**
@@ -69,7 +54,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 	options: CreateCoreOptions<T, C>,
 ): FluxCore<T, keyof C & string> {
 	type Contexts = keyof C & string;
-	const { actions, contexts } = options;
+	const { actions, contexts, parent } = options;
 	const factory = createHandleFactory();
 	const handles = new Map<InputHandle, HandleData<T>>();
 
@@ -81,9 +66,17 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				throw new ContextError(`context already active: ${context}`, context);
 			}
 
+			const contextConfig = contexts[context];
+			assert(contextConfig, `missing context config: ${context}`);
+			addContextInstances(context, contextConfig, actions, data.instanceData);
+			setContextEnabled(data.instanceData, context, true);
 			data.activeContexts.add(context);
 		},
 		destroy(): void {
+			for (const [, data] of handles) {
+				destroyInputInstances(data.instanceData);
+			}
+
 			handles.clear();
 		},
 		getContexts(handle: InputHandle): ReadonlyArray<Contexts> {
@@ -120,7 +113,14 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				validateContextName(contexts, name);
 			}
 
-			return registerHandle(factory, handles, actions, [context, ...rest]);
+			return registerHandle({
+				actions,
+				contextNames: [context, ...rest],
+				contexts,
+				factory,
+				handles,
+				...(parent !== undefined && { parent }),
+			});
 		},
 		removeContext(handle: InputHandle, context: Contexts): void {
 			const data = getHandleData(handles, handle);
@@ -128,6 +128,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				throw new ContextError(`context not active: ${context}`, context);
 			}
 
+			setContextEnabled(data.instanceData, context, false);
 			data.activeContexts.delete(context);
 		},
 		resetAllBindings(_handle: InputHandle): void {
@@ -147,7 +148,8 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			getHandleData(handles, handle).simulatedValues.set(action, value);
 		},
 		unregister(handle: InputHandle): void {
-			getHandleData(handles, handle);
+			const data = getHandleData(handles, handle);
+			destroyInputInstances(data.instanceData);
 			handles.delete(handle);
 		},
 		update(deltaTime: number): void {
@@ -182,148 +184,8 @@ function getHandleData<T extends ActionMap>(
 	return data;
 }
 
-function sortActiveContexts(
-	activeContexts: Set<string>,
-	contexts: Record<string, ContextConfig>,
-): Array<[string, ContextConfig]> {
-	const sorted = new Array<[string, ContextConfig]>();
-	for (const name of activeContexts) {
-		const config = contexts[name];
-		assert(config, `missing context config: ${name}`);
-		sorted.push([name, config]);
-	}
-
-	sorted.sort((first, second) => first[1].priority > second[1].priority);
-	return sorted;
-}
-
-function getDefaultValue(actionType: ActionType): ActionValueType {
-	switch (actionType) {
-		case "Bool": {
-			return false;
-		}
-		case "Direction1D": {
-			return 0;
-		}
-		case "Direction2D":
-		case "ViewportPosition": {
-			return Vector2.zero;
-		}
-		case "Direction3D": {
-			return Vector3.zero;
-		}
-	}
-}
-
-function getRawValue(
-	handleData: CoreHandleData,
-	actionName: string,
-	actionConfig: ActionConfig,
-): ActionValueType {
-	return handleData.simulatedValues.get(actionName) ?? getDefaultValue(actionConfig.type);
-}
-
-function updateDuration(
-	handleData: CoreHandleData,
-	actionName: string,
-	rawValue: ActionValueType,
-	deltaTime: number,
-): number {
-	const magnitude = getMagnitude(rawValue);
-	const previous = handleData.durations.get(actionName);
-	assert(previous !== undefined, `missing duration for action: ${actionName}`);
-	const updated = magnitude > 0 ? previous + deltaTime : 0;
-	handleData.durations.set(actionName, updated);
-	return updated;
-}
-
-function processAction(options: ActionUpdateOptions): void {
-	const { actionConfig, actionName, deltaTime, handle, handleData } = options;
-	const rawValue = getRawValue(handleData, actionName, actionConfig);
-	const duration = updateDuration(handleData, actionName, rawValue, deltaTime);
-	const modifierContext: ModifierContext = { deltaTime, handle };
-	const result = processPipeline({
-		actionConfig,
-		deltaTime,
-		duration,
-		modifierContext,
-		rawValue,
-	});
-	handleData.internalState.updateAction({
-		action: actionName,
-		deltaTime,
-		triggerState: result.triggerState,
-		value: result.value,
-	});
-}
-
-function processContextActions(options: ContextActionsOptions): void {
-	const { actions, contextConfig, deltaTime, handle, handleData, processedActions } = options;
-	for (const [actionName] of pairs(contextConfig.bindings)) {
-		if (processedActions.has(actionName)) {
-			continue;
-		}
-
-		const actionConfig = actions[actionName];
-		if (actionConfig === undefined) {
-			continue;
-		}
-
-		processAction({ actionConfig, actionName, deltaTime, handle, handleData });
-		processedActions.add(actionName);
-	}
-}
-
-function updateUnprocessedActions(
-	actions: ActionMap,
-	processedActions: Set<string>,
-	handleData: CoreHandleData,
-	deltaTime: number,
-): void {
-	for (const [actionName, actionConfig] of pairs(actions)) {
-		if (processedActions.has(actionName)) {
-			continue;
-		}
-
-		handleData.durations.set(actionName, 0);
-		handleData.internalState.updateAction({
-			action: actionName,
-			deltaTime,
-			triggerState: "none",
-			value: getDefaultValue(actionConfig.type),
-		});
-	}
-}
-
-function updateHandle(options: HandleUpdateOptions): void {
-	const { actions, contexts, deltaTime, handle, handleData } = options;
-	const sorted = sortActiveContexts(handleData.activeContexts, contexts);
-	const processedActions = new Set<string>();
-	for (const [, contextConfig] of sorted) {
-		processContextActions({
-			actions,
-			contextConfig,
-			deltaTime,
-			handle,
-			handleData,
-			processedActions,
-		});
-		if (contextConfig.sink === true) {
-			break;
-		}
-	}
-
-	updateUnprocessedActions(actions, processedActions, handleData, deltaTime);
-	handleData.simulatedValues.clear();
-	handleData.internalState.endFrame();
-}
-
-function registerHandle<T extends ActionMap>(
-	factory: ReturnType<typeof createHandleFactory>,
-	handles: Map<InputHandle, HandleData<T>>,
-	actions: T,
-	contextNames: ReadonlyArray<string>,
-): InputHandle {
+function registerHandle<T extends ActionMap>(options: RegisterHandleOptions<T>): InputHandle {
+	const { actions, contextNames, contexts, factory, handles, parent } = options;
 	const handle = factory.allocate();
 	const [publicState, internalState] = createActionState(actions);
 	const durations = new Map<string, number>();
@@ -331,9 +193,16 @@ function registerHandle<T extends ActionMap>(
 		durations.set(name, 0);
 	}
 
+	const instanceData = createInputInstances({
+		actions,
+		contextNames,
+		contexts,
+		...(parent !== undefined && { parent }),
+	});
 	handles.set(handle, {
 		activeContexts: new Set<string>(contextNames),
 		durations,
+		instanceData,
 		internalState,
 		publicState,
 		simulatedValues: new Map<string, ActionValueType>(),

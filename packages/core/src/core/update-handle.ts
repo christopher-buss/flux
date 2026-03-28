@@ -1,0 +1,197 @@
+import type { ModifierContext } from "../modifiers/types";
+import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
+import type { ContextConfig } from "../types/contexts";
+import type { InputHandle } from "../types/core";
+import type { ActionValueType, InternalActionState } from "./action-state";
+import { getMagnitude } from "./action-state";
+import type { InputInstanceData } from "./input-instances";
+import { processPipeline } from "./pipeline";
+
+/** Internal per-handle data used during update processing. */
+export interface CoreHandleData {
+	readonly activeContexts: Set<string>;
+	readonly durations: Map<string, number>;
+	readonly instanceData: InputInstanceData;
+	readonly internalState: InternalActionState;
+	readonly simulatedValues: Map<string, ActionValueType>;
+}
+
+/** Options for {@link updateHandle}. */
+export interface HandleUpdateOptions {
+	readonly actions: ActionMap;
+	readonly contexts: Record<string, ContextConfig>;
+	readonly deltaTime: number;
+	readonly handle: InputHandle;
+	readonly handleData: CoreHandleData;
+}
+
+interface ActionUpdateOptions {
+	readonly actionConfig: ActionConfig;
+	readonly actionName: string;
+	readonly deltaTime: number;
+	readonly handle: InputHandle;
+	readonly handleData: CoreHandleData;
+}
+
+interface ContextActionsOptions {
+	readonly actions: ActionMap;
+	readonly contextConfig: ContextConfig;
+	readonly deltaTime: number;
+	readonly handle: InputHandle;
+	readonly handleData: CoreHandleData;
+	readonly processedActions: Set<string>;
+}
+
+/**
+ * Returns the default zero value for an action type.
+ * @param actionType - Bool, Direction1D, Direction2D, Direction3D, or ViewportPosition.
+ * @returns The corresponding zero/false value.
+ */
+export function getDefaultValue(actionType: ActionType): ActionValueType {
+	switch (actionType) {
+		case "Bool": {
+			return false;
+		}
+		case "Direction1D": {
+			return 0;
+		}
+		case "Direction2D":
+		case "ViewportPosition": {
+			return Vector2.zero;
+		}
+		case "Direction3D": {
+			return Vector3.zero;
+		}
+	}
+}
+
+/**
+ * Sorts active contexts by priority (descending).
+ * @param activeContexts - Set of active context names.
+ * @param contexts - Context configuration record.
+ * @returns Sorted array of context name/config pairs.
+ */
+export function sortActiveContexts(
+	activeContexts: Set<string>,
+	contexts: Record<string, ContextConfig>,
+): Array<[string, ContextConfig]> {
+	const sorted = new Array<[string, ContextConfig]>();
+	for (const name of activeContexts) {
+		const config = contexts[name];
+		assert(config, `missing context config: ${name}`);
+		sorted.push([name, config]);
+	}
+
+	sorted.sort((first, second) => first[1].priority > second[1].priority);
+	return sorted;
+}
+
+/**
+ * Processes all actions for a single handle during an update tick.
+ * @param options - The handle, actions, contexts, and delta time.
+ */
+export function updateHandle(options: HandleUpdateOptions): void {
+	const { actions, contexts, deltaTime, handle, handleData } = options;
+	const sorted = sortActiveContexts(handleData.activeContexts, contexts);
+	const processedActions = new Set<string>();
+	for (const [, contextConfig] of sorted) {
+		processContextActions({
+			actions,
+			contextConfig,
+			deltaTime,
+			handle,
+			handleData,
+			processedActions,
+		});
+		if (contextConfig.sink === true) {
+			break;
+		}
+	}
+
+	updateUnprocessedActions(actions, processedActions, handleData, deltaTime);
+	handleData.simulatedValues.clear();
+	handleData.internalState.endFrame();
+}
+
+function getRawValue(handleData: CoreHandleData, actionName: string): ActionValueType {
+	const simulated = handleData.simulatedValues.get(actionName);
+	if (simulated !== undefined) {
+		return simulated;
+	}
+
+	const inputAction = handleData.instanceData.inputActions.get(actionName);
+	assert(inputAction, `missing InputAction instance for: ${actionName}`);
+	return inputAction.GetState() as ActionValueType;
+}
+
+function updateDuration(
+	handleData: CoreHandleData,
+	actionName: string,
+	rawValue: ActionValueType,
+	deltaTime: number,
+): number {
+	const magnitude = getMagnitude(rawValue);
+	const previous = handleData.durations.get(actionName);
+	assert(previous !== undefined, `missing duration for action: ${actionName}`);
+	const updated = magnitude > 0 ? previous + deltaTime : 0;
+	handleData.durations.set(actionName, updated);
+	return updated;
+}
+
+function processAction(options: ActionUpdateOptions): void {
+	const { actionConfig, actionName, deltaTime, handle, handleData } = options;
+	const rawValue = getRawValue(handleData, actionName);
+	const duration = updateDuration(handleData, actionName, rawValue, deltaTime);
+	const modifierContext: ModifierContext = { deltaTime, handle };
+	const result = processPipeline({
+		actionConfig,
+		deltaTime,
+		duration,
+		modifierContext,
+		rawValue,
+	});
+	handleData.internalState.updateAction({
+		action: actionName,
+		deltaTime,
+		triggerState: result.triggerState,
+		value: result.value,
+	});
+}
+
+function processContextActions(options: ContextActionsOptions): void {
+	const { actions, contextConfig, deltaTime, handle, handleData, processedActions } = options;
+	for (const [actionName] of pairs(contextConfig.bindings)) {
+		if (processedActions.has(actionName)) {
+			continue;
+		}
+
+		const actionConfig = actions[actionName];
+		if (actionConfig === undefined) {
+			continue;
+		}
+
+		processAction({ actionConfig, actionName, deltaTime, handle, handleData });
+		processedActions.add(actionName);
+	}
+}
+
+function updateUnprocessedActions(
+	actions: ActionMap,
+	processedActions: Set<string>,
+	handleData: CoreHandleData,
+	deltaTime: number,
+): void {
+	for (const [actionName, actionConfig] of pairs(actions)) {
+		if (processedActions.has(actionName)) {
+			continue;
+		}
+
+		handleData.durations.set(actionName, 0);
+		handleData.internalState.updateAction({
+			action: actionName,
+			deltaTime,
+			triggerState: "none",
+			value: getDefaultValue(actionConfig.type),
+		});
+	}
+}

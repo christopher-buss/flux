@@ -4,8 +4,10 @@ See `docs/core-api-proposal.md` for the full API design.
 
 ## Constraints
 
-**InputContexts Ownership**: InputContext instances MUST be descendants of Player
-instance in DataModel for Roblox network ownership.
+**InputContexts Ownership**: For server-authoritative experiences, InputContext
+instances must be descendants of a Player so the engine knows input ownership.
+StarterGui works because it replicates to PlayerGui under each Player. For
+client-only input, ReplicatedStorage or StarterGui both work.
 
 **Context Priority**: Lower numbers = lower priority. UI contexts typically use
 high priority + sink to block gameplay input.
