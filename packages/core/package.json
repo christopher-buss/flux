@@ -20,6 +20,7 @@
 	"type": "module",
 	"exports": {
 		".": {
+			"source": "./src/index.ts",
 			"import": "./dist/init.luau",
 			"types": "./dist/index.d.ts"
 		}
@@ -51,6 +52,7 @@
 		"@rbxts/jest": "catalog:test",
 		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",
+		"@rbxts/react-roblox-fire": "catalog:test",
 		"@rbxts/regexp": "catalog:test",
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",

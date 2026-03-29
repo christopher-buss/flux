@@ -32,6 +32,12 @@ describe("CreateCoreOptions", () => {
 		);
 	});
 
+	it("should not have parent field", () => {
+		expectTypeOf<CreateCoreOptions<typeof actions, typeof contexts>>().not.toHaveProperty(
+			"parent",
+		);
+	});
+
 	it("should reject missing fields", () => {
 		// @ts-expect-error missing contexts
 		createCore({ actions });
@@ -88,17 +94,54 @@ describe("createCore", () => {
 	});
 
 	describe("register", () => {
-		it("should return InputHandle", () => {
-			expectTypeOf(core.register("gameplay")).toEqualTypeOf<InputHandle>();
+		it("should require parent as first arg", () => {
+			expectTypeOf(
+				core.register(new Instance("Folder"), "gameplay"),
+			).toEqualTypeOf<InputHandle>();
 		});
 
 		it("should accept variadic context names", () => {
-			expectTypeOf<typeof core.register>().toBeCallableWith("gameplay", "ui");
+			expectTypeOf<typeof core.register>().toBeCallableWith(
+				new Instance("Folder"),
+				"gameplay",
+				"ui",
+			);
+		});
+
+		it("should reject missing parent", () => {
+			// @ts-expect-error missing parent
+			core.register("gameplay");
 		});
 
 		it("should reject invalid context on register", () => {
 			// @ts-expect-error unknown context
-			core.register(INVALID);
+			core.register(new Instance("Folder"), INVALID);
+		});
+	});
+
+	describe("subscribe", () => {
+		it("should return LuaTuple of handle and cancel", () => {
+			expectTypeOf<ReturnType<typeof core.subscribe>>().toEqualTypeOf<
+				[InputHandle, () => void]
+			>();
+		});
+
+		it("should accept variadic context names", () => {
+			expectTypeOf<typeof core.subscribe>().toBeCallableWith(
+				new Instance("Folder"),
+				"gameplay",
+				"ui",
+			);
+		});
+
+		it("should reject missing parent", () => {
+			// @ts-expect-error missing parent
+			core.subscribe("gameplay");
+		});
+
+		it("should reject invalid context on subscribe", () => {
+			// @ts-expect-error unknown context
+			core.subscribe(new Instance("Folder"), INVALID);
 		});
 	});
 
@@ -106,6 +149,11 @@ describe("createCore", () => {
 		it("should constrain to known context names", () => {
 			const handle = {} as InputHandle;
 			expectTypeOf<typeof core.addContext>().toBeCallableWith(handle, "ui");
+		});
+
+		it("should return cancel function", () => {
+			const handle = {} as InputHandle;
+			expectTypeOf(core.addContext(handle, "ui")).toEqualTypeOf<() => void>();
 		});
 
 		it("should reject invalid context on addContext", () => {

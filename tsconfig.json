@@ -3,6 +3,9 @@
 	"compilerOptions": {
 		"composite": true,
 		"tsBuildInfoFile": "${configDir}/tsconfig.tsbuildinfo",
+		"module": "preserve",
+		"moduleResolution": "bundler",
+		"typeRoots": ["${configDir}/node_modules/@rbxts", "${configDir}/node_modules/@flux"],
 		"types": ["compiler-types", "jest-extended"],
 		"sourceMap": true
 	},

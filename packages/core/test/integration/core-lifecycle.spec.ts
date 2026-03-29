@@ -34,7 +34,7 @@ describe("core lifecycle", () => {
 		});
 
 		const core = createCore({ actions, contexts });
-		const handle = core.register("gameplay");
+		const handle = core.register(new Instance("Folder"), "gameplay");
 
 		core.simulateAction(handle, "jump", true);
 		core.update(FRAME_TIME);
@@ -65,7 +65,7 @@ describe("core lifecycle", () => {
 		});
 
 		const core = createCore({ actions, contexts });
-		const handle = core.register("gameplay", "menu");
+		const handle = core.register(new Instance("Folder"), "gameplay", "menu");
 
 		core.simulateAction(handle, "jump", true);
 		core.update(FRAME_TIME);
@@ -100,7 +100,7 @@ describe("core lifecycle", () => {
 		});
 
 		const core = createCore({ actions, contexts });
-		const handle = core.register("gameplay", "ui");
+		const handle = core.register(new Instance("Folder"), "gameplay", "ui");
 
 		core.simulateAction(handle, "jump", true);
 		core.update(FRAME_TIME);
@@ -128,8 +128,8 @@ describe("core lifecycle", () => {
 		});
 
 		const core = createCore({ actions, contexts });
-		const handle1 = core.register("gameplay");
-		const handle2 = core.register("gameplay");
+		const handle1 = core.register(new Instance("Folder"), "gameplay");
+		const handle2 = core.register(new Instance("Folder"), "gameplay");
 
 		core.simulateAction(handle1, "jump", true);
 		core.update(FRAME_TIME);
@@ -153,7 +153,7 @@ describe("core lifecycle", () => {
 		});
 
 		const core = createCore({ actions, contexts });
-		const handle = core.register("gameplay");
+		const handle = core.register(new Instance("Folder"), "gameplay");
 
 		core.simulateAction(handle, "throttle", 0.5);
 		core.update(FRAME_TIME);
@@ -178,7 +178,7 @@ describe("core lifecycle", () => {
 		});
 
 		const core = createCore({ actions, contexts });
-		const handle = core.register("gameplay");
+		const handle = core.register(new Instance("Folder"), "gameplay");
 
 		core.simulateAction(handle, "fire", true);
 		core.update(0.1);

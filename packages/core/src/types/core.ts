@@ -28,9 +28,11 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * Activates a context for the given handle.
 	 * @param handle - The input consumer handle.
 	 * @param context - The context name to activate.
+	 * @returns A cancel function that disconnects any ChildAdded listeners
+	 * (no-op for owned handles).
 	 * @throws Error if the context is already active for this handle.
 	 */
-	addContext(handle: InputHandle, context: Contexts): void;
+	addContext(handle: InputHandle, context: Contexts): () => void;
 
 	/**
 	 * Tears down the core instance and releases all resources.
@@ -87,12 +89,17 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	rebindAll(handle: InputHandle, bindings: BindingState<Actions>): void;
 
 	/**
-	 * Registers a new input consumer with the given initial contexts.
+	 * Registers a new input consumer, creating IAS instances under the parent.
+	 * @param parent - The instance to parent InputContexts under.
 	 * @param context - First context name to activate (at least one required).
 	 * @param contexts - Additional context names to activate.
 	 * @returns An opaque handle identifying the consumer.
 	 */
-	register(context: Contexts, ...contexts: ReadonlyArray<Contexts>): InputHandle;
+	register(
+		parent: Instance,
+		context: Contexts,
+		...contexts: ReadonlyArray<Contexts>
+	): InputHandle;
 
 	/**
 	 * Deactivates a context for the given handle.
@@ -134,6 +141,21 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 		action: A,
 		state: ActionValue<Actions, A>,
 	): void;
+
+	/**
+	 * Subscribes to server-created IAS instances under the parent.
+	 * Uses FindFirstChild + ChildAdded to discover existing and incoming instances.
+	 * @param parent - The instance containing server-created InputContexts.
+	 * @param context - First context name to subscribe to (at least one required).
+	 * @param contexts - Additional context names to subscribe to.
+	 * @returns A tuple of the handle and a cancel function that disconnects
+	 * ChildAdded listeners.
+	 */
+	subscribe(
+		parent: Instance,
+		context: Contexts,
+		...contexts: ReadonlyArray<Contexts>
+	): [InputHandle, () => void];
 
 	/**
 	 * Unregisters an input consumer, releasing its handle.

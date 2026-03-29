@@ -1,0 +1,6 @@
+{
+	"name": "flux",
+	"tree": {
+		"$path": "dist"
+	}
+}

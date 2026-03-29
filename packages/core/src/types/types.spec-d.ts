@@ -56,6 +56,7 @@ describe("FluxCore methods", () => {
 		expectTypeOf<FluxCore>().toHaveProperty("resetBindings");
 		expectTypeOf<FluxCore>().toHaveProperty("serializeBindings");
 		expectTypeOf<FluxCore>().toHaveProperty("simulateAction");
+		expectTypeOf<FluxCore>().toHaveProperty("subscribe");
 		expectTypeOf<FluxCore>().toHaveProperty("unregister");
 		expectTypeOf<FluxCore>().toHaveProperty("update");
 	});
@@ -63,7 +64,7 @@ describe("FluxCore methods", () => {
 
 describe("FluxCore generics", () => {
 	it("should default Contexts to string", () => {
-		expectTypeOf<FluxCore["register"]>().toBeCallableWith("anything");
+		expectTypeOf<FluxCore["register"]>().toBeCallableWith(new Instance("Folder"), "anything");
 	});
 
 	it("should constrain Contexts to provided string union", () => {

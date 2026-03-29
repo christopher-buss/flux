@@ -6,19 +6,19 @@ export const contexts = defineContexts({
 			jump: [Enum.KeyCode.Space],
 			move: [
 				{
-					Backward: Enum.KeyCode.S,
-					Forward: Enum.KeyCode.W,
-					Left: Enum.KeyCode.A,
-					Right: Enum.KeyCode.D,
+					down: Enum.KeyCode.S,
+					left: Enum.KeyCode.A,
+					right: Enum.KeyCode.D,
+					up: Enum.KeyCode.W,
 				},
 			],
-			toggleContext: [Enum.KeyCode.Tab],
+			toggleContext: [Enum.KeyCode.F],
 		},
 		priority: 0,
 	},
 	menu: {
 		bindings: {
-			toggleContext: [Enum.KeyCode.Tab],
+			toggleContext: [Enum.KeyCode.F],
 		},
 		priority: 10,
 		sink: true,

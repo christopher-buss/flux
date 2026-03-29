@@ -16,6 +16,9 @@ packages:
   - packages/*
   - scripts
 
+overrides:
+  "@isentinel/roblox-ts": "link:D:\\roblox\\halcyon\\project-halcyon\\tools\\roblox-ts"
+
 catalogs:
   build:
     "@isentinel/roblox-ts": 3.1.1

@@ -1,3 +1,4 @@
+import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it } from "@rbxts/jest-globals";
 
 import type { ActionMap } from "../types/actions";
@@ -6,6 +7,7 @@ import {
 	addContextInstances,
 	createInputInstances,
 	destroyInputInstances,
+	findInputInstances,
 	setContextEnabled,
 } from "./input-instances";
 
@@ -39,6 +41,7 @@ describe("createInputInstances", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay", "ui"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		expect(data.inputContexts.size()).toBe(2);
@@ -52,6 +55,7 @@ describe("createInputInstances", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		expect(data.inputActions.has("jump")).toBeTrue();
@@ -64,6 +68,7 @@ describe("createInputInstances", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay", "ui"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		const jumpAction = data.inputActions.get("jump");
@@ -78,6 +83,7 @@ describe("createInputInstances", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		expect(data.instances.size()).toBeGreaterThan(0);
@@ -100,6 +106,7 @@ describe("createInputInstances", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			contexts,
+			parent: new Instance("Folder"),
 		});
 
 		expect(data.inputActions.has("nonexistent")).toBeFalse();
@@ -132,6 +139,7 @@ describe("createInputInstances", () => {
 			actions,
 			contextNames: ["gameplay"],
 			contexts,
+			parent: new Instance("Folder"),
 		});
 
 		expect(data.inputActions.has("move")).toBeTrue();
@@ -157,6 +165,7 @@ describe("createInputInstances", () => {
 			actions,
 			contextNames: ["gameplay"],
 			contexts,
+			parent: new Instance("Folder"),
 		});
 
 		expect(data.inputActions.has("aim")).toBeTrue();
@@ -169,6 +178,7 @@ describe("createInputInstances", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["ui"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		const uiContext = data.inputContexts.get("ui");
@@ -195,19 +205,17 @@ describe("createInputInstances", () => {
 		expect(gameplayContext.Parent).toBe(parent);
 	});
 
-	it("should not set Parent when parent is omitted", () => {
+	it("should mark data as owned", () => {
 		expect.assertions(1);
 
 		const data = createInputInstances({
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
-		const gameplayContext = data.inputContexts.get("gameplay");
-		assert(gameplayContext);
-
-		expect(gameplayContext.Parent).toBeUndefined();
+		expect(data.owned).toBeTrue();
 	});
 });
 
@@ -219,6 +227,7 @@ describe("destroyInputInstances", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		const instanceCount = data.instances.size();
@@ -236,6 +245,7 @@ describe("addContextInstances", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		addContextInstances("ui", TEST_CONTEXTS.ui, TEST_ACTIONS, data);
@@ -270,6 +280,7 @@ describe("setContextEnabled", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		setContextEnabled(data, "gameplay", false);
@@ -286,11 +297,198 @@ describe("setContextEnabled", () => {
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			contexts: TEST_CONTEXTS,
+			parent: new Instance("Folder"),
 		});
 
 		// Should not throw
 		setContextEnabled(data, "nonexistent", true);
 
 		expect(data.inputContexts.has("nonexistent")).toBeFalse();
+	});
+});
+
+describe("findInputInstances", () => {
+	it("should find existing InputContext instances", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		expect(found.inputContexts.has("gameplay")).toBeTrue();
+		expect(found.owned).toBeFalse();
+	});
+
+	it("should collect InputAction instances from found contexts", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		expect(found.inputActions.has("jump")).toBeTrue();
+	});
+
+	it("should set up ChildAdded for missing contexts", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		expect(found.connections.size()).toBe(1);
+	});
+
+	it("should not destroy instances when not owned", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		destroyInputInstances(found);
+
+		expect(parent.FindFirstChild("gameplay")).toBeDefined();
+	});
+
+	it("should find context added after subscribe via ChildAdded", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		// Create instances after findInputInstances
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+		awaitDefer();
+
+		expect(found.inputContexts.has("gameplay")).toBeTrue();
+		expect(found.inputActions.has("jump")).toBeTrue();
+	});
+
+	it("should ignore non-InputContext children via ChildAdded", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		// Add a non-InputContext child — should be ignored
+		const folder = new Instance("Folder");
+		folder.Name = "gameplay";
+		folder.Parent = parent;
+		awaitDefer();
+
+		expect(found.inputContexts.has("gameplay")).toBeFalse();
+	});
+
+	it("should not overwrite existing InputAction when shared across contexts", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay", "ui"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay", "ui"],
+			parent,
+		});
+
+		expect(found.inputActions.has("jump")).toBeTrue();
+	});
+
+	it("should skip non-InputAction children when collecting actions", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		// Add non-InputAction child to the InputContext
+		const gameplayContext = parent.FindFirstChild("gameplay");
+		assert(gameplayContext);
+		const folder = new Instance("Folder");
+		folder.Name = "notAnAction";
+		folder.Parent = gameplayContext;
+
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		expect(found.inputActions.has("jump")).toBeTrue();
+	});
+
+	it("should ignore wrong-named InputContext via ChildAdded", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		// Add an InputContext with wrong name — should be ignored
+		const context = new Instance("InputContext");
+		context.Name = "other";
+		context.Parent = parent;
+		awaitDefer();
+
+		expect(found.inputContexts.has("gameplay")).toBeFalse();
 	});
 });

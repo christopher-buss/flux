@@ -17,6 +17,7 @@ export default defineConfig({
 	placeFile: "test.rbxl",
 	rojoProject: "test.project.json",
 	setupFiles: ["@flux/test-utils/out/setup"],
-	setupFilesAfterEnv: ["@flux/test-utils/out/jest-extended"],
+	setupFilesAfterEnv: ["@flux/test-utils/loaders/jest-extended"],
+	testTimeout: 5000,
 	typecheck: true,
 });

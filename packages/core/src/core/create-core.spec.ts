@@ -1,3 +1,4 @@
+import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it } from "@rbxts/jest-globals";
 import RegExp from "@rbxts/regexp";
 
@@ -50,7 +51,7 @@ describe("createCore", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const register = () => {
-			core.register("nonexistent" as never);
+			core.register(new Instance("Folder"), "nonexistent" as never);
 		};
 
 		expect(register).toThrow("unknown context");
@@ -61,8 +62,8 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const first = core.register("gameplay");
-			const second = core.register("gameplay");
+			const first = core.register(new Instance("Folder"), "gameplay");
+			const second = core.register(new Instance("Folder"), "gameplay");
 
 			expect(first).never.toBe(second);
 		});
@@ -71,7 +72,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 
 			expect(core.hasContext(handle, "gameplay")).toBeTrue();
 		});
@@ -82,7 +83,7 @@ describe("createCore", () => {
 			expect.assertions(2);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const state = core.getState(handle);
 
 			expect(state.pressed("jump")).toBeFalse();
@@ -93,7 +94,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.unregister(handle);
 			const getState = () => {
 				core.getState(handle);
@@ -108,7 +109,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.unregister(handle);
 			const getState = () => {
 				core.getState(handle);
@@ -123,17 +124,29 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.addContext(handle, "ui");
 
 			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+
+		it("should return a callable cancel function from addContext", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const cancel = core.addContext(handle, "ui");
+
+			expect(() => {
+				cancel();
+			}).never.toThrow();
 		});
 
 		it("should throw when adding already active context", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const addContext = () => {
 				core.addContext(handle, "gameplay");
 			};
@@ -145,7 +158,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay", "ui");
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
 			core.removeContext(handle, "ui");
 
 			expect(core.hasContext(handle, "ui")).toBeFalse();
@@ -155,7 +168,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const removeContext = () => {
 				core.removeContext(handle, "ui");
 			};
@@ -167,7 +180,7 @@ describe("createCore", () => {
 			expect.assertions(2);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay", "ui");
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
 			const contexts = core.getContexts(handle);
 
 			expect(contexts).toContain("gameplay");
@@ -180,7 +193,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
 
@@ -191,7 +204,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
 			core.update(0.016);
@@ -203,7 +216,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.update(0.016);
 
 			expect(core.getState(handle).axis1d("throttle")).toBe(0);
@@ -213,7 +226,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.update(0.016);
 
 			expect(core.getState(handle).axis3d("look")).toBe(Vector3.zero);
@@ -223,7 +236,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
 			core.simulateAction(handle, "jump", true);
@@ -238,7 +251,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay", "ui");
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
 
@@ -262,7 +275,7 @@ describe("createCore", () => {
 				},
 			} satisfies Record<string, ContextConfig>;
 			const core = createCore({ actions, contexts });
-			const handle = core.register("gameplay", "combat");
+			const handle = core.register(new Instance("Folder"), "gameplay", "combat");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
 
@@ -285,7 +298,7 @@ describe("createCore", () => {
 				},
 			} satisfies Record<string, ContextConfig>;
 			const core = createCore({ actions, contexts });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.update(0.016);
 
 			expect(core.getState(handle).pressed("jump")).toBeFalse();
@@ -307,7 +320,7 @@ describe("createCore", () => {
 				},
 			} satisfies Record<string, ContextConfig>;
 			const core = createCore({ actions, contexts });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.update(0.016);
 
 			expect(core.getState(handle).pressed("unbound")).toBeFalse();
@@ -319,7 +332,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay", "ui");
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
 			core.simulateAction(handle, "move", new Vector2(1, 0));
 			core.update(0.016);
 
@@ -334,7 +347,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
 
@@ -345,7 +358,7 @@ describe("createCore", () => {
 			expect.assertions(2);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const direction = new Vector2(0.5, -0.3);
 			core.simulateAction(handle, "move", direction);
 			core.update(0.016);
@@ -362,8 +375,8 @@ describe("createCore", () => {
 			expect.assertions(2);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const first = core.register("gameplay");
-			const second = core.register("ui");
+			const first = core.register(new Instance("Folder"), "gameplay");
+			const second = core.register(new Instance("Folder"), "ui");
 			core.destroy();
 			const getFirstState = () => {
 				core.getState(first);
@@ -378,28 +391,28 @@ describe("createCore", () => {
 		});
 	});
 
-	describe("parent option", () => {
-		it("should work without parent", () => {
-			expect.assertions(1);
-
-			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
-			core.simulateAction(handle, "jump", true);
-			core.update(0.016);
-
-			expect(core.getState(handle).pressed("jump")).toBeTrue();
-		});
-
-		it("should pass parent to input instances", () => {
+	describe("register parent", () => {
+		it("should parent InputContexts under the given instance", () => {
 			expect.assertions(1);
 
 			const parent = new Instance("Folder");
-			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS, parent });
-			const handle = core.register("gameplay");
-			core.simulateAction(handle, "jump", true);
-			core.update(0.016);
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			core.register(parent, "gameplay");
 
-			expect(core.getState(handle).pressed("jump")).toBeTrue();
+			expect(parent.FindFirstChild("gameplay")).toBeDefined();
+		});
+
+		it("should support different parents per handle", () => {
+			expect.assertions(2);
+
+			const parentA = new Instance("Folder");
+			const parentB = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			core.register(parentA, "gameplay");
+			core.register(parentB, "ui");
+
+			expect(parentA.FindFirstChild("gameplay")).toBeDefined();
+			expect(parentB.FindFirstChild("ui")).toBeDefined();
 		});
 	});
 
@@ -408,7 +421,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 
 			// Verify update still works (contexts were created)
 			core.simulateAction(handle, "jump", true);
@@ -421,7 +434,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.unregister(handle);
 			const getState = () => {
 				core.getState(handle);
@@ -434,8 +447,8 @@ describe("createCore", () => {
 			expect.assertions(2);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const first = core.register("gameplay");
-			const second = core.register("ui");
+			const first = core.register(new Instance("Folder"), "gameplay");
+			const second = core.register(new Instance("Folder"), "ui");
 			core.destroy();
 			const getFirstState = () => {
 				core.getState(first);
@@ -453,7 +466,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.addContext(handle, "ui");
 
 			expect(core.hasContext(handle, "ui")).toBeTrue();
@@ -463,7 +476,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay", "ui");
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
 			core.removeContext(handle, "ui");
 
 			expect(core.hasContext(handle, "ui")).toBeFalse();
@@ -473,7 +486,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
 
@@ -486,7 +499,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const rebind = () => {
 				core.rebind(handle, "jump", [Enum.KeyCode.Space]);
 			};
@@ -498,7 +511,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const rebindAll = () => {
 				core.rebindAll(handle, {});
 			};
@@ -510,7 +523,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const resetBindings = () => {
 				core.resetBindings(handle, "jump");
 			};
@@ -522,7 +535,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const resetAllBindings = () => {
 				core.resetAllBindings(handle);
 			};
@@ -534,7 +547,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const serializeBindings = () => {
 				core.serializeBindings(handle);
 			};
@@ -546,7 +559,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const loadBindings = () => {
 				core.loadBindings(handle, {});
 			};
@@ -561,7 +574,7 @@ describe("createCore", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const register = () => {
-				core.register("nonexistent" as never);
+				core.register(new Instance("Folder"), "nonexistent" as never);
 			};
 
 			expect(register).toThrowWithMessage(ContextError, RegExp("unknown context"));
@@ -571,7 +584,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const addContext = () => {
 				core.addContext(handle, "gameplay");
 			};
@@ -583,7 +596,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			const removeContext = () => {
 				core.removeContext(handle, "ui");
 			};
@@ -595,7 +608,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register("gameplay");
+			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.unregister(handle);
 			const getState = () => {
 				core.getState(handle);
@@ -609,7 +622,7 @@ describe("createCore", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const register = () => {
-				core.register("nonexistent" as never);
+				core.register(new Instance("Folder"), "nonexistent" as never);
 			};
 
 			expect(register).toThrowWithMessage(FluxError, RegExp("unknown context"));
@@ -621,6 +634,141 @@ describe("createCore", () => {
 			const thrown = new ContextError("unknown context: nonexistent", "nonexistent");
 
 			expect(thrown.toString()).toBe("ContextError: unknown context: nonexistent");
+		});
+	});
+
+	describe("subscribe", () => {
+		it("should find existing InputContext instances", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			// Simulate server-created instances (full IAS tree)
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			expect(core.hasContext(handle, "gameplay")).toBeTrue();
+		});
+
+		it("should return cancel function that disconnects listeners", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			const context = new Instance("InputContext");
+			context.Name = "gameplay";
+			context.Parent = parent;
+
+			const [, cancel] = core.subscribe(parent, "gameplay");
+
+			expect(typeIs(cancel, "function")).toBeTrue();
+		});
+
+		it("should not destroy instances on unregister", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			const context = new Instance("InputContext");
+			context.Name = "gameplay";
+			context.Parent = parent;
+
+			const [handle] = core.subscribe(parent, "gameplay");
+			core.unregister(handle);
+
+			expect(parent.FindFirstChild("gameplay")).toBeDefined();
+		});
+
+		it("should auto-cancel listeners on unregister", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			const [handle, cancel] = core.subscribe(parent, "gameplay");
+			core.unregister(handle);
+
+			// cancel should be safe to call after unregister (no-op)
+			expect(() => {
+				cancel();
+			}).never.toThrow();
+		});
+
+		it("should find context via addContext on subscribed handle", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			// Server creates both contexts
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay", "ui");
+
+			const [handle] = core.subscribe(parent, "gameplay");
+			core.addContext(handle, "ui");
+
+			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+
+		it("should return cancel from addContext on subscribed handle", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay", "ui");
+
+			const [handle] = core.subscribe(parent, "gameplay");
+			const cancel = core.addContext(handle, "ui");
+
+			expect(() => {
+				cancel();
+			}).never.toThrow();
+		});
+
+		it("should find context added after subscribe via ChildAdded", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			// Subscribe before server creates instances
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			// Server creates instances after subscribe
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+			awaitDefer();
+
+			expect(core.hasContext(handle, "gameplay")).toBeTrue();
+		});
+
+		it("should find context via addContext ChildAdded on subscribed handle", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			// Server creates gameplay first
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			// addContext before server creates ui
+			core.addContext(handle, "ui");
+
+			// Server creates ui after addContext
+			serverCore.register(parent, "ui");
+			awaitDefer();
+
+			expect(core.hasContext(handle, "ui")).toBeTrue();
 		});
 	});
 });

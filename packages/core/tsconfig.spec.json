@@ -4,6 +4,7 @@
 		"tsBuildInfoFile": "out-test/tsconfig.tsbuildinfo",
 		"rootDir": null,
 		"rootDirs": ["src", "test"],
+		"customConditions": ["source"],
 		"outDir": "out-test"
 	},
 	"references": [
@@ -12,6 +13,9 @@
 		},
 		{
 			"path": "tsconfig.lib.json"
+		},
+		{
+			"path": "../test-utils/tsconfig.lib.json"
 		}
 	],
 	"include": ["src/**/*.spec.ts", "test/**/*", "../../types/**/*.d.ts"],

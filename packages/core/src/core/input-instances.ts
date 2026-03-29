@@ -4,23 +4,27 @@ import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingConfig, BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 
-/** Stores all IAS instances created for a single handle. */
+/** Stores all IAS instances for a single handle. */
 export interface InputInstanceData {
+	/** Active ChildAdded connections for cleanup. */
+	readonly connections: Array<RBXScriptConnection>;
 	/** Maps action names to their InputAction instances. */
 	readonly inputActions: Map<string, InputAction>;
 	/** Maps context names to their InputContext instances. */
 	readonly inputContexts: Map<string, InputContext>;
 	/** All created instances for bulk cleanup. */
 	readonly instances: Array<Instance>;
-	/** Parent instance for InputContext network ownership. */
-	readonly parent?: Instance;
+	/** Whether this handle owns (created) the instances. */
+	readonly owned: boolean;
+	/** Parent instance the InputContexts live under. */
+	readonly parent: Instance;
 }
 
 interface CreateInstancesOptions {
 	readonly actions: ActionMap;
 	readonly contextNames: ReadonlyArray<string>;
 	readonly contexts: Record<string, ContextConfig>;
-	readonly parent?: Instance;
+	readonly parent: Instance;
 }
 
 interface CreateActionOptions {
@@ -43,6 +47,11 @@ type BindingConfigKey = Extract<KeysOfUnion<BindingConfig>, string>;
 
 type BindingProperty = WritablePropertyNames<InputBinding>;
 
+interface FindInstancesOptions {
+	readonly actions: ActionMap;
+	readonly contextNames: ReadonlyArray<string>;
+	readonly parent: Instance;
+}
 /**
  * Creates all IAS instances for a handle's registered contexts.
  * @param options - Context names, context configs, and action configs.
@@ -66,18 +75,17 @@ export function createInputInstances(options: CreateInstancesOptions): InputInst
 			instances,
 		});
 
-		if (parent !== undefined) {
-			inputContext.Parent = parent;
-		}
-
+		inputContext.Parent = parent;
 		inputContexts.set(contextName, inputContext);
 	}
 
 	return {
+		connections: [],
 		inputActions,
 		inputContexts,
 		instances,
-		...(parent !== undefined && { parent }),
+		owned: true,
+		parent,
 	};
 }
 /**
@@ -85,10 +93,61 @@ export function createInputInstances(options: CreateInstancesOptions): InputInst
  * @param data - The instance data to clean up.
  */
 export function destroyInputInstances(data: InputInstanceData): void {
+	for (const connection of data.connections) {
+		connection.Disconnect();
+	}
+
+	if (!data.owned) {
+		return;
+	}
+
 	for (const instance of data.instances) {
 		instance.Destroy();
 	}
 }
+
+/**
+ * Finds existing IAS instances under the parent (server-created).
+ * Uses FindFirstChild for already-present instances and ChildAdded for pending ones.
+ * @param options - Context names and parent to search under.
+ * @returns The discovered instance data and connections for cleanup.
+ */
+export function findInputInstances(options: FindInstancesOptions): InputInstanceData {
+	const { actions, contextNames, parent } = options;
+	const inputActions = new Map<string, InputAction>();
+	const inputContexts = new Map<string, InputContext>();
+	const connections = new Array<RBXScriptConnection>();
+
+	for (const contextName of contextNames) {
+		const existing = parent.FindFirstChild(contextName);
+		if (existing !== undefined && classIs(existing, "InputContext")) {
+			inputContexts.set(contextName, existing);
+			collectActions(existing, actions, inputActions);
+			continue;
+		}
+
+		const connection = parent.ChildAdded.Connect((child) => {
+			if (child.Name !== contextName || !classIs(child, "InputContext")) {
+				return;
+			}
+
+			inputContexts.set(contextName, child);
+			collectActions(child, actions, inputActions);
+		});
+
+		connections.push(connection);
+	}
+
+	return {
+		connections,
+		inputActions,
+		inputContexts,
+		instances: [],
+		owned: false,
+		parent,
+	};
+}
+
 /**
  * Creates an InputContext instance for a newly added context.
  * @param contextName - The name of the context to add.
@@ -110,12 +169,10 @@ export function addContextInstances(
 		instances: data.instances,
 	});
 
-	if (data.parent !== undefined) {
-		inputContext.Parent = data.parent;
-	}
-
+	inputContext.Parent = data.parent;
 	data.inputContexts.set(contextName, inputContext);
 }
+
 /**
  * Sets the Enabled property on an InputContext instance.
  * @param data - The instance data containing context instances.
@@ -130,6 +187,22 @@ export function setContextEnabled(
 	const inputContext = data.inputContexts.get(contextName);
 	if (inputContext !== undefined) {
 		inputContext.Enabled = enabled;
+	}
+}
+
+function collectActions(
+	inputContext: InputContext,
+	actions: ActionMap,
+	inputActions: Map<string, InputAction>,
+): void {
+	for (const child of inputContext.GetChildren()) {
+		if (
+			classIs(child, "InputAction") &&
+			actions[child.Name] !== undefined &&
+			!inputActions.has(child.Name)
+		) {
+			inputActions.set(child.Name, child);
+		}
 	}
 }
 

@@ -1,6 +1,9 @@
 {
 	"name": "test-utils",
 	"tree": {
-		"$path": "out"
+		"$path": "out",
+		"loaders": {
+			"$path": "loaders"
+		}
 	}
 }
