@@ -1,5 +1,4 @@
 import type {
-	ActionConfig,
 	ActionMap,
 	AllActions,
 	AxisActions,
@@ -29,8 +28,10 @@ export interface ActionValueMap {
  * @template Actions - The action map containing the action.
  * @template A - The action name to resolve.
  */
-export type ActionValue<Actions extends ActionMap, A extends AllActions<Actions>> =
-	Actions[A] extends ActionConfig<infer T> ? ActionValueMap[T] : never;
+export type ActionValue<
+	Actions extends ActionMap,
+	A extends AllActions<Actions>,
+> = ActionValueMap[Actions[A]["type"]];
 
 /**
  * Query interface for input state per handle.

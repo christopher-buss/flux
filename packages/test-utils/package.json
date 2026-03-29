@@ -11,6 +11,12 @@
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
 	"exports": {
+		".": {
+			"source": "./src/index.ts",
+			"import": "./out/init.luau",
+			"types": "./src/index.ts"
+		},
+		"./loaders/*": "./loaders/*",
 		"./out/*": "./out/*"
 	},
 	"main": "./dist/init.luau",

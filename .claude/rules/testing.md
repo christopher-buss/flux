@@ -26,8 +26,12 @@ Test behavior, not implementation.
 - No 1:1 mapping between test files and implementation files
 - Code coverage must be 100% - no untested code allowed
 
-Place tests in `<file-name>.spec.ts` files next to the implementation file
+Place tests in `<file-name>.spec.ts` files next to the implementation file.
 Example: `src/shared/modules/foo/bar.ts` → `src/shared/modules/foo/bar.spec.ts`
+
+All public API must also have `.spec-d.ts` type tests verifying compile-time
+constraints (rejected arguments, inferred return types) using `expectTypeOf`
+from `@rbxts/jest-utils/type-testing`.
 
 Pattern:
 

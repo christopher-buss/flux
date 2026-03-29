@@ -4,8 +4,12 @@ See `docs/core-api-proposal.md` for the full API design.
 
 ## Constraints
 
-**InputContexts Ownership**: InputContext instances MUST be descendants of Player
-instance in DataModel for Roblox network ownership.
+**InputContexts Ownership**: For server-authoritative experiences, InputContexts
+must be descendants of a Player so the engine knows ownership. Use
+`core.register(parent, ...)` on the server to create instances that replicate.
+Use `core.subscribe(parent, ...)` on the client to find server-created instances
+via FindFirstChild + ChildAdded. Use `core.register(parent, ...)` on the client
+for local-only input.
 
 **Context Priority**: Lower numbers = lower priority. UI contexts typically use
 high priority + sink to block gameplay input.

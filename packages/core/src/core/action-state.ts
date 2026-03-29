@@ -294,8 +294,8 @@ function updateAction(entries: Map<string, ActionEntry>, options: UpdateActionOp
 
 	if (options.triggerState !== entry.triggerState) {
 		entry.previousDuration = entry.duration;
-		entry.duration = options.deltaTime;
-	} else {
+		entry.duration = options.triggerState === "none" ? 0 : options.deltaTime;
+	} else if (options.triggerState !== "none") {
 		entry.duration += options.deltaTime;
 	}
 

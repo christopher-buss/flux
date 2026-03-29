@@ -10,12 +10,16 @@ export {
 export { defineContexts } from "./contexts/define";
 
 export { createActionState } from "./core/action-state";
-export type { InternalActionState, UpdateActionOptions } from "./core/action-state";
-export { createHandleFactory } from "./core/handle-factory";
 
+export type { InternalActionState, UpdateActionOptions } from "./core/action-state";
+export { createCore } from "./core/create-core";
+export type { CreateCoreOptions } from "./core/create-core";
+export { createHandleFactory } from "./core/handle-factory";
 export type { HandleFactory } from "./core/handle-factory";
+
 export { processPipeline } from "./core/pipeline";
 export type { PipelineOptions, PipelineResult } from "./core/pipeline";
+export { ContextError, FluxError, HandleError } from "./errors";
 export { deadZone, negate, scale } from "./modifiers";
 export type { Modifier, ModifierContext, ModifierValue } from "./modifiers";
 export { blocker, doubleTap, explicit, hold, implicit, tap } from "./triggers";
@@ -40,7 +44,18 @@ export type {
 	Direction3dActions,
 	ViewportPositionActions,
 } from "./types/actions";
-export type { BindingLike, BindingState } from "./types/bindings";
+export type {
+	BindingConfig,
+	BindingForAction,
+	BindingLike,
+	BindingState,
+	BoolBindingConfig,
+	Direction1dBindingConfig,
+	Direction2dBindingConfig,
+	Direction3dBindingConfig,
+	TypedBindings,
+	ViewportPositionBindingConfig,
+} from "./types/bindings";
 export type { ContextConfig } from "./types/contexts";
 export type { FluxCore, InputHandle } from "./types/core";
 export type { ActionState, ActionValue, ActionValueMap } from "./types/state";

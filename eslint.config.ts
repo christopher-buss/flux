@@ -20,6 +20,17 @@ export default isentinel(
 		typescript: {
 			overridesTypeAware: {
 				"ts/no-deprecated": "error",
+				"ts/only-throw-error": [
+					"error",
+					{
+						allow: [
+							{ name: "Error", from: "file" },
+							{ name: "FluxError", from: "file" },
+							{ name: "ContextError", from: "file" },
+							{ name: "HandleError", from: "file" },
+						],
+					},
+				],
 			},
 			parserOptionsTypeAware: {
 				projectService: true,
@@ -56,6 +67,13 @@ export default isentinel(
 		files: [GLOB_MARKDOWN_CODE],
 		rules: {
 			"ts/no-unused-private-class-members": "off",
+		},
+	},
+	{
+		name: "project/type-tests",
+		files: ["**/*.spec-d.ts"],
+		rules: {
+			"max-lines-per-function": "off",
 		},
 	},
 );
