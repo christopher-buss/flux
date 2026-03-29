@@ -43,6 +43,8 @@ interface CreateContextOptions {
 	readonly instances: Array<Instance>;
 }
 
+const INPUT_FOLDER_NAME = "input";
+
 type BindingConfigKey = Extract<KeysOfUnion<BindingConfig>, string>;
 
 type BindingProperty = WritablePropertyNames<InputBinding>;
@@ -52,6 +54,13 @@ interface FindInstancesOptions {
 	readonly contextNames: ReadonlyArray<string>;
 	readonly parent: Instance;
 }
+interface SearchState {
+	readonly actions: ActionMap;
+	readonly connections: Array<RBXScriptConnection>;
+	readonly inputActions: Map<string, InputAction>;
+	readonly inputContexts: Map<string, InputContext>;
+}
+
 /**
  * Creates all IAS instances for a handle's registered contexts.
  * @param options - Context names, context configs, and action configs.
@@ -62,6 +71,7 @@ export function createInputInstances(options: CreateInstancesOptions): InputInst
 	const inputActions = new Map<string, InputAction>();
 	const inputContexts = new Map<string, InputContext>();
 	const instances = new Array<Instance>();
+	const inputFolder = getOrCreateInputFolder(parent);
 
 	for (const contextName of contextNames) {
 		const contextConfig = contexts[contextName];
@@ -75,7 +85,7 @@ export function createInputInstances(options: CreateInstancesOptions): InputInst
 			instances,
 		});
 
-		inputContext.Parent = parent;
+		inputContext.Parent = inputFolder;
 		inputContexts.set(contextName, inputContext);
 	}
 
@@ -107,45 +117,31 @@ export function destroyInputInstances(data: InputInstanceData): void {
 }
 
 /**
- * Finds existing IAS instances under the parent (server-created).
+ * Finds existing IAS instances under the parent's "input" folder (server-created).
  * Uses FindFirstChild for already-present instances and ChildAdded for pending ones.
  * @param options - Context names and parent to search under.
  * @returns The discovered instance data and connections for cleanup.
  */
 export function findInputInstances(options: FindInstancesOptions): InputInstanceData {
 	const { actions, contextNames, parent } = options;
-	const inputActions = new Map<string, InputAction>();
-	const inputContexts = new Map<string, InputContext>();
-	const connections = new Array<RBXScriptConnection>();
+	const state = createSearchState(actions);
 
-	for (const contextName of contextNames) {
-		const existing = parent.FindFirstChild(contextName);
-		if (existing !== undefined && classIs(existing, "InputContext")) {
-			inputContexts.set(contextName, existing);
-			collectActions(existing, actions, inputActions);
-			continue;
-		}
-
+	const folder = parent.FindFirstChild(INPUT_FOLDER_NAME);
+	if (folder !== undefined && classIs(folder, "Folder")) {
+		searchForContexts(folder, contextNames, state);
+	} else {
 		const connection = parent.ChildAdded.Connect((child) => {
-			if (child.Name !== contextName || !classIs(child, "InputContext")) {
+			if (child.Name !== INPUT_FOLDER_NAME || !classIs(child, "Folder")) {
 				return;
 			}
 
-			inputContexts.set(contextName, child);
-			collectActions(child, actions, inputActions);
+			searchForContexts(child, contextNames, state);
 		});
 
-		connections.push(connection);
+		state.connections.push(connection);
 	}
 
-	return {
-		connections,
-		inputActions,
-		inputContexts,
-		instances: [],
-		owned: false,
-		parent,
-	};
+	return { ...state, instances: [], owned: false, parent };
 }
 
 /**
@@ -169,7 +165,8 @@ export function addContextInstances(
 		instances: data.instances,
 	});
 
-	inputContext.Parent = data.parent;
+	const inputFolder = getOrCreateInputFolder(data.parent);
+	inputContext.Parent = inputFolder;
 	data.inputContexts.set(contextName, inputContext);
 }
 
@@ -190,6 +187,32 @@ export function setContextEnabled(
 	}
 }
 
+/**
+ * Finds or creates the intermediary "input" folder under the given instance.
+ * @param parent - The instance to place the folder under.
+ * @returns The existing or newly created "input" folder.
+ */
+function getOrCreateInputFolder(parent: Instance): Folder {
+	const existing = parent.FindFirstChild(INPUT_FOLDER_NAME);
+	if (existing !== undefined && classIs(existing, "Folder")) {
+		return existing;
+	}
+
+	const folder = new Instance("Folder");
+	folder.Name = INPUT_FOLDER_NAME;
+	folder.Parent = parent;
+	return folder;
+}
+
+function createSearchState(actions: ActionMap): SearchState {
+	return {
+		actions,
+		connections: new Array<RBXScriptConnection>(),
+		inputActions: new Map<string, InputAction>(),
+		inputContexts: new Map<string, InputContext>(),
+	};
+}
+
 function collectActions(
 	inputContext: InputContext,
 	actions: ActionMap,
@@ -203,6 +226,32 @@ function collectActions(
 		) {
 			inputActions.set(child.Name, child);
 		}
+	}
+}
+
+function searchForContexts(
+	folder: Instance,
+	contextNames: ReadonlyArray<string>,
+	state: SearchState,
+): void {
+	for (const contextName of contextNames) {
+		const existing = folder.FindFirstChild(contextName);
+		if (existing !== undefined && classIs(existing, "InputContext")) {
+			state.inputContexts.set(contextName, existing);
+			collectActions(existing, state.actions, state.inputActions);
+			continue;
+		}
+
+		const connection = folder.ChildAdded.Connect((child) => {
+			if (child.Name !== contextName || !classIs(child, "InputContext")) {
+				return;
+			}
+
+			state.inputContexts.set(contextName, child);
+			collectActions(child, state.actions, state.inputActions);
+		});
+
+		state.connections.push(connection);
 	}
 }
 

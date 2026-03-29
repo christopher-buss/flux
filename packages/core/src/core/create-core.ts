@@ -304,15 +304,19 @@ function subscribeHandle<T extends ActionMap>(
 	return [handle, cancel];
 }
 
-function findAndAddContext(contextName: string, data: InputInstanceData): void {
-	const { connections, inputContexts, parent } = data;
-	const existing = parent.FindFirstChild(contextName);
+function findContextInFolder(
+	contextName: string,
+	folder: Folder,
+	inputContexts: Map<string, InputContext>,
+	connections: Array<RBXScriptConnection>,
+): void {
+	const existing = folder.FindFirstChild(contextName);
 	if (existing !== undefined && classIs(existing, "InputContext")) {
 		inputContexts.set(contextName, existing);
 		return;
 	}
 
-	const connection = parent.ChildAdded.Connect((child) => {
+	const connection = folder.ChildAdded.Connect((child) => {
 		if (child.Name !== contextName || !classIs(child, "InputContext")) {
 			return;
 		}
@@ -321,4 +325,24 @@ function findAndAddContext(contextName: string, data: InputInstanceData): void {
 	});
 
 	connections.push(connection);
+}
+
+function findAndAddContext(contextName: string, data: InputInstanceData): void {
+	const { connections, inputContexts, parent } = data;
+
+	const folder = parent.FindFirstChild("input");
+	if (folder !== undefined && classIs(folder, "Folder")) {
+		findContextInFolder(contextName, folder, inputContexts, connections);
+		return;
+	}
+
+	const folderConnection = parent.ChildAdded.Connect((child) => {
+		if (child.Name !== "input" || !classIs(child, "Folder")) {
+			return;
+		}
+
+		findContextInFolder(contextName, child, inputContexts, connections);
+	});
+
+	connections.push(folderConnection);
 }

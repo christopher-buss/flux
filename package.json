@@ -19,7 +19,7 @@
 		"lint": "node scripts/lint.ts",
 		"lint:ci": "eslint --cache --cache-strategy content",
 		"rojo-sync": "node scripts/rojo-sync.ts",
-		"test": "FORCE_COLOR=1 pnpm -r --stream test",
+		"test": "COLUMNS=${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} FORCE_COLOR=1 pnpm -r --stream test",
 		"typecheck": "tsgo --build --emitDeclarationOnly"
 	},
 	"devDependencies": {

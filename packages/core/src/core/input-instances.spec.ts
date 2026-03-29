@@ -188,8 +188,25 @@ describe("createInputInstances", () => {
 		expect(uiContext.Sink).toBeTrue();
 	});
 
-	it("should set Parent on InputContext when parent is provided", () => {
-		expect.assertions(1);
+	it("should create an 'input' folder under the parent", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		const inputFolder = parent.FindFirstChild("input");
+
+		expect(inputFolder).toBeDefined();
+		expect(classIs(inputFolder!, "Folder")).toBeTrue();
+	});
+
+	it("should parent InputContext under the 'input' folder", () => {
+		expect.assertions(2);
 
 		const parent = new Instance("Folder");
 		const data = createInputInstances({
@@ -199,10 +216,37 @@ describe("createInputInstances", () => {
 			parent,
 		});
 
+		const inputFolder = parent.FindFirstChild("input");
+		assert(inputFolder);
+
 		const gameplayContext = data.inputContexts.get("gameplay");
 		assert(gameplayContext);
 
-		expect(gameplayContext.Parent).toBe(parent);
+		expect(gameplayContext.Parent).toBe(inputFolder);
+		expect(inputFolder.FindFirstChild("gameplay")).toBeDefined();
+	});
+
+	it("should reuse existing 'input' folder on same parent", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["ui"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		const children = parent.GetChildren().filter((child) => child.Name === "input");
+
+		expect(children.size()).toBe(1);
 	});
 
 	it("should mark data as owned", () => {
@@ -253,7 +297,7 @@ describe("addContextInstances", () => {
 		expect(data.inputContexts.has("ui")).toBeTrue();
 	});
 
-	it("should set Parent on added context when parent is stored", () => {
+	it("should parent added context under the 'input' folder", () => {
 		expect.assertions(1);
 
 		const parent = new Instance("Folder");
@@ -268,7 +312,9 @@ describe("addContextInstances", () => {
 		const uiContext = data.inputContexts.get("ui");
 		assert(uiContext);
 
-		expect(uiContext.Parent).toBe(parent);
+		const inputFolder = parent.FindFirstChild("input");
+
+		expect(uiContext.Parent).toBe(inputFolder);
 	});
 });
 
@@ -381,7 +427,10 @@ describe("findInputInstances", () => {
 
 		destroyInputInstances(found);
 
-		expect(parent.FindFirstChild("gameplay")).toBeDefined();
+		const inputFolder = parent.FindFirstChild("input");
+		assert(inputFolder);
+
+		expect(inputFolder.FindFirstChild("gameplay")).toBeDefined();
 	});
 
 	it("should find context added after subscribe via ChildAdded", () => {
@@ -401,6 +450,9 @@ describe("findInputInstances", () => {
 			contexts: TEST_CONTEXTS,
 			parent,
 		});
+		// First defer fires the folder ChildAdded, second fires the context
+		// ChildAdded
+		awaitDefer();
 		awaitDefer();
 
 		expect(found.inputContexts.has("gameplay")).toBeTrue();
@@ -411,16 +463,21 @@ describe("findInputInstances", () => {
 		expect.assertions(1);
 
 		const parent = new Instance("Folder");
+		// Pre-create the "input" folder so we test context-level filtering
+		const inputFolder = new Instance("Folder");
+		inputFolder.Name = "input";
+		inputFolder.Parent = parent;
+
 		const found = findInputInstances({
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
 			parent,
 		});
 
-		// Add a non-InputContext child — should be ignored
-		const folder = new Instance("Folder");
-		folder.Name = "gameplay";
-		folder.Parent = parent;
+		// Add a non-InputContext child to the input folder — should be ignored
+		const decoy = new Instance("Folder");
+		decoy.Name = "gameplay";
+		decoy.Parent = inputFolder;
 		awaitDefer();
 
 		expect(found.inputContexts.has("gameplay")).toBeFalse();
@@ -458,7 +515,9 @@ describe("findInputInstances", () => {
 		});
 
 		// Add non-InputAction child to the InputContext
-		const gameplayContext = parent.FindFirstChild("gameplay");
+		const inputFolder = parent.FindFirstChild("input");
+		assert(inputFolder);
+		const gameplayContext = inputFolder.FindFirstChild("gameplay");
 		assert(gameplayContext);
 		const folder = new Instance("Folder");
 		folder.Name = "notAnAction";
@@ -477,6 +536,11 @@ describe("findInputInstances", () => {
 		expect.assertions(1);
 
 		const parent = new Instance("Folder");
+		// Pre-create the "input" folder so we test context-level filtering
+		const inputFolder = new Instance("Folder");
+		inputFolder.Name = "input";
+		inputFolder.Parent = parent;
+
 		const found = findInputInstances({
 			actions: TEST_ACTIONS,
 			contextNames: ["gameplay"],
@@ -486,7 +550,7 @@ describe("findInputInstances", () => {
 		// Add an InputContext with wrong name — should be ignored
 		const context = new Instance("InputContext");
 		context.Name = "other";
-		context.Parent = parent;
+		context.Parent = inputFolder;
 		awaitDefer();
 
 		expect(found.inputContexts.has("gameplay")).toBeFalse();

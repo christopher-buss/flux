@@ -5,6 +5,10 @@ settings:
   excludeLinksFromLockfile: false
 
 catalogs:
+  build:
+    '@isentinel/roblox-ts':
+      specifier: 3.1.3
+      version: 3.1.3
   cli:
     pncat:
       specifier: 0.10.4
@@ -135,9 +139,6 @@ catalogs:
       specifier: 5.4.4
       version: 5.4.4
 
-overrides:
-  '@isentinel/roblox-ts': link:D:\roblox\halcyon\project-halcyon\tools\roblox-ts
-
 pnpmfileChecksum: sha256-ZfwGjIvQgPR9mEJg5iihJauZ5iv1Ogj5lI/dgVj7pgI=
 
 importers:
@@ -157,8 +158,8 @@ importers:
         specifier: catalog:test
         version: 0.1.4(jiti@2.6.1)
       '@isentinel/roblox-ts':
-        specifier: link:D:\roblox\halcyon\project-halcyon\tools\roblox-ts
-        version: link:../../halcyon/project-halcyon/tools/roblox-ts
+        specifier: catalog:build
+        version: 3.1.3
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -230,8 +231,8 @@ importers:
         version: 1.6.0
     devDependencies:
       '@isentinel/roblox-ts':
-        specifier: link:D:\roblox\halcyon\project-halcyon\tools\roblox-ts
-        version: link:../../../halcyon/project-halcyon/tools/roblox-ts
+        specifier: catalog:build
+        version: 3.1.3
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -264,8 +265,8 @@ importers:
         specifier: catalog:test
         version: 0.1.4(jiti@2.6.1)
       '@isentinel/roblox-ts':
-        specifier: link:D:\roblox\halcyon\project-halcyon\tools\roblox-ts
-        version: link:../../../../halcyon/project-halcyon/tools/roblox-ts
+        specifier: catalog:build
+        version: 3.1.3
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -309,8 +310,8 @@ importers:
         specifier: catalog:test
         version: 0.1.4(jiti@2.6.1)
       '@isentinel/roblox-ts':
-        specifier: link:D:\roblox\halcyon\project-halcyon\tools\roblox-ts
-        version: link:../../../../halcyon/project-halcyon/tools/roblox-ts
+        specifier: catalog:build
+        version: 3.1.3
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -1061,6 +1062,10 @@ packages:
   '@isentinel/jest-roblox@0.1.4':
     resolution: {integrity: sha512-bU96P1oJZ7EGVxKstYj/2Hk3byOWCUnvUP3W3SFKCNRdHvwu233ECNyvPYUnuHo0UJtL+CpFXQAbUbW1IcOjFg==}
     engines: {node: '>=24.10.0'}
+    hasBin: true
+
+  '@isentinel/roblox-ts@3.1.3':
+    resolution: {integrity: sha512-ELLw3XVtXJ9/3mV1Qu3YX27ZOAUi8z22sqUxJpsesYKBrJIpOSyOj0Jbm4GK4FPVFEwLGAz3jK84PoGzBXfjZw==}
     hasBin: true
 
   '@isentinel/stylua@2.1.0-esm.3':
@@ -3168,6 +3173,10 @@ packages:
     resolution: {integrity: sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==}
     engines: {node: '>=0.4.x'}
 
+  fs-extra@11.3.2:
+    resolution: {integrity: sha512-Xr9F6z6up6Ws+NjzMCZc6WXg2YFRlrLP9NQDO3VQrWrfiojdhS56TzueT88ze0uBdCTwEIhQ3ptnmKeWGFAe0A==}
+    engines: {node: '>=14.14'}
+
   fs-extra@11.3.3:
     resolution: {integrity: sha512-VWSRii4t0AFm6ixFFmLLx1t7wS1gh+ckoa84aOeapGum0h+EZd1EhEumSB+ZdDLnEPuucsVB9oB7cxJHap6Afg==}
     engines: {node: '>=14.14'}
@@ -3469,6 +3478,10 @@ packages:
 
   keyv@5.6.0:
     resolution: {integrity: sha512-CYDD3SOtsHtyXeEORYRx2qBtpDJFjRTGXUtmNEMGyzYOKj1TE3tycdlho7kA1Ufx9OYWZzg52QFBGALTirzDSw==}
+
+  kleur@4.1.5:
+    resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
+    engines: {node: '>=6'}
 
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
@@ -5151,6 +5164,19 @@ snapshots:
       - magicast
       - utf-8-validate
 
+  '@isentinel/roblox-ts@3.1.3':
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      '@roblox-ts/luau-ast': 2.0.1
+      '@roblox-ts/path-translator': 1.1.0
+      '@roblox-ts/rojo-resolver': 1.1.0
+      chokidar: 4.0.3
+      fs-extra: 11.3.2
+      kleur: 4.1.5
+      resolve: 1.22.11
+      typescript: 5.9.3
+      yargs: 18.0.0
+
   '@isentinel/stylua@2.1.0-esm.3':
     dependencies:
       rollup: 4.54.0
@@ -5948,7 +5974,6 @@ snapshots:
     dependencies:
       ajv: 8.17.1
       fs-extra: 11.3.3
-    optional: true
 
   '@roblox-ts/rojo-resolver@1.1.0':
     dependencies:
@@ -7503,6 +7528,12 @@ snapshots:
 
   format@0.2.2: {}
 
+  fs-extra@11.3.2:
+    dependencies:
+      graceful-fs: 4.2.11
+      jsonfile: 6.2.0
+      universalify: 2.0.1
+
   fs-extra@11.3.3:
     dependencies:
       graceful-fs: 4.2.11
@@ -7749,6 +7780,8 @@ snapshots:
   keyv@5.6.0:
     dependencies:
       '@keyv/serialize': 1.1.1
+
+  kleur@4.1.5: {}
 
   levn@0.4.1:
     dependencies:

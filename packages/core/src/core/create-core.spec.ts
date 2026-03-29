@@ -392,14 +392,18 @@ describe("createCore", () => {
 	});
 
 	describe("register parent", () => {
-		it("should parent InputContexts under the given instance", () => {
-			expect.assertions(1);
+		it("should parent InputContexts under the 'input' folder", () => {
+			expect.assertions(2);
 
 			const parent = new Instance("Folder");
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			core.register(parent, "gameplay");
 
-			expect(parent.FindFirstChild("gameplay")).toBeDefined();
+			const inputFolder = parent.FindFirstChild("input");
+			assert(inputFolder);
+
+			expect(classIs(inputFolder, "Folder")).toBeTrue();
+			expect(inputFolder.FindFirstChild("gameplay")).toBeDefined();
 		});
 
 		it("should support different parents per handle", () => {
@@ -411,8 +415,13 @@ describe("createCore", () => {
 			core.register(parentA, "gameplay");
 			core.register(parentB, "ui");
 
-			expect(parentA.FindFirstChild("gameplay")).toBeDefined();
-			expect(parentB.FindFirstChild("ui")).toBeDefined();
+			const folderA = parentA.FindFirstChild("input");
+			assert(folderA);
+			const folderB = parentB.FindFirstChild("input");
+			assert(folderB);
+
+			expect(folderA.FindFirstChild("gameplay")).toBeDefined();
+			expect(folderB.FindFirstChild("ui")).toBeDefined();
 		});
 	});
 
@@ -674,14 +683,18 @@ describe("createCore", () => {
 			const parent = new Instance("Folder");
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 
+			const inputFolder = new Instance("Folder");
+			inputFolder.Name = "input";
+			inputFolder.Parent = parent;
+
 			const context = new Instance("InputContext");
 			context.Name = "gameplay";
-			context.Parent = parent;
+			context.Parent = inputFolder;
 
 			const [handle] = core.subscribe(parent, "gameplay");
 			core.unregister(handle);
 
-			expect(parent.FindFirstChild("gameplay")).toBeDefined();
+			expect(inputFolder.FindFirstChild("gameplay")).toBeDefined();
 		});
 
 		it("should auto-cancel listeners on unregister", () => {
@@ -744,6 +757,9 @@ describe("createCore", () => {
 			// Server creates instances after subscribe
 			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			serverCore.register(parent, "gameplay");
+			// First defer fires the folder ChildAdded, second fires the context
+			// ChildAdded
+			awaitDefer();
 			awaitDefer();
 
 			expect(core.hasContext(handle, "gameplay")).toBeTrue();
@@ -766,6 +782,27 @@ describe("createCore", () => {
 
 			// Server creates ui after addContext
 			serverCore.register(parent, "ui");
+			awaitDefer();
+
+			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+
+		it("should find context via addContext when input folder does not yet exist", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			// Subscribe before server creates anything — no input folder exists
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			// addContext while input folder still doesn't exist
+			core.addContext(handle, "ui");
+
+			// Server creates both contexts (creates the input folder)
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay", "ui");
+			awaitDefer();
 			awaitDefer();
 
 			expect(core.hasContext(handle, "ui")).toBeTrue();
