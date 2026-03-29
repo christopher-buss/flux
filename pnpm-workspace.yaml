@@ -18,7 +18,7 @@ packages:
 
 catalogs:
   build:
-    "@isentinel/roblox-ts": 3.1.3
+    "@isentinel/roblox-ts": 3.1.4
   cli:
     pncat: 0.10.4
   dev:
@@ -26,7 +26,7 @@ catalogs:
   lint:
     "@eslint/config-inspector": 1.4.2
     "@isentinel/eslint-config": 5.0.0-beta.9
-    "@isentinel/hooks": 1.2.5
+    "@isentinel/hooks": 1.2.6
     eslint: 9.39.2
     eslint-plugin-jest: 29.15.0
     eslint-plugin-jest-extended: 3.0.1
