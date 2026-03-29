@@ -3,19 +3,13 @@
 	"compilerOptions": {
 		"tsBuildInfoFile": "out/tsconfig.tsbuildinfo",
 		"rootDir": "src",
+		"customConditions": ["source"],
 		"paths": {
-			"@flux/core": ["./node_modules/@flux/core/out"],
-			"@flux/core/*": ["./node_modules/@flux/core/out/*"],
 			"shared/*": ["./src/shared/*"]
 		},
 		"typeRoots": ["./node_modules/@rbxts", "./node_modules/@flux"],
 		"types": ["compiler-types"],
 		"outDir": "out"
 	},
-	"references": [
-		{
-			"path": "../packages/core/tsconfig.lib.json"
-		}
-	],
 	"include": ["src/**/*.ts", "../types/**/*.d.ts"]
 }

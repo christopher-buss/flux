@@ -10,7 +10,8 @@
 	],
 	"type": "commonjs",
 	"scripts": {
-		"build": "rbxtsc --build .\\tsconfig.game.json --type \"game\" && rojo build e2e.project.json -o flux-e2e.rbxl",
+		"build": "rbxtsc --project ./tsconfig.game.json --type game && rojo build e2e.project.json -o flux-e2e.rbxl",
+		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
 		"typecheck": "tsgo --noEmit --project tsconfig.game.json"
 	},
 	"dependencies": {
@@ -23,6 +24,7 @@
 		"@rbxts/compiler-types": "catalog:types",
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
+		"rimraf": "catalog:node",
 		"typescript": "catalog:tsc"
 	}
 }

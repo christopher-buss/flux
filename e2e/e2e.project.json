@@ -31,6 +31,12 @@
 				"$path": "out/shared"
 			}
 		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"server": {
+				"$path": "out/server"
+			}
+		},
 		"Workspace": {
 			"$className": "Workspace",
 			"$path": "assets/models/workspace",

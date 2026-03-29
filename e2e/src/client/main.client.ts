@@ -5,8 +5,8 @@ import { actions } from "shared/actions";
 import { contexts } from "shared/contexts";
 
 const player = Players.LocalPlayer;
-const core = createCore({ actions, contexts, parent: player });
-const handle = core.register("gameplay");
+const core = createCore({ actions, contexts });
+const [handle] = core.subscribe(player, "gameplay");
 
 const activeContexts = new Set<string>();
 
@@ -82,7 +82,7 @@ RunService.Heartbeat.Connect((deltaTime) => {
 
 	const state = core.getState(handle);
 
-	if (state.pressed("toggleContext")) {
+	if (state.justPressed("toggleContext")) {
 		toggleContext();
 	}
 
