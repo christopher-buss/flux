@@ -12,7 +12,9 @@
 	"scripts": {
 		"build": "rbxtsc --project ./tsconfig.game.json --type game && rojo build default.project.json -o flux-e2e-default.rbxl",
 		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
-		"typecheck": "tsgo --noEmit --project tsconfig.game.json"
+		"serve": "rojo serve default.project.json",
+		"typecheck": "tsgo --noEmit --project tsconfig.game.json",
+		"watch": "rbxtsc --watch --project ./tsconfig.game.json --type game"
 	},
 	"dependencies": {
 		"@flux/core": "workspace:@rbxts/flux@*",
