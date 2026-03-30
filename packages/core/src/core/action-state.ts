@@ -125,19 +125,19 @@ function getEntry(entries: Map<string, ActionEntry>, action: string): ActionEntr
 }
 
 function isPressed(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).value === true;
+	return getEntry(entries, action).triggerState === "triggered";
 }
 
 function wasJustPressed(entries: Map<string, ActionEntry>, action: string): boolean {
 	const entry = getEntry(entries, action);
 
-	return entry.value === true && entry.previousValue === false;
+	return entry.triggerState === "triggered" && entry.previousTriggerState !== "triggered";
 }
 
 function wasJustReleased(entries: Map<string, ActionEntry>, action: string): boolean {
 	const entry = getEntry(entries, action);
 
-	return entry.value === false && entry.previousValue === true;
+	return entry.previousTriggerState === "triggered" && entry.triggerState !== "triggered";
 }
 
 function getAxis1d(entries: Map<string, ActionEntry>, action: string): number {
@@ -213,6 +213,16 @@ function isActionEnabled(entries: Map<string, ActionEntry>, action: string): boo
 	return getEntry(entries, action).enabled;
 }
 
+function isRawPressed(entries: Map<string, ActionEntry>, action: string): boolean {
+	return getEntry(entries, action).value === true;
+}
+
+function wasRawJustPressed(entries: Map<string, ActionEntry>, action: string): boolean {
+	const entry = getEntry(entries, action);
+
+	return entry.value === true && entry.previousValue === false;
+}
+
 // eslint-disable-next-line max-lines-per-function -- thin delegation methods
 function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>): ActionState<T> {
 	return {
@@ -269,6 +279,12 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 		},
 		previousDuration(action) {
 			return getPreviousDuration(entries, action);
+		},
+		rawJustPressed(action) {
+			return wasRawJustPressed(entries, action);
+		},
+		rawPressed(action) {
+			return isRawPressed(entries, action);
 		},
 		triggered(action) {
 			return isTriggered(entries, action);

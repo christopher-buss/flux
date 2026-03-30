@@ -12,7 +12,7 @@ const TEST_ACTIONS = {
 
 describe("createActionState", () => {
 	describe("pressed", () => {
-		it("should return true when bool value is true", () => {
+		it("should return true when triggerState is triggered", () => {
 			expect.assertions(1);
 
 			const [state, internal] = createActionState(TEST_ACTIONS);
@@ -25,10 +25,24 @@ describe("createActionState", () => {
 
 			expect(state.pressed("jump")).toBeTrue();
 		});
+
+		it("should return false when value is true but triggerState is ongoing", () => {
+			expect.assertions(1);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+
+			expect(state.pressed("jump")).toBeFalse();
+		});
 	});
 
 	describe("justPressed", () => {
-		it("should detect frame transition false to true", () => {
+		it("should detect triggerState transition to triggered", () => {
 			expect.assertions(2);
 
 			const [state, internal] = createActionState(TEST_ACTIONS);
@@ -51,10 +65,48 @@ describe("createActionState", () => {
 
 			expect(state.justPressed("jump")).toBeFalse();
 		});
+
+		it("should return false when value is true but triggerState is ongoing", () => {
+			expect.assertions(1);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+
+			expect(state.justPressed("jump")).toBeFalse();
+		});
+
+		it("should fire when triggerState transitions from ongoing to triggered", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+
+			expect(state.justPressed("jump")).toBeFalse();
+
+			internal.endFrame();
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.justPressed("jump")).toBeTrue();
+		});
 	});
 
 	describe("justReleased", () => {
-		it("should detect frame transition true to false", () => {
+		it("should detect triggerState transition from triggered", () => {
 			expect.assertions(2);
 
 			const [state, internal] = createActionState(TEST_ACTIONS);
@@ -83,6 +135,48 @@ describe("createActionState", () => {
 			});
 
 			expect(state.justReleased("jump")).toBeFalse();
+		});
+	});
+
+	describe("rawPressed", () => {
+		it("should return true when raw value is true regardless of triggerState", () => {
+			expect.assertions(1);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+
+			expect(state.rawPressed("jump")).toBeTrue();
+		});
+	});
+
+	describe("rawJustPressed", () => {
+		it("should detect raw value transition false to true", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+
+			expect(state.rawJustPressed("jump")).toBeTrue();
+
+			internal.endFrame();
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+
+			expect(state.rawJustPressed("jump")).toBeFalse();
 		});
 	});
 

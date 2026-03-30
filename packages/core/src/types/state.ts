@@ -128,16 +128,16 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	isEnabled(action: AllActions<Actions>): boolean;
 
 	/**
-	 * Whether a boolean action transitioned from released to pressed this frame.
+	 * Whether a boolean action's trigger transitioned to "triggered" this frame.
 	 * @param action - A Bool action name.
-	 * @returns True if the action was just pressed.
+	 * @returns True if the trigger just fired.
 	 */
 	justPressed(action: BoolActions<Actions>): boolean;
 
 	/**
-	 * Whether a boolean action transitioned from pressed to released this frame.
+	 * Whether a boolean action's trigger transitioned from "triggered" this frame.
 	 * @param action - A Bool action name.
-	 * @returns True if the action was just released.
+	 * @returns True if the trigger just stopped firing.
 	 */
 	justReleased(action: BoolActions<Actions>): boolean;
 
@@ -156,9 +156,9 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	position2d(action: ViewportPositionActions<Actions>): Vector2;
 
 	/**
-	 * Whether a boolean action is currently held down.
+	 * Whether a boolean action's trigger is currently "triggered".
 	 * @param action - A Bool action name.
-	 * @returns True if the action is pressed.
+	 * @returns True if the trigger is active.
 	 */
 	pressed(action: BoolActions<Actions>): boolean;
 
@@ -168,6 +168,26 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * @returns Duration in seconds.
 	 */
 	previousDuration(action: AllActions<Actions>): number;
+
+	/**
+	 * Whether the raw input value transitioned from false to true this frame.
+	 *
+	 * @remarks Bypasses trigger evaluation. Prefer {@link ActionState.justPressed} unless
+	 * you specifically need raw input detection.
+	 * @param action - A Bool action name.
+	 * @returns True if the raw value just became true.
+	 */
+	rawJustPressed(action: BoolActions<Actions>): boolean;
+
+	/**
+	 * Whether the raw input value is currently true.
+	 *
+	 * @remarks Bypasses trigger evaluation. Prefer {@link ActionState.pressed} unless
+	 * you specifically need raw input detection.
+	 * @param action - A Bool action name.
+	 * @returns True if the raw value is true.
+	 */
+	rawPressed(action: BoolActions<Actions>): boolean;
 
 	/**
 	 * Whether the action's trigger conditions were met this frame.
