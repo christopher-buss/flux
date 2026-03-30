@@ -33,6 +33,10 @@ All public API must also have `.spec-d.ts` type tests verifying compile-time
 constraints (rejected arguments, inferred return types) using `expectTypeOf`
 from `@rbxts/jest-utils/type-testing`.
 
+Integration tests that span multiple modules should be placed in a `tests/`
+directory at the root of each package. End-to-end tests that span the entire
+system should be placed in the `e2e/` directory at the root of the repository.
+
 Pattern:
 
 ```typescript

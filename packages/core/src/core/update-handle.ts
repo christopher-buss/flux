@@ -92,6 +92,7 @@ export function sortActiveContexts(
  */
 export function updateHandle(options: HandleUpdateOptions): void {
 	const { actions, contexts, deltaTime, handle, handleData } = options;
+	handleData.internalState.endFrame();
 	const sorted = sortActiveContexts(handleData.activeContexts, contexts);
 	const processedActions = new Set<string>();
 	for (const [, contextConfig] of sorted) {
@@ -110,7 +111,6 @@ export function updateHandle(options: HandleUpdateOptions): void {
 
 	updateUnprocessedActions(actions, processedActions, handleData, deltaTime);
 	handleData.simulatedValues.clear();
-	handleData.internalState.endFrame();
 }
 
 function getRawValue(handleData: CoreHandleData, actionName: string): ActionValueType {

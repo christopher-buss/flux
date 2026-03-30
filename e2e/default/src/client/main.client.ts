@@ -31,11 +31,13 @@ function updateMovement(state: ReturnType<typeof core.getState>): void {
 		return;
 	}
 
+	humanoid.SetStateEnabled(Enum.HumanoidStateType.Jumping, false);
+
 	const direction = state.direction2d("move");
 	humanoid.Move(new Vector3(direction.X, 0, direction.Y));
 
-	if (state.pressed("jump")) {
-		humanoid.Jump = true;
+	if (state.justPressed("jump")) {
+		humanoid.ChangeState(Enum.HumanoidStateType.Jumping);
 	}
 }
 
@@ -96,6 +98,6 @@ RunService.Heartbeat.Connect((deltaTime) => {
 		`move: (${string.format("%.1f", move.X)}, ${string.format("%.1f", move.Y)})`,
 		`jump: ${state.pressed("jump")}`,
 		`jump duration: ${string.format("%.2f", state.currentDuration("jump"))}s`,
-		`toggle: ${state.pressed("toggleContext")}`,
+		`toggle: ${activeContexts.has("menu")}`,
 	].join("\n");
 });
