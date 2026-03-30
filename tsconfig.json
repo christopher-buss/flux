@@ -11,7 +11,10 @@
 	},
 	"references": [
 		{
-			"path": "e2e"
+			"path": "e2e/default"
+		},
+		{
+			"path": "e2e/server-authority"
 		},
 		{
 			"path": "packages/core"

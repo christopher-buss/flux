@@ -1,5 +1,5 @@
 {
-	"name": "flux-e2e",
+	"name": "flux-e2e-default",
 	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
 	"emitLegacyScripts": false,
 	"tree": {
@@ -19,11 +19,11 @@
 					},
 					"@rbxts": {
 						"$className": "Folder",
-						"$path": "../rojo-sync/@rbxts"
+						"$path": "../../rojo-sync/@rbxts"
 					},
 					"@rbxts-js": {
 						"$className": "Folder",
-						"$path": "../rojo-sync/@rbxts-js"
+						"$path": "../../rojo-sync/@rbxts-js"
 					}
 				}
 			},
@@ -39,7 +39,6 @@
 		},
 		"Workspace": {
 			"$className": "Workspace",
-			"$path": "assets/models/workspace",
 			"$properties": {
 				"FilteringEnabled": true,
 				"SignalBehavior": "Deferred"

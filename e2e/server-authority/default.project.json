@@ -1,0 +1,72 @@
+{
+	"name": "flux-e2e-server-authority",
+	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
+	"emitLegacyScripts": false,
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"client": {
+				"$path": "out/client"
+			},
+			"rbxts_include": {
+				"$path": "include",
+				"node_modules": {
+					"$className": "Folder",
+					"@flux": {
+						"$className": "Folder",
+						"$path": "node_modules/@flux"
+					},
+					"@rbxts": {
+						"$className": "Folder",
+						"$path": "../../rojo-sync/@rbxts"
+					},
+					"@rbxts-js": {
+						"$className": "Folder",
+						"$path": "../../rojo-sync/@rbxts-js"
+					}
+				}
+			},
+			"shared": {
+				"$path": "out/shared"
+			}
+		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"server": {
+				"$path": "out/server"
+			}
+		},
+		"Workspace": {
+			"$className": "Workspace",
+			"$properties": {
+				"AuthorityMode": "Server",
+				"FilteringEnabled": true,
+				"NextGenerationReplication": {
+					"Enum": 2
+				},
+				"PlayerScriptsUseInputActionSystem": {
+					"Enum": 2
+				},
+				"SignalBehavior": "Deferred",
+				"StreamingEnabled": true,
+				"UseFixedSimulation": {
+					"Enum": 2
+				},
+				"UseNewLuauTypeSolver": "Disabled"
+			},
+			"Baseplate": {
+				"$className": "Part",
+				"$properties": {
+					"Anchored": true,
+					"Color": {
+						"Color3uint8": [99, 95, 99]
+					},
+					"Locked": true,
+					"Position": [0.0, -10.0, 0.0],
+					"Size": [50.0, 2.0, 50.0]
+				}
+			}
+		}
+	}
+}
