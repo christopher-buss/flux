@@ -146,6 +146,11 @@ interface CoreConfigReplication {
 	readonly replication?: {
 		readonly flush?: "auto" | "manual";
 		readonly onDiffs?: (handle: InputHandle, diffs: ReadonlyArray<ActionDiff>) => void;
+		/**
+		 * "remote" (default) -- diff-based replication via onDiffs callback.
+		 * "native" -- no-op; for games using server authority (beta), where
+		 * IAS replicates input automatically.
+		 */
 		readonly transport?: "native" | "remote";
 	};
 }
@@ -245,6 +250,11 @@ captures action state changes for transmission via RemoteEvents.
 
 **These three tasks (4.1, 4.2, 4.3) are independent and can run in parallel.**
 
+**Note (2026-03-30):** e2e validated that when server authority (beta) is
+enabled, `InputAction.GetState()` replicates to the server natively. Games
+using server authority can opt into `"native"` transport to skip diff-based
+replication entirely. Most games will use `"remote"` (default).
+
 ### Task 4.2 Implementation Details
 
 Each handle needs a diff buffer:
@@ -265,11 +275,7 @@ interface ActionDiff {
 }
 ```
 
-**Transport modes** (from `CoreConfig.replication.transport`):
-- `"remote"` -- diffs are collected and sent via the `onDiffs` callback
-- `"native"` -- reserved for future use, throw `error("Not implemented")` for now
-
-**Flush modes** (from `CoreConfig.replication.flush`):
+**Flush modes** (from `CoreConfig.replication.flush`, only relevant for `"remote"`):
 - `"auto"` (default) -- at the end of `update()`, automatically call flush
   and invoke `onDiffs(handle, diffs)` if there are pending diffs
 - `"manual"` -- diffs accumulate until `flushDiffs(handle)` is called
@@ -298,7 +304,8 @@ interface ActionDiff {
 
 ### Task 4.2 Acceptance Criteria
 
-- [ ] `replication.transport: "remote"` collects diffs
+- [ ] `replication.transport: "remote"` (default) collects diffs
+- [ ] `replication.transport: "native"` is a no-op (server authority handles it)
 - [ ] `replication.flush: "auto"` flushes in `update()`
 - [ ] `replication.flush: "manual"` requires explicit `flushDiffs(handle)`
 - [ ] `replication.onDiffs` callback receives `(handle, diffs)`

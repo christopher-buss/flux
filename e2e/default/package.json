@@ -1,8 +1,8 @@
 {
-	"name": "@flux/e2e",
+	"name": "@flux/e2e-default",
 	"version": "0.0.0",
 	"private": true,
-	"description": "End-to-end playable test game for Flux",
+	"description": "End-to-end test game for Flux (default client authority)",
 	"keywords": [
 		"roblox",
 		"e2e",
@@ -10,7 +10,7 @@
 	],
 	"type": "commonjs",
 	"scripts": {
-		"build": "rbxtsc --project ./tsconfig.game.json --type game && rojo build e2e.project.json -o flux-e2e.rbxl",
+		"build": "rbxtsc --project ./tsconfig.game.json --type game && rojo build default.project.json -o flux-e2e-default.rbxl",
 		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
 		"typecheck": "tsgo --noEmit --project tsconfig.game.json"
 	},

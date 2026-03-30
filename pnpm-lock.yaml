@@ -221,11 +221,42 @@ importers:
         specifier: catalog:tsc
         version: 5.9.3
 
-  e2e:
+  e2e/default:
     dependencies:
       '@flux/core':
         specifier: workspace:@rbxts/flux@*
-        version: link:../packages/core
+        version: link:../../packages/core
+      '@rbxts/services':
+        specifier: catalog:prod
+        version: 1.6.0
+    devDependencies:
+      '@isentinel/roblox-ts':
+        specifier: catalog:build
+        version: 3.1.4
+      '@isentinel/tsconfig':
+        specifier: catalog:tsc
+        version: 1.2.0(typescript@5.9.3)
+      '@rbxts/compiler-types':
+        specifier: catalog:types
+        version: 3.0.0-types.0
+      '@rbxts/types':
+        specifier: catalog:types
+        version: 1.0.913
+      '@typescript/native-preview':
+        specifier: catalog:tsc
+        version: 7.0.0-dev.20260324.1
+      rimraf:
+        specifier: catalog:node
+        version: 6.1.2
+      typescript:
+        specifier: catalog:tsc
+        version: 5.9.3
+
+  e2e/server-authority:
+    dependencies:
+      '@flux/core':
+        specifier: workspace:@rbxts/flux@*
+        version: link:../../packages/core
       '@rbxts/services':
         specifier: catalog:prod
         version: 1.6.0
