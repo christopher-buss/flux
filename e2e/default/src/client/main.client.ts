@@ -97,7 +97,8 @@ RunService.Heartbeat.Connect((deltaTime) => {
 		`context: ${activeContext}`,
 		`move: (${string.format("%.1f", move.X)}, ${string.format("%.1f", move.Y)})`,
 		`jump: ${state.pressed("jump")}`,
-		`jump duration: ${string.format("%.2f", state.currentDuration("jump"))}s`,
+		`interact: ${state.pressed("interact")}`,
+		`interact duration: ${string.format("%.2f", state.currentDuration("interact"))}s`,
 		`toggle: ${activeContexts.has("menu")}`,
 	].join("\n");
 });
