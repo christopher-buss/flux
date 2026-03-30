@@ -1,0 +1,22 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "./out/.tsbuildinfo"
+	},
+	"references": [
+		{
+			"path": "../test-utils"
+		},
+		{
+			"path": "../core"
+		},
+		{
+			"path": "./tsconfig.lib.json"
+		},
+		{
+			"path": "./tsconfig.spec.json"
+		}
+	],
+	"files": [],
+	"include": []
+}

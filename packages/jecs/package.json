@@ -1,0 +1,72 @@
+{
+	"name": "@rbxts/flux-jecs",
+	"version": "0.1.0",
+	"description": "Jecs wrapper for Flux input system",
+	"keywords": [
+		"roblox",
+		"input",
+		"rbxts",
+		"jecs",
+		"ecs"
+	],
+	"homepage": "https://github.com/christopher-buss/flux/",
+	"bugs": {
+		"url": "https://github.com/christopher-buss/flux/issues"
+	},
+	"repository": {
+		"url": "https://github.com/christopher-buss/flux/",
+		"type": "git"
+	},
+	"license": "MIT",
+	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
+	"type": "module",
+	"exports": {
+		".": {
+			"source": "./src/index.ts",
+			"import": "./dist/init.luau",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"main": "./dist/init.luau",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"!**/*tsconfig.tsbuildinfo"
+	],
+	"scripts": {
+		"build": "rbxtsc --project tsconfig.lib.json",
+		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
+		"darklua": "darklua process out dist --verbose",
+		"dev:build": "rbxtsc --build --type=game --rojo test.project.json --project tsconfig.spec.json",
+		"test": "pnpm dev:build && jest-roblox",
+		"typecheck": "tsgo --noEmit",
+		"typecheck:types": "tsgo --project tsconfig.typetest.json --noEmit"
+	},
+	"devDependencies": {
+		"@flux/test-utils": "workspace:*",
+		"@isentinel/jest-roblox": "catalog:test",
+		"@isentinel/roblox-ts": "catalog:build",
+		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/flux": "workspace:*",
+		"@rbxts/jecs": "catalog:peer",
+		"@rbxts/jest": "catalog:test",
+		"@rbxts/jest-extended": "catalog:test",
+		"@rbxts/jest-globals": "catalog:test",
+		"@rbxts/react-roblox-fire": "catalog:test",
+		"@rbxts/regexp": "catalog:test",
+		"@rbxts/types": "catalog:types",
+		"@typescript/native-preview": "catalog:tsc",
+		"rimraf": "catalog:node",
+		"type-fest": "catalog:types",
+		"typescript": "catalog:tsc"
+	},
+	"peerDependencies": {
+		"@rbxts/flux": "workspace:*",
+		"@rbxts/jecs": "catalog:peer"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
+	}
+}

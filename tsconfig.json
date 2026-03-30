@@ -20,6 +20,9 @@
 			"path": "packages/core"
 		},
 		{
+			"path": "packages/jecs"
+		},
+		{
 			"path": "packages/test-utils"
 		},
 		{

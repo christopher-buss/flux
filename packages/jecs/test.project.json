@@ -1,0 +1,44 @@
+{
+	"name": "test",
+	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"flux-jecs": {
+				"$path": "out"
+			},
+			"flux-jecs:tests": {
+				"$path": "out-test"
+			},
+			"rbxts_include": {
+				"$path": "include",
+				"node_modules": {
+					"$className": "Folder",
+					"@flux": {
+						"$path": "node_modules/@flux"
+					},
+					"@rbxts": {
+						"$path": "../../rojo-sync/@rbxts"
+					},
+					"@rbxts-js": {
+						"$path": "../../rojo-sync/@rbxts-js"
+					}
+				}
+			}
+		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"$properties": {
+				"LoadStringEnabled": true
+			}
+		},
+		"TestService": {
+			"$className": "TestService",
+			"$properties": {
+				"AutoRuns": false,
+				"ExecuteWithStudioRun": false
+			}
+		}
+	}
+}

@@ -64,6 +64,10 @@ catalogs:
     rimraf:
       specifier: 6.1.2
       version: 6.1.2
+  peer:
+    '@rbxts/jecs':
+      specifier: 0.11.0
+      version: 0.11.0
   prod:
     '@rbxts/services':
       specifier: 1.6.0
@@ -304,6 +308,60 @@ importers:
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0
+      '@rbxts/jest':
+        specifier: catalog:test
+        version: 3.13.3-ts.1
+      '@rbxts/jest-extended':
+        specifier: catalog:test
+        version: 1.0.1
+      '@rbxts/jest-globals':
+        specifier: catalog:test
+        version: 3.13.3-ts.2
+      '@rbxts/react-roblox-fire':
+        specifier: catalog:test
+        version: 0.1.4
+      '@rbxts/regexp':
+        specifier: catalog:test
+        version: 0.2.1-ts.4
+      '@rbxts/types':
+        specifier: catalog:types
+        version: 1.0.913
+      '@typescript/native-preview':
+        specifier: catalog:tsc
+        version: 7.0.0-dev.20260324.1
+      rimraf:
+        specifier: catalog:node
+        version: 6.1.2
+      type-fest:
+        specifier: catalog:types
+        version: 5.4.4
+      typescript:
+        specifier: catalog:tsc
+        version: 5.9.3
+
+  packages/jecs:
+    devDependencies:
+      '@flux/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+      '@isentinel/jest-roblox':
+        specifier: catalog:test
+        version: 0.1.4(jiti@2.6.1)
+      '@isentinel/roblox-ts':
+        specifier: catalog:build
+        version: 3.1.4
+      '@isentinel/tsconfig':
+        specifier: catalog:tsc
+        version: 1.2.0(typescript@5.9.3)
+      '@rbxts/compiler-types':
+        specifier: catalog:types
+        version: 3.0.0-types.0
+      '@rbxts/flux':
+        specifier: workspace:*
+        version: link:../core
+      '@rbxts/jecs':
+        specifier: catalog:peer
+        version: 0.11.0
       '@rbxts/jest':
         specifier: catalog:test
         version: 3.13.3-ts.1
@@ -1834,6 +1892,9 @@ packages:
 
   '@rbxts/emittery@3.13.3-ts.1':
     resolution: {integrity: sha512-iEUg8fk1xYO70H5t+a1sO34FkYerP+melGdJYkUV0Jf6fzYms7YQ/5awVjJ7KYJW3vo1bKUODBiBymqz4LHxEA==}
+
+  '@rbxts/jecs@0.11.0':
+    resolution: {integrity: sha512-rJPZkqrL8PXVX5YP5a9gMcddm8U7TeXZDYEbBTAXs81r9IKhTWNVxGoFRPTbsDT4BhwM0LMvydvWDAqHvWzHpA==}
 
   '@rbxts/jest-extended@1.0.1':
     resolution: {integrity: sha512-1Lul8qzU54Kc1uDbsOfw9TYZoeAmWFQCyrMnIYjfXkNxcmxNCZvgqTDVEju6DKPdFf3YSq+fk7dX8gA4UKMYNA==}
@@ -5931,6 +5992,8 @@ snapshots:
   '@rbxts/emittery@3.13.3-ts.1':
     dependencies:
       '@rbxts-js/emittery': 3.13.3-ts.3
+
+  '@rbxts/jecs@0.11.0': {}
 
   '@rbxts/jest-extended@1.0.1':
     dependencies:
