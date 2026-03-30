@@ -52,6 +52,18 @@
 					"Position": [0, -10, 0],
 					"Size": [50, 2, 50]
 				}
+			},
+			"Interactable": {
+				"$className": "Part",
+				"$properties": {
+					"Anchored": true,
+					"Color": [0.0, 0.6, 1.0],
+					"Material": "Neon",
+					"Name": "Interactable",
+					"Position": [5, -7, 5],
+					"Shape": "Cylinder",
+					"Size": [3, 2, 2]
+				}
 			}
 		}
 	}
