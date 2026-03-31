@@ -1,6 +1,7 @@
 import { type ActionMap, type ContextConfig, HandleError } from "@rbxts/flux";
 import Jecs from "@rbxts/jecs";
 import { describe, expect, it } from "@rbxts/jest-globals";
+import RegExp from "@rbxts/regexp";
 
 import { createFluxJecs } from "./create-flux-jecs";
 
@@ -100,6 +101,6 @@ describe("createFluxJecs", () => {
 
 		expect(() => {
 			flux.register(entity, new Instance("Folder"), "ui");
-		}).toThrowWithMessage(HandleError, "handle already registered");
+		}).toThrowWithMessage(HandleError, RegExp("handle already registered"));
 	});
 });
