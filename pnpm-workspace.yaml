@@ -16,6 +16,10 @@ packages:
   - packages/*
   - scripts
 
+overrides:
+  "@isentinel/jest-roblox": "D:\\roblox\\halcyon\\project-halcyon\\tools\\jest-roblox-cli"
+  "@isentinel/roblox-ts": "D:\\roblox\\halcyon\\project-halcyon\\tools\\roblox-ts"
+
 catalogs:
   build:
     "@isentinel/roblox-ts": 3.1.4
