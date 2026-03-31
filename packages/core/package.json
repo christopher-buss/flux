@@ -40,9 +40,6 @@
 		"typecheck": "tsgo --noEmit",
 		"typecheck:types": "tsgo --project tsconfig.typetest.json --noEmit"
 	},
-	"dependencies": {
-		"@rbxts/services": "catalog:prod"
-	},
 	"devDependencies": {
 		"@flux/test-utils": "workspace:*",
 		"@isentinel/jest-roblox": "catalog:test",

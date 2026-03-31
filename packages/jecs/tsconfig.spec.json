@@ -12,13 +12,10 @@
 			"path": "../test-utils"
 		},
 		{
-			"path": "tsconfig.lib.json"
+			"path": "./tsconfig.lib.json"
 		},
 		{
 			"path": "../test-utils/tsconfig.lib.json"
-		},
-		{
-			"path": "../core/tsconfig.lib.json"
 		}
 	],
 	"include": ["src/**/*.spec.ts", "test/**/*", "../../types/**/*.d.ts"],

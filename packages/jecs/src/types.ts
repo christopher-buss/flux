@@ -1,4 +1,10 @@
-import type { ActionMap, ActionState, ContextConfig, FluxCore } from "@rbxts/flux";
+import type {
+	ActionMap,
+	ActionState,
+	ContextConfig,
+	CreateCoreOptions,
+	FluxCore,
+} from "@rbxts/flux";
 import type { Entity, Tag } from "@rbxts/jecs";
 
 /**
@@ -6,10 +12,11 @@ import type { Entity, Tag } from "@rbxts/jecs";
  * @template T - Action map type.
  * @template C - Context configuration record type.
  */
-export interface FluxJecsOptions<T extends ActionMap, C extends Record<string, ContextConfig>> {
-	readonly actions: T;
+export interface FluxJecsOptions<
+	T extends ActionMap,
+	C extends Record<string, ContextConfig>,
+> extends CreateCoreOptions<T, C> {
 	readonly actionStateComponent?: Entity<ActionState<T>>;
-	readonly contexts: C;
 }
 
 /**
