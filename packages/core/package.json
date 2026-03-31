@@ -49,6 +49,7 @@
 		"@rbxts/jest": "catalog:test",
 		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",
+		"@rbxts/jest-utils": "catalog:test",
 		"@rbxts/react-roblox-fire": "catalog:test",
 		"@rbxts/regexp": "catalog:test",
 		"@rbxts/types": "catalog:types",

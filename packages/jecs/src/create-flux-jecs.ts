@@ -26,8 +26,8 @@ interface FluxJecsResult<T extends ActionMap, C extends Record<string, ContextCo
 /**
  * Creates a FluxJecs instance that wraps FluxCore with jecs integration.
  *
- * Maps jecs entities to core InputHandles. Sets ActionState as a jecs
- * component and context names as jecs tags on registered entities.
+ * Uses jecs entities directly as core InputHandles, eliminating the need
+ * for a separate entity-to-handle mapping.
  *
  * @template T - Action map type.
  * @template C - Context configuration record type.
@@ -52,17 +52,8 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 		contextTags[name as Contexts] = world.component() as unknown as Tag;
 	}
 
-	const entityToHandle = new Map<Entity, InputHandle>();
-
-	function getHandle(entity: Entity): InputHandle {
-		const handle = entityToHandle.get(entity);
-		assert(handle !== undefined, `entity not registered: ${entity}`);
-		return handle;
-	}
-
 	function addContextTags(entity: Entity): void {
-		const handle = getHandle(entity);
-		const activeContexts = core.getContexts(handle);
+		const activeContexts = core.getContexts(toHandle(entity));
 		for (const [name] of pairs(contextTags)) {
 			const tag = contextTags[name as Contexts] as unknown as Id;
 			if (activeContexts.includes(name as Contexts) && !world.has(entity, tag)) {
@@ -76,7 +67,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 		contexts: table.freeze(contextTags),
 
 		getState(entity: Entity): ActionState<T> {
-			return core.getState(getHandle(entity));
+			return core.getState(toHandle(entity));
 		},
 
 		register(
@@ -85,22 +76,23 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			context: Contexts,
 			...rest: ReadonlyArray<Contexts>
 		): void {
-			assert(!entityToHandle.has(entity), `entity already registered: ${entity}`);
+			core.registerAs(toHandle(entity), parent, context, ...rest);
 
-			const handle = core.register(parent, context, ...rest);
-			entityToHandle.set(entity, handle);
-
-			const state = core.getState(handle);
+			const state = core.getState(toHandle(entity));
 			world.set(entity, actionStateComponent, state);
 			addContextTags(entity);
 		},
 
 		simulateAction(entity: Entity, action: keyof T & string, state: unknown): void {
-			core.simulateAction(getHandle(entity), action, state as never);
+			core.simulateAction(toHandle(entity), action, state as never);
 		},
 
 		update(deltaTime: number): void {
 			core.update(deltaTime);
 		},
 	};
+}
+
+function toHandle(entity: Entity): InputHandle {
+	return entity as unknown as InputHandle;
 }

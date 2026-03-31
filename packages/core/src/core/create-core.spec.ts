@@ -1,5 +1,6 @@
 import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import RegExp from "@rbxts/regexp";
 
 import { ContextError } from "../errors/context-error";
@@ -7,6 +8,7 @@ import { FluxError } from "../errors/flux-error";
 import { HandleError } from "../errors/handle-error";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
+import type { InputHandle } from "../types/core";
 import { createCore } from "./create-core";
 
 const TEST_ACTIONS = {
@@ -51,7 +53,7 @@ describe("createCore", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const register = () => {
-			core.register(new Instance("Folder"), "nonexistent" as never);
+			core.register(new Instance("Folder"), fromAny("nonexistent"));
 		};
 
 		expect(register).toThrow("unknown context");
@@ -583,7 +585,7 @@ describe("createCore", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const register = () => {
-				core.register(new Instance("Folder"), "nonexistent" as never);
+				core.register(new Instance("Folder"), fromAny("nonexistent"));
 			};
 
 			expect(register).toThrowWithMessage(ContextError, RegExp("unknown context"));
@@ -631,7 +633,7 @@ describe("createCore", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const register = () => {
-				core.register(new Instance("Folder"), "nonexistent" as never);
+				core.register(new Instance("Folder"), fromAny("nonexistent"));
 			};
 
 			expect(register).toThrowWithMessage(FluxError, RegExp("unknown context"));
@@ -787,6 +789,28 @@ describe("createCore", () => {
 			expect(core.hasContext(handle, "ui")).toBeTrue();
 		});
 
+		it("should disconnect ChildAdded listeners when addContext cancel is called", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			const [handle] = core.subscribe(parent, "gameplay");
+			const cancel = core.addContext(handle, "ui");
+
+			cancel();
+
+			// Server creates instances after cancel — context should NOT be found
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay", "ui");
+			awaitDefer();
+			awaitDefer();
+
+			// ui context was added via addContext (tracked internally) but
+			// instances were never discovered because listeners were cancelled
+			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+
 		it("should find context via addContext when input folder does not yet exist", () => {
 			expect.assertions(1);
 
@@ -806,6 +830,86 @@ describe("createCore", () => {
 			awaitDefer();
 
 			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+	});
+
+	describe("registerAs", () => {
+		it("should set up requested contexts", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = fromPartial<InputHandle>(99);
+			core.registerAs(handle, new Instance("Folder"), "gameplay", "ui");
+
+			expect(core.hasContext(handle, "gameplay")).toBeTrue();
+			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+
+		it("should work with simulateAction and update", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = fromPartial<InputHandle>(7);
+			core.registerAs(handle, new Instance("Folder"), "gameplay");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should clean up via unregister", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = fromPartial<InputHandle>(42);
+			core.registerAs(handle, new Instance("Folder"), "gameplay");
+			core.unregister(handle);
+			const getState = () => {
+				core.getState(handle);
+			};
+
+			expect(getState).toThrow("handle not registered");
+		});
+
+		it("should validate unknown context names", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = fromPartial<InputHandle>(42);
+			const registerAs = () => {
+				core.registerAs(handle, new Instance("Folder"), fromAny("nonexistent"));
+			};
+
+			expect(registerAs).toThrow("unknown context");
+		});
+	});
+
+	describe("subscribeAs", () => {
+		it("should subscribe with externally-provided handle", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+
+			const handle = fromPartial<InputHandle>(42);
+			core.subscribeAs(handle, parent, "gameplay");
+
+			expect(core.hasContext(handle, "gameplay")).toBeTrue();
+		});
+
+		it("should validate unknown context names", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = fromPartial<InputHandle>(42);
+			const subscribeAs = () => {
+				core.subscribeAs(handle, new Instance("Folder"), fromAny("nonexistent"));
+			};
+
+			expect(subscribeAs).toThrow("unknown context");
 		});
 	});
 });
