@@ -95,6 +95,11 @@ describe("createFluxJecs", () => {
 			// @ts-expect-error unknown action
 			flux.simulateAction(entity, INVALID, true);
 		});
+
+		it("should reject wrong payload type for action", () => {
+			// @ts-expect-error Vector2 is not valid for Bool action "jump"
+			flux.simulateAction(entity, "jump", new Vector2());
+		});
 	});
 
 	describe("update", () => {

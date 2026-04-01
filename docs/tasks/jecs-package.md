@@ -2,8 +2,8 @@
 
 ## Overview
 
-Thin wrapper mapping jecs entities to core InputHandles. Exposes ActionState as
-a jecs component and contexts as jecs tags. Lets ECS systems query input state
+Thin wrapper using jecs entity IDs as Flux handles via registerAs/subscribeAs.
+Exposes ActionState as a jecs component and contexts as jecs tags. Lets ECS systems query input state
 via `world.query(flux.ActionState, flux.contexts.gameplay)`.
 
 Design doc: `flux/jecs-package-example.ts`
@@ -32,7 +32,7 @@ implementation.**
 
 ## Architecture Decisions
 
-- **Core is a peer dep** — user installs `@rbxts/flux-core` + `@rbxts/flux-jecs`
+- **Core is a peer dep** — user installs `@rbxts/flux` + `@rbxts/flux-jecs`
 - **jecs is a peer dep** — same reason
 - **No re-exports from core** — jecs package only exports `createFluxJecs` +
   types
@@ -88,8 +88,8 @@ query `ActionState` from the mock world.
     calls update, verifies ActionState was set on mock world, verifies context
     tag was added
   - Green: implement `createFluxJecs` with just register/getState/update —
-    creates core, bidirectional entity↔handle map, world.set for ActionState,
-    world.add for context tag
+    creates core, uses entity IDs directly as handles via registerAs,
+    world.set for ActionState, world.add for context tag
   - `src/index.ts` exports `createFluxJecs`
   - `src/index.spec.ts` — smoke test
   - Acceptance: test passes, proves full path works end-to-end

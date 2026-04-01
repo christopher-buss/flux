@@ -1,6 +1,7 @@
 import type {
 	ActionMap,
 	ActionState,
+	ActionValue,
 	ContextConfig,
 	CreateCoreOptions,
 	FluxCore,
@@ -22,8 +23,9 @@ export interface FluxJecsOptions<
 /**
  * Jecs wrapper around FluxCore.
  *
- * Maps jecs entities to core InputHandles. Exposes ActionState as a jecs
- * component and contexts as jecs tags so ECS systems can query input state.
+ * Uses jecs entity IDs as external Flux handles via registerAs/subscribeAs.
+ * Exposes ActionState as a jecs component and contexts as jecs tags so ECS
+ * systems can query input state.
  *
  * @template T - Action map type.
  * @template C - Context configuration record type.
@@ -99,8 +101,8 @@ export interface FluxJecs<
 	rebindAll(entity: Entity, bindings: unknown): void;
 
 	/**
-	 * Registers an entity as an input consumer. Creates IAS instances under
-	 * the parent and maps the entity to a core InputHandle.
+	 * Registers an entity as an input consumer using the entity ID as the
+	 * Flux handle. Creates IAS instances under the parent.
 	 * @param entity - The jecs entity.
 	 * @param parent - The Roblox instance to parent InputContexts under.
 	 * @param context - First context name (at least one required).
@@ -146,7 +148,11 @@ export interface FluxJecs<
 	 * @param action - The action name.
 	 * @param state - The value to inject.
 	 */
-	simulateAction(entity: Entity, action: keyof T & string, state: unknown): void;
+	simulateAction<A extends keyof T & string>(
+		entity: Entity,
+		action: A,
+		state: ActionValue<T, A>,
+	): void;
 
 	/**
 	 * Subscribes to server-created IAS instances under the parent.

@@ -1,6 +1,6 @@
-import type { ActionMap, ActionState, ContextConfig, InputHandle } from "@rbxts/flux";
+import type { ActionMap, ActionState, ActionValue, ContextConfig, InputHandle } from "@rbxts/flux";
 import { createCore } from "@rbxts/flux";
-import type { Entity, Id, Tag, World } from "@rbxts/jecs";
+import type { Entity, Tag, World } from "@rbxts/jecs";
 
 import type { FluxJecsOptions } from "./types";
 
@@ -18,7 +18,11 @@ interface FluxJecsResult<T extends ActionMap, C extends Record<string, ContextCo
 		...rest: ReadonlyArray<keyof C & string>
 	): void;
 
-	simulateAction(entity: Entity, action: keyof T & string, state: unknown): void;
+	simulateAction<A extends keyof T & string>(
+		entity: Entity,
+		action: A,
+		state: ActionValue<T, A>,
+	): void;
 
 	update(deltaTime: number): void;
 }
@@ -49,15 +53,15 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 
 	const contextTags = {} as Record<Contexts, Tag>;
 	for (const [name] of pairs(contexts)) {
-		contextTags[name as Contexts] = world.component() as unknown as Tag;
+		contextTags[name as Contexts] = world.component();
 	}
 
 	function addContextTags(entity: Entity): void {
 		const activeContexts = core.getContexts(toHandle(entity));
 		for (const [name] of pairs(contextTags)) {
-			const tag = contextTags[name as Contexts] as unknown as Id;
+			const tag = contextTags[name as Contexts];
 			if (activeContexts.includes(name as Contexts) && !world.has(entity, tag)) {
-				world.add(entity, tag as Id<never>);
+				world.add(entity, tag);
 			}
 		}
 	}
@@ -83,8 +87,12 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			addContextTags(entity);
 		},
 
-		simulateAction(entity: Entity, action: keyof T & string, state: unknown): void {
-			core.simulateAction(toHandle(entity), action, state as never);
+		simulateAction<A extends keyof T & string>(
+			entity: Entity,
+			action: A,
+			state: ActionValue<T, A>,
+		): void {
+			core.simulateAction(toHandle(entity), action, state);
 		},
 
 		update(deltaTime: number): void {

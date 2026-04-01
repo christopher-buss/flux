@@ -67,20 +67,19 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				throw new ContextError(`context already active: ${context}`, context);
 			}
 
-			if (data.instanceData.owned) {
-				addContextInstances(context, contexts[context], actions, data.instanceData);
-			} else {
-				findAndAddContext(context, data.instanceData);
-			}
+			const cancel = (() => {
+				if (data.instanceData.owned) {
+					addContextInstances(context, contexts[context], actions, data.instanceData);
+					return noop;
+				}
+
+				return findAndAddContext(context, data.instanceData);
+			})();
 
 			setContextEnabled(data.instanceData, context, true);
 			data.activeContexts.add(context);
 
-			return data.instanceData.owned
-				? noop
-				: () => {
-						disconnectAll(data.instanceData.connections);
-					};
+			return cancel;
 		},
 		destroy(): void {
 			for (const [, data] of handles) {
@@ -235,14 +234,6 @@ function validateContextName(contexts: Record<string, ContextConfig>, name: stri
 	}
 }
 
-function disconnectAll(connections: Array<RBXScriptConnection>): void {
-	for (const connection of connections) {
-		connection.Disconnect();
-	}
-
-	connections.clear();
-}
-
 function findContextInFolder(
 	contextName: string,
 	folder: Folder,
@@ -266,13 +257,26 @@ function findContextInFolder(
 	connections.push(connection);
 }
 
-function findAndAddContext(contextName: string, data: InputInstanceData): void {
+function disconnectOwned(owned: Array<RBXScriptConnection>): void {
+	for (const connection of owned) {
+		connection.Disconnect();
+	}
+}
+
+function findAndAddContext(contextName: string, data: InputInstanceData): () => void {
 	const { connections, inputContexts, parent } = data;
+	const owned: Array<RBXScriptConnection> = [];
 
 	const folder = parent.FindFirstChild("input");
 	if (folder !== undefined && classIs(folder, "Folder")) {
-		findContextInFolder(contextName, folder, inputContexts, connections);
-		return;
+		findContextInFolder(contextName, folder, inputContexts, owned);
+		for (const connection of owned) {
+			connections.push(connection);
+		}
+
+		return () => {
+			disconnectOwned(owned);
+		};
 	}
 
 	const folderConnection = parent.ChildAdded.Connect((child) => {
@@ -280,8 +284,16 @@ function findAndAddContext(contextName: string, data: InputInstanceData): void {
 			return;
 		}
 
-		findContextInFolder(contextName, child, inputContexts, connections);
+		findContextInFolder(contextName, child, inputContexts, owned);
+		for (const connection of owned) {
+			connections.push(connection);
+		}
 	});
 
+	owned.push(folderConnection);
 	connections.push(folderConnection);
+
+	return () => {
+		disconnectOwned(owned);
+	};
 }

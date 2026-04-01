@@ -811,6 +811,28 @@ describe("createCore", () => {
 			expect(core.hasContext(handle, "ui")).toBeTrue();
 		});
 
+		it("should not disconnect subscribe listeners when addContext cancel is called", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			// Subscribe before server creates anything
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			// addContext for ui, then immediately cancel
+			const cancel = core.addContext(handle, "ui");
+			cancel();
+
+			// Server creates gameplay — subscribe listeners should still work
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+			awaitDefer();
+			awaitDefer();
+
+			expect(core.hasContext(handle, "gameplay")).toBeTrue();
+		});
+
 		it("should find context via addContext when input folder does not yet exist", () => {
 			expect.assertions(1);
 
