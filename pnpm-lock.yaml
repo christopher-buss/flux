@@ -15,8 +15,8 @@ catalogs:
       version: 0.10.4
   dev:
     confbox:
-      specifier: 0.2.2
-      version: 0.2.2
+      specifier: 0.2.4
+      version: 0.2.4
   lint:
     '@eslint/config-inspector':
       specifier: 1.4.2
@@ -142,8 +142,6 @@ catalogs:
     type-fest:
       specifier: 5.4.4
       version: 5.4.4
-
-pnpmfileChecksum: sha256-ZfwGjIvQgPR9mEJg5iihJauZ5iv1Ogj5lI/dgVj7pgI=
 
 importers:
 
@@ -484,7 +482,7 @@ importers:
         version: 24.10.4
       confbox:
         specifier: catalog:dev
-        version: 0.2.2
+        version: 0.2.4
       istanbul-lib-coverage:
         specifier: catalog:test
         version: 3.2.2
@@ -2685,9 +2683,6 @@ packages:
 
   confbox@0.1.8:
     resolution: {integrity: sha512-RMtmw0iFkeR4YV+fUOSucriAQNb9g8zFR52MWCtl+cCZOFRNL6zeB395vPzFhEjjn4fMxXudmELnl/KF/WrK6w==}
-
-  confbox@0.2.2:
-    resolution: {integrity: sha512-1NB+BKqhtNipMsov4xI/NnhCKp9XG9NamYp5PVm9klAT0fsrNPjaFICsCFhNhwZJKNh7zB/3q8qXz0E9oaMNtQ==}
 
   confbox@0.2.4:
     resolution: {integrity: sha512-ysOGlgTFbN2/Y6Cg3Iye8YKulHw+R2fNXHrgSmXISQdMnomY6eNDprVdW9R5xBguEqI954+S6709UyiO7B+6OQ==}
@@ -6832,8 +6827,6 @@ snapshots:
   concat-map@0.0.1: {}
 
   confbox@0.1.8: {}
-
-  confbox@0.2.2: {}
 
   confbox@0.2.4: {}
 
