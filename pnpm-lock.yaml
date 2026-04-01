@@ -7,8 +7,8 @@ settings:
 catalogs:
   build:
     '@isentinel/roblox-ts':
-      specifier: 3.1.4
-      version: 3.1.4
+      specifier: 3.1.5
+      version: 3.1.5
   cli:
     pncat:
       specifier: 0.10.4
@@ -64,6 +64,10 @@ catalogs:
     rimraf:
       specifier: 6.1.2
       version: 6.1.2
+  peer:
+    '@rbxts/jecs':
+      specifier: 0.11.0
+      version: 0.11.0
   prod:
     '@rbxts/services':
       specifier: 1.6.0
@@ -74,8 +78,8 @@ catalogs:
       version: 2.6.1
   test:
     '@isentinel/jest-roblox':
-      specifier: 0.1.4
-      version: 0.1.4
+      specifier: 0.2.0
+      version: 0.2.0
     '@rbxts/jest':
       specifier: 3.13.3-ts.1
       version: 3.13.3-ts.1
@@ -156,10 +160,10 @@ importers:
         version: 1.2.6(@typescript/native-preview@7.0.0-dev.20260324.1)(jiti@2.6.1)(typescript@5.9.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.1.4(jiti@2.6.1)
+        version: 0.2.0(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 3.1.4
+        version: 3.1.5
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -232,7 +236,44 @@ importers:
     devDependencies:
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 3.1.4
+        version: 3.1.5
+      '@isentinel/tsconfig':
+        specifier: catalog:tsc
+        version: 1.2.0(typescript@5.9.3)
+      '@rbxts/compiler-types':
+        specifier: catalog:types
+        version: 3.0.0-types.0
+      '@rbxts/types':
+        specifier: catalog:types
+        version: 1.0.913
+      '@typescript/native-preview':
+        specifier: catalog:tsc
+        version: 7.0.0-dev.20260324.1
+      rimraf:
+        specifier: catalog:node
+        version: 6.1.2
+      typescript:
+        specifier: catalog:tsc
+        version: 5.9.3
+
+  e2e/jecs:
+    dependencies:
+      '@rbxts/flux':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@rbxts/flux-jecs':
+        specifier: workspace:*
+        version: link:../../packages/jecs
+      '@rbxts/jecs':
+        specifier: catalog:peer
+        version: 0.11.0
+      '@rbxts/services':
+        specifier: catalog:prod
+        version: 1.6.0
+    devDependencies:
+      '@isentinel/roblox-ts':
+        specifier: catalog:build
+        version: 3.1.5
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -263,7 +304,7 @@ importers:
     devDependencies:
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 3.1.4
+        version: 3.1.5
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -284,26 +325,79 @@ importers:
         version: 5.9.3
 
   packages/core:
-    dependencies:
-      '@rbxts/services':
-        specifier: catalog:prod
-        version: 1.6.0
     devDependencies:
       '@flux/test-utils':
         specifier: workspace:*
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.1.4(jiti@2.6.1)
+        version: 0.2.0(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 3.1.4
+        version: 3.1.5
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0
+      '@rbxts/jest':
+        specifier: catalog:test
+        version: 3.13.3-ts.1
+      '@rbxts/jest-extended':
+        specifier: catalog:test
+        version: 1.0.1
+      '@rbxts/jest-globals':
+        specifier: catalog:test
+        version: 3.13.3-ts.2
+      '@rbxts/jest-utils':
+        specifier: catalog:test
+        version: 0.1.3(@rbxts/jest-globals@3.13.3-ts.2)
+      '@rbxts/react-roblox-fire':
+        specifier: catalog:test
+        version: 0.1.4
+      '@rbxts/regexp':
+        specifier: catalog:test
+        version: 0.2.1-ts.4
+      '@rbxts/types':
+        specifier: catalog:types
+        version: 1.0.913
+      '@typescript/native-preview':
+        specifier: catalog:tsc
+        version: 7.0.0-dev.20260324.1
+      rimraf:
+        specifier: catalog:node
+        version: 6.1.2
+      type-fest:
+        specifier: catalog:types
+        version: 5.4.4
+      typescript:
+        specifier: catalog:tsc
+        version: 5.9.3
+
+  packages/jecs:
+    devDependencies:
+      '@flux/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+      '@isentinel/jest-roblox':
+        specifier: catalog:test
+        version: 0.2.0(jiti@2.6.1)
+      '@isentinel/roblox-ts':
+        specifier: catalog:build
+        version: 3.1.5
+      '@isentinel/tsconfig':
+        specifier: catalog:tsc
+        version: 1.2.0(typescript@5.9.3)
+      '@rbxts/compiler-types':
+        specifier: catalog:types
+        version: 3.0.0-types.0
+      '@rbxts/flux':
+        specifier: workspace:*
+        version: link:../core
+      '@rbxts/jecs':
+        specifier: catalog:peer
+        version: 0.11.0
       '@rbxts/jest':
         specifier: catalog:test
         version: 3.13.3-ts.1
@@ -339,10 +433,10 @@ importers:
     devDependencies:
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.1.4(jiti@2.6.1)
+        version: 0.2.0(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 3.1.4
+        version: 3.1.5
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
@@ -1090,13 +1184,13 @@ packages:
       '@typescript/native-preview':
         optional: true
 
-  '@isentinel/jest-roblox@0.1.4':
-    resolution: {integrity: sha512-bU96P1oJZ7EGVxKstYj/2Hk3byOWCUnvUP3W3SFKCNRdHvwu233ECNyvPYUnuHo0UJtL+CpFXQAbUbW1IcOjFg==}
+  '@isentinel/jest-roblox@0.2.0':
+    resolution: {integrity: sha512-vEuhZw4EZQTqcFp+RtUirC7nk2iVv8G1aQgmdyHWigGZKJY75qHkP/TvgPI1n4S/6Gv3+BFvz3Gf1j+3ZJBq/A==}
     engines: {node: '>=24.10.0'}
     hasBin: true
 
-  '@isentinel/roblox-ts@3.1.4':
-    resolution: {integrity: sha512-G28LFDBBqTWugRPZ37upZyPa71gqqGBYSPAqD3l2AfCcaQJgs+DHvO1HQaU7mw/0QA7vVDgL8daV6XlZE+LAIA==}
+  '@isentinel/roblox-ts@3.1.5':
+    resolution: {integrity: sha512-XlTDpoA4iaCzvfQRp72rDZ4qdeM7RqmLNJdJNfb+gkU2czFouxZquDONBt//4YNPHYun+b8+4aIYg6ZrSgKE3w==}
     hasBin: true
 
   '@isentinel/stylua@2.1.0-esm.3':
@@ -1835,6 +1929,9 @@ packages:
   '@rbxts/emittery@3.13.3-ts.1':
     resolution: {integrity: sha512-iEUg8fk1xYO70H5t+a1sO34FkYerP+melGdJYkUV0Jf6fzYms7YQ/5awVjJ7KYJW3vo1bKUODBiBymqz4LHxEA==}
 
+  '@rbxts/jecs@0.11.0':
+    resolution: {integrity: sha512-rJPZkqrL8PXVX5YP5a9gMcddm8U7TeXZDYEbBTAXs81r9IKhTWNVxGoFRPTbsDT4BhwM0LMvydvWDAqHvWzHpA==}
+
   '@rbxts/jest-extended@1.0.1':
     resolution: {integrity: sha512-1Lul8qzU54Kc1uDbsOfw9TYZoeAmWFQCyrMnIYjfXkNxcmxNCZvgqTDVEju6DKPdFf3YSq+fk7dX8gA4UKMYNA==}
     engines: {node: '>=v24.12.0'}
@@ -2404,8 +2501,8 @@ packages:
   arkregex@0.0.5:
     resolution: {integrity: sha512-ncYjBdLlh5/QnVsAA8De16Tc9EqmYM7y/WU9j+236KcyYNUXogpz3sC4ATIZYzzLxwI+0sEOaQLEmLmRleaEXw==}
 
-  arktype@2.1.29:
-    resolution: {integrity: sha512-jyfKk4xIOzvYNayqnD8ZJQqOwcrTOUbIU4293yrzAjA3O1dWh61j71ArMQ6tS/u4pD7vabSPe7nG3RCyoXW6RQ==}
+  arktype@2.2.0:
+    resolution: {integrity: sha512-t54MZ7ti5BhOEvzEkgKnWvqj+UbDfWig+DHr5I34xatymPusKLS0lQpNJd8M6DzmIto2QGszHfNKoFIT8tMCZQ==}
 
   array-timsort@1.0.3:
     resolution: {integrity: sha512-/+3GRL7dDAGEfM6TseQk/U+mi18TU2Ms9I3UlLdUMhz2hbvGNTKdj9xniwXfUqgYhHxRx0+8UnKkvlNwVU+cWQ==}
@@ -3252,6 +3349,9 @@ packages:
   get-tsconfig@4.13.6:
     resolution: {integrity: sha512-shZT/QMiSHc/YBLxxOkMtgSid5HFoauqCE3/exfsEcwg1WkeqjG+V40yBbBrsD+jW2HDXcs28xOfcbm2jI8Ddw==}
 
+  get-tsconfig@4.13.7:
+    resolution: {integrity: sha512-7tN6rFgBlMgpBML5j8typ92BKFi2sFQvIdpAqLA2beia5avZDrMs0FLZiM5etShWq5irVyGcGMEA1jcDaK7A/Q==}
+
   git-hooks-list@4.1.1:
     resolution: {integrity: sha512-cmP497iLq54AZnv4YRAEMnEyQ1eIn4tGKbmswqwmFV4GBnAqE8NLtWxxdXa++AalfgL5EBH4IxTPyquEuGY/jA==}
 
@@ -3874,6 +3974,10 @@ packages:
 
   picomatch@4.0.3:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
+    engines: {node: '>=12'}
+
+  picomatch@4.0.4:
+    resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
 
   pkg-types@1.3.1:
@@ -5168,21 +5272,21 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/jest-roblox@0.1.4(jiti@2.6.1)':
+  '@isentinel/jest-roblox@0.2.0(jiti@2.6.1)':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@roblox-ts/rojo-resolver': 1.1.0
-      arktype: 2.1.29
+      arktype: 2.2.0
       c12: 4.0.0-beta.4(jiti@2.6.1)
       confbox: 0.2.4
       defu: 6.1.4
-      get-tsconfig: 4.13.6
+      get-tsconfig: 4.13.7
       highlight.js: 11.11.1
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
       oxc-parser: 0.120.0
-      picomatch: 4.0.3
+      picomatch: 4.0.4
       std-env: 4.0.0
       tinyrainbow: 3.0.3
       ws: 8.18.0
@@ -5195,7 +5299,7 @@ snapshots:
       - magicast
       - utf-8-validate
 
-  '@isentinel/roblox-ts@3.1.4':
+  '@isentinel/roblox-ts@3.1.5':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
@@ -5932,6 +6036,8 @@ snapshots:
     dependencies:
       '@rbxts-js/emittery': 3.13.3-ts.3
 
+  '@rbxts/jecs@0.11.0': {}
+
   '@rbxts/jest-extended@1.0.1':
     dependencies:
       '@rbxts-js/jest-diff': 3.13.3-ts.3
@@ -6570,7 +6676,7 @@ snapshots:
     dependencies:
       '@ark/util': 0.56.0
 
-  arktype@2.1.29:
+  arktype@2.2.0:
     dependencies:
       '@ark/schema': 0.56.0
       '@ark/util': 0.56.0
@@ -7128,7 +7234,7 @@ snapshots:
       enhanced-resolve: 5.20.0
       eslint: 9.39.2(jiti@2.6.1)
       eslint-plugin-es-x: 7.8.0(eslint@9.39.2(jiti@2.6.1))
-      get-tsconfig: 4.13.6
+      get-tsconfig: 4.13.7
       globals: 15.15.0
       globrex: 0.1.2
       ignore: 5.3.2
@@ -7597,6 +7703,10 @@ snapshots:
   get-own-enumerable-property-symbols@3.0.2: {}
 
   get-tsconfig@4.13.6:
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+
+  get-tsconfig@4.13.7:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
@@ -8444,6 +8554,8 @@ snapshots:
   picomatch@2.3.1: {}
 
   picomatch@4.0.3: {}
+
+  picomatch@4.0.4: {}
 
   pkg-types@1.3.1:
     dependencies:

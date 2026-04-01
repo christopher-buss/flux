@@ -1,22 +1,20 @@
 import { ContextError } from "../errors/context-error";
-import { HandleError } from "../errors/handle-error";
 import type { ActionMap } from "../types/actions";
 import type { BindingForAction, BindingState, TypedBindings } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
-import type { ActionValueType } from "./action-state";
-import { createActionState } from "./action-state";
 import { createHandleFactory } from "./handle-factory";
-import type { InputInstanceData } from "./input-instances";
+import type { HandleData } from "./handle-lifecycle";
 import {
-	addContextInstances,
-	createInputInstances,
-	destroyInputInstances,
-	findInputInstances,
-	setContextEnabled,
-} from "./input-instances";
-import type { CoreHandleData } from "./update-handle";
+	getHandleData,
+	registerHandle,
+	registerHandleAs,
+	subscribeHandle,
+	subscribeHandleAs,
+} from "./handle-lifecycle";
+import type { InputInstanceData } from "./input-instances";
+import { addContextInstances, destroyInputInstances, setContextEnabled } from "./input-instances";
 import { updateHandle } from "./update-handle";
 
 /**
@@ -41,27 +39,6 @@ type ValidatedContexts<T extends ActionMap, C extends Record<string, ContextConf
 		readonly sink?: boolean;
 	};
 };
-
-interface HandleData<T extends ActionMap> extends CoreHandleData {
-	readonly publicState: ActionState<T>;
-}
-
-interface RegisterHandleOptions<T extends ActionMap> {
-	readonly actions: T;
-	readonly contextNames: ReadonlyArray<string>;
-	readonly contexts: Record<string, ContextConfig>;
-	readonly factory: ReturnType<typeof createHandleFactory>;
-	readonly handles: Map<InputHandle, HandleData<T>>;
-	readonly parent: Instance;
-}
-
-interface SubscribeHandleOptions<T extends ActionMap> {
-	readonly actions: T;
-	readonly contextNames: ReadonlyArray<string>;
-	readonly factory: ReturnType<typeof createHandleFactory>;
-	readonly handles: Map<InputHandle, HandleData<T>>;
-	readonly parent: Instance;
-}
 
 /**
  * Creates a Flux core instance for managing input actions and contexts.
@@ -90,20 +67,19 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				throw new ContextError(`context already active: ${context}`, context);
 			}
 
-			if (data.instanceData.owned) {
-				addContextInstances(context, contexts[context], actions, data.instanceData);
-			} else {
-				findAndAddContext(context, data.instanceData);
-			}
+			const cancel = (() => {
+				if (data.instanceData.owned) {
+					addContextInstances(context, contexts[context], actions, data.instanceData);
+					return noop;
+				}
+
+				return findAndAddContext(context, data.instanceData);
+			})();
 
 			setContextEnabled(data.instanceData, context, true);
 			data.activeContexts.add(context);
 
-			return data.instanceData.owned
-				? noop
-				: () => {
-						disconnectAll(data.instanceData.connections);
-					};
+			return cancel;
 		},
 		destroy(): void {
 			for (const [, data] of handles) {
@@ -150,11 +126,29 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				validateContextName(contexts, name);
 			}
 
-			return registerHandle({
+			return registerHandle(factory, {
 				actions,
 				contextNames: [context, ...rest],
 				contexts,
-				factory,
+				handles,
+				parent,
+			});
+		},
+		registerAs(
+			handle: InputHandle,
+			parent: Instance,
+			context: Contexts,
+			...rest: ReadonlyArray<Contexts>
+		): void {
+			validateContextName(contexts, context);
+			for (const name of rest) {
+				validateContextName(contexts, name);
+			}
+
+			registerHandleAs(handle, {
+				actions,
+				contextNames: [context, ...rest],
+				contexts,
 				handles,
 				parent,
 			});
@@ -190,10 +184,27 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				validateContextName(contexts, name);
 			}
 
-			return subscribeHandle({
+			return subscribeHandle(factory, {
 				actions,
 				contextNames: [context, ...rest],
-				factory,
+				handles,
+				parent,
+			});
+		},
+		subscribeAs(
+			handle: InputHandle,
+			parent: Instance,
+			context: Contexts,
+			...rest: ReadonlyArray<Contexts>
+		): () => void {
+			validateContextName(contexts, context);
+			for (const name of rest) {
+				validateContextName(contexts, name);
+			}
+
+			return subscribeHandleAs(handle, {
+				actions,
+				contextNames: [context, ...rest],
 				handles,
 				parent,
 			});
@@ -223,87 +234,6 @@ function validateContextName(contexts: Record<string, ContextConfig>, name: stri
 	}
 }
 
-function getHandleData<T extends ActionMap>(
-	handles: Map<InputHandle, HandleData<T>>,
-	handle: InputHandle,
-): HandleData<T> {
-	const data = handles.get(handle);
-	if (data === undefined) {
-		throw new HandleError(`handle not registered: ${handle}`);
-	}
-
-	return data;
-}
-
-function createDurations(actions: ActionMap): Map<string, number> {
-	const durations = new Map<string, number>();
-	for (const [name] of pairs(actions)) {
-		durations.set(name, 0);
-	}
-
-	return durations;
-}
-
-function registerHandle<T extends ActionMap>(options: RegisterHandleOptions<T>): InputHandle {
-	const { actions, contextNames, contexts, factory, handles, parent } = options;
-	const handle = factory.allocate();
-	const [publicState, internalState] = createActionState(actions);
-	const durations = createDurations(actions);
-
-	const instanceData = createInputInstances({
-		actions,
-		contextNames,
-		contexts,
-		parent,
-	});
-	handles.set(handle, {
-		activeContexts: new Set<string>(contextNames),
-		durations,
-		instanceData,
-		internalState,
-		publicState,
-		simulatedValues: new Map<string, ActionValueType>(),
-	});
-	return handle;
-}
-
-function disconnectAll(connections: Array<RBXScriptConnection>): void {
-	for (const connection of connections) {
-		connection.Disconnect();
-	}
-
-	connections.clear();
-}
-
-function subscribeHandle<T extends ActionMap>(
-	options: SubscribeHandleOptions<T>,
-): [InputHandle, () => void] {
-	const { actions, contextNames, factory, handles, parent } = options;
-	const handle = factory.allocate();
-	const [publicState, internalState] = createActionState(actions);
-	const durations = createDurations(actions);
-
-	const instanceData = findInputInstances({
-		actions,
-		contextNames,
-		parent,
-	});
-	handles.set(handle, {
-		activeContexts: new Set<string>(contextNames),
-		durations,
-		instanceData,
-		internalState,
-		publicState,
-		simulatedValues: new Map<string, ActionValueType>(),
-	});
-
-	const cancel = (): void => {
-		disconnectAll(instanceData.connections);
-	};
-
-	return [handle, cancel];
-}
-
 function findContextInFolder(
 	contextName: string,
 	folder: Folder,
@@ -327,13 +257,26 @@ function findContextInFolder(
 	connections.push(connection);
 }
 
-function findAndAddContext(contextName: string, data: InputInstanceData): void {
+function disconnectOwned(owned: Array<RBXScriptConnection>): void {
+	for (const connection of owned) {
+		connection.Disconnect();
+	}
+}
+
+function findAndAddContext(contextName: string, data: InputInstanceData): () => void {
 	const { connections, inputContexts, parent } = data;
+	const owned: Array<RBXScriptConnection> = [];
 
 	const folder = parent.FindFirstChild("input");
 	if (folder !== undefined && classIs(folder, "Folder")) {
-		findContextInFolder(contextName, folder, inputContexts, connections);
-		return;
+		findContextInFolder(contextName, folder, inputContexts, owned);
+		for (const connection of owned) {
+			connections.push(connection);
+		}
+
+		return () => {
+			disconnectOwned(owned);
+		};
 	}
 
 	const folderConnection = parent.ChildAdded.Connect((child) => {
@@ -341,8 +284,16 @@ function findAndAddContext(contextName: string, data: InputInstanceData): void {
 			return;
 		}
 
-		findContextInFolder(contextName, child, inputContexts, connections);
+		findContextInFolder(contextName, child, inputContexts, owned);
+		for (const connection of owned) {
+			connections.push(connection);
+		}
 	});
 
+	owned.push(folderConnection);
 	connections.push(folderConnection);
+
+	return () => {
+		disconnectOwned(owned);
+	};
 }

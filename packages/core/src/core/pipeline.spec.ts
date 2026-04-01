@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 
 import type { Modifier, ModifierContext } from "../modifiers/types";
 import type { Trigger, TriggerState, TypedTrigger } from "../triggers/types";
@@ -8,7 +9,7 @@ import { processPipeline } from "./pipeline";
 
 const MODIFIER_CONTEXT = {
 	deltaTime: 0.016,
-	handle: 0 as InputHandle,
+	handle: fromPartial<InputHandle>(0),
 } satisfies ModifierContext;
 
 function mockTrigger(returnState: TriggerState): Trigger {
@@ -29,7 +30,7 @@ function createTypedTrigger(
 const doubleModifier: Modifier = {
 	modify(value: never): never {
 		if (typeIs(value, "number")) {
-			return (value * 2) as never;
+			return fromAny(value * 2);
 		}
 
 		return value;
@@ -39,7 +40,7 @@ const doubleModifier: Modifier = {
 const addOneModifier: Modifier = {
 	modify(value: never): never {
 		if (typeIs(value, "number")) {
-			return ((value as number) + 1) as never;
+			return fromAny((value as number) + 1);
 		}
 
 		return value;

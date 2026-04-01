@@ -1,11 +1,13 @@
 {
-	"name": "@rbxts/flux",
+	"name": "@rbxts/flux-jecs",
 	"version": "0.1.0",
-	"description": "Input Action System wrapper for Roblox",
+	"description": "Jecs wrapper for Flux input system",
 	"keywords": [
 		"roblox",
 		"input",
-		"rbxts"
+		"rbxts",
+		"jecs",
+		"ecs"
 	],
 	"homepage": "https://github.com/christopher-buss/flux/",
 	"bugs": {
@@ -46,10 +48,11 @@
 		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/flux": "workspace:*",
+		"@rbxts/jecs": "catalog:peer",
 		"@rbxts/jest": "catalog:test",
 		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",
-		"@rbxts/jest-utils": "catalog:test",
 		"@rbxts/react-roblox-fire": "catalog:test",
 		"@rbxts/regexp": "catalog:test",
 		"@rbxts/types": "catalog:types",
@@ -57,6 +60,10 @@
 		"rimraf": "catalog:node",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
+	},
+	"peerDependencies": {
+		"@rbxts/flux": "workspace:*",
+		"@rbxts/jecs": "catalog:peer"
 	},
 	"publishConfig": {
 		"access": "public",

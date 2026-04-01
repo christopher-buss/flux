@@ -14,10 +14,16 @@
 			"path": "e2e/default"
 		},
 		{
+			"path": "e2e/jecs"
+		},
+		{
 			"path": "e2e/server-authority"
 		},
 		{
 			"path": "packages/core"
+		},
+		{
+			"path": "packages/jecs"
 		},
 		{
 			"path": "packages/test-utils"

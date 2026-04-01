@@ -4,7 +4,7 @@ export default defineConfig({
 	backend: "open-cloud",
 	clearMocks: true,
 	collectCoverage: true,
-	coveragePathIgnorePatterns: ["**/test/"],
+	coveragePathIgnorePatterns: ["**/test/", "**/index.ts"],
 	coverageThreshold: {
 		branches: 100,
 		functions: 100,

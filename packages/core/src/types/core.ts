@@ -102,6 +102,24 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	): InputHandle;
 
 	/**
+	 * Registers a new input consumer using an externally-provided handle.
+	 *
+	 * Use when the caller manages handle identity (e.g., ECS entity IDs).
+	 *
+	 * @param handle - The externally-provided handle to register under.
+	 * @param parent - The instance to parent InputContexts under.
+	 * @param context - First context name to activate (at least one required).
+	 * @param contexts - Additional context names to activate.
+	 * @throws HandleError if handle is already registered.
+	 */
+	registerAs(
+		handle: InputHandle,
+		parent: Instance,
+		context: Contexts,
+		...contexts: ReadonlyArray<Contexts>
+	): void;
+
+	/**
 	 * Deactivates a context for the given handle.
 	 * @param handle - The input consumer handle.
 	 * @param context - The context name to deactivate.
@@ -156,6 +174,23 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 		context: Contexts,
 		...contexts: ReadonlyArray<Contexts>
 	): [InputHandle, () => void];
+
+	/**
+	 * Subscribes to server-created IAS instances using an externally-provided handle.
+	 *
+	 * @param handle - The externally-provided handle to register under.
+	 * @param parent - The instance containing server-created InputContexts.
+	 * @param context - First context name to subscribe to (at least one required).
+	 * @param contexts - Additional context names to subscribe to.
+	 * @returns A cancel function that disconnects ChildAdded listeners.
+	 * @throws HandleError if handle is already registered.
+	 */
+	subscribeAs(
+		handle: InputHandle,
+		parent: Instance,
+		context: Contexts,
+		...contexts: ReadonlyArray<Contexts>
+	): () => void;
 
 	/**
 	 * Unregisters an input consumer, releasing its handle.
