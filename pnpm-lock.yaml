@@ -78,8 +78,8 @@ catalogs:
       version: 2.6.1
   test:
     '@isentinel/jest-roblox':
-      specifier: 0.2.0
-      version: 0.2.0
+      specifier: 0.2.1
+      version: 0.2.1
     '@rbxts/jest':
       specifier: 3.13.3-ts.1
       version: 3.13.3-ts.1
@@ -160,7 +160,7 @@ importers:
         version: 1.2.6(@typescript/native-preview@7.0.0-dev.20260324.1)(jiti@2.6.1)(typescript@5.9.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.0(jiti@2.6.1)
+        version: 0.2.1(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 3.1.5
@@ -331,7 +331,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.0(jiti@2.6.1)
+        version: 0.2.1(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 3.1.5
@@ -382,7 +382,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.0(jiti@2.6.1)
+        version: 0.2.1(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 3.1.5
@@ -433,7 +433,7 @@ importers:
     devDependencies:
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.0(jiti@2.6.1)
+        version: 0.2.1(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 3.1.5
@@ -1184,8 +1184,8 @@ packages:
       '@typescript/native-preview':
         optional: true
 
-  '@isentinel/jest-roblox@0.2.0':
-    resolution: {integrity: sha512-vEuhZw4EZQTqcFp+RtUirC7nk2iVv8G1aQgmdyHWigGZKJY75qHkP/TvgPI1n4S/6Gv3+BFvz3Gf1j+3ZJBq/A==}
+  '@isentinel/jest-roblox@0.2.1':
+    resolution: {integrity: sha512-un0uNytJWHg2RibvsIRy07PDADVQABcjKf8j/SnIMguRepSgaK+Z1vMdI5t/7XUQ6FPeOlsJ7joUirUT8PvkMA==}
     engines: {node: '>=24.10.0'}
     hasBin: true
 
@@ -4315,8 +4315,8 @@ packages:
     resolution: {integrity: sha512-Pugqs6M0m7Lv1I7FtxN4aoyToKg1C4tu+/381vH35y8oENM/Ai7f7C4StcoK4/+BSw9ebcS8jRiVrORFKCALLw==}
     engines: {node: ^20.0.0 || >=22.0.0}
 
-  tinyrainbow@3.0.3:
-    resolution: {integrity: sha512-PSkbLUoxOFRzJYjjxHJt9xro7D+iilgMX/C9lawzVuYiIdcihh9DXmVibBe8lmcFrRi/VzlPjBxbN7rH24q8/Q==}
+  tinyrainbow@3.1.0:
+    resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
     engines: {node: '>=14.0.0'}
 
   to-regex-range@5.0.1:
@@ -5272,7 +5272,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/jest-roblox@0.2.0(jiti@2.6.1)':
+  '@isentinel/jest-roblox@0.2.1(jiti@2.6.1)':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@roblox-ts/rojo-resolver': 1.1.0
@@ -5288,7 +5288,7 @@ snapshots:
       oxc-parser: 0.120.0
       picomatch: 4.0.4
       std-env: 4.0.0
-      tinyrainbow: 3.0.3
+      tinyrainbow: 3.1.0
       ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
@@ -8900,7 +8900,7 @@ snapshots:
 
   tinypool@2.1.0: {}
 
-  tinyrainbow@3.0.3: {}
+  tinyrainbow@3.1.0: {}
 
   to-regex-range@5.0.1:
     dependencies:
