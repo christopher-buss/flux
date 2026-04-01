@@ -9,19 +9,29 @@ import { processPipeline } from "./pipeline";
 
 /** Internal per-handle data used during update processing. */
 export interface CoreHandleData {
+	/** Set of currently active context names. */
 	readonly activeContexts: Set<string>;
+	/** Per-action trigger duration accumulators in seconds. */
 	readonly durations: Map<string, number>;
+	/** Roblox InputContext instance references. */
 	readonly instanceData: InputInstanceData;
+	/** Mutable internal action state used during update. */
 	readonly internalState: InternalActionState;
+	/** Injected values from `simulateAction`. */
 	readonly simulatedValues: Map<string, ActionValueType>;
 }
 
 /** Options for {@link updateHandle}. */
 export interface HandleUpdateOptions {
+	/** The action map defining available actions. */
 	readonly actions: ActionMap;
+	/** Context configurations with bindings. */
 	readonly contexts: Record<string, ContextConfig>;
+	/** Time elapsed since last frame in seconds. */
 	readonly deltaTime: number;
+	/** The input consumer handle being updated. */
 	readonly handle: InputHandle;
+	/** Per-handle internal data for this update cycle. */
 	readonly handleData: CoreHandleData;
 }
 

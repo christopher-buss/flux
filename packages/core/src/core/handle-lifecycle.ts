@@ -14,6 +14,7 @@ import type { CoreHandleData } from "./update-handle";
  * @template T - The action map type.
  */
 export interface HandleData<T extends ActionMap> extends CoreHandleData {
+	/** The typed action state exposed to consumers. */
 	readonly publicState: ActionState<T>;
 }
 

@@ -49,6 +49,8 @@ export default isentinel(
 						"TSInterfaceDeclaration",
 						"TSTypeAliasDeclaration",
 						"TSEnumDeclaration",
+						"TSMethodSignature",
+						"TSPropertySignature",
 					],
 					publicOnly: { ancestorsOnly: true },
 					require: {
