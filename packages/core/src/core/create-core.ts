@@ -23,7 +23,9 @@ import { updateHandle } from "./update-handle";
  * @template C - The context configuration record type.
  */
 export interface CreateCoreOptions<T extends ActionMap, C extends Record<string, ContextConfig>> {
+	/** The action map defining available actions and their types. */
 	readonly actions: T;
+	/** Context configurations with validated bindings per action type. */
 	readonly contexts: C & ValidatedContexts<T, C>;
 }
 

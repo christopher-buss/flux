@@ -15,10 +15,15 @@ import type {
  */
 export interface ActionValueMap {
 	/* eslint-disable flawless/naming-convention -- Matches Roblox API. */
+	/** Boolean on/off state. */
 	Bool: boolean;
+	/** Scalar axis value. */
 	Direction1D: number;
+	/** 2D directional vector. */
 	Direction2D: Vector2;
+	/** 3D directional vector. */
 	Direction3D: Vector3;
+	/** Screen-space pointer position. */
 	ViewportPosition: Vector2;
 	/* eslint-enable flawless/naming-convention */
 }
@@ -40,6 +45,7 @@ export type ActionValue<
  * Bool-only methods like `pressed` reject axis actions at compile time.
  *
  * @template Actions - The action map constraining available queries.
+ * @see https://create.roblox.com/docs/reference/engine/classes/InputAction
  */
 export interface ActionState<Actions extends ActionMap = ActionMap> {
 	/**

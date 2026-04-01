@@ -4,7 +4,11 @@ import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingConfig, BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 
-/** Stores all IAS instances for a single handle. */
+/**
+ * Stores all IAS instances for a single handle.
+ * @see https://create.roblox.com/docs/reference/engine/classes/InputContext
+ * @see https://create.roblox.com/docs/reference/engine/classes/InputAction
+ */
 export interface InputInstanceData {
 	/** Active ChildAdded connections for cleanup. */
 	readonly connections: Array<RBXScriptConnection>;
@@ -259,6 +263,7 @@ function searchForContexts(
  * Maps an ActionType string to the corresponding Enum.InputActionType.
  * @param actionType - The action type string.
  * @returns The matching Enum.InputActionType value.
+ * @see https://create.roblox.com/docs/reference/engine/enums/InputActionType
  */
 function toInputActionType(actionType: ActionType): Enum.InputActionType {
 	switch (actionType) {

@@ -4,13 +4,38 @@ import type { Entity, Tag, World } from "@rbxts/jecs";
 
 import type { FluxJecsOptions } from "./types";
 
-interface FluxJecsResult<T extends ActionMap, C extends Record<string, ContextConfig>> {
+/**
+ * Result of {@link createFluxJecs}, providing jecs-integrated input handling.
+ *
+ * @template T - Action map type.
+ * @template C - Context configuration record type.
+ */
+export interface FluxJecsResult<T extends ActionMap, C extends Record<string, ContextConfig>> {
+	/** Jecs component for storing action state on entities. */
 	// eslint-disable-next-line flawless/naming-convention -- Jecs component convention
 	readonly ActionState: Entity<ActionState<T>>;
+	/** Jecs tags for each context, queryable via `world.has(entity, tag)`. */
 	readonly contexts: Readonly<Record<keyof C & string, Tag>>;
 
+	/**
+	 * Returns the action state query interface for the given entity.
+	 *
+	 * @param entity - The entity to query.
+	 * @returns The typed action state for querying input.
+	 */
 	getState(entity: Entity): ActionState<T>;
 
+	/**
+	 * Registers an entity as an input consumer and activates contexts.
+	 *
+	 * Sets the {@link ActionState} component on the entity and adds
+	 * context tags for each active context.
+	 *
+	 * @param entity - The entity to register.
+	 * @param parent - The instance to parent InputContexts under.
+	 * @param context - First context to activate (at least one required).
+	 * @param rest - Additional contexts to activate.
+	 */
 	register(
 		entity: Entity,
 		parent: Instance,
@@ -18,12 +43,25 @@ interface FluxJecsResult<T extends ActionMap, C extends Record<string, ContextCo
 		...rest: ReadonlyArray<keyof C & string>
 	): void;
 
+	/**
+	 * Injects a synthetic action value for testing or replay.
+	 *
+	 * @template A - The action name.
+	 * @param entity - The entity to simulate input for.
+	 * @param action - The action to simulate.
+	 * @param state - The value to inject, matching the action's type.
+	 */
 	simulateAction<A extends keyof T & string>(
 		entity: Entity,
 		action: A,
 		state: ActionValue<T, A>,
 	): void;
 
+	/**
+	 * Advances the input system by one frame.
+	 *
+	 * @param deltaTime - Time elapsed since last frame in seconds.
+	 */
 	update(deltaTime: number): void;
 }
 

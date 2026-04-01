@@ -9,6 +9,8 @@ import type { TypedTrigger } from "../triggers/types";
  * - `"Direction2D"` — dual-axis input (movement)
  * - `"Direction3D"` — triple-axis input (spatial movement)
  * - `"ViewportPosition"` — screen-space position (cursor, touch).
+ *
+ * @see https://create.roblox.com/docs/reference/engine/enums/InputActionType
  */
 export type ActionType =
 	| "Bool"
