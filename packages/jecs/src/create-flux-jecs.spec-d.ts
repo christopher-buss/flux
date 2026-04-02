@@ -1,4 +1,4 @@
-import type { ActionState } from "@rbxts/flux";
+import type { ActionState, FluxCore } from "@rbxts/flux";
 import { bool, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import type { Entity, Tag } from "@rbxts/jecs";
 import Jecs from "@rbxts/jecs";
@@ -33,6 +33,8 @@ const world = Jecs.world();
 const flux = createFluxJecs(world, { actions, contexts });
 const entity = {} as Entity;
 const INVALID = "nonexistent";
+const GAMEPLAY = "gameplay";
+const UI = "ui";
 
 describe("createFluxJecs", () => {
 	describe("ActionState property", () => {
@@ -57,7 +59,7 @@ describe("createFluxJecs", () => {
 			expectTypeOf<typeof flux.register>().toBeCallableWith(
 				entity,
 				new Instance("Folder"),
-				"gameplay",
+				GAMEPLAY,
 			);
 		});
 
@@ -65,8 +67,8 @@ describe("createFluxJecs", () => {
 			expectTypeOf<typeof flux.register>().toBeCallableWith(
 				entity,
 				new Instance("Folder"),
-				"gameplay",
-				"ui",
+				GAMEPLAY,
+				UI,
 			);
 		});
 
@@ -92,7 +94,7 @@ describe("createFluxJecs", () => {
 			expectTypeOf<typeof flux.subscribe>().toBeCallableWith(
 				entity,
 				new Instance("Folder"),
-				"gameplay",
+				GAMEPLAY,
 			);
 		});
 
@@ -100,8 +102,8 @@ describe("createFluxJecs", () => {
 			expectTypeOf<typeof flux.subscribe>().toBeCallableWith(
 				entity,
 				new Instance("Folder"),
-				"gameplay",
-				"ui",
+				GAMEPLAY,
+				UI,
 			);
 		});
 
@@ -112,6 +114,68 @@ describe("createFluxJecs", () => {
 
 		it("should return a cancel function", () => {
 			expectTypeOf<typeof flux.subscribe>().returns.toEqualTypeOf<() => void>();
+		});
+	});
+
+	describe("addContext", () => {
+		it("should accept entity and context name", () => {
+			expectTypeOf<typeof flux.addContext>().toBeCallableWith(entity, GAMEPLAY);
+		});
+
+		it("should reject unknown context for addContext", () => {
+			// @ts-expect-error unknown context
+			flux.addContext(entity, INVALID);
+		});
+
+		it("should return a cancel function from addContext", () => {
+			expectTypeOf<typeof flux.addContext>().returns.toEqualTypeOf<() => void>();
+		});
+	});
+
+	describe("removeContext", () => {
+		it("should accept entity and context name", () => {
+			expectTypeOf<typeof flux.removeContext>().toBeCallableWith(entity, UI);
+		});
+
+		it("should reject unknown context for removeContext", () => {
+			// @ts-expect-error unknown context
+			flux.removeContext(entity, INVALID);
+		});
+
+		it("should return void from removeContext", () => {
+			expectTypeOf<typeof flux.removeContext>().returns.toEqualTypeOf<void>();
+		});
+	});
+
+	describe("hasContext", () => {
+		it("should accept entity and context name and return boolean", () => {
+			expectTypeOf<typeof flux.hasContext>().toBeCallableWith(entity, GAMEPLAY);
+			expectTypeOf<typeof flux.hasContext>().returns.toEqualTypeOf<boolean>();
+		});
+
+		it("should reject unknown context for hasContext", () => {
+			// @ts-expect-error unknown context
+			flux.hasContext(entity, INVALID);
+		});
+	});
+
+	describe("getContexts", () => {
+		it("should return readonly array of context names", () => {
+			expectTypeOf(flux.getContexts(entity)).toEqualTypeOf<
+				ReadonlyArray<"gameplay" | "ui">
+			>();
+		});
+	});
+
+	describe("destroy", () => {
+		it("should return void", () => {
+			expectTypeOf<typeof flux.destroy>().returns.toEqualTypeOf<void>();
+		});
+	});
+
+	describe("core", () => {
+		it("should be typed as FluxCore", () => {
+			expectTypeOf(flux.core).toEqualTypeOf<FluxCore<typeof actions, "gameplay" | "ui">>();
 		});
 	});
 

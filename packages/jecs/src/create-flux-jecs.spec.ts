@@ -1,4 +1,4 @@
-import { type ActionMap, type ContextConfig, HandleError } from "@rbxts/flux";
+import { type ActionMap, type ContextConfig, ContextError, HandleError } from "@rbxts/flux";
 import Jecs from "@rbxts/jecs";
 import { describe, expect, it } from "@rbxts/jest-globals";
 import RegExp from "@rbxts/regexp";
@@ -139,6 +139,174 @@ describe("createFluxJecs", () => {
 			expect(() => {
 				flux.getState(entity);
 			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+		});
+	});
+
+	describe("addContext", () => {
+		it("should activate context and add jecs tag", () => {
+			expect.assertions(2);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay");
+			flux.addContext(entity, "ui");
+
+			expect(flux.hasContext(entity, "ui")).toBeTrue();
+			expect(world.has(entity, flux.contexts.ui)).toBeTrue();
+		});
+
+		it("should throw ContextError on duplicate context", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay");
+
+			expect(() => {
+				flux.addContext(entity, "gameplay");
+			}).toThrowWithMessage(ContextError, RegExp("context already active"));
+		});
+	});
+
+	describe("removeContext", () => {
+		it("should deactivate context and remove jecs tag without affecting others", () => {
+			expect.assertions(4);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay", "ui");
+			flux.removeContext(entity, "ui");
+
+			expect(flux.hasContext(entity, "ui")).toBeFalse();
+			expect(world.has(entity, flux.contexts.ui)).toBeFalse();
+			expect(flux.hasContext(entity, "gameplay")).toBeTrue();
+			expect(world.has(entity, flux.contexts.gameplay)).toBeTrue();
+		});
+
+		it("should throw ContextError on inactive context", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay");
+
+			expect(() => {
+				flux.removeContext(entity, "ui");
+			}).toThrowWithMessage(ContextError, RegExp("context not active"));
+		});
+	});
+
+	describe("hasContext", () => {
+		it("should return true for active and false for inactive context", () => {
+			expect.assertions(2);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay");
+
+			expect(flux.hasContext(entity, "gameplay")).toBeTrue();
+			expect(flux.hasContext(entity, "ui")).toBeFalse();
+		});
+	});
+
+	describe("getContexts", () => {
+		it("should return all active context names", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay", "ui");
+
+			const active = flux.getContexts(entity);
+
+			expect(active).toStrictEqual(expect.arrayContaining(["gameplay", "ui"]));
+		});
+	});
+
+	describe("destroy", () => {
+		it("should make all handle operations throw", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay");
+			flux.destroy();
+
+			expect(() => {
+				flux.getState(entity);
+			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+		});
+
+		it("should clean up multiple registered entities", () => {
+			expect.assertions(2);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const first = world.entity();
+			const second = world.entity();
+			flux.register(first, new Instance("Folder"), "gameplay");
+			flux.register(second, new Instance("Folder"), "ui");
+			flux.destroy();
+
+			expect(() => {
+				flux.getState(first);
+			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+			expect(() => {
+				flux.getState(second);
+			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+		});
+	});
+
+	describe("core", () => {
+		it("should expose the underlying FluxCore instance", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			expect(typeOf(flux.core.update)).toBe("function");
 		});
 	});
 

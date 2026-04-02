@@ -41,15 +41,28 @@ export interface FluxJecs<
 
 	/**
 	 * Activates a context for the given entity.
+	 *
+	 * Delegates to core and adds the corresponding jecs tag.
+	 *
 	 * @param entity - The entity to add the context to.
 	 * @param context - The context name to activate.
+	 * @returns A cancel function that disconnects any ChildAdded listeners
+	 * (no-op for owned handles).
 	 */
-	addContext(entity: Entity, context: keyof C & string): void;
+	addContext(entity: Entity, context: keyof C & string): () => void;
 
 	/** Record of jecs tag entities, one per context name. */
 	readonly contexts: Readonly<Record<keyof C & string, Tag>>;
 
-	/** Underlying FluxCore instance. */
+	/**
+	 * Underlying FluxCore instance (escape hatch).
+	 *
+	 * @remarks
+	 * Core is ECS-agnostic and operates on opaque InputHandles. Mutations
+	 * performed directly via core bypass jecs synchronization — ActionState
+	 * components and context tags will not be updated. Prefer FluxJecs
+	 * methods unless intentionally bypassing synchronization.
+	 */
 	readonly core: FluxCore<T, keyof C & string>;
 
 	/**
@@ -59,20 +72,23 @@ export interface FluxJecs<
 
 	/**
 	 * Returns the active contexts for the given entity.
+	 *
 	 * @param entity - The entity to query.
 	 * @returns Read-only array of active context names.
 	 */
 	getContexts(entity: Entity): ReadonlyArray<keyof C & string>;
 
 	/**
-	 * Returns the action state for the given entity.
+	 * Returns the action state query interface for the given entity.
+	 *
 	 * @param entity - The entity to query.
-	 * @returns The typed action state.
+	 * @returns The typed action state for querying input.
 	 */
 	getState(entity: Entity): ActionState<T>;
 
 	/**
 	 * Checks whether a context is active for the given entity.
+	 *
 	 * @param entity - The entity to check.
 	 * @param context - The context name to check.
 	 * @returns True if the context is active.
@@ -80,30 +96,11 @@ export interface FluxJecs<
 	hasContext(entity: Entity, context: keyof C & string): boolean;
 
 	/**
-	 * Loads serialized bindings for the given entity.
-	 * @param entity - The entity to load bindings for.
-	 * @param data - The serialized binding data.
-	 */
-	loadBindings(entity: Entity, data: unknown): void;
-
-	/**
-	 * Replaces bindings for a single action on the given entity.
-	 * @param entity - The entity to rebind.
-	 * @param action - The action name.
-	 * @param bindings - The new bindings.
-	 */
-	rebind(entity: Entity, action: keyof T & string, bindings: ReadonlyArray<unknown>): void;
-
-	/**
-	 * Replaces all bindings for the given entity.
-	 * @param entity - The entity to rebind.
-	 * @param bindings - The complete binding state.
-	 */
-	rebindAll(entity: Entity, bindings: unknown): void;
-
-	/**
-	 * Registers an entity as an input consumer using the entity ID as the
-	 * Flux handle. Creates IAS instances under the parent.
+	 * Registers an entity as an input consumer and activates contexts.
+	 *
+	 * Sets the {@link ActionState} component on the entity and adds
+	 * context tags for each active context.
+	 *
 	 * @param entity - The jecs entity.
 	 * @param parent - The Roblox instance to parent InputContexts under.
 	 * @param context - First context name (at least one required).
@@ -118,33 +115,18 @@ export interface FluxJecs<
 
 	/**
 	 * Deactivates a context for the given entity.
+	 *
+	 * Delegates to core and removes the corresponding jecs tag.
+	 *
 	 * @param entity - The entity to remove the context from.
 	 * @param context - The context name to deactivate.
 	 */
 	removeContext(entity: Entity, context: keyof C & string): void;
 
 	/**
-	 * Resets all bindings for the given entity to defaults.
-	 * @param entity - The entity to reset.
-	 */
-	resetAllBindings(entity: Entity): void;
-
-	/**
-	 * Resets bindings for a single action to defaults.
-	 * @param entity - The entity to reset.
-	 * @param action - The action name.
-	 */
-	resetBindings(entity: Entity, action: keyof T & string): void;
-
-	/**
-	 * Serializes current bindings for the given entity.
-	 * @param entity - The entity to serialize.
-	 * @returns The serialized binding state.
-	 */
-	serializeBindings(entity: Entity): unknown;
-
-	/**
 	 * Injects a synthetic action value for testing or replay.
+	 *
+	 * @template A - The action name.
 	 * @param entity - The entity to simulate on.
 	 * @param action - The action name.
 	 * @param state - The value to inject.
@@ -157,6 +139,7 @@ export interface FluxJecs<
 
 	/**
 	 * Subscribes to server-created IAS instances under the parent.
+	 *
 	 * @param entity - The jecs entity.
 	 * @param parent - The instance containing server-created InputContexts.
 	 * @param context - First context name.
@@ -172,12 +155,14 @@ export interface FluxJecs<
 
 	/**
 	 * Unregisters an entity, cleaning up its handle and jecs components.
+	 *
 	 * @param entity - The entity to unregister.
 	 */
 	unregister(entity: Entity): void;
 
 	/**
 	 * Advances input processing for all registered entities.
+	 *
 	 * @param deltaTime - Time elapsed since last frame in seconds.
 	 */
 	update(deltaTime: number): void;
