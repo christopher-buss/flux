@@ -143,9 +143,37 @@ describe("createFluxJecs", () => {
 	});
 
 	describe("subscribe", () => {
-		it.todo("should set ActionState component and add context tags");
+		it("should set ActionState component, add context tags, and return cancel function", () => {
+			expect.assertions(5);
 
-		it.todo("should return a cancel function");
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const parent = new Instance("Folder");
+			const inputFolder = new Instance("Folder");
+			inputFolder.Name = "InputContexts";
+			inputFolder.Parent = parent;
+			const gameplay = new Instance("Folder");
+			gameplay.Name = "gameplay";
+			gameplay.Parent = inputFolder;
+
+			const entity = world.entity();
+			const cancel = flux.subscribe(entity, parent, "gameplay");
+
+			expect(world.has(entity, flux.ActionState)).toBeTrue();
+			expect(world.has(entity, flux.contexts.gameplay)).toBeTrue();
+			expect(typeOf(cancel)).toBe("function");
+
+			// Cancel should allow unregister without error
+			cancel();
+			flux.unregister(entity);
+
+			expect(world.has(entity, flux.ActionState)).toBeFalse();
+			expect(world.has(entity, flux.contexts.gameplay)).toBeFalse();
+		});
 
 		it.todo("should throw when subscribing the same entity twice");
 	});
