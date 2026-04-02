@@ -33,6 +33,8 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 		contextTags[name as Contexts] = world.component();
 	}
 
+	const registeredEntities = new Set<Entity>();
+
 	function addContextTags(entity: Entity): void {
 		const activeContexts = core.getContexts(toHandle(entity));
 		for (const [name] of pairs(contextTags)) {
@@ -55,6 +57,20 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 		core,
 
 		destroy(): void {
+			for (const entity of registeredEntities) {
+				if (world.has(entity, actionStateComponent)) {
+					world.remove(entity, actionStateComponent);
+				}
+
+				for (const [name] of pairs(contextTags)) {
+					const tag = contextTags[name as Contexts];
+					if (world.has(entity, tag)) {
+						world.remove(entity, tag);
+					}
+				}
+			}
+
+			registeredEntities.clear();
 			core.destroy();
 		},
 
@@ -77,6 +93,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			...rest: ReadonlyArray<Contexts>
 		): void {
 			core.registerAs(toHandle(entity), parent, context, ...rest);
+			registeredEntities.add(entity);
 
 			const state = core.getState(toHandle(entity));
 			world.set(entity, actionStateComponent, state);
@@ -103,6 +120,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			...rest: ReadonlyArray<Contexts>
 		): () => void {
 			const cancel = core.subscribeAs(toHandle(entity), parent, context, ...rest);
+			registeredEntities.add(entity);
 
 			const state = core.getState(toHandle(entity));
 			world.set(entity, actionStateComponent, state);
@@ -113,6 +131,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 
 		unregister(entity: Entity): void {
 			core.unregister(toHandle(entity));
+			registeredEntities.delete(entity);
 			world.remove(entity, actionStateComponent);
 			for (const [name] of pairs(contextTags)) {
 				const tag = contextTags[name as Contexts];
