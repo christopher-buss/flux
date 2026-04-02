@@ -123,7 +123,23 @@ describe("createFluxJecs", () => {
 			expect(world.has(entity, flux.contexts.ui)).toBeFalse();
 		});
 
-		it.todo("should make getState throw after unregister");
+		it("should make getState throw after unregister", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay");
+			flux.unregister(entity);
+
+			expect(() => {
+				flux.getState(entity);
+			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+		});
 	});
 
 	describe("subscribe", () => {
