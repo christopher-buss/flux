@@ -58,6 +58,13 @@ export interface FluxJecsResult<T extends ActionMap, C extends Record<string, Co
 	): void;
 
 	/**
+	 * Unregisters an entity, removing its ActionState component and context tags.
+	 *
+	 * @param entity - The entity to unregister.
+	 */
+	unregister(entity: Entity): void;
+
+	/**
 	 * Advances the input system by one frame.
 	 *
 	 * @param deltaTime - Time elapsed since last frame in seconds.
@@ -131,6 +138,17 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			state: ActionValue<T, A>,
 		): void {
 			core.simulateAction(toHandle(entity), action, state);
+		},
+
+		unregister(entity: Entity): void {
+			core.unregister(toHandle(entity));
+			world.remove(entity, actionStateComponent);
+			for (const [name] of pairs(contextTags)) {
+				const tag = contextTags[name as Contexts];
+				if (world.has(entity, tag)) {
+					world.remove(entity, tag);
+				}
+			}
 		},
 
 		update(deltaTime: number): void {

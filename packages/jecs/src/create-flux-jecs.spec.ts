@@ -103,4 +103,34 @@ describe("createFluxJecs", () => {
 			flux.register(entity, new Instance("Folder"), "ui");
 		}).toThrowWithMessage(HandleError, RegExp("handle already registered"));
 	});
+
+	describe("unregister", () => {
+		it("should remove ActionState component and context tags from entity", () => {
+			expect.assertions(3);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay", "ui");
+			flux.unregister(entity);
+
+			expect(world.has(entity, flux.ActionState)).toBeFalse();
+			expect(world.has(entity, flux.contexts.gameplay)).toBeFalse();
+			expect(world.has(entity, flux.contexts.ui)).toBeFalse();
+		});
+
+		it.todo("should make getState throw after unregister");
+	});
+
+	describe("subscribe", () => {
+		it.todo("should set ActionState component and add context tags");
+
+		it.todo("should return a cancel function");
+
+		it.todo("should throw when subscribing the same entity twice");
+	});
 });
