@@ -80,6 +80,41 @@ describe("createFluxJecs", () => {
 		});
 	});
 
+	describe("unregister", () => {
+		it("should accept entity and return void", () => {
+			expectTypeOf<typeof flux.unregister>().toBeCallableWith(entity);
+			expectTypeOf<typeof flux.unregister>().returns.toEqualTypeOf<void>();
+		});
+	});
+
+	describe("subscribe", () => {
+		it("should accept entity, parent, and context names", () => {
+			expectTypeOf<typeof flux.subscribe>().toBeCallableWith(
+				entity,
+				new Instance("Folder"),
+				"gameplay",
+			);
+		});
+
+		it("should accept variadic context names", () => {
+			expectTypeOf<typeof flux.subscribe>().toBeCallableWith(
+				entity,
+				new Instance("Folder"),
+				"gameplay",
+				"ui",
+			);
+		});
+
+		it("should reject invalid context name", () => {
+			// @ts-expect-error unknown context
+			flux.subscribe(entity, new Instance("Folder"), INVALID);
+		});
+
+		it("should return a cancel function", () => {
+			expectTypeOf<typeof flux.subscribe>().returns.toEqualTypeOf<() => void>();
+		});
+	});
+
 	describe("getState", () => {
 		it("should return typed ActionState", () => {
 			expectTypeOf(flux.getState(entity)).toEqualTypeOf<ActionState<typeof actions>>();

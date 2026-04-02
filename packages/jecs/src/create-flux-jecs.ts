@@ -58,6 +58,29 @@ export interface FluxJecsResult<T extends ActionMap, C extends Record<string, Co
 	): void;
 
 	/**
+	 * Subscribes to server-created IAS instances under the parent.
+	 *
+	 * @param entity - The jecs entity.
+	 * @param parent - The instance containing server-created InputContexts.
+	 * @param context - First context to subscribe to (at least one required).
+	 * @param rest - Additional contexts to subscribe to.
+	 * @returns A cancel function that disconnects all tracked subscription connections.
+	 */
+	subscribe(
+		entity: Entity,
+		parent: Instance,
+		context: keyof C & string,
+		...rest: ReadonlyArray<keyof C & string>
+	): () => void;
+
+	/**
+	 * Unregisters an entity, removing its ActionState component and context tags.
+	 *
+	 * @param entity - The entity to unregister.
+	 */
+	unregister(entity: Entity): void;
+
+	/**
 	 * Advances the input system by one frame.
 	 *
 	 * @param deltaTime - Time elapsed since last frame in seconds.
@@ -131,6 +154,32 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			state: ActionValue<T, A>,
 		): void {
 			core.simulateAction(toHandle(entity), action, state);
+		},
+
+		subscribe(
+			entity: Entity,
+			parent: Instance,
+			context: Contexts,
+			...rest: ReadonlyArray<Contexts>
+		): () => void {
+			const cancel = core.subscribeAs(toHandle(entity), parent, context, ...rest);
+
+			const state = core.getState(toHandle(entity));
+			world.set(entity, actionStateComponent, state);
+			addContextTags(entity);
+
+			return cancel;
+		},
+
+		unregister(entity: Entity): void {
+			core.unregister(toHandle(entity));
+			world.remove(entity, actionStateComponent);
+			for (const [name] of pairs(contextTags)) {
+				const tag = contextTags[name as Contexts];
+				if (world.has(entity, tag)) {
+					world.remove(entity, tag);
+				}
+			}
 		},
 
 		update(deltaTime: number): void {

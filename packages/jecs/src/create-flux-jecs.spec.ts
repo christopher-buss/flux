@@ -103,4 +103,101 @@ describe("createFluxJecs", () => {
 			flux.register(entity, new Instance("Folder"), "ui");
 		}).toThrowWithMessage(HandleError, RegExp("handle already registered"));
 	});
+
+	describe("unregister", () => {
+		it("should remove ActionState component and context tags from entity", () => {
+			expect.assertions(3);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay", "ui");
+			flux.unregister(entity);
+
+			expect(world.has(entity, flux.ActionState)).toBeFalse();
+			expect(world.has(entity, flux.contexts.gameplay)).toBeFalse();
+			expect(world.has(entity, flux.contexts.ui)).toBeFalse();
+		});
+
+		it("should make getState throw after unregister", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay");
+			flux.unregister(entity);
+
+			expect(() => {
+				flux.getState(entity);
+			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+		});
+	});
+
+	describe("subscribe", () => {
+		it("should set ActionState component, add context tags, and return cancel function", () => {
+			expect.assertions(5);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const parent = new Instance("Folder");
+			const inputFolder = new Instance("Folder");
+			inputFolder.Name = "InputContexts";
+			inputFolder.Parent = parent;
+			const gameplay = new Instance("Folder");
+			gameplay.Name = "gameplay";
+			gameplay.Parent = inputFolder;
+
+			const entity = world.entity();
+			const cancel = flux.subscribe(entity, parent, "gameplay");
+
+			expect(world.has(entity, flux.ActionState)).toBeTrue();
+			expect(world.has(entity, flux.contexts.gameplay)).toBeTrue();
+			expect(typeOf(cancel)).toBe("function");
+
+			// Cancel should allow unregister without error
+			cancel();
+			flux.unregister(entity);
+
+			expect(world.has(entity, flux.ActionState)).toBeFalse();
+			expect(world.has(entity, flux.contexts.gameplay)).toBeFalse();
+		});
+
+		it("should throw when subscribing the same entity twice", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const parent = new Instance("Folder");
+			const inputFolder = new Instance("Folder");
+			inputFolder.Name = "InputContexts";
+			inputFolder.Parent = parent;
+			const gameplay = new Instance("Folder");
+			gameplay.Name = "gameplay";
+			gameplay.Parent = inputFolder;
+
+			const entity = world.entity();
+			flux.subscribe(entity, parent, "gameplay");
+
+			expect(() => {
+				flux.subscribe(entity, parent, "gameplay");
+			}).toThrowWithMessage(HandleError, RegExp("handle already registered"));
+		});
+	});
 });
