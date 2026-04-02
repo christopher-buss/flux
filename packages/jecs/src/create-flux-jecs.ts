@@ -45,9 +45,10 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 
 	return {
 		ActionState: actionStateComponent,
-		addContext(entity: Entity, context: Contexts): void {
-			core.addContext(toHandle(entity), context);
+		addContext(entity: Entity, context: Contexts): () => void {
+			const cancel = core.addContext(toHandle(entity), context);
 			world.add(entity, contextTags[context]);
+			return cancel;
 		},
 
 		contexts: table.freeze(contextTags),

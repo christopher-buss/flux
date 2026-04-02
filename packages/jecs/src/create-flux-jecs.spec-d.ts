@@ -127,8 +127,8 @@ describe("createFluxJecs", () => {
 			flux.addContext(entity, INVALID);
 		});
 
-		it("should return void from addContext", () => {
-			expectTypeOf<typeof flux.addContext>().returns.toEqualTypeOf<void>();
+		it("should return a cancel function from addContext", () => {
+			expectTypeOf<typeof flux.addContext>().returns.toEqualTypeOf<() => void>();
 		});
 	});
 

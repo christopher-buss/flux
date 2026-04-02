@@ -46,13 +46,23 @@ export interface FluxJecs<
 	 *
 	 * @param entity - The entity to add the context to.
 	 * @param context - The context name to activate.
+	 * @returns A cancel function that disconnects any ChildAdded listeners
+	 * (no-op for owned handles).
 	 */
-	addContext(entity: Entity, context: keyof C & string): void;
+	addContext(entity: Entity, context: keyof C & string): () => void;
 
 	/** Record of jecs tag entities, one per context name. */
 	readonly contexts: Readonly<Record<keyof C & string, Tag>>;
 
-	/** Underlying FluxCore instance. */
+	/**
+	 * Underlying FluxCore instance (escape hatch).
+	 *
+	 * @remarks
+	 * Core is ECS-agnostic and operates on opaque InputHandles. Mutations
+	 * performed directly via core bypass jecs synchronization — ActionState
+	 * components and context tags will not be updated. Prefer FluxJecs
+	 * methods unless intentionally bypassing synchronization.
+	 */
 	readonly core: FluxCore<T, keyof C & string>;
 
 	/**
