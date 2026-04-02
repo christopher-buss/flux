@@ -64,7 +64,7 @@ export interface FluxJecsResult<T extends ActionMap, C extends Record<string, Co
 	 * @param parent - The instance containing server-created InputContexts.
 	 * @param context - First context to subscribe to (at least one required).
 	 * @param rest - Additional contexts to subscribe to.
-	 * @returns A cancel function that disconnects ChildAdded listeners.
+	 * @returns A cancel function that disconnects all tracked subscription connections.
 	 */
 	subscribe(
 		entity: Entity,
