@@ -175,6 +175,29 @@ describe("createFluxJecs", () => {
 			expect(world.has(entity, flux.contexts.gameplay)).toBeFalse();
 		});
 
-		it.todo("should throw when subscribing the same entity twice");
+		it("should throw when subscribing the same entity twice", () => {
+			expect.assertions(1);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const parent = new Instance("Folder");
+			const inputFolder = new Instance("Folder");
+			inputFolder.Name = "InputContexts";
+			inputFolder.Parent = parent;
+			const gameplay = new Instance("Folder");
+			gameplay.Name = "gameplay";
+			gameplay.Parent = inputFolder;
+
+			const entity = world.entity();
+			flux.subscribe(entity, parent, "gameplay");
+
+			expect(() => {
+				flux.subscribe(entity, parent, "gameplay");
+			}).toThrowWithMessage(HandleError, RegExp("handle already registered"));
+		});
 	});
 });
