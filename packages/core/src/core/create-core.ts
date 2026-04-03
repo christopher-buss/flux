@@ -34,6 +34,13 @@ export interface CreateCoreOptions<T extends ActionMap, C extends Record<string,
 	 * @default false
 	 */
 	readonly debug?: boolean;
+	/**
+	 * Called when a subscribed InputAction has not replicated within the
+	 * timeout threshold. Only invoked when `debug` is `true`.
+	 * Defaults to `warn()`.
+	 * @internal
+	 */
+	readonly onReplicationTimeout?: (message: string) => void;
 }
 
 /**
@@ -61,8 +68,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 	options: CreateCoreOptions<T, C>,
 ): FluxCore<T, keyof C & string> {
 	type Contexts = keyof C & string;
-	const { actions, contexts, debug: isDebug } = options;
-	// eslint-disable-next-line unused-imports/no-unused-vars, sonar/no-dead-store -- infrastructure for future dev warnings
+	const { actions, contexts, debug: isDebug, onReplicationTimeout } = options;
 	const isDevelopmentMode = _G.__DEV__ && isDebug === true;
 	const factory = createHandleFactory();
 	const handles = new Map<InputHandle, HandleData<T>>();
@@ -233,6 +239,8 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 					deltaTime,
 					handle,
 					handleData,
+					isDebug: isDevelopmentMode,
+					...(onReplicationTimeout !== undefined && { onReplicationTimeout }),
 				});
 			}
 		},
