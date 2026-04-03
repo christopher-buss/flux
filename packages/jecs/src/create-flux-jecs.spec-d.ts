@@ -236,6 +236,15 @@ describe("FluxJecsOptions", () => {
 		createFluxJecs(world, { actions, actionStateComponent: component, contexts });
 	});
 
+	it("should accept debug option", () => {
+		createFluxJecs(world, { actions, contexts, debug: true });
+		createFluxJecs(world, { actions, contexts, debug: false });
+	});
+
+	it("should accept omitted debug option", () => {
+		createFluxJecs(world, { actions, contexts });
+	});
+
 	it("should reject missing actions", () => {
 		// @ts-expect-error missing actions
 		createFluxJecs(world, { contexts });

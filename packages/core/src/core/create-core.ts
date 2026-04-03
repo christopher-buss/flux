@@ -27,6 +27,13 @@ export interface CreateCoreOptions<T extends ActionMap, C extends Record<string,
 	readonly actions: T;
 	/** Context configurations with validated bindings per action type. */
 	readonly contexts: C & ValidatedContexts<T, C>;
+	/**
+	 * Enable debug warnings. Requires `_G.__DEV__` to also be `true` — when
+	 * `_G.__DEV__` is `false`, debug code paths become dead code eligible
+	 * for removal by code transformation tools.
+	 * @default false
+	 */
+	readonly debug?: boolean;
 }
 
 /**
@@ -54,7 +61,9 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 	options: CreateCoreOptions<T, C>,
 ): FluxCore<T, keyof C & string> {
 	type Contexts = keyof C & string;
-	const { actions, contexts } = options;
+	const { actions, contexts, debug: isDebug } = options;
+	// eslint-disable-next-line unused-imports/no-unused-vars, sonar/no-dead-store -- infrastructure for future dev warnings
+	const isDevelopmentMode = _G.__DEV__ && isDebug === true;
 	const factory = createHandleFactory();
 	const handles = new Map<InputHandle, HandleData<T>>();
 

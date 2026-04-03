@@ -38,6 +38,19 @@ describe("CreateCoreOptions", () => {
 		);
 	});
 
+	it("should have optional debug field", () => {
+		expectTypeOf<CreateCoreOptions<typeof actions, typeof contexts>>().toHaveProperty("debug");
+	});
+
+	it("should accept debug option", () => {
+		createCore({ actions, contexts, debug: true });
+		createCore({ actions, contexts, debug: false });
+	});
+
+	it("should accept omitted debug option", () => {
+		createCore({ actions, contexts });
+	});
+
 	it("should reject missing fields", () => {
 		// @ts-expect-error missing contexts
 		createCore({ actions });
