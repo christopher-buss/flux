@@ -128,6 +128,21 @@ function createStatusGui(): TextLabel {
 
 const statusLabel = createStatusGui();
 
+function buildStatusText(state: ReturnType<typeof core.getState>, isNearby: boolean): string {
+	const move = state.direction2d("move");
+	const activeContext = activeContexts.has("menu") ? "menu" : "gameplay";
+	return [
+		"[Flux E2E]",
+		`context: ${activeContext}`,
+		`move: (${string.format("%.1f", move.X)}, ${string.format("%.1f", move.Y)})`,
+		`fire: ${state.pressed("fire") ? "pressed" : ""}`,
+		`jump: ${state.pressed("jump")}`,
+		`interact: ${isNearby ? "nearby" : "far"} | ${getInteractStatus(state)}`,
+		`interact duration: ${string.format("%.2f", state.currentDuration("interact"))}s`,
+		`toggle: ${activeContexts.has("menu")}`,
+	].join("\n");
+}
+
 RunService.Heartbeat.Connect((deltaTime) => {
 	core.update(deltaTime);
 
@@ -152,15 +167,5 @@ RunService.Heartbeat.Connect((deltaTime) => {
 		promptLabel.Text = "[E] Hold to interact";
 	}
 
-	const move = state.direction2d("move");
-	const activeContext = activeContexts.has("menu") ? "menu" : "gameplay";
-	statusLabel.Text = [
-		"[Flux E2E]",
-		`context: ${activeContext}`,
-		`move: (${string.format("%.1f", move.X)}, ${string.format("%.1f", move.Y)})`,
-		`jump: ${state.pressed("jump")}`,
-		`interact: ${isNearby ? "nearby" : "far"} | ${getInteractStatus(state)}`,
-		`interact duration: ${string.format("%.2f", state.currentDuration("interact"))}s`,
-		`toggle: ${activeContexts.has("menu")}`,
-	].join("\n");
+	statusLabel.Text = buildStatusText(state, isNearby);
 });
