@@ -220,6 +220,21 @@ function clearPendingAction(handleData: CoreHandleData, actionName: string): voi
 	handleData.pendingActions.delete(actionName);
 }
 
+function resetAction(
+	handleData: CoreHandleData,
+	actionName: string,
+	actionConfig: ActionConfig,
+	deltaTime: number,
+): void {
+	handleData.durations.set(actionName, 0);
+	handleData.internalState.updateAction({
+		action: actionName,
+		deltaTime,
+		triggerState: "none",
+		value: getDefaultValue(actionConfig.type),
+	});
+}
+
 function canProcessAction(handleData: CoreHandleData, actionName: string): boolean {
 	if (handleData.instanceData.owned) {
 		return true;
@@ -259,6 +274,7 @@ function processContextActions(options: ContextActionsOptions): void {
 				trackPendingAction(handleData, actionName, deltaTime, onReplicationTimeout);
 			}
 
+			resetAction(handleData, actionName, actionConfig, deltaTime);
 			processedActions.add(actionName);
 			continue;
 		}

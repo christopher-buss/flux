@@ -1023,6 +1023,22 @@ describe("createCore", () => {
 			expect(core.getState(handle).pressed("jump")).toBeTrue();
 		});
 
+		it("should not retain stale state after simulateAction expires", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+			// simulatedValues cleared after first update; next update should
+			// reset
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeFalse();
+		});
+
 		it("should call onReplicationTimeout after threshold", () => {
 			expect.assertions(1);
 
