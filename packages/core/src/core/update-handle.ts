@@ -1,5 +1,6 @@
 import type { ModifierContext } from "../modifiers/types";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
+import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionValueType, InternalActionState } from "./action-state";
@@ -92,7 +93,12 @@ export function sortActiveContexts(
 		sorted.push([name, config]);
 	}
 
-	sorted.sort((first, second) => first[1].priority > second[1].priority);
+	sorted.sort((first, second) => {
+		return (
+			(first[1].priority ?? DEFAULT_CONTEXT_PRIORITY) >
+			(second[1].priority ?? DEFAULT_CONTEXT_PRIORITY)
+		);
+	});
 	return sorted;
 }
 

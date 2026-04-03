@@ -28,8 +28,7 @@ describe("defineContexts", () => {
 		expectTypeOf(contexts.gameplay).toExtend<ContextConfig>();
 	});
 
-	it("should reject invalid context config", () => {
-		// @ts-expect-error missing required 'priority' field
+	it("should accept context config without priority", () => {
 		defineContexts({ gameplay: { bindings: {} } });
 	});
 

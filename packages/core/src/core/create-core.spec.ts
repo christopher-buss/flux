@@ -261,6 +261,32 @@ describe("createCore", () => {
 		});
 	});
 
+	describe("default priority", () => {
+		it("should use default priority when not specified", () => {
+			expect.assertions(1);
+
+			const actions = { jump: { type: "Bool" as const } } satisfies ActionMap;
+			const contexts = {
+				gameplay: {
+					bindings: { jump: [Enum.KeyCode.Space] },
+				},
+				menu: {
+					bindings: { jump: [Enum.KeyCode.Space] },
+				},
+				ui: {
+					bindings: { jump: [Enum.KeyCode.Space] },
+					priority: 10,
+				},
+			} satisfies Record<string, ContextConfig>;
+			const core = createCore({ actions, contexts });
+			const handle = core.register(new Instance("Folder"), "gameplay", "menu", "ui");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+	});
+
 	describe("overlapping bindings", () => {
 		it("should process action only once across non-sink contexts", () => {
 			expect.assertions(1);

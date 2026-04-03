@@ -3,6 +3,7 @@ import type { KeysOfUnion } from "type-fest";
 import { FluxError } from "../errors";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingConfig, BindingLike } from "../types/bindings";
+import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
 
 /**
@@ -364,7 +365,7 @@ function createContext(options: CreateContextOptions): InputContext {
 	const { actions, contextConfig, contextName, inputActions, instances } = options;
 	const inputContext = new Instance("InputContext");
 	inputContext.Name = contextName;
-	inputContext.Priority = contextConfig.priority;
+	inputContext.Priority = contextConfig.priority ?? DEFAULT_CONTEXT_PRIORITY;
 	inputContext.Sink = contextConfig.sink === true;
 
 	for (const [actionName, bindings] of pairs(contextConfig.bindings)) {

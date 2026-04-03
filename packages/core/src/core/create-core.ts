@@ -37,7 +37,7 @@ export interface CreateCoreOptions<T extends ActionMap, C extends Record<string,
 type ValidatedContexts<T extends ActionMap, C extends Record<string, ContextConfig>> = {
 	readonly [K in keyof C]: {
 		readonly bindings: TypedBindings<T>;
-		readonly priority: number;
+		readonly priority?: number;
 		readonly sink?: boolean;
 	};
 };
