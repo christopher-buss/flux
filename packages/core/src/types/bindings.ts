@@ -123,19 +123,19 @@ export type BindingConfig =
  * @template T - The action type literal.
  */
 export type BindingForAction<T extends ActionType> = T extends "Bool"
-	? BoolBindingConfig | Enum.KeyCode | Enum.UserInputType
+	? BoolBindingConfig | Enum.KeyCode
 	: T extends "Direction1D"
-		? Direction1dBindingConfig | Enum.KeyCode | Enum.UserInputType
+		? Direction1dBindingConfig | Enum.KeyCode
 		: T extends "Direction2D"
-			? Direction2dBindingConfig | Enum.KeyCode | Enum.UserInputType
+			? Direction2dBindingConfig | Enum.KeyCode
 			: T extends "Direction3D"
-				? Direction3dBindingConfig | Enum.KeyCode | Enum.UserInputType
+				? Direction3dBindingConfig | Enum.KeyCode
 				: T extends "ViewportPosition"
-					? Enum.KeyCode | Enum.UserInputType | ViewportPositionBindingConfig
+					? Enum.KeyCode | ViewportPositionBindingConfig
 					: never;
 
-/** A binding-like value: KeyCode, UserInputType, or typed binding config. */
-export type BindingLike = BindingConfig | Enum.KeyCode | Enum.UserInputType;
+/** A binding-like value: KeyCode or typed binding config. */
+export type BindingLike = BindingConfig | Enum.KeyCode;
 
 /**
  * Maps action names to correctly-typed binding arrays.

@@ -174,8 +174,8 @@ describe("BindingLike", () => {
 		expectTypeOf<Enum.KeyCode>().toExtend<BindingLike>();
 	});
 
-	it("should accept UserInputType", () => {
-		expectTypeOf<Enum.UserInputType>().toExtend<BindingLike>();
+	it("should reject UserInputType", () => {
+		expectTypeOf<Enum.UserInputType>().not.toExtend<BindingLike>();
 	});
 
 	it("should accept Direction2dBindingConfig", () => {
@@ -193,12 +193,12 @@ describe("BindingLike", () => {
 });
 
 describe("BindingForAction", () => {
-	it("should resolve Bool to KeyCode | UserInputType | BoolBindingConfig", () => {
+	it("should resolve Bool to KeyCode | BoolBindingConfig", () => {
 		expectTypeOf<BoolBindingConfig>().toExtend<BindingForAction<"Bool">>();
 		expectTypeOf<Enum.KeyCode>().toExtend<BindingForAction<"Bool">>();
 	});
 
-	it("should resolve Direction2D to KeyCode | UserInputType | Direction2dBindingConfig", () => {
+	it("should resolve Direction2D to KeyCode | Direction2dBindingConfig", () => {
 		expectTypeOf<Direction2dBindingConfig>().toExtend<BindingForAction<"Direction2D">>();
 		expectTypeOf<Enum.KeyCode>().toExtend<BindingForAction<"Direction2D">>();
 	});
