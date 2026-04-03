@@ -1,6 +1,9 @@
 import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { fromAny } from "@rbxts/jest-utils";
+import RegExp from "@rbxts/regexp";
 
+import { FluxError } from "../errors";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import {
@@ -145,7 +148,7 @@ describe("createInputInstances", () => {
 		expect(data.inputActions.has("move")).toBeTrue();
 	});
 
-	it("should skip UserInputType bindings", () => {
+	it("should throw on UserInputType bindings", () => {
 		expect.assertions(1);
 
 		const actions = {
@@ -155,20 +158,20 @@ describe("createInputInstances", () => {
 		const contexts = {
 			gameplay: {
 				bindings: {
-					aim: [Enum.UserInputType.MouseButton2],
+					aim: fromAny([Enum.UserInputType.MouseButton2]),
 				},
 				priority: 0,
 			},
 		} satisfies Record<string, ContextConfig>;
 
-		const data = createInputInstances({
-			actions,
-			contextNames: ["gameplay"],
-			contexts,
-			parent: new Instance("Folder"),
-		});
-
-		expect(data.inputActions.has("aim")).toBeTrue();
+		expect(() => {
+			createInputInstances({
+				actions,
+				contextNames: ["gameplay"],
+				contexts,
+				parent: new Instance("Folder"),
+			});
+		}).toThrowWithMessage(FluxError, RegExp("UserInputType"));
 	});
 
 	it("should set priority and sink on InputContext", () => {

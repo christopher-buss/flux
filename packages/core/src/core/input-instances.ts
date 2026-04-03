@@ -1,5 +1,6 @@
 import type { KeysOfUnion } from "type-fest";
 
+import { FluxError } from "../errors";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingConfig, BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
@@ -310,7 +311,7 @@ function isKeyCode(value: BindingLike): value is Enum.KeyCode {
 	return typeIs(value, "EnumItem") && value.EnumType === Enum.KeyCode;
 }
 
-function isUserInputType(value: BindingLike): value is Enum.UserInputType {
+function isUserInputType(value: unknown): boolean {
 	return typeIs(value, "EnumItem") && value.EnumType === Enum.UserInputType;
 }
 
@@ -320,7 +321,9 @@ function createBinding(
 	instances: Array<Instance>,
 ): void {
 	if (isUserInputType(bindingLike)) {
-		return;
+		throw new FluxError(
+			`UserInputType bindings are not supported: ${bindingLike}. Use Enum.KeyCode instead`,
+		);
 	}
 
 	const binding = new Instance("InputBinding");
