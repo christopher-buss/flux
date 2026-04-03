@@ -5,6 +5,7 @@ import RegExp from "@rbxts/regexp";
 
 import { FluxError } from "../errors";
 import type { ActionMap } from "../types/actions";
+import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
 import {
 	addContextInstances,
@@ -189,6 +190,28 @@ describe("createInputInstances", () => {
 
 		expect(uiContext.Priority).toBe(10);
 		expect(uiContext.Sink).toBeTrue();
+	});
+
+	it("should use default priority when not specified", () => {
+		expect.assertions(1);
+
+		const contexts = {
+			defaults: {
+				bindings: { jump: [Enum.KeyCode.Space] },
+			},
+		} satisfies Record<string, ContextConfig>;
+
+		const data = createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["defaults"],
+			contexts,
+			parent: new Instance("Folder"),
+		});
+
+		const context = data.inputContexts.get("defaults");
+		assert(context);
+
+		expect(context.Priority).toBe(DEFAULT_CONTEXT_PRIORITY);
 	});
 
 	it("should create an 'input' folder under the parent", () => {
