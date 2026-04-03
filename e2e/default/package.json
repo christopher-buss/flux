@@ -11,6 +11,7 @@
 	"type": "commonjs",
 	"scripts": {
 		"build": "rbxtsc --project ./tsconfig.game.json --type game && rojo build default.project.json -o flux-e2e-default.rbxl",
+		"build:bundled": "rbxtsc --project ./tsconfig.game.json --type game && rojo build bundled.project.json -o flux-e2e-default.rbxl",
 		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
 		"serve": "rojo serve default.project.json",
 		"typecheck": "tsgo --noEmit --project tsconfig.game.json",

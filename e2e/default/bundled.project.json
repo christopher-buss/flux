@@ -1,5 +1,5 @@
 {
-	"name": "flux-e2e-jecs",
+	"name": "flux-e2e-default",
 	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
 	"emitLegacyScripts": false,
 	"tree": {
@@ -13,15 +13,15 @@
 				"$path": "include",
 				"node_modules": {
 					"$className": "Folder",
+					"@flux": {
+						"$className": "Folder",
+						"flux": {
+							"$path": "../../packages/core/dist"
+						}
+					},
 					"@rbxts": {
 						"$className": "Folder",
-						"$path": "../../rojo-sync/@rbxts",
-						"flux": {
-							"$path": "node_modules/@rbxts/flux"
-						},
-						"flux-jecs": {
-							"$path": "../../packages/jecs/dist"
-						}
+						"$path": "../../rojo-sync/@rbxts"
 					},
 					"@rbxts-js": {
 						"$className": "Folder",
@@ -53,6 +53,17 @@
 					"Locked": true,
 					"Position": [0, -10, 0],
 					"Size": [50, 2, 50]
+				}
+			},
+			"Interactable": {
+				"$className": "Part",
+				"$properties": {
+					"Anchored": true,
+					"Color": [0.0, 0.6, 1.0],
+					"Material": "Neon",
+					"Position": [5, -7, 5],
+					"Shape": "Cylinder",
+					"Size": [3, 2, 2]
 				}
 			}
 		}
