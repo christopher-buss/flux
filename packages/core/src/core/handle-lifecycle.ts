@@ -144,8 +144,10 @@ function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): Han
 		durations,
 		instanceData,
 		internalState,
+		pendingActions: new Map<string, number>(),
 		publicState,
 		simulatedValues: new Map<string, ActionValueType>(),
+		warnedActions: new Set<string>(),
 	};
 }
 
@@ -176,8 +178,10 @@ function createSubscribeData<T extends ActionMap>(
 		durations,
 		instanceData,
 		internalState,
+		pendingActions: new Map<string, number>(),
 		publicState,
 		simulatedValues: new Map<string, ActionValueType>(),
+		warnedActions: new Set<string>(),
 	};
 
 	const cancel = (): void => {

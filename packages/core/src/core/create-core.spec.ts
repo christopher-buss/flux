@@ -1,5 +1,5 @@
 import { awaitDefer } from "@flux/test-utils";
-import { describe, expect, it } from "@rbxts/jest-globals";
+import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import RegExp from "@rbxts/regexp";
 
@@ -10,6 +10,8 @@ import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import { createCore } from "./create-core";
+
+_G.__DEV__ = true;
 
 const TEST_ACTIONS = {
 	cursor: { type: "ViewportPosition" as const },
@@ -958,6 +960,223 @@ describe("createCore", () => {
 			};
 
 			expect(subscribeAs).toThrow("unknown context");
+		});
+	});
+
+	describe("subscribe + update", () => {
+		it("should not throw when update is called before replication", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			core.subscribe(parent, "gameplay");
+
+			expect(() => {
+				core.update(0.016);
+			}).never.toThrow();
+		});
+
+		it("should return default values for actions not yet replicated", () => {
+			expect.assertions(2);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			core.update(0.016);
+
+			const state = core.getState(handle);
+
+			expect(state.pressed("jump")).toBeFalse();
+			expect(state.direction2d("move")).toBe(Vector2.zero);
+		});
+
+		it("should process action after instances replicate", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+			awaitDefer();
+			awaitDefer();
+
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should allow simulateAction before replication", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should not retain stale state after simulateAction expires", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+			// simulatedValues cleared after first update; next update should
+			// reset
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeFalse();
+		});
+
+		it("should call onReplicationTimeout after threshold", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const [mockWarn, mockWarnFunction] = jest.fn<void, [message: string]>();
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				debug: true,
+				onReplicationTimeout: mockWarnFunction,
+			});
+
+			core.subscribe(parent, "gameplay");
+
+			for (const _ of $range(1, 313)) {
+				core.update(0.016);
+			}
+
+			expect(mockWarn).toHaveBeenCalledWith(expect.any("string"));
+		});
+
+		it("should warn only once per action", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const [mockWarn, mockWarnFunction] = jest.fn<void, [message: string]>();
+			const core = createCore({
+				actions: { jump: { type: "Bool" as const } },
+				contexts: {
+					gameplay: { bindings: { jump: [Enum.KeyCode.Space] }, priority: 0 },
+				},
+				debug: true,
+				onReplicationTimeout: mockWarnFunction,
+			});
+
+			core.subscribe(parent, "gameplay");
+
+			for (const _ of $range(1, 625)) {
+				core.update(0.016);
+			}
+
+			expect(mockWarn).toHaveBeenCalledOnce();
+		});
+
+		it("should not warn if action replicates before timeout", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const [mockWarn, mockWarnFunction] = jest.fn<void, [message: string]>();
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				debug: true,
+				onReplicationTimeout: mockWarnFunction,
+			});
+
+			core.subscribe(parent, "gameplay");
+			core.update(0.016);
+			core.update(0.016);
+
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+			awaitDefer();
+			awaitDefer();
+
+			for (const _ of $range(1, 625)) {
+				core.update(0.016);
+			}
+
+			expect(mockWarn).never.toHaveBeenCalled();
+		});
+
+		it("should not warn when debug is false", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const [mockWarn, mockWarnFunction] = jest.fn<void, [message: string]>();
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				debug: false,
+				onReplicationTimeout: mockWarnFunction,
+			});
+
+			core.subscribe(parent, "gameplay");
+
+			for (const _ of $range(1, 625)) {
+				core.update(0.016);
+			}
+
+			expect(mockWarn).never.toHaveBeenCalled();
+		});
+
+		it("should skip missing actions from addContext on subscribed handle", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+
+			const [handle] = core.subscribe(parent, "gameplay");
+			core.addContext(handle, "ui");
+
+			expect(() => {
+				core.update(0.016);
+			}).never.toThrow();
+		});
+
+		it("should warn via global warn when no callback is provided", () => {
+			expect.assertions(1);
+
+			const spy = jest.spyOn(jest.globalEnv, "warn");
+			spy.mockImplementation(() => {});
+
+			const parent = new Instance("Folder");
+			const core = createCore({
+				actions: { jump: { type: "Bool" as const } },
+				contexts: {
+					gameplay: { bindings: { jump: [Enum.KeyCode.Space] }, priority: 0 },
+				},
+				debug: true,
+			});
+
+			core.subscribe(parent, "gameplay");
+
+			for (const _ of $range(1, 313)) {
+				core.update(0.016);
+			}
+
+			const callCount = spy.mock.calls.size();
+			const firstArgument = spy.mock.calls[0]![0];
+			spy.mockRestore();
+
+			assert(callCount > 0, "expected warn to be called");
+
+			expect(firstArgument).toStrictEqual(expect.stringContaining("jump"));
 		});
 	});
 });
