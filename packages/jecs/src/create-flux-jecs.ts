@@ -23,8 +23,8 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 ): FluxJecs<T, C> {
 	type Contexts = keyof C & string;
 
-	const { actions, contexts } = options;
-	const core = createCore({ actions, contexts });
+	const { actions, contexts, debug: isDebug } = options;
+	const core = createCore({ actions, contexts, debug: isDebug === true });
 
 	const actionStateComponent = options.actionStateComponent ?? world.component<ActionState<T>>();
 
