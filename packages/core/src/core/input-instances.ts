@@ -113,10 +113,6 @@ export function destroyInputInstances(data: InputInstanceData): void {
 		connection.Disconnect();
 	}
 
-	if (!data.owned) {
-		return;
-	}
-
 	for (const instance of data.instances) {
 		instance.Destroy();
 	}

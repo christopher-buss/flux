@@ -459,6 +459,35 @@ describe("findInputInstances", () => {
 		expect(inputFolder.FindFirstChild("gameplay")).toBeDefined();
 	});
 
+	it("should destroy dynamically-added instances even when not owned", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		createInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			contexts: TEST_CONTEXTS,
+			parent,
+		});
+
+		const found = findInputInstances({
+			actions: TEST_ACTIONS,
+			contextNames: ["gameplay"],
+			parent,
+		});
+
+		addContextInstances("ui", TEST_CONTEXTS.ui, TEST_ACTIONS, found);
+
+		const inputFolder = parent.FindFirstChild("input");
+		assert(inputFolder);
+
+		expect(inputFolder.FindFirstChild("ui")).toBeDefined();
+
+		destroyInputInstances(found);
+
+		expect(inputFolder.FindFirstChild("ui")).toBeUndefined();
+	});
+
 	it("should find context added after subscribe via ChildAdded", () => {
 		expect.assertions(2);
 

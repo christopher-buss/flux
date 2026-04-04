@@ -13,7 +13,11 @@ export { createActionState } from "./core/action-state";
 
 export type { InternalActionState, UpdateActionOptions } from "./core/action-state";
 export { createCore } from "./core/create-core";
-export type { CreateCoreOptions } from "./core/create-core";
+export type {
+	CreateCoreOptions,
+	ReplicationConfig,
+	ReplicationTransport,
+} from "./core/create-core";
 export { createHandleFactory } from "./core/handle-factory";
 export type { HandleFactory } from "./core/handle-factory";
 
