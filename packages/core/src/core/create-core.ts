@@ -1,3 +1,4 @@
+import { FluxError } from "../errors";
 import { ContextError } from "../errors/context-error";
 import type { ActionMap } from "../types/actions";
 import type { BindingForAction, BindingState, TypedBindings } from "../types/bindings";
@@ -16,6 +17,20 @@ import {
 import type { InputInstanceData } from "./input-instances";
 import { addContextInstances, destroyInputInstances, setContextEnabled } from "./input-instances";
 import { updateHandle } from "./update-handle";
+
+/**
+ * Replication transport mode.
+ *
+ * - `"remote"` — replicate via RemoteEvents.
+ * - `"native"` — server reads client input natively (server authority).
+ */
+export type ReplicationTransport = "native" | "remote";
+
+/** Configuration for how input state is replicated between client and server. */
+export interface ReplicationConfig {
+	/** The transport mechanism for replication. */
+	readonly transport: ReplicationTransport;
+}
 
 /**
  * Options for creating a Flux core instance.
@@ -41,6 +56,14 @@ export interface CreateCoreOptions<T extends ActionMap, C extends Record<string,
 	 * @internal
 	 */
 	readonly onReplicationTimeout?: (message: string) => void;
+	/**
+	 * Replication configuration. Currently a noop — will be used for
+	 * server-client context synchronization in a future release.
+	 *
+	 * - `"remote"` — replicate via RemoteEvents (default).
+	 * - `"native"` — server reads client input natively (server authority).
+	 */
+	readonly replication?: ReplicationConfig;
 }
 
 /**
@@ -68,7 +91,8 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 	options: CreateCoreOptions<T, C>,
 ): FluxCore<T, keyof C & string> {
 	type Contexts = keyof C & string;
-	const { actions, contexts, debug: isDebug, onReplicationTimeout } = options;
+	const { actions, contexts, debug: isDebug, onReplicationTimeout, replication } = options;
+	const replicationTransport = replication?.transport;
 	const isDevelopmentMode = _G.__DEV__ && isDebug === true;
 	const factory = createHandleFactory();
 	const handles = new Map<InputHandle, HandleData<T>>();
@@ -84,19 +108,25 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				throw new ContextError(`context already active: ${context}`, context);
 			}
 
-			const cancel = (() => {
-				if (data.instanceData.owned) {
-					addContextInstances(context, contexts[context], actions, data.instanceData);
-					return noop;
-				}
+			if (!data.instanceData.owned && replicationTransport === "native") {
+				throw new FluxError(
+					"cannot call addContext on a subscribed handle with native replication",
+				);
+			}
 
-				return findAndAddContext(context, data.instanceData);
-			})();
+			if (!data.instanceData.inputContexts.has(context)) {
+				const existing = findExistingContext(context, data.instanceData);
+				if (existing !== undefined) {
+					data.instanceData.inputContexts.set(context, existing);
+				} else {
+					addContextInstances(context, contexts[context], actions, data.instanceData);
+				}
+			}
 
 			setContextEnabled(data.instanceData, context, true);
 			data.activeContexts.add(context);
 
-			return cancel;
+			return noop;
 		},
 		destroy(): void {
 			for (const [, data] of handles) {
@@ -253,66 +283,19 @@ function validateContextName(contexts: Record<string, ContextConfig>, name: stri
 	}
 }
 
-function findContextInFolder(
+function findExistingContext(
 	contextName: string,
-	folder: Folder,
-	inputContexts: Map<string, InputContext>,
-	connections: Array<RBXScriptConnection>,
-): void {
+	data: InputInstanceData,
+): InputContext | undefined {
+	const folder = data.parent.FindFirstChild("input");
+	if (folder === undefined || !classIs(folder, "Folder")) {
+		return undefined;
+	}
+
 	const existing = folder.FindFirstChild(contextName);
 	if (existing !== undefined && classIs(existing, "InputContext")) {
-		inputContexts.set(contextName, existing);
-		return;
+		return existing;
 	}
 
-	const connection = folder.ChildAdded.Connect((child) => {
-		if (child.Name !== contextName || !classIs(child, "InputContext")) {
-			return;
-		}
-
-		inputContexts.set(contextName, child);
-	});
-
-	connections.push(connection);
-}
-
-function disconnectOwned(owned: Array<RBXScriptConnection>): void {
-	for (const connection of owned) {
-		connection.Disconnect();
-	}
-}
-
-function findAndAddContext(contextName: string, data: InputInstanceData): () => void {
-	const { connections, inputContexts, parent } = data;
-	const owned: Array<RBXScriptConnection> = [];
-
-	const folder = parent.FindFirstChild("input");
-	if (folder !== undefined && classIs(folder, "Folder")) {
-		findContextInFolder(contextName, folder, inputContexts, owned);
-		for (const connection of owned) {
-			connections.push(connection);
-		}
-
-		return () => {
-			disconnectOwned(owned);
-		};
-	}
-
-	const folderConnection = parent.ChildAdded.Connect((child) => {
-		if (child.Name !== "input" || !classIs(child, "Folder")) {
-			return;
-		}
-
-		findContextInFolder(contextName, child, inputContexts, owned);
-		for (const connection of owned) {
-			connections.push(connection);
-		}
-	});
-
-	owned.push(folderConnection);
-	connections.push(folderConnection);
-
-	return () => {
-		disconnectOwned(owned);
-	};
+	return undefined;
 }

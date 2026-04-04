@@ -631,6 +631,26 @@ describe("createCore", () => {
 			expect(addContext).toThrowWithMessage(ContextError, RegExp("context already active"));
 		});
 
+		it("should throw when addContext called on subscribed handle with native replication", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				replication: { transport: "native" },
+			});
+
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+
+			const [handle] = core.subscribe(parent, "gameplay");
+
+			expect(() => {
+				core.addContext(handle, "ui");
+			}).toThrowWithMessage(FluxError, RegExp("native replication"));
+		});
+
 		it("should throw ContextError for inactive context removal", () => {
 			expect.assertions(1);
 
@@ -742,20 +762,63 @@ describe("createCore", () => {
 			}).never.toThrow();
 		});
 
-		it("should find context via addContext on subscribed handle", () => {
+		it("should create context via addContext on subscribed handle", () => {
 			expect.assertions(1);
 
 			const parent = new Instance("Folder");
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 
-			// Server creates both contexts
 			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			serverCore.register(parent, "gameplay", "ui");
+			serverCore.register(parent, "gameplay");
 
 			const [handle] = core.subscribe(parent, "gameplay");
 			core.addContext(handle, "ui");
 
 			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+
+		it("should reuse server-created InputContext instead of creating a duplicate", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			// Server creates both gameplay and ui
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay", "ui");
+
+			// Client subscribes to gameplay only, then adds ui
+			const [handle] = core.subscribe(parent, "gameplay");
+			core.addContext(handle, "ui");
+
+			const inputFolder = parent.FindFirstChild("input");
+			assert(inputFolder);
+
+			// Should be exactly one "ui" InputContext, not two
+			const children = inputFolder.GetChildren().filter((child) => child.Name === "ui");
+
+			expect(children.size()).toBe(1);
+		});
+
+		it("should create InputContext instance under input folder via addContext on subscribed handle", () => {
+			expect.assertions(2);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay");
+
+			const [handle] = core.subscribe(parent, "gameplay");
+			core.addContext(handle, "ui");
+
+			const inputFolder = parent.FindFirstChild("input");
+			assert(inputFolder);
+
+			const uiContext = inputFolder.FindFirstChild("ui");
+
+			expect(uiContext).toBeDefined();
+			expect(classIs(uiContext!, "InputContext")).toBeTrue();
 		});
 
 		it("should return cancel from addContext on subscribed handle", () => {
@@ -765,7 +828,7 @@ describe("createCore", () => {
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 
 			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			serverCore.register(parent, "gameplay", "ui");
+			serverCore.register(parent, "gameplay");
 
 			const [handle] = core.subscribe(parent, "gameplay");
 			const cancel = core.addContext(handle, "ui");
@@ -795,91 +858,62 @@ describe("createCore", () => {
 			expect(core.hasContext(handle, "gameplay")).toBeTrue();
 		});
 
-		it("should find context via addContext ChildAdded on subscribed handle", () => {
-			expect.assertions(1);
+		it("should re-enable context on re-add after remove on subscribed handle", () => {
+			expect.assertions(2);
 
 			const parent = new Instance("Folder");
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 
-			// Server creates gameplay first
 			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			serverCore.register(parent, "gameplay");
 
 			const [handle] = core.subscribe(parent, "gameplay");
+			core.addContext(handle, "ui");
+			core.removeContext(handle, "ui");
 
-			// addContext before server creates ui
+			expect(core.hasContext(handle, "ui")).toBeFalse();
+
 			core.addContext(handle, "ui");
 
-			// Server creates ui after addContext
-			serverCore.register(parent, "ui");
-			awaitDefer();
-
 			expect(core.hasContext(handle, "ui")).toBeTrue();
 		});
 
-		it("should disconnect ChildAdded listeners when addContext cancel is called", () => {
-			expect.assertions(1);
+		it("should create input folder via addContext when it does not yet exist", () => {
+			expect.assertions(2);
 
 			const parent = new Instance("Folder");
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 
 			const [handle] = core.subscribe(parent, "gameplay");
-			const cancel = core.addContext(handle, "ui");
+			core.addContext(handle, "ui");
 
-			cancel();
+			const inputFolder = parent.FindFirstChild("input");
 
-			// Server creates instances after cancel — context should NOT be found
-			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			serverCore.register(parent, "gameplay", "ui");
-			awaitDefer();
-			awaitDefer();
+			expect(inputFolder).toBeDefined();
 
-			// ui context was added via addContext (tracked internally) but
-			// instances were never discovered because listeners were cancelled
-			expect(core.hasContext(handle, "ui")).toBeTrue();
+			const uiContext = inputFolder!.FindFirstChild("ui");
+
+			expect(uiContext).toBeDefined();
 		});
 
-		it("should not disconnect subscribe listeners when addContext cancel is called", () => {
+		it("should destroy dynamically-added instances on unregister for subscribed handle", () => {
 			expect.assertions(1);
 
 			const parent = new Instance("Folder");
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 
-			// Subscribe before server creates anything
-			const [handle] = core.subscribe(parent, "gameplay");
-
-			// addContext for ui, then immediately cancel
-			const cancel = core.addContext(handle, "ui");
-			cancel();
-
-			// Server creates gameplay — subscribe listeners should still work
 			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			serverCore.register(parent, "gameplay");
-			awaitDefer();
-			awaitDefer();
 
-			expect(core.hasContext(handle, "gameplay")).toBeTrue();
-		});
-
-		it("should find context via addContext when input folder does not yet exist", () => {
-			expect.assertions(1);
-
-			const parent = new Instance("Folder");
-			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-
-			// Subscribe before server creates anything — no input folder exists
 			const [handle] = core.subscribe(parent, "gameplay");
-
-			// addContext while input folder still doesn't exist
 			core.addContext(handle, "ui");
 
-			// Server creates both contexts (creates the input folder)
-			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			serverCore.register(parent, "gameplay", "ui");
-			awaitDefer();
-			awaitDefer();
+			core.unregister(handle);
 
-			expect(core.hasContext(handle, "ui")).toBeTrue();
+			const inputFolder = parent.FindFirstChild("input");
+			assert(inputFolder);
+
+			expect(inputFolder.FindFirstChild("ui")).toBeUndefined();
 		});
 	});
 
