@@ -638,7 +638,6 @@ describe("createCore", () => {
 			const core = createCore({
 				actions: TEST_ACTIONS,
 				contexts: TEST_CONTEXTS,
-				debug: true,
 				replication: { transport: "native" },
 			});
 
@@ -776,6 +775,29 @@ describe("createCore", () => {
 			core.addContext(handle, "ui");
 
 			expect(core.hasContext(handle, "ui")).toBeTrue();
+		});
+
+		it("should reuse server-created InputContext instead of creating a duplicate", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			// Server creates both gameplay and ui
+			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			serverCore.register(parent, "gameplay", "ui");
+
+			// Client subscribes to gameplay only, then adds ui
+			const [handle] = core.subscribe(parent, "gameplay");
+			core.addContext(handle, "ui");
+
+			const inputFolder = parent.FindFirstChild("input");
+			assert(inputFolder);
+
+			// Should be exactly one "ui" InputContext, not two
+			const children = inputFolder.GetChildren().filter((child) => child.Name === "ui");
+
+			expect(children.size()).toBe(1);
 		});
 
 		it("should create InputContext instance under input folder via addContext on subscribed handle", () => {

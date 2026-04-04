@@ -14,6 +14,7 @@ import {
 	subscribeHandle,
 	subscribeHandleAs,
 } from "./handle-lifecycle";
+import type { InputInstanceData } from "./input-instances";
 import { addContextInstances, destroyInputInstances, setContextEnabled } from "./input-instances";
 import { updateHandle } from "./update-handle";
 
@@ -107,19 +108,19 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 				throw new ContextError(`context already active: ${context}`, context);
 			}
 
-			if (
-				_G.__DEV__ &&
-				isDebug === true &&
-				!data.instanceData.owned &&
-				replicationTransport === "native"
-			) {
+			if (!data.instanceData.owned && replicationTransport === "native") {
 				throw new FluxError(
 					"cannot call addContext on a subscribed handle with native replication",
 				);
 			}
 
 			if (!data.instanceData.inputContexts.has(context)) {
-				addContextInstances(context, contexts[context], actions, data.instanceData);
+				const existing = findExistingContext(context, data.instanceData);
+				if (existing !== undefined) {
+					data.instanceData.inputContexts.set(context, existing);
+				} else {
+					addContextInstances(context, contexts[context], actions, data.instanceData);
+				}
 			}
 
 			setContextEnabled(data.instanceData, context, true);
@@ -280,4 +281,21 @@ function validateContextName(contexts: Record<string, ContextConfig>, name: stri
 	if (contexts[name] === undefined) {
 		throw new ContextError(`unknown context: ${name}`, name);
 	}
+}
+
+function findExistingContext(
+	contextName: string,
+	data: InputInstanceData,
+): InputContext | undefined {
+	const folder = data.parent.FindFirstChild("input");
+	if (folder === undefined || !classIs(folder, "Folder")) {
+		return undefined;
+	}
+
+	const existing = folder.FindFirstChild(contextName);
+	if (existing !== undefined && classIs(existing, "InputContext")) {
+		return existing;
+	}
+
+	return undefined;
 }
