@@ -325,10 +325,6 @@ importers:
         version: 5.9.3
 
   packages/core:
-    dependencies:
-      '@rbxts/services':
-        specifier: catalog:prod
-        version: 1.6.0
     devDependencies:
       '@flux/test-utils':
         specifier: workspace:*
