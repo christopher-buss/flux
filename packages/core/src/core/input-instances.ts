@@ -5,6 +5,7 @@ import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingConfig, BindingLike } from "../types/bindings";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
+import { classifyBinding } from "./classify-binding";
 
 /**
  * Stores all IAS instances for a single handle.
@@ -324,6 +325,7 @@ function createBinding(
 	}
 
 	const binding = new Instance("InputBinding");
+	binding.Name = classifyBinding(bindingLike);
 	if (isKeyCode(bindingLike)) {
 		binding.KeyCode = bindingLike;
 	} else {

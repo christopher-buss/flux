@@ -128,6 +128,66 @@ function createStatusGui(): TextLabel {
 
 const statusLabel = createStatusGui();
 
+// Touch controls — bypass Flux API to manually wire UIButton-based InputBindings.
+// This is a demo workaround; a proper rebind() API would make this unnecessary.
+
+/**
+ * Creates a touch button and parents it under the given ScreenGui.
+ * @param name - Display label for the button.
+ * @param position - Screen position.
+ * @param parent - ScreenGui to parent under.
+ * @returns The created TextButton.
+ */
+function createTouchButton(name: string, position: UDim2, parent: Instance): TextButton {
+	const button = new Instance("TextButton");
+	button.Name = name;
+	button.Size = new UDim2(0, 80, 0, 80);
+	button.Position = position;
+	button.AnchorPoint = new Vector2(0.5, 0.5);
+	button.BackgroundColor3 = new Color3(0.2, 0.2, 0.2);
+	button.BackgroundTransparency = 0.4;
+	button.TextColor3 = new Color3(1, 1, 1);
+	button.FontFace = Font.fromEnum(Enum.Font.GothamBold);
+	button.TextSize = 18;
+	button.Text = name;
+	button.Parent = parent;
+
+	const corner = new Instance("UICorner");
+	corner.CornerRadius = new UDim(0, 12);
+	corner.Parent = button;
+
+	return button;
+}
+
+/** Wires on-screen touch buttons directly to InputAction instances via InputBinding. */
+function setupTouchBindings(): void {
+	const screenGui = statusLabel.FindFirstAncestorOfClass("ScreenGui");
+	const gameplayContext = player.FindFirstChild("input")?.FindFirstChild("gameplay");
+	if (screenGui === undefined || gameplayContext === undefined) {
+		return;
+	}
+
+	const touchActions: ReadonlyArray<[string, UDim2]> = [
+		["jump", new UDim2(1, -60, 1, -60)],
+		["fire", new UDim2(1, -60, 1, -160)],
+	];
+
+	for (const [actionName, position] of touchActions) {
+		const inputAction = gameplayContext.FindFirstChild(actionName);
+		if (inputAction === undefined) {
+			continue;
+		}
+
+		const button = createTouchButton(actionName, position, screenGui);
+		const binding = new Instance("InputBinding");
+		binding.Name = "TouchBinding";
+		binding.UIButton = button;
+		binding.Parent = inputAction;
+	}
+}
+
+setupTouchBindings();
+
 function buildStatusText(state: ReturnType<typeof core.getState>, isNearby: boolean): string {
 	const move = state.direction2d("move");
 	const activeContext = activeContexts.has("menu") ? "menu" : "gameplay";

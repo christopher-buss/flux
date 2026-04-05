@@ -43,6 +43,7 @@
 			"$className": "Workspace",
 			"$properties": {
 				"FilteringEnabled": true,
+				"PlayerScriptsUseInputActionSystem": "Enabled",
 				"SignalBehavior": "Deferred"
 			},
 			"Baseplate": {

@@ -149,6 +149,43 @@ describe("createInputInstances", () => {
 		expect(data.inputActions.has("move")).toBeTrue();
 	});
 
+	it("should name each binding by device type when multiple bindings exist", () => {
+		expect.assertions(3);
+
+		const actions = {
+			jump: { type: "Bool" as const },
+		} satisfies ActionMap;
+
+		const contexts = {
+			gameplay: {
+				bindings: {
+					jump: [Enum.KeyCode.Space, Enum.KeyCode.ButtonA, { pointerIndex: 0 }],
+				},
+				priority: 0,
+			},
+		} satisfies Record<string, ContextConfig>;
+
+		const data = createInputInstances({
+			actions,
+			contextNames: ["gameplay"],
+			contexts,
+			parent: new Instance("Folder"),
+		});
+
+		const jumpAction = data.inputActions.get("jump");
+		assert(jumpAction);
+
+		const bindings = jumpAction
+			.GetChildren()
+			.filter((child): child is InputBinding => classIs(child, "InputBinding"));
+
+		const names = bindings.map((binding) => binding.Name);
+
+		expect(names).toContain("KeyboardBinding");
+		expect(names).toContain("GamepadBinding");
+		expect(names).toContain("TouchBinding");
+	});
+
 	it("should throw on UserInputType bindings", () => {
 		expect.assertions(1);
 
