@@ -162,8 +162,14 @@ function createTouchButton(name: string, position: UDim2, parent: Instance): Tex
 /** Wires on-screen touch buttons directly to InputAction instances via InputBinding. */
 function setupTouchBindings(): void {
 	const screenGui = statusLabel.FindFirstAncestorOfClass("ScreenGui");
+	if (screenGui === undefined) {
+		warn("[Flux E2E] setupTouchBindings: screenGui not found");
+		return;
+	}
+
 	const gameplayContext = player.FindFirstChild("input")?.FindFirstChild("gameplay");
-	if (screenGui === undefined || gameplayContext === undefined) {
+	if (gameplayContext === undefined) {
+		warn("[Flux E2E] setupTouchBindings: gameplay InputContext not found");
 		return;
 	}
 

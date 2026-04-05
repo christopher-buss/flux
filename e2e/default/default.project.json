@@ -41,9 +41,7 @@
 			"$className": "Workspace",
 			"$properties": {
 				"FilteringEnabled": true,
-				"PlayerScriptsUseInputActionSystem": {
-					"Enum": 2
-				},
+				"PlayerScriptsUseInputActionSystem": "Enabled",
 				"SignalBehavior": "Deferred"
 			},
 			"Baseplate": {

@@ -45,7 +45,7 @@ function classifyConfig(config: BindingConfig): BindingClassName {
 
 	for (const field of KEY_CODE_FIELDS) {
 		const value = config[field as keyof typeof config];
-		if (value !== undefined) {
+		if (value !== undefined && typeIs(value, "EnumItem") && value.EnumType === Enum.KeyCode) {
 			return classifyKeyCode(value);
 		}
 	}
