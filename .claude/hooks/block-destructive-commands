@@ -17,9 +17,9 @@ blocked() {
 
 # pattern|instruction
 RULES=(
-  "\brm\s+-rf\b|Rename the target to a .backup extension instead of deleting."
-  "\brm\s+-r\b|Rename the target to a .backup extension instead of deleting."
-  "\brm\s+-f\b|Rename the target to a .backup extension instead of deleting."
+  "\brm\s+-rf\b|Run \`pnpm clean\` or rename the target to a .backup extension instead of deleting."
+  "\brm\s+-r\b|Run \`pnpm clean\` or rename the target to a .backup extension instead of deleting."
+  "\brm\s+-f\b|Run \`pnpm clean\` or rename the target to a .backup extension instead of deleting."
   "\bdd\s+if=|"
   "\bmkfs\b|"
   "\bformat\s+[A-Z]:|"
