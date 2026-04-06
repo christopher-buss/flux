@@ -13,18 +13,20 @@ export interface DoubleTapOptions {
  * @returns A trigger that detects double taps.
  */
 export function doubleTap({ window: tapWindow }: DoubleTapOptions): Trigger {
-	let lastTapTime = 0;
+	let timeSinceLastTap = math.huge;
 	let tapCount = 0;
 	let didPress = false;
 
 	return {
 		reset(): void {
-			lastTapTime = 0;
+			timeSinceLastTap = math.huge;
 			tapCount = 0;
 			didPress = false;
 		},
 
-		update(magnitude: number): TriggerState {
+		update(magnitude: number, _, deltaTime: number): TriggerState {
+			timeSinceLastTap += deltaTime;
+
 			const isPressed = magnitude > 0;
 			const isRisingEdge = isPressed && !didPress;
 			didPress = isPressed;
@@ -32,9 +34,8 @@ export function doubleTap({ window: tapWindow }: DoubleTapOptions): Trigger {
 				return "none";
 			}
 
-			const now = os.clock();
-			const isWithinWindow = now - lastTapTime < tapWindow;
-			lastTapTime = now;
+			const isWithinWindow = timeSinceLastTap < tapWindow;
+			timeSinceLastTap = 0;
 			tapCount = isWithinWindow ? tapCount + 1 : 1;
 
 			if (tapCount >= 2) {
