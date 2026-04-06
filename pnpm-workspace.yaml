@@ -39,7 +39,7 @@ catalogs:
     get-tsconfig: 4.13.6
     madge: 8.0.0
   node:
-    rimraf: 6.1.2
+    rimraf: 6.1.3
   peer:
     "@rbxts/jecs": 0.11.0
   prod:
