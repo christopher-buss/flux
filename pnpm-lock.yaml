@@ -126,7 +126,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.913
+      version: 1.0.914
     '@types/istanbul-lib-coverage':
       specifier: 2.0.6
       version: 2.0.6
@@ -137,13 +137,11 @@ catalogs:
       specifier: 3.0.4
       version: 3.0.4
     '@types/node':
-      specifier: 24.10.4
-      version: 24.10.4
+      specifier: 24.12.2
+      version: 24.12.2
     type-fest:
       specifier: 5.4.4
       version: 5.4.4
-
-pnpmfileChecksum: sha256-ZfwGjIvQgPR9mEJg5iihJauZ5iv1Ogj5lI/dgVj7pgI=
 
 importers:
 
@@ -172,7 +170,7 @@ importers:
         version: 0.1.3(@rbxts/jest-globals@3.13.3-ts.2)
       '@types/node':
         specifier: catalog:types
-        version: 24.10.4
+        version: 24.12.2
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -282,7 +280,7 @@ importers:
         version: 3.0.0-types.0
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -313,7 +311,7 @@ importers:
         version: 3.0.0-types.0
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -361,7 +359,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -415,7 +413,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -457,7 +455,7 @@ importers:
         version: 0.1.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       rimraf:
         specifier: catalog:node
         version: 6.1.2
@@ -481,7 +479,7 @@ importers:
         version: 3.0.4
       '@types/node':
         specifier: catalog:types
-        version: 24.10.4
+        version: 24.12.2
       confbox:
         specifier: catalog:dev
         version: 0.2.2
@@ -1979,9 +1977,6 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.913':
-    resolution: {integrity: sha512-AweuNYRVJb6y4PNajx2mnpqv+hm0+8GWtH9Dj4EMUuOVN5qcfcOMNSqjvQ4dmF5u0yQ89HKGeXa+4sLnaTIEng==}
-
   '@rbxts/types@1.0.914':
     resolution: {integrity: sha512-Mvi1ETvzFWL14uV79BWop3tCSpEjpw//umzS/1fIpdfydr2Eys3KJJKBAll864xBPAb97s8TMUX+1V4eWBz0sA==}
 
@@ -2171,8 +2166,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node@24.10.4':
-    resolution: {integrity: sha512-vnDVpYPMzs4wunl27jHrfmwojOGKya0xyM3sH+UE5iv5uPS6vX7UIoh6m+vQc5LGBq52HBKPIn/zcSZVzeDEZg==}
+  '@types/node@24.12.2':
+    resolution: {integrity: sha512-A1sre26ke7HDIuY/M23nd9gfB+nrmhtYyMINbjI1zHJxYteKR6qSMX56FsmjMcDb3SMcjJg5BiRRgOCC/yBD0g==}
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
@@ -6115,8 +6110,6 @@ snapshots:
 
   '@rbxts/services@1.6.0': {}
 
-  '@rbxts/types@1.0.913': {}
-
   '@rbxts/types@1.0.914': {}
 
   '@roblox-ts/luau-ast@2.0.1': {}
@@ -6255,7 +6248,7 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@24.10.4':
+  '@types/node@24.12.2':
     dependencies:
       undici-types: 7.16.0
 
