@@ -62,8 +62,8 @@ catalogs:
       version: 8.0.0
   node:
     rimraf:
-      specifier: 6.1.2
-      version: 6.1.2
+      specifier: 6.1.3
+      version: 6.1.3
   peer:
     '@rbxts/jecs':
       specifier: 0.11.0
@@ -126,7 +126,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.913
+      version: 1.0.914
     '@types/istanbul-lib-coverage':
       specifier: 2.0.6
       version: 2.0.6
@@ -142,8 +142,6 @@ catalogs:
     type-fest:
       specifier: 5.4.4
       version: 5.4.4
-
-pnpmfileChecksum: sha256-ZfwGjIvQgPR9mEJg5iihJauZ5iv1Ogj5lI/dgVj7pgI=
 
 importers:
 
@@ -251,7 +249,7 @@ importers:
         version: 7.0.0-dev.20260324.1
       rimraf:
         specifier: catalog:node
-        version: 6.1.2
+        version: 6.1.3
       typescript:
         specifier: catalog:tsc
         version: 5.9.3
@@ -282,13 +280,13 @@ importers:
         version: 3.0.0-types.0
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
       rimraf:
         specifier: catalog:node
-        version: 6.1.2
+        version: 6.1.3
       typescript:
         specifier: catalog:tsc
         version: 5.9.3
@@ -313,13 +311,13 @@ importers:
         version: 3.0.0-types.0
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
       rimraf:
         specifier: catalog:node
-        version: 6.1.2
+        version: 6.1.3
       typescript:
         specifier: catalog:tsc
         version: 5.9.3
@@ -361,13 +359,13 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
       rimraf:
         specifier: catalog:node
-        version: 6.1.2
+        version: 6.1.3
       type-fest:
         specifier: catalog:types
         version: 5.4.4
@@ -415,13 +413,13 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
       rimraf:
         specifier: catalog:node
-        version: 6.1.2
+        version: 6.1.3
       type-fest:
         specifier: catalog:types
         version: 5.4.4
@@ -457,10 +455,10 @@ importers:
         version: 0.1.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       rimraf:
         specifier: catalog:node
-        version: 6.1.2
+        version: 6.1.3
       typescript:
         specifier: catalog:tsc
         version: 5.9.3
@@ -1978,9 +1976,6 @@ packages:
 
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
-
-  '@rbxts/types@1.0.913':
-    resolution: {integrity: sha512-AweuNYRVJb6y4PNajx2mnpqv+hm0+8GWtH9Dj4EMUuOVN5qcfcOMNSqjvQ4dmF5u0yQ89HKGeXa+4sLnaTIEng==}
 
   '@rbxts/types@1.0.914':
     resolution: {integrity: sha512-Mvi1ETvzFWL14uV79BWop3tCSpEjpw//umzS/1fIpdfydr2Eys3KJJKBAll864xBPAb97s8TMUX+1V4eWBz0sA==}
@@ -4150,8 +4145,8 @@ packages:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  rimraf@6.1.2:
-    resolution: {integrity: sha512-cFCkPslJv7BAXJsYlK1dZsbP8/ZNLkCAQ0bi1hf5EKX2QHegmDFEFA6QhuYJlk7UDdc+02JjO80YSOrWPpw06g==}
+  rimraf@6.1.3:
+    resolution: {integrity: sha512-LKg+Cr2ZF61fkcaK1UdkH2yEBBKnYjTyWzTJT6KNPcSPaiT7HSdhtMXQuN5wkTX0Xu72KQ1l8S42rlmexS2hSA==}
     engines: {node: 20 || >=22}
     hasBin: true
 
@@ -6114,8 +6109,6 @@ snapshots:
   '@rbxts/regexp@0.2.1-ts.4': {}
 
   '@rbxts/services@1.6.0': {}
-
-  '@rbxts/types@1.0.913': {}
 
   '@rbxts/types@1.0.914': {}
 
@@ -8744,7 +8737,7 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  rimraf@6.1.2:
+  rimraf@6.1.3:
     dependencies:
       glob: 13.0.6
       package-json-from-dist: 1.0.1
