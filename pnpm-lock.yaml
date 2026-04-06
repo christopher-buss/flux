@@ -49,8 +49,8 @@ catalogs:
       specifier: 2.13.0
       version: 2.13.0
     eslint_d:
-      specifier: 15.0.0
-      version: 15.0.0
+      specifier: 15.0.2
+      version: 15.0.2
     file-entry-cache:
       specifier: 11.1.2
       version: 11.1.2
@@ -126,7 +126,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.913
+      version: 1.0.914
     '@types/istanbul-lib-coverage':
       specifier: 2.0.6
       version: 2.0.6
@@ -142,8 +142,6 @@ catalogs:
     type-fest:
       specifier: 5.4.4
       version: 5.4.4
-
-pnpmfileChecksum: sha256-ZfwGjIvQgPR9mEJg5iihJauZ5iv1Ogj5lI/dgVj7pgI=
 
 importers:
 
@@ -199,7 +197,7 @@ importers:
         version: 2.13.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       eslint_d:
         specifier: catalog:lint
-        version: 15.0.0(jiti@2.6.1)
+        version: 15.0.2(jiti@2.6.1)
       file-entry-cache:
         specifier: catalog:lint
         version: 11.1.2
@@ -282,7 +280,7 @@ importers:
         version: 3.0.0-types.0
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -313,7 +311,7 @@ importers:
         version: 3.0.0-types.0
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -361,7 +359,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -415,7 +413,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -457,7 +455,7 @@ importers:
         version: 0.1.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       rimraf:
         specifier: catalog:node
         version: 6.1.2
@@ -1979,9 +1977,6 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.913':
-    resolution: {integrity: sha512-AweuNYRVJb6y4PNajx2mnpqv+hm0+8GWtH9Dj4EMUuOVN5qcfcOMNSqjvQ4dmF5u0yQ89HKGeXa+4sLnaTIEng==}
-
   '@rbxts/types@1.0.914':
     resolution: {integrity: sha512-Mvi1ETvzFWL14uV79BWop3tCSpEjpw//umzS/1fIpdfydr2Eys3KJJKBAll864xBPAb97s8TMUX+1V4eWBz0sA==}
 
@@ -3180,8 +3175,8 @@ packages:
       jiti:
         optional: true
 
-  eslint_d@15.0.0:
-    resolution: {integrity: sha512-4GKp4YK4oxTFCNdz7ygOaB+T9+kDR/xY8RdfeB1JFU+IUuHJzXO1CBfNyVjKSy3b12sdrw6e0XA7ku5I2s+ItA==}
+  eslint_d@15.0.2:
+    resolution: {integrity: sha512-08qxnTNAHi6gaOJdixu/5gliLFRQzTAeX/aXxcFK78FPK9RQuCNnvwq2tDzlSmXc/dkK/Q2n3P4nvPhvTQJa2Q==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -5272,7 +5267,7 @@ snapshots:
 
   '@isentinel/hooks@1.2.6(@typescript/native-preview@7.0.0-dev.20260324.1)(jiti@2.6.1)(typescript@5.9.3)':
     dependencies:
-      eslint_d: 15.0.0(jiti@2.6.1)
+      eslint_d: 15.0.2(jiti@2.6.1)
       file-entry-cache: 11.1.2
       get-tsconfig: 4.13.6
       madge: 8.0.0(typescript@5.9.3)
@@ -6114,8 +6109,6 @@ snapshots:
   '@rbxts/regexp@0.2.1-ts.4': {}
 
   '@rbxts/services@1.6.0': {}
-
-  '@rbxts/types@1.0.913': {}
 
   '@rbxts/types@1.0.914': {}
 
@@ -7554,7 +7547,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint_d@15.0.0(jiti@2.6.1):
+  eslint_d@15.0.2(jiti@2.6.1):
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       eslint: 10.0.3(jiti@2.6.1)(supports-color@10.2.2)
