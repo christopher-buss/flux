@@ -7,5 +7,5 @@
 		"typeRoots": ["./node_modules/@types"]
 	},
 	"files": [],
-	"include": ["**/jest.config.ts", "**/eslint.config.ts", "jest.shared.ts"]
+	"include": ["**/*.config.ts", "jest.shared.ts"]
 }
