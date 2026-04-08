@@ -19,6 +19,8 @@
 *.bash            text eol=lf
 *.bat             text eol=crlf
 *.cmd             text eol=crlf
+# Polyglot hook scripts must use LF for bash compatibility
+.claude/hooks/run-hook.cmd text eol=lf
 *.coffee          text
 *.css             text diff=css
 *.htm             text diff=html
