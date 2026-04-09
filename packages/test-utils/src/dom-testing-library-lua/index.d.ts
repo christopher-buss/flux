@@ -6,7 +6,7 @@ export declare const within: typeof getQueriesForElement;
 export { configure, getConfig } from "./types/config";
 
 // Re-export config types
-export type { Config, ConfigFn } from "./types/config";
+export type { Config, ConfigFunc } from "./types/config";
 
 // Re-export fireEvent const
 export { fireEvent } from "./types/events";
@@ -21,7 +21,12 @@ export { getNodeText } from "./types/get-node-text";
 export { getQueriesForElement } from "./types/get-queries-for-element";
 
 // Re-export element query types
-export type { BoundFunction, BoundFunctions, Query, Queries } from "./types/get-queries-for-element";
+export type {
+	BoundFunction,
+	BoundFunctions,
+	Query,
+	Queries,
+} from "./types/get-queries-for-element";
 // Re-export normalizer function
 export { getDefaultNormalizer } from "./types/matches";
 
@@ -30,7 +35,7 @@ export type {
 	MatcherFunction,
 	Matcher,
 	ByRoleMatcher,
-	NormalizerFn,
+	NormalizerFunc,
 	NormalizerOptions,
 	MatcherOptions,
 	Match,

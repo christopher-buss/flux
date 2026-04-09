@@ -6,7 +6,7 @@ export declare const within: typeof getQueriesForElement;
 export { configure, getConfig } from "./config";
 
 // Re-export config types
-export type { Config, ConfigFn } from "./config";
+export type { Config, ConfigFunc } from "./config";
 
 // Re-export fireEvent const
 export { fireEvent } from "./events";
@@ -30,7 +30,7 @@ export type {
 	MatcherFunction,
 	Matcher,
 	ByRoleMatcher,
-	NormalizerFn,
+	NormalizerFunc,
 	NormalizerOptions,
 	MatcherOptions,
 	Match,

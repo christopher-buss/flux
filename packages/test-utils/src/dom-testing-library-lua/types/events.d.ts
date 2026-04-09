@@ -1,5 +1,6 @@
-type Event = unknown;
+/* cspell:words oxlint */
 
+/** Union of all supported DOM event type identifiers. */
 export type EventType =
 	| "abort"
 	| "animationEnd"
@@ -89,8 +90,13 @@ export type EventType =
 	| "waiting"
 	| "wheel";
 
+/** Low-level function that fires a raw event on an element. */
 export type FireFunction = (element: Instance, event: Event) => boolean;
+
 // oxlint-disable-next-line typescript/no-empty-object-type
-export type FireObject = Record<EventType, (element: Instance, options?: {}) => boolean>;
+/** Object with a method for each event type that fires it on an element. */
+export type FireObject = Record<EventType, (element: Instance, options?: object) => boolean>;
+
+type Event = unknown;
 
 export const fireEvent: FireFunction & FireObject;

@@ -6,22 +6,52 @@ import type Act from "./types/act";
 
 export * from "../dom-testing-library-lua";
 
+/**
+ * Result object returned by `render`, providing queries bound to the
+ * rendered container plus utilities for interacting with the rendered tree.
+ *
+ * @template Q - The set of queries bound to the result.
+ * @template Container - The container element type.
+ * @template BaseElement - The base element type for queries.
+ */
 export type RenderResult<
 	Q extends Queries = typeof queries,
 	Container extends Instance = Instance,
 	BaseElement extends Instance = Container,
-> = { [P in keyof Q]: BoundFunction<Q[P]> } & {
+> = {
+	/** The base element used for queries and debug output. */
 	baseElement: BaseElement;
+	/** The container element the component was rendered into. */
 	container: Container;
+	/**
+	 * Pretty-print the rendered DOM tree for debugging.
+	 *
+	 * @param baseElement - Element(s) to print. Defaults to the rendered tree.
+	 * @param maxLength - Maximum output length.
+	 * @param options - Pretty-format options.
+	 */
 	debug: (
 		baseElement?: Array<Instance> | Instance,
 		maxLength?: number,
 		options?: prettyFormat.OptionsReceived,
 	) => void;
+	/**
+	 * Re-render the component with new props.
+	 *
+	 * @param ui - The updated React element to render.
+	 */
 	rerender: (ui: React.ReactElement) => void;
+	/** Unmount the rendered component and clean up. */
 	unmount: () => void;
-};
+} & { [P in keyof Q]: BoundFunction<Q[P]> };
 
+/**
+ * Options for the `render` function.
+ *
+ * @template Q - The set of queries to bind.
+ * @template Container - The container element type.
+ * @template BaseElement - The base element type for queries.
+ */
 export interface RenderOptions<
 	Q extends Queries = typeof queries,
 	Container extends Instance = Instance,
@@ -62,19 +92,35 @@ export interface RenderOptions<
 	 *
 	 * @see https://testing-library.com/docs/react-testing-library/api/#wrapper
 	 */
-	wrapper?: React.JSXElementConstructor<{ children: React.ReactElement }>;
+	wrapper?: React.JSXElementConstructor<{
+		/** The children elements to wrap. */
+		children: React.ReactElement;
+	}>;
 }
 
 /**
- * Render into a container which is appended to document.body. It should be used
- * with cleanup.
+ * Render a React element into a container appended to document.body.
+ * Should be used with `cleanup`.
+ *
+ * @template Q - The set of queries to bind.
+ * @template Container - The container element type.
+ * @template BaseElement - The base element type for queries.
+ * @param ui - The React element to render.
+ * @param options - Render options including container, queries, and wrapper.
+ * @returns A result object with bound queries and utilities.
  */
 export function render<
 	Q extends Queries = typeof queries,
 	Container extends Instance = Instance,
 	BaseElement extends Instance = Container,
->(ui: React.ReactElement, options: RenderOptions<Q, Container, BaseElement>): RenderResult<Q, Container, BaseElement>;
-export function render(ui: React.ReactElement, options?: Except<RenderOptions, "queries">): RenderResult;
+>(
+	ui: React.ReactElement,
+	options: RenderOptions<Q, Container, BaseElement>,
+): RenderResult<Q, Container, BaseElement>;
+export function render(
+	ui: React.ReactElement,
+	options?: Except<RenderOptions, "queries">,
+): RenderResult;
 
 /** Unmounts React trees that were mounted with render. */
 export function cleanup(): void;

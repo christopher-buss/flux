@@ -1,20 +1,34 @@
-/* oxlint-disable small-rules/no-shorthand-names -- upstream */
 import type { Matcher, MatcherOptions } from "./matches";
 import type { SelectorMatcherOptions } from "./query-helpers";
 import type { WaitForOptions } from "./wait-for";
 
+/**
+ * Query that returns a single element or undefined by a bound attribute.
+ *
+ * @template T - The element type to return.
+ */
 export type QueryByBoundAttribute<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
 	options?: MatcherOptions,
 ) => T | undefined;
 
+/**
+ * Query that returns all matching elements by a bound attribute.
+ *
+ * @template T - The element type to return.
+ */
 export type AllByBoundAttribute<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
 	options?: MatcherOptions,
 ) => Array<T>;
 
+/**
+ * Async query that finds all matching elements by a bound attribute.
+ *
+ * @template T - The element type to return.
+ */
 export type FindAllByBoundAttribute<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
@@ -22,12 +36,23 @@ export type FindAllByBoundAttribute<T extends Instance = Instance> = (
 	waitForElementOptions?: WaitForOptions,
 ) => Promise<Array<T>>;
 
+/**
+ * Query that returns exactly one element by a bound attribute, throwing if
+ * not found or multiple found.
+ *
+ * @template T - The element type to return.
+ */
 export type GetByBoundAttribute<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
 	options?: MatcherOptions,
 ) => T;
 
+/**
+ * Async query that finds exactly one element by a bound attribute.
+ *
+ * @template T - The element type to return.
+ */
 export type FindByBoundAttribute<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
@@ -35,18 +60,33 @@ export type FindByBoundAttribute<T extends Instance = Instance> = (
 	waitForElementOptions?: WaitForOptions,
 ) => Promise<T>;
 
+/**
+ * Query that returns a single element or undefined by text content.
+ *
+ * @template T - The element type to return.
+ */
 export type QueryByText<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
 	options?: SelectorMatcherOptions,
 ) => T | undefined;
 
+/**
+ * Query that returns all matching elements by text content.
+ *
+ * @template T - The element type to return.
+ */
 export type AllByText<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
 	options?: SelectorMatcherOptions,
 ) => Array<T>;
 
+/**
+ * Async query that finds all matching elements by text content.
+ *
+ * @template T - The element type to return.
+ */
 export type FindAllByText<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
@@ -54,12 +94,23 @@ export type FindAllByText<T extends Instance = Instance> = (
 	waitForElementOptions?: WaitForOptions,
 ) => Promise<Array<T>>;
 
+/**
+ * Query that returns exactly one element by text content, throwing if not
+ * found or multiple found.
+ *
+ * @template T - The element type to return.
+ */
 export type GetByText<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
 	options?: SelectorMatcherOptions,
 ) => T;
 
+/**
+ * Async query that finds exactly one element by text content.
+ *
+ * @template T - The element type to return.
+ */
 export type FindByText<T extends Instance = Instance> = (
 	container: Instance,
 	id: Matcher,
@@ -85,7 +136,9 @@ export function findByPlaceholderText<T extends Instance = Instance>(
 export function findAllByPlaceholderText<T extends Instance = Instance>(
 	...args: Parameters<FindAllByBoundAttribute<T>>
 ): ReturnType<FindAllByBoundAttribute<T>>;
-export function getByText<T extends Instance = Instance>(...args: Parameters<GetByText<T>>): ReturnType<GetByText<T>>;
+export function getByText<T extends Instance = Instance>(
+	...args: Parameters<GetByText<T>>
+): ReturnType<GetByText<T>>;
 export function getAllByText<T extends Instance = Instance>(
 	...args: Parameters<AllByText<T>>
 ): ReturnType<AllByText<T>>;
