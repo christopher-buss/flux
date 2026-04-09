@@ -26,6 +26,9 @@
 			"path": "packages/jecs"
 		},
 		{
+			"path": "packages/react"
+		},
+		{
 			"path": "packages/test-utils"
 		},
 		{
