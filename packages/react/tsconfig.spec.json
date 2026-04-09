@@ -18,6 +18,6 @@
 			"path": "../test-utils/tsconfig.lib.json"
 		}
 	],
-	"include": ["src/**/*.spec.ts", "test/**/*", "../../types/**/*.d.ts"],
+	"include": ["src/**/*.spec.ts", "src/**/*.spec.tsx", "test/**/*", "../../types/**/*.d.ts"],
 	"exclude": ["node_modules", "out", "out-test", "**/.*/", "dist"]
 }

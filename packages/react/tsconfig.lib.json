@@ -19,6 +19,7 @@
 		"dist",
 		"test",
 		"src/**/*.spec.ts",
+		"src/**/*.spec.tsx",
 		"src/**/*.spec-d.ts"
 	]
 }

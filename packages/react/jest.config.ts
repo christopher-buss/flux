@@ -6,9 +6,17 @@ export default defineConfig({
 		{
 			test: {
 				displayName: { name: "react", color: "blue" },
-				include: ["src/**/*.spec.ts"],
+				include: ["src/**/*.spec.ts", "src/**/*.spec.tsx"],
 				mockDataModel: true,
 				outDir: "out-test/src",
+			},
+		},
+		{
+			test: {
+				displayName: { name: "react:integration", color: "white" },
+				include: ["test/**/*.spec.ts", "test/**/*.spec.tsx"],
+				mockDataModel: true,
+				outDir: "out-test/test",
 			},
 		},
 	],
