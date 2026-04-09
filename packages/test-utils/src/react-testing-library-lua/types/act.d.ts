@@ -14,7 +14,7 @@ export interface Thenable<T> {
 	 * @returns A new thenable for the handler's return value.
 	 */
 	andThen<TResult1 = T, TResult2 = never>(
-		onFulfill?: (value: TResult1) => Thenable<TResult1> | TResult1 | undefined,
+		onFulfill?: (value: T) => Thenable<TResult1> | TResult1 | undefined,
 		onReject?: (error: unknown) => Thenable<TResult2> | TResult2 | undefined,
 	): Thenable<TResult1 | TResult2>;
 }

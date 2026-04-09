@@ -21,8 +21,8 @@ export type GetErrorFunction<Arguments extends Array<unknown> = [string]> = (
 export interface SelectorMatcherOptions extends MatcherOptions {
 	/** Whether to ignore certain nodes, or a CSS selector string of nodes to ignore. */
 	ignore?: boolean | string;
-	/** CSS selectors to narrow down candidate elements. */
-	selector?: Array<string>;
+	/** CSS selector to narrow down candidate elements. */
+	selector?: string;
 }
 
 /**

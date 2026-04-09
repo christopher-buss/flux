@@ -36,17 +36,6 @@ assignment.** The `react/no-outside-reassign` lint rule blocks writing to
 outer variables or object properties from inside a component. Use
 `makeRenderCounter()` (returns `{ get, tick }`) from `helpers/probes.tsx`.
 
-## Known Issues
-
-- **Tap trigger does not fire through the core pipeline.**
-  `packages/core/src/core/update-handle.ts:165` resets `duration` to 0 on
-  the release frame before the trigger evaluates, making tap's
-  `duration > 0` check always fail. Unit tests in
-  `packages/core/src/triggers/tap.spec.ts` pass by stubbing the duration
-  argument. Integration test lives at
-  `test/integration/context-triggers-strict.spec.tsx` as `it.skip` —
-  re-enable after core fixes the ordering.
-
 ## Critical Files
 
 - `src/create-flux-react.tsx` — Provider + `useAction` implementation.
