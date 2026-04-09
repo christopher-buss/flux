@@ -138,7 +138,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.913
+      version: 1.0.914
     '@types/istanbul-lib-coverage':
       specifier: 2.0.6
       version: 2.0.6
@@ -295,6 +295,46 @@ importers:
       '@rbxts/types':
         specifier: catalog:types
         version: 1.0.913
+      '@typescript/native-preview':
+        specifier: catalog:tsc
+        version: 7.0.0-dev.20260324.1
+      rimraf:
+        specifier: catalog:node
+        version: 6.1.2
+      typescript:
+        specifier: catalog:tsc
+        version: 5.9.3
+
+  e2e/react:
+    dependencies:
+      '@flux/core':
+        specifier: workspace:@rbxts/flux@*
+        version: link:../../packages/core
+      '@flux/react':
+        specifier: workspace:@rbxts/flux-react@*
+        version: link:../../packages/react
+      '@rbxts/react':
+        specifier: catalog:peer
+        version: 17.3.7-ts.1
+      '@rbxts/react-roblox':
+        specifier: catalog:peer
+        version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
+      '@rbxts/services':
+        specifier: catalog:prod
+        version: 1.6.0
+    devDependencies:
+      '@isentinel/roblox-ts':
+        specifier: catalog:build
+        version: 3.1.5
+      '@isentinel/tsconfig':
+        specifier: catalog:tsc
+        version: 1.2.0(typescript@5.9.3)
+      '@rbxts/compiler-types':
+        specifier: catalog:types
+        version: 3.0.0-types.0
+      '@rbxts/types':
+        specifier: catalog:types
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
