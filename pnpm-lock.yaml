@@ -86,6 +86,12 @@ catalogs:
     '@isentinel/jest-roblox':
       specifier: 0.2.1
       version: 0.2.1
+    '@rbxts-js/dom-testing-library-lua':
+      specifier: 8.16.0-ts.2
+      version: 8.16.0-ts.2
+    '@rbxts-js/react-testing-library-lua':
+      specifier: 12.3.4-ts.2
+      version: 12.3.4-ts.2
     '@rbxts/jest':
       specifier: 3.13.3-ts.1
       version: 3.13.3-ts.1
@@ -449,6 +455,12 @@ importers:
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
+      '@rbxts-js/dom-testing-library-lua':
+        specifier: catalog:test
+        version: 8.16.0-ts.2
+      '@rbxts-js/react-testing-library-lua':
+        specifier: catalog:test
+        version: 12.3.4-ts.2
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0
@@ -506,6 +518,12 @@ importers:
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@5.9.3)
+      '@rbxts-js/dom-testing-library-lua':
+        specifier: catalog:test
+        version: 8.16.0-ts.2
+      '@rbxts-js/react-testing-library-lua':
+        specifier: catalog:test
+        version: 12.3.4-ts.2
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0
@@ -1836,6 +1854,9 @@ packages:
   '@rbxts-js/diff-sequences@3.13.3-ts.3':
     resolution: {integrity: sha512-rYbBZrtoymMKZcP9qawJ86a1o/VJOvQTLir40Hzjk+l7jsgiLr+bNnn3ryIGqWR61FTLlZFHMcf+DSHU4mQA0Q==}
 
+  '@rbxts-js/dom-testing-library-lua@8.16.0-ts.2':
+    resolution: {integrity: sha512-VS24bvq2HnvliGMD9XEfPx8ba/a1FZux4XwY9mbpzoFYl/UWNQJlFwq0OO/ewrjWAs3QPwY0WuoZuURG9FSxJw==}
+
   '@rbxts-js/emittery@3.13.3-ts.3':
     resolution: {integrity: sha512-WDHiwHC3T2x/qPDq/O4Ml8d2ZZnSjABzye+Vc3ksVdiqC/BxOg7GghEI8PV0R9zoC1XagrQPX8DF1PMeD8AMOQ==}
 
@@ -1955,6 +1976,9 @@ packages:
 
   '@rbxts-js/react-roblox@17.3.7-ts.1':
     resolution: {integrity: sha512-xiJQXmJAho/mStcWYC7AXFqgUqW78whUMacaNeODMimQXgoVqaIfo0sEhLtLtS/N3qZRs1KR64nsNG/0n1r/NQ==}
+
+  '@rbxts-js/react-testing-library-lua@12.3.4-ts.2':
+    resolution: {integrity: sha512-aUpiBrYylI+k8KXB7k+N+q0CwPFZb4GqB4vdmr28JwSG3mWclCPUepsExGmH7hix0OFM1lPuMllXaRVozmxJYw==}
 
   '@rbxts-js/react@17.3.7-ts.1':
     resolution: {integrity: sha512-nRHYoBzk9DSbOvk281jmN5EM3TlmKv2jOzLgSIGtmNMuwZKi9yEjjxdluS1wHmjSvus1YiPHhBUwrKnbu01Obg==}
@@ -5730,6 +5754,17 @@ snapshots:
     dependencies:
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
 
+  '@rbxts-js/dom-testing-library-lua@8.16.0-ts.2':
+    dependencies:
+      '@rbxts-js/chalk-lua': 0.2.2-ts.2
+      '@rbxts-js/jest-get-type': 3.13.3-ts.3
+      '@rbxts-js/jest-globals': 3.13.3-ts.3
+      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
+      '@rbxts-js/luau-regexp': 0.2.2-ts.1
+      '@rbxts-js/pretty-format': 3.13.3-ts.3
+      '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
+      '@rbxts-js/roblox-shared': 3.13.3-ts.3
+
   '@rbxts-js/emittery@3.13.3-ts.3':
     dependencies:
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
@@ -6051,6 +6086,17 @@ snapshots:
       '@rbxts-js/react': 17.3.7-ts.1
       '@rbxts-js/react-globals': 17.3.7-ts.1
       '@rbxts-js/react-reconciler': 17.3.7-ts.1
+      '@rbxts-js/scheduler': 17.3.7-ts.1
+      '@rbxts-js/shared': 17.3.7-ts.1
+
+  '@rbxts-js/react-testing-library-lua@12.3.4-ts.2':
+    dependencies:
+      '@rbxts-js/dom-testing-library-lua': 8.16.0-ts.2
+      '@rbxts-js/jest-globals': 3.13.3-ts.3
+      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
+      '@rbxts-js/react': 17.3.7-ts.1
+      '@rbxts-js/react-roblox': 17.3.7-ts.1
+      '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
       '@rbxts-js/scheduler': 17.3.7-ts.1
       '@rbxts-js/shared': 17.3.7-ts.1
 

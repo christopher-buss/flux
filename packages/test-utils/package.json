@@ -16,8 +16,18 @@
 			"import": "./out/init.luau",
 			"types": "./src/index.ts"
 		},
+		"./dom-testing-library-lua": {
+			"source": "./src/dom-testing-library-lua/index.d.ts",
+			"import": "./out/dom-testing-library-lua/init.luau",
+			"types": "./src/dom-testing-library-lua/index.d.ts"
+		},
 		"./loaders/*": "./loaders/*",
-		"./out/*": "./out/*"
+		"./out/*": "./out/*",
+		"./react-testing-library-lua": {
+			"source": "./src/react-testing-library-lua/index.d.ts",
+			"import": "./out/react-testing-library-lua/init.luau",
+			"types": "./src/react-testing-library-lua/index.d.ts"
+		}
 	},
 	"main": "./dist/init.luau",
 	"types": "./dist/index.d.ts",
@@ -31,6 +41,8 @@
 		"@isentinel/jest-roblox": "catalog:test",
 		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts-js/dom-testing-library-lua": "catalog:test",
+		"@rbxts-js/react-testing-library-lua": "catalog:test",
 		"@rbxts/compiler-types": "catalog:types",
 		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",

@@ -1,5 +1,5 @@
 import type { ActionMap, ActionState, FluxCore, InputHandle } from "@rbxts/flux";
-import React, { useState } from "@rbxts/react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "@rbxts/react";
 
 import type { Disconnect } from "./update-signal";
 import { createUpdateSignal } from "./update-signal";
@@ -103,7 +103,7 @@ export function createFluxReact<T extends ActionMap>(
 	const signal = createUpdateSignal();
 
 	// eslint-disable-next-line flawless/naming-convention -- React convention
-	const FluxContext = React.createContext<FluxContextValue<T> | undefined>(undefined);
+	const FluxContext = createContext<FluxContextValue<T> | undefined>(undefined);
 
 	const useFluxContext = createUseFluxContext(FluxContext);
 
@@ -119,7 +119,7 @@ function createUseFluxContext<T extends ActionMap>(
 	context: React.Context<FluxContextValue<T> | undefined>,
 ): () => FluxContextValue<T> {
 	return () => {
-		const value = React.useContext(context);
+		const value = useContext(context);
 		assert(value !== undefined, "useAction must be used within a FluxProvider");
 
 		return value;
@@ -135,7 +135,7 @@ function createFluxProvider<T extends ActionMap>(
 	return (props: FluxProviderProps): React.ReactNode => {
 		const { children, handle } = props;
 
-		const contextValue = React.useMemo(() => {
+		const contextValue = useMemo(() => {
 			return {
 				getState: (inputHandle: InputHandle) => core.getState(inputHandle),
 				handle,
@@ -165,7 +165,7 @@ function createUseAction<T extends ActionMap>(
 		const state = context.getState(handle);
 		const [value, setValue] = useState(() => selector(state));
 
-		React.useEffect(() => {
+		useEffect(() => {
 			return context.subscribe(() => {
 				const updated = selector(context.getState(handle));
 

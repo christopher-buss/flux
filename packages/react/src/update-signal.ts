@@ -32,13 +32,13 @@ export function createUpdateSignal(): UpdateSignal {
 	const listeners = new Set<UpdateListener>();
 
 	return {
-		fire() {
+		fire: () => {
 			for (const listener of listeners) {
 				listener();
 			}
 		},
 
-		subscribe(listener: UpdateListener): Disconnect {
+		subscribe: (listener: UpdateListener): Disconnect => {
 			listeners.add(listener);
 
 			return () => {

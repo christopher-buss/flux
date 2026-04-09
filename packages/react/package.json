@@ -45,6 +45,8 @@
 		"@isentinel/jest-roblox": "catalog:test",
 		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts-js/dom-testing-library-lua": "catalog:test",
+		"@rbxts-js/react-testing-library-lua": "catalog:test",
 		"@rbxts/compiler-types": "catalog:types",
 		"@rbxts/flux": "workspace:*",
 		"@rbxts/jest": "catalog:test",

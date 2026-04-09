@@ -1,10 +1,10 @@
 /* eslint-disable flawless/naming-convention -- React components use PascalCase */
+import { cleanup, render } from "@flux/test-utils/react-testing-library-lua";
 import type { ActionMap, ContextConfig } from "@rbxts/flux";
 import { createCore } from "@rbxts/flux";
 import { describe, expect, it } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React from "@rbxts/react";
-import ReactRoblox from "@rbxts/react-roblox";
 
 import { createFluxReact } from "./create-flux-react";
 
@@ -22,13 +22,6 @@ const TEST_CONTEXTS = {
 		priority: 0,
 	},
 } satisfies Record<string, ContextConfig>;
-
-function getTextLabel(container: Instance): TextLabel {
-	const label = container.FindFirstChildWhichIsA("TextLabel", true);
-	assert(label, "Expected TextLabel in container");
-
-	return label;
-}
 
 describe("createFluxReact", () => {
 	it("should create a FluxReact instance with core and flush", () => {
@@ -51,12 +44,8 @@ describe("useAction", () => {
 		const { flush, FluxProvider, useAction } = createFluxReact({ core });
 		const handle = core.register(new Instance("Folder"), "gameplay");
 
-		const container = new Instance("Folder");
-		const root = ReactRoblox.createRoot(container);
-
 		afterThis(() => {
-			root.unmount();
-			container.Destroy();
+			cleanup();
 		});
 
 		function JumpDisplay(): React.ReactNode {
@@ -67,22 +56,17 @@ describe("useAction", () => {
 			});
 		}
 
-		ReactRoblox.act(() => {
-			root.render(
-				React.createElement(FluxProvider, { handle }, React.createElement(JumpDisplay)),
-			);
-		});
+		const { queryByText } = render(
+			React.createElement(FluxProvider, { handle }, React.createElement(JumpDisplay)),
+		);
 
-		expect(getTextLabel(container).Text).toBe("false");
+		expect(queryByText("false")).toBeDefined();
 
 		core.simulateAction(handle, "jump", true);
 		core.update(0.016);
+		flush();
 
-		ReactRoblox.act(() => {
-			flush();
-		});
-
-		expect(getTextLabel(container).Text).toBe("true");
+		expect(queryByText("true")).toBeDefined();
 	});
 
 	it("should not re-render when selector result is unchanged", () => {
@@ -92,12 +76,8 @@ describe("useAction", () => {
 		const { flush, FluxProvider, useAction } = createFluxReact({ core });
 		const handle = core.register(new Instance("Folder"), "gameplay");
 
-		const container = new Instance("Folder");
-		const root = ReactRoblox.createRoot(container);
-
 		afterThis(() => {
-			root.unmount();
-			container.Destroy();
+			cleanup();
 		});
 
 		let renderCount = 0;
@@ -109,19 +89,12 @@ describe("useAction", () => {
 			return React.createElement("TextLabel", { Text: "test" });
 		}
 
-		ReactRoblox.act(() => {
-			root.render(
-				React.createElement(FluxProvider, { handle }, React.createElement(JumpDisplay)),
-			);
-		});
+		render(React.createElement(FluxProvider, { handle }, React.createElement(JumpDisplay)));
 
 		const initialRenderCount = renderCount;
 
 		core.update(0.016);
-
-		ReactRoblox.act(() => {
-			flush();
-		});
+		flush();
 
 		expect(renderCount).toBe(initialRenderCount);
 	});
@@ -134,12 +107,8 @@ describe("useAction", () => {
 		const defaultHandle = core.register(new Instance("Folder"), "gameplay");
 		const explicitHandle = core.register(new Instance("Folder"), "gameplay");
 
-		const container = new Instance("Folder");
-		const root = ReactRoblox.createRoot(container);
-
 		afterThis(() => {
-			root.unmount();
-			container.Destroy();
+			cleanup();
 		});
 
 		function JumpDisplay(): React.ReactNode {
@@ -150,25 +119,20 @@ describe("useAction", () => {
 			});
 		}
 
-		ReactRoblox.act(() => {
-			root.render(
-				React.createElement(
-					FluxProvider,
-					{ handle: defaultHandle },
-					React.createElement(JumpDisplay),
-				),
-			);
-		});
+		const { queryByText } = render(
+			React.createElement(
+				FluxProvider,
+				{ handle: defaultHandle },
+				React.createElement(JumpDisplay),
+			),
+		);
 
-		expect(getTextLabel(container).Text).toBe("false");
+		expect(queryByText("false")).toBeDefined();
 
 		core.simulateAction(explicitHandle, "jump", true);
 		core.update(0.016);
+		flush();
 
-		ReactRoblox.act(() => {
-			flush();
-		});
-
-		expect(getTextLabel(container).Text).toBe("true");
+		expect(queryByText("true")).toBeDefined();
 	});
 });
