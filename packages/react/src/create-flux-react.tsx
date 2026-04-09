@@ -1,5 +1,12 @@
 import type { ActionMap, ActionState, FluxCore, InputHandle } from "@rbxts/flux";
-import React, { createContext, useContext, useEffect, useMemo, useState } from "@rbxts/react";
+import React, {
+	createContext,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "@rbxts/react";
 
 import type { Disconnect } from "./update-signal";
 import { createUpdateSignal } from "./update-signal";
@@ -8,11 +15,11 @@ import { createUpdateSignal } from "./update-signal";
  * Props for the FluxProvider component.
  */
 export interface FluxProviderProps {
-	/** Child elements. */
-	readonly children?: React.ReactNode;
-
 	/** The default InputHandle for hooks that omit the handle argument. */
 	readonly handle: InputHandle;
+
+	/** Child elements. */
+	readonly children?: React.ReactNode;
 }
 
 /**
@@ -43,10 +50,11 @@ export interface FluxUseAction<T extends ActionMap> {
 /**
  * The return type of createFluxReact.
  * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
  */
-export interface FluxReact<T extends ActionMap> {
+export interface FluxReact<T extends ActionMap, Contexts extends string = string> {
 	/** The underlying FluxCore instance. */
-	readonly core: FluxCore<T>;
+	readonly core: FluxCore<T, Contexts>;
 
 	/**
 	 * Notify React hooks that ActionState has been updated.
@@ -75,10 +83,11 @@ export interface FluxReact<T extends ActionMap> {
 /**
  * Options for creating a FluxReact instance in wrap mode.
  * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
  */
-export interface FluxReactWrapOptions<T extends ActionMap> {
+export interface FluxReactWrapOptions<T extends ActionMap, Contexts extends string = string> {
 	/** An existing FluxCore instance to wrap. */
-	readonly core: FluxCore<T>;
+	readonly core: FluxCore<T, Contexts>;
 }
 
 interface FluxContextValue<T extends ActionMap> {
@@ -93,17 +102,19 @@ interface FluxContextValue<T extends ActionMap> {
  * Returns the core, a flush function, a Provider component, and typed hooks.
  *
  * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
  * @param options - Wrap options containing an existing FluxCore.
  * @returns A FluxReact instance with typed hooks.
  */
-export function createFluxReact<T extends ActionMap>(
-	options: FluxReactWrapOptions<T>,
-): FluxReact<T> {
+export function createFluxReact<T extends ActionMap, Contexts extends string = string>(
+	options: FluxReactWrapOptions<T, Contexts>,
+): FluxReact<T, Contexts> {
 	const { core } = options;
 	const signal = createUpdateSignal();
 
 	// eslint-disable-next-line flawless/naming-convention -- React convention
 	const FluxContext = createContext<FluxContextValue<T> | undefined>(undefined);
+	FluxContext.displayName = "FluxContext";
 
 	const useFluxContext = createUseFluxContext(FluxContext);
 
@@ -133,7 +144,7 @@ function createFluxProvider<T extends ActionMap>(
 	subscribe: (listener: () => void) => Disconnect,
 ): (props: FluxProviderProps) => React.ReactNode {
 	return (props: FluxProviderProps): React.ReactNode => {
-		const { children, handle } = props;
+		const { handle, children } = props;
 
 		const contextValue = useMemo(() => {
 			return {
@@ -143,7 +154,7 @@ function createFluxProvider<T extends ActionMap>(
 			};
 		}, [handle]);
 
-		return React.createElement(FluxContext.Provider, { value: contextValue }, children);
+		return <FluxContext.Provider value={contextValue}>{children}</FluxContext.Provider>;
 	};
 }
 
@@ -164,18 +175,21 @@ function createUseAction<T extends ActionMap>(
 
 		const state = context.getState(handle);
 		const [value, setValue] = useState(() => selector(state));
+		const lastValueRef = useRef(value);
+
+		useEffect(() => {
+			lastValueRef.current = value;
+		});
 
 		useEffect(() => {
 			return context.subscribe(() => {
 				const updated = selector(context.getState(handle));
+				if (lastValueRef.current === updated) {
+					return;
+				}
 
-				setValue((previous) => {
-					if (previous === updated) {
-						return previous;
-					}
-
-					return updated;
-				});
+				lastValueRef.current = updated;
+				setValue(updated);
 			});
 		}, [context, handle, selector]);
 
