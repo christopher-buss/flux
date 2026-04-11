@@ -4,6 +4,8 @@ import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import { createCore } from "./create-core";
 
+_G.__DEV__ = true;
+
 const REBIND_ACTIONS = {
 	jump: { type: "Bool" as const },
 	move: { type: "Direction2D" as const },
@@ -246,6 +248,23 @@ describe("serializeBindings", () => {
 
 		expect(count).toBe(0);
 	});
+
+	it("should throw for subscribed handles", () => {
+		expect.assertions(1);
+
+		const serverParent = new Instance("Folder");
+		const serverCore = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		serverCore.register(serverParent, "gameplay");
+
+		const clientCore = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const [clientHandle] = clientCore.subscribe(serverParent, "gameplay");
+
+		const serialize = (): void => {
+			clientCore.serializeBindings(clientHandle);
+		};
+
+		expect(serialize).toThrow("subscribed handle");
+	});
 });
 
 describe("loadBindings", () => {
@@ -275,5 +294,70 @@ describe("loadBindings", () => {
 		second.loadBindings(secondHandle, saved);
 
 		expect(getKeyCodes(secondParent, "gameplay", "jump")).toContain(Enum.KeyCode.F);
+	});
+
+	it("should round-trip a rebound action across every context", () => {
+		expect.assertions(3);
+
+		const firstParent = new Instance("Folder");
+		const first = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const firstHandle = first.register(firstParent, "gameplay", "ui");
+		first.rebind(firstHandle, "jump", [Enum.KeyCode.F]);
+		const saved = first.serializeBindings(firstHandle);
+
+		const secondParent = new Instance("Folder");
+		const second = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const secondHandle = second.register(secondParent, "gameplay", "ui");
+		second.loadBindings(secondHandle, saved);
+
+		expect(getKeyCodes(secondParent, "gameplay", "jump")).toContain(Enum.KeyCode.F);
+		expect(getKeyCodes(secondParent, "ui", "jump")).toContain(Enum.KeyCode.F);
+		expect(getKeyCodes(secondParent, "gameplay", "move")).toHaveLength(1);
+	});
+
+	it("should preserve per-context defaults when no overrides were saved", () => {
+		expect.assertions(2);
+
+		const firstParent = new Instance("Folder");
+		const first = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const firstHandle = first.register(firstParent, "gameplay", "ui");
+		const saved = first.serializeBindings(firstHandle);
+
+		const secondParent = new Instance("Folder");
+		const second = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const secondHandle = second.register(secondParent, "gameplay", "ui");
+		second.loadBindings(secondHandle, saved);
+
+		expect(getKeyCodes(secondParent, "gameplay", "jump")).toContain(Enum.KeyCode.Space);
+		expect(getKeyCodes(secondParent, "ui", "jump")).toContain(Enum.KeyCode.Return);
+	});
+});
+
+describe("loadBindings unknown action", () => {
+	it("should drop keys absent from the action map", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.loadBindings(handle, { unknownAction: [Enum.KeyCode.F] } as never);
+
+		const state = core.serializeBindings(handle) as Record<string, unknown>;
+
+		expect(state["unknownAction"]).toBeUndefined();
+	});
+
+	it("should drop unknown keys silently when not in dev mode", () => {
+		expect.assertions(1);
+
+		_G.__DEV__ = false;
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.loadBindings(handle, { unknownAction: [Enum.KeyCode.F] } as never);
+		const state = core.serializeBindings(handle) as Record<string, unknown>;
+		_G.__DEV__ = true;
+
+		expect(state["unknownAction"]).toBeUndefined();
 	});
 });

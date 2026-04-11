@@ -163,7 +163,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		loadBindings(handle: InputHandle, data: BindingState<T>): void {
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
-			applyRebindAll(handleData, contexts, data);
+			applyRebindAll(handleData, actions, contexts, data);
 		},
 		rebind<A extends keyof T & string>(
 			handle: InputHandle,
@@ -177,7 +177,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		rebindAll(handle: InputHandle, bindings: BindingState<T>): void {
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
-			applyRebindAll(handleData, contexts, bindings);
+			applyRebindAll(handleData, actions, contexts, bindings);
 		},
 		register(
 			parent: Instance,
@@ -237,6 +237,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		},
 		serializeBindings(handle: InputHandle): BindingState<T> {
 			const handleData = getHandleData(handles, handle);
+			assertOwnedForRebind(handleData);
 			return serializeFullBindings(handleData) as BindingState<T>;
 		},
 		simulateAction<A extends keyof T & string>(

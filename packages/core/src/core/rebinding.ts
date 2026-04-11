@@ -63,21 +63,26 @@ export function applyRebindOne<T extends ActionMap>(
 	action: string,
 	bindings: ReadonlyArray<BindingLike>,
 ): void {
-	handleData.bindingOverrides.set(action, bindings);
-	rebuildActionBindings(handleData.instanceData, action, () => bindings);
+	const owned = [...bindings];
+	handleData.bindingOverrides.set(action, owned);
+	rebuildActionBindings(handleData.instanceData, action, () => owned);
 }
 
 /**
  * Performs a full replace of the override map. Actions present in `bindings`
  * receive their new values; every other action known to the handle is
- * restored to its original context bindings.
+ * restored to its original context bindings. Keys absent from the core's
+ * action map are dropped, which lets a saved payload survive action renames
+ * or removals without leaking stale keys back out through `serializeBindings`.
  * @template T - The action map type.
  * @param handleData - Handle state to mutate.
+ * @param actions - Core action map used to filter unknown keys.
  * @param contexts - Core context config used to resolve originals.
  * @param bindings - The full binding state to apply.
  */
 export function applyRebindAll<T extends ActionMap>(
 	handleData: HandleData<T>,
+	actions: T,
 	contexts: Record<string, ContextConfig>,
 	bindings: BindingState<T>,
 ): void {
@@ -85,8 +90,17 @@ export function applyRebindAll<T extends ActionMap>(
 	const handledActions = new Set<string>();
 	const typedBindings = bindings as Record<string, ReadonlyArray<BindingLike>>;
 	for (const [action, actionBindings] of pairs(typedBindings)) {
-		handleData.bindingOverrides.set(action, actionBindings);
-		rebuildActionBindings(handleData.instanceData, action, () => actionBindings);
+		if ((actions as Record<string, unknown>)[action] === undefined) {
+			if (_G.__DEV__) {
+				warn(`[flux] dropping unknown action from loaded bindings: ${action}`);
+			}
+
+			continue;
+		}
+
+		const owned = [...actionBindings];
+		handleData.bindingOverrides.set(action, owned);
+		rebuildActionBindings(handleData.instanceData, action, () => owned);
 		handledActions.add(action);
 	}
 
@@ -151,7 +165,7 @@ export function serializeFullBindings<T extends ActionMap>(
 ): Record<string, ReadonlyArray<BindingLike>> {
 	const result: Record<string, ReadonlyArray<BindingLike>> = {};
 	for (const [actionName, bindings] of handleData.bindingOverrides) {
-		result[actionName] = bindings;
+		result[actionName] = [...bindings];
 	}
 
 	return result;
