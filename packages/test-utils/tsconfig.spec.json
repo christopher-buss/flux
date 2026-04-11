@@ -1,10 +1,15 @@
 {
+	"$schema": "./node_modules/@isentinel/roblox-ts/schemas/rbxts-tsconfig.schema.json",
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"tsBuildInfoFile": "out-test/tsconfig.tsbuildinfo",
 		"rootDir": null,
 		"rootDirs": ["src", "test"],
 		"outDir": "out-test"
+	},
+	"rbxts": {
+		"rojo": "./test.project.json",
+		"type": "game"
 	},
 	"references": [
 		{

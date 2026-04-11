@@ -47,11 +47,13 @@ outer variables or object properties from inside a component. Use
 ## Commands
 
 ```bash
-pnpm --filter @rbxts/flux-react test        # build + jest-roblox
+pnpm test                                     # root: build all + run all tests
+pnpm --filter @rbxts/flux-react dev:build     # build just this package
+pnpm --filter @rbxts/flux-react test          # jest-roblox only (no build)
 pnpm --filter @rbxts/flux-react typecheck
 pnpm run lint                                 # workspace-wide
 ```
 
-When `pnpm test` reports `Infinite yield on WaitForChild("out")`, run
-`pnpm --filter @rbxts/flux-react run clean && pnpm --filter
-@rbxts/flux-react test` — it is an intermittent stale-build issue.
+Per-package `test` no longer builds — compilation is driven centrally by root
+`pnpm dev:build` (one `rbxtsc --build tsconfig.build.json` walks the whole
+graph). For scoped iteration, run `dev:build` then `test` explicitly.

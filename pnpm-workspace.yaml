@@ -18,7 +18,7 @@ packages:
 
 catalogs:
   build:
-    "@isentinel/roblox-ts": 3.1.5
+    "@isentinel/roblox-ts": 3.2.0
   cli:
     pncat: 0.10.4
   dev:
@@ -52,9 +52,9 @@ catalogs:
     "@isentinel/jest-roblox": 0.2.1
     "@rbxts-js/dom-testing-library-lua": 8.16.0-ts.2
     "@rbxts-js/react-testing-library-lua": 12.3.4-ts.2
-    "@rbxts/jest": 3.13.3-ts.1
+    "@rbxts/jest": 3.16.0-ts.1
     "@rbxts/jest-extended": 1.0.1
-    "@rbxts/jest-globals": 3.13.3-ts.2
+    "@rbxts/jest-globals": 3.16.0-ts.1
     "@rbxts/jest-utils": 0.1.3
     "@rbxts/react-roblox-fire": 0.1.4
     "@rbxts/regexp": 0.2.1-ts.4

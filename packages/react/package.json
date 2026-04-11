@@ -35,8 +35,8 @@
 	"scripts": {
 		"build": "rbxtsc --project tsconfig.lib.json",
 		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
-		"dev:build": "rbxtsc --build --type=game --rojo test.project.json --project tsconfig.spec.json",
-		"test": "pnpm dev:build && jest-roblox",
+		"dev:build": "rbxtsc --build --type=game --project tsconfig.spec.json",
+		"test": "jest-roblox",
 		"typecheck": "tsgo --noEmit",
 		"typecheck:types": "tsgo --project tsconfig.typetest.json --noEmit"
 	},
