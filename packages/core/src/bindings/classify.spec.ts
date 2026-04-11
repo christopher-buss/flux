@@ -36,10 +36,10 @@ describe("classifyBinding", () => {
 		expect.assertions(1);
 
 		const config: Direction2dBindingConfig = {
-			up: Enum.KeyCode.W,
 			down: Enum.KeyCode.S,
 			left: Enum.KeyCode.A,
 			right: Enum.KeyCode.D,
+			up: Enum.KeyCode.W,
 		};
 
 		expect(classifyBinding(config)).toBe("keyboard");
@@ -49,10 +49,10 @@ describe("classifyBinding", () => {
 		expect.assertions(1);
 
 		const config: Direction2dBindingConfig = {
-			up: Enum.KeyCode.DPadUp,
 			down: Enum.KeyCode.DPadDown,
 			left: Enum.KeyCode.DPadLeft,
 			right: Enum.KeyCode.DPadRight,
+			up: Enum.KeyCode.DPadUp,
 		};
 
 		expect(classifyBinding(config)).toBe("gamepad");

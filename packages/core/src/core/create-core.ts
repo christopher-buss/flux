@@ -138,6 +138,13 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 
 			return noop;
 		},
+		destroy(): void {
+			for (const [, data] of handles) {
+				destroyInputInstances(data.instanceData);
+			}
+
+			handles.clear();
+		},
 		getAllBindings(
 			handle: InputHandle,
 			context?: Contexts,
@@ -162,13 +169,6 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		): ReadonlyArray<BindingLike> {
 			const handleData = getHandleData(handles, handle);
 			return resolveBindings(handleData, contexts, action, context);
-		},
-		destroy(): void {
-			for (const [, data] of handles) {
-				destroyInputInstances(data.instanceData);
-			}
-
-			handles.clear();
 		},
 		getContexts(handle: InputHandle): ReadonlyArray<Contexts> {
 			const data = getHandleData(handles, handle);
@@ -355,33 +355,37 @@ function resolveBindings<T extends ActionMap>(
 	}
 
 	if (context !== undefined) {
-		const contextConfig = contexts[context];
-		if (contextConfig === undefined) {
-			return [];
-		}
-
-		const bindings = (
-			contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
-		)[action];
-		return bindings ?? [];
+		return getContextBindings(contexts, context, action);
 	}
 
+	return mergeBindingsAcrossContexts(handleData, contexts, action);
+}
+
+function getContextBindings(
+	contexts: Record<string, ContextConfig>,
+	context: string,
+	action: string,
+): ReadonlyArray<BindingLike> {
+	const contextConfig = contexts[context];
+	if (contextConfig === undefined) {
+		return [];
+	}
+
+	const bindings = (
+		contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
+	)[action];
+	return bindings ?? [];
+}
+
+function mergeBindingsAcrossContexts<T extends ActionMap>(
+	handleData: HandleData<T>,
+	contexts: Record<string, ContextConfig>,
+	action: string,
+): ReadonlyArray<BindingLike> {
 	const result = new Array<BindingLike>();
 	const seen = new Set<BindingLike>();
 	for (const contextName of handleData.activeContexts) {
-		const contextConfig = contexts[contextName];
-		if (contextConfig === undefined) {
-			continue;
-		}
-
-		const bindings = (
-			contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
-		)[action];
-		if (bindings === undefined) {
-			continue;
-		}
-
-		for (const binding of bindings) {
+		for (const binding of getContextBindings(contexts, contextName, action)) {
 			if (!seen.has(binding)) {
 				seen.add(binding);
 				result.push(binding);

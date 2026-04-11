@@ -249,8 +249,8 @@ function shallowArrayEqual<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>): boolean
 		return false;
 	}
 
-	for (let i = 0; i < a.size(); i++) {
-		if (a[i] !== b[i]) {
+	for (let index = 0; index < a.size(); index++) {
+		if (a[index] !== b[index]) {
 			return false;
 		}
 	}
@@ -276,30 +276,28 @@ function createUseBindings<T extends ActionMap>(
 		actionOrPlatform?: AllActions<T> | InputPlatform,
 		maybePlatform?: InputPlatform,
 	): ReadonlyArray<BindingLike> {
-		const context = useFluxContext();
+		const { handle: defaultHandle, subscribe } = useFluxContext();
 
-		let handle: InputHandle;
-		let action: AllActions<T>;
-		let platform: InputPlatform | undefined;
+		const handle = typeIs(handleOrAction, "string")
+			? defaultHandle
+			: (handleOrAction as InputHandle);
+		const action = typeIs(handleOrAction, "string")
+			? handleOrAction
+			: (actionOrPlatform as AllActions<T>);
+		const platform = typeIs(handleOrAction, "string")
+			? (actionOrPlatform as InputPlatform | undefined)
+			: maybePlatform;
 
-		if (typeIs(handleOrAction, "string")) {
-			handle = context.handle;
-			action = handleOrAction;
-			platform = actionOrPlatform as InputPlatform | undefined;
-		} else {
-			handle = handleOrAction as InputHandle;
-			action = actionOrPlatform as AllActions<T>;
-			platform = maybePlatform;
-		}
+		const getBindingsValue = useMemo(() => {
+			return (): ReadonlyArray<BindingLike> => {
+				const bindings = core.getBindings(handle, action);
+				if (platform !== undefined) {
+					return getBindingsForPlatform(bindings, platform);
+				}
 
-		const getBindingsValue = (): ReadonlyArray<BindingLike> => {
-			const bindings = core.getBindings(handle, action);
-			if (platform !== undefined) {
-				return getBindingsForPlatform(bindings, platform);
-			}
-
-			return bindings;
-		};
+				return bindings;
+			};
+		}, [handle, action, platform]);
 
 		const [value, setValue] = useState(getBindingsValue);
 		const lastValueRef = useRef(value);
@@ -317,10 +315,10 @@ function createUseBindings<T extends ActionMap>(
 
 			lastValueRef.current = updated;
 			setValue(updated);
-		}, [context, handle, action, platform]);
+		}, [getBindingsValue]);
 
 		useEffect(() => {
-			return context.subscribe(() => {
+			return subscribe(() => {
 				const updated = getBindingsValue();
 				if (shallowArrayEqual(lastValueRef.current, updated)) {
 					return;
@@ -329,7 +327,7 @@ function createUseBindings<T extends ActionMap>(
 				lastValueRef.current = updated;
 				setValue(updated);
 			});
-		}, [context, handle, action, platform]);
+		}, [subscribe, getBindingsValue]);
 
 		return value;
 	}
