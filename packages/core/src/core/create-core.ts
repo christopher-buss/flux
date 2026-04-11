@@ -22,6 +22,7 @@ import {
 	applyResetAll,
 	applyResetOne,
 	assertOwnedForRebind,
+	replayOverridesIntoContext,
 	serializeFullBindings,
 } from "./rebinding";
 import { updateHandle } from "./update-handle";
@@ -128,6 +129,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 					data.instanceData.inputContexts.set(context, existing);
 				} else {
 					addContextInstances(context, contexts[context], actions, data.instanceData);
+					replayOverridesIntoContext(data, context);
 				}
 			}
 
@@ -235,7 +237,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		},
 		serializeBindings(handle: InputHandle): BindingState<T> {
 			const handleData = getHandleData(handles, handle);
-			return serializeFullBindings(handleData, contexts) as BindingState<T>;
+			return serializeFullBindings(handleData) as BindingState<T>;
 		},
 		simulateAction<A extends keyof T & string>(
 			handle: InputHandle,

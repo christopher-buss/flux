@@ -107,6 +107,40 @@ describe("rebind", () => {
 
 		expect(rebind).toThrow("subscribed handle");
 	});
+
+	it("should apply to contexts activated after the rebind", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebind(handle, "jump", [Enum.KeyCode.F]);
+		core.addContext(handle, "ui");
+
+		expect(getKeyCodes(parent, "ui", "jump")).toContain(Enum.KeyCode.F);
+	});
+
+	it("should skip replay for actions absent from the newly added context", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebind(handle, "move", [
+			{
+				down: Enum.KeyCode.K,
+				left: Enum.KeyCode.J,
+				right: Enum.KeyCode.L,
+				up: Enum.KeyCode.I,
+			},
+		]);
+
+		const addContext = (): void => {
+			core.addContext(handle, "ui");
+		};
+
+		expect(addContext).never.toThrow();
+	});
 });
 
 describe("rebindAll", () => {
@@ -184,8 +218,8 @@ describe("resetAllBindings", () => {
 });
 
 describe("serializeBindings", () => {
-	it("should return full effective state including unchanged actions", () => {
-		expect.assertions(3);
+	it("should return only overridden actions", () => {
+		expect.assertions(2);
 
 		const parent = new Instance("Folder");
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
@@ -193,20 +227,24 @@ describe("serializeBindings", () => {
 		core.rebind(handle, "jump", [Enum.KeyCode.F]);
 		const state = core.serializeBindings(handle);
 
-		expect(state.jump).toHaveLength(1);
 		expect(state.jump).toContain(Enum.KeyCode.F);
-		expect(state.move).never.toBeUndefined();
+		expect(state.move).toBeUndefined();
 	});
 
-	it("should fall back to a later context when earlier ones lack the action", () => {
+	it("should return an empty record when no overrides are set", () => {
 		expect.assertions(1);
 
 		const parent = new Instance("Folder");
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
-		const handle = core.register(parent, "ui", "gameplay");
-		const state = core.serializeBindings(handle);
+		const handle = core.register(parent, "gameplay");
 
-		expect(state.move).never.toBeUndefined();
+		const state = core.serializeBindings(handle);
+		let count = 0;
+		for (const [_key] of pairs(state)) {
+			count += 1;
+		}
+
+		expect(count).toBe(0);
 	});
 });
 

@@ -138,39 +138,60 @@ export function applyResetAll<T extends ActionMap>(
 }
 
 /**
- * Produces a self-contained binding state including both current overrides
- * and original bindings for unchanged actions.
+ * Serializes the handle's active binding overrides. Unchanged actions are
+ * absent from the result — on load they are restored from the current
+ * code's default bindings. This avoids the ambiguity of multi-context
+ * actions that may declare different defaults per context.
  * @template T - The action map type.
  * @param handleData - Handle state to read.
- * @param contexts - Core context config used to resolve originals.
- * @returns A record of effective bindings keyed by action name.
+ * @returns A sparse record of overridden bindings keyed by action name.
  */
 export function serializeFullBindings<T extends ActionMap>(
 	handleData: HandleData<T>,
-	contexts: Record<string, ContextConfig>,
 ): Record<string, ReadonlyArray<BindingLike>> {
 	const result: Record<string, ReadonlyArray<BindingLike>> = {};
-	for (const [actionName] of handleData.instanceData.inputActions) {
-		const override = handleData.bindingOverrides.get(actionName);
-		if (override !== undefined) {
-			result[actionName] = override;
-			continue;
-		}
-
-		for (const [contextName] of handleData.instanceData.inputContexts) {
-			const contextConfig = contexts[contextName];
-			assert(contextConfig, `missing context config: ${contextName}`);
-			const bindings = (
-				contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
-			)[actionName];
-			if (bindings !== undefined) {
-				result[actionName] = bindings;
-				break;
-			}
-		}
+	for (const [actionName, bindings] of handleData.bindingOverrides) {
+		result[actionName] = bindings;
 	}
 
 	return result;
+}
+
+/**
+ * Replays active overrides onto a single freshly-activated InputContext.
+ * Lets `addContext` hydrate the new context so rebinds applied before
+ * activation still take effect when the context comes online.
+ * @template T - The action map type.
+ * @param handleData - Handle state containing the active overrides.
+ * @param contextName - Name of the context that was just activated.
+ */
+export function replayOverridesIntoContext<T extends ActionMap>(
+	handleData: HandleData<T>,
+	contextName: string,
+): void {
+	if (handleData.bindingOverrides.isEmpty()) {
+		return;
+	}
+
+	const inputContext = handleData.instanceData.inputContexts.get(contextName);
+	assert(inputContext, `context not registered: ${contextName}`);
+	for (const [actionName, bindings] of handleData.bindingOverrides) {
+		const inputAction = inputContext.FindFirstChild(actionName);
+		if (inputAction === undefined || !classIs(inputAction, "InputAction")) {
+			continue;
+		}
+
+		const destroyed = new Set<Instance>();
+		for (const child of inputAction.GetChildren()) {
+			destroyed.add(child);
+			child.Destroy();
+		}
+
+		pruneInstances(handleData.instanceData.instances, destroyed);
+		for (const bindingLike of bindings) {
+			createInputBinding(bindingLike, inputAction, handleData.instanceData.instances);
+		}
+	}
 }
 
 function destroyExistingBindings(data: InputInstanceData, actionName: string): Set<Instance> {
