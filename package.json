@@ -14,7 +14,7 @@
 		"build": "pnpm -r run build",
 		"clean": "pnpm -r run clean",
 		"commit": "commit",
-		"dev:build": "rbxtsc --build tsconfig.build.json --type=game",
+		"dev:build": "rbxtsc --build tsconfig.build.json --type=game --verbose",
 		"eslint-config": "npx @eslint/config-inspector",
 		"postinstall": "node scripts/rojo-sync.ts",
 		"lint": "node scripts/lint.ts",
