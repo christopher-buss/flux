@@ -154,6 +154,32 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 
 			return result;
 		},
+		getBindings(
+			handle: InputHandle,
+			action: keyof T & string,
+			context?: Contexts,
+		): ReadonlyArray<BindingLike> {
+			const handleData = getHandleData(handles, handle);
+			return resolveBindings(handleData, actions, contexts, action, context);
+		},
+		getAllBindings(
+			handle: InputHandle,
+			context?: Contexts,
+		): Record<keyof T & string, ReadonlyArray<BindingLike>> {
+			const handleData = getHandleData(handles, handle);
+			const result = {} as Record<string, ReadonlyArray<BindingLike>>;
+			for (const [actionName] of pairs(actions as Record<string, unknown>)) {
+				result[actionName] = resolveBindings(
+					handleData,
+					actions,
+					contexts,
+					actionName,
+					context,
+				);
+			}
+
+			return result as Record<keyof T & string, ReadonlyArray<BindingLike>>;
+		},
 		getState(handle: InputHandle): ActionState<T> {
 			return getHandleData(handles, handle).publicState;
 		},
@@ -303,6 +329,53 @@ function validateContextName(contexts: Record<string, ContextConfig>, name: stri
 	if (contexts[name] === undefined) {
 		throw new ContextError(`unknown context: ${name}`, name);
 	}
+}
+
+function resolveBindings<T extends ActionMap>(
+	handleData: HandleData<T>,
+	actions: T,
+	contexts: Record<string, ContextConfig>,
+	action: string,
+	context?: string,
+): ReadonlyArray<BindingLike> {
+	const override = handleData.bindingOverrides.get(action);
+	if (override !== undefined) {
+		return override;
+	}
+
+	if (context !== undefined) {
+		const contextConfig = contexts[context];
+		assert(contextConfig, `missing context config: ${context}`);
+		const bindings = (
+			contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
+		)[action];
+		return bindings ?? [];
+	}
+
+	const result = new Array<BindingLike>();
+	const seen = new Set<BindingLike>();
+	for (const activeContext of handleData.activeContexts) {
+		const contextConfig = contexts[activeContext];
+		if (contextConfig === undefined) {
+			continue;
+		}
+
+		const bindings = (
+			contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
+		)[action];
+		if (bindings === undefined) {
+			continue;
+		}
+
+		for (const binding of bindings) {
+			if (!seen.has(binding)) {
+				seen.add(binding);
+				result.push(binding);
+			}
+		}
+	}
+
+	return result;
 }
 
 function findExistingContext(

@@ -1,7 +1,7 @@
 import type { Tagged } from "type-fest";
 
 import type { ActionMap, AllActions } from "./actions";
-import type { BindingForAction, BindingState } from "./bindings";
+import type { BindingForAction, BindingLike, BindingState } from "./bindings";
 import type { ActionState, ActionValue } from "./state";
 
 /**
@@ -45,6 +45,38 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * @returns Read-only array of active context names.
 	 */
 	getContexts(handle: InputHandle): ReadonlyArray<Contexts>;
+
+	/**
+	 * Returns the effective bindings for a single action on the given handle.
+	 *
+	 * When a context is specified, only bindings from that context are returned.
+	 * Otherwise, bindings from all active contexts are merged.
+	 *
+	 * @param handle - The input consumer handle.
+	 * @param action - The action name to query.
+	 * @param context - Optional context to restrict results to.
+	 * @returns Read-only array of bindings for the action.
+	 */
+	getBindings(
+		handle: InputHandle,
+		action: AllActions<Actions>,
+		context?: Contexts,
+	): ReadonlyArray<BindingLike>;
+
+	/**
+	 * Returns the effective bindings for all actions on the given handle.
+	 *
+	 * When a context is specified, only bindings from that context are returned.
+	 * Otherwise, bindings from all active contexts are merged.
+	 *
+	 * @param handle - The input consumer handle.
+	 * @param context - Optional context to restrict results to.
+	 * @returns A record mapping action names to their bindings.
+	 */
+	getAllBindings(
+		handle: InputHandle,
+		context?: Contexts,
+	): Record<AllActions<Actions>, ReadonlyArray<BindingLike>>;
 
 	/**
 	 * Returns the action state query interface for the given handle.
