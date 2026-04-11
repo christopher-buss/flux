@@ -67,7 +67,7 @@ jobs:
           ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
           ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}
         name: Test
-        run: pnpm -r --stream test --coverage --coverageReporters json-summary --coverageReporters json
+        run: pnpm -r --stream --workspace-concurrency=1 test --coverage --coverageReporters json-summary --coverageReporters json
 
       - name: Merge Coverage
         run: node scripts/merge-coverage.ts
