@@ -1,4 +1,5 @@
-import { describe, expect, it } from "@rbxts/jest-globals";
+import { describe, expect, it, jest } from "@rbxts/jest-globals";
+import { afterThis, fromAny } from "@rbxts/jest-utils";
 
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
@@ -332,30 +333,47 @@ describe("loadBindings", () => {
 });
 
 describe("loadBindings unknown action", () => {
-	it("should drop keys absent from the action map", () => {
-		expect.assertions(1);
+	it("should drop keys absent from the action map and log in dev mode", () => {
+		expect.assertions(2);
+
+		_G.__DEV__ = true;
+		afterThis(() => {
+			_G.__DEV__ = false;
+		});
+		const spy = jest.spyOn(jest.globalEnv, "warn");
+		spy.mockImplementation(() => {});
+		afterThis(() => {
+			spy.mockRestore();
+		});
 
 		const parent = new Instance("Folder");
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
-		core.loadBindings(handle, { unknownAction: [Enum.KeyCode.F] } as never);
+		core.loadBindings(handle, fromAny({ unknownAction: [Enum.KeyCode.F] }));
 
 		const state = core.serializeBindings(handle) as Record<string, unknown>;
 
 		expect(state["unknownAction"]).toBeUndefined();
+		expect(spy).toHaveBeenCalledWith(expect.stringContaining("unknownAction"));
 	});
 
-	it("should drop unknown keys silently when not in dev mode", () => {
-		expect.assertions(1);
+	it("should drop keys absent from the action map without logging outside dev mode", () => {
+		expect.assertions(2);
 
-		_G.__DEV__ = false;
+		const spy = jest.spyOn(jest.globalEnv, "warn");
+		spy.mockImplementation(() => {});
+		afterThis(() => {
+			spy.mockRestore();
+		});
+
 		const parent = new Instance("Folder");
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
-		core.loadBindings(handle, { unknownAction: [Enum.KeyCode.F] } as never);
+		core.loadBindings(handle, fromAny({ unknownAction: [Enum.KeyCode.F] }));
+
 		const state = core.serializeBindings(handle) as Record<string, unknown>;
-		_G.__DEV__ = true;
 
 		expect(state["unknownAction"]).toBeUndefined();
+		expect(spy).never.toHaveBeenCalled();
 	});
 });
