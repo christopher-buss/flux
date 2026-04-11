@@ -141,9 +141,17 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	resetBindings(handle: InputHandle, action: AllActions<Actions>): void;
 
 	/**
-	 * Serializes current bindings for persistence or network transfer.
+	 * Serializes the handle's active binding overrides for persistence.
+	 *
+	 * The result is sparse: only actions with an explicit override appear.
+	 * Unchanged actions are absent and, on `loadBindings`, are restored from
+	 * the current code's default context bindings. This lets multi-context
+	 * actions keep their per-context defaults across a save/load cycle
+	 * without flattening them into a single shared list. Suitable for
+	 * DataStore persistence of user customizations.
 	 * @param handle - The input consumer handle.
-	 * @returns The serialized binding state.
+	 * @returns A sparse record of overridden bindings keyed by action name.
+	 * @throws FluxError if called on a subscribed handle.
 	 */
 	serializeBindings(handle: InputHandle): BindingState<Actions>;
 

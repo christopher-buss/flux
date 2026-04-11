@@ -1,5 +1,6 @@
 import type { ModifierContext } from "../modifiers/types";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
+import type { BindingLike } from "../types/bindings";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
@@ -12,6 +13,8 @@ import { processPipeline } from "./pipeline";
 export interface CoreHandleData {
 	/** Set of currently active context names. */
 	readonly activeContexts: Set<string>;
+	/** Active per-action binding overrides. Absent key = use original bindings. */
+	readonly bindingOverrides: Map<string, ReadonlyArray<BindingLike>>;
 	/** Per-action trigger duration accumulators in seconds. */
 	readonly durations: Map<string, number>;
 	/** Roblox InputContext instance references. */

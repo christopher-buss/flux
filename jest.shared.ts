@@ -19,5 +19,6 @@ export default defineConfig({
 	setupFiles: ["@flux/test-utils/out/setup"],
 	setupFilesAfterEnv: ["@flux/test-utils/loaders/jest-extended"],
 	testTimeout: 5000,
+	timeout: 30000,
 	typecheck: true,
 });

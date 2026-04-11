@@ -304,15 +304,14 @@ const PROPERTY_MAP = {
 	vector3Scale: "Vector3Scale",
 } as const satisfies Record<BindingConfigKey, BindingProperty>;
 
-function isKeyCode(value: BindingLike): value is Enum.KeyCode {
-	return typeIs(value, "EnumItem") && value.EnumType === Enum.KeyCode;
-}
-
-function isUserInputType(value: unknown): boolean {
-	return typeIs(value, "EnumItem") && value.EnumType === Enum.UserInputType;
-}
-
-function createBinding(
+/**
+ * Creates a single `InputBinding` child on the given `InputAction`.
+ * @param bindingLike - The binding definition (KeyCode or config object).
+ * @param parent - The `InputAction` to parent the binding under.
+ * @param instances - Bulk cleanup array the new instance is appended to.
+ * @throws FluxError if a raw `Enum.UserInputType` is passed.
+ */
+export function createInputBinding(
 	bindingLike: BindingLike,
 	parent: InputAction,
 	instances: Array<Instance>,
@@ -336,13 +335,21 @@ function createBinding(
 	instances.push(binding);
 }
 
+function isKeyCode(value: BindingLike): value is Enum.KeyCode {
+	return typeIs(value, "EnumItem") && value.EnumType === Enum.KeyCode;
+}
+
+function isUserInputType(value: unknown): boolean {
+	return typeIs(value, "EnumItem") && value.EnumType === Enum.UserInputType;
+}
+
 function createBindingsForAction(
 	bindings: ReadonlyArray<BindingLike>,
 	parent: InputAction,
 	instances: Array<Instance>,
 ): void {
 	for (const bindingLike of bindings) {
-		createBinding(bindingLike, parent, instances);
+		createInputBinding(bindingLike, parent, instances);
 	}
 }
 
