@@ -4,8 +4,6 @@ import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import { createCore } from "./create-core";
 
-_G.__DEV__ = true;
-
 const REBIND_ACTIONS = {
 	jump: { type: "Bool" as const },
 	move: { type: "Direction2D" as const },
