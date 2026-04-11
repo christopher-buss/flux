@@ -1,6 +1,5 @@
 /* eslint-disable flawless/naming-convention -- React components use PascalCase */
 import { cleanup, render } from "@flux/test-utils/react-testing-library-lua";
-import type { BindingLike } from "@rbxts/flux";
 import { createCore } from "@rbxts/flux";
 import { describe, expect, it } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
@@ -25,20 +24,18 @@ describe("useBindings", () => {
 		const flux = createFluxReact({ core });
 		const { FluxProvider, useBindings } = flux;
 
-		let captured: ReadonlyArray<BindingLike> = [];
-
 		function Probe(): React.ReactNode {
-			captured = useBindings("jump");
-			return <frame />;
+			const bindings = useBindings("jump");
+			return <textlabel Text={`count:${bindings.size()}`} />;
 		}
 
-		render(
+		const { queryByText } = render(
 			<FluxProvider handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
 
-		expect(captured.size()).toBeGreaterThan(0);
+		expect(queryByText("count:1")).toBeDefined();
 	});
 
 	it("should filter by platform when platform is provided", () => {
@@ -53,25 +50,27 @@ describe("useBindings", () => {
 		const flux = createFluxReact({ core });
 		const { FluxProvider, useBindings } = flux;
 
-		let keyboardBindings: ReadonlyArray<BindingLike> = [];
-		let gamepadBindings: ReadonlyArray<BindingLike> = [];
-
 		function Probe(): React.ReactNode {
-			keyboardBindings = useBindings("jump", "keyboard");
-			gamepadBindings = useBindings("jump", "gamepad");
-			return <frame />;
+			const keyboard = useBindings("jump", "keyboard");
+			const gamepad = useBindings("jump", "gamepad");
+			return (
+				<frame>
+					<textlabel Text={`keyboard:${keyboard.size()}`} />
+					<textlabel Text={`gamepad:${gamepad.size()}`} />
+				</frame>
+			);
 		}
 
-		render(
+		const { queryByText } = render(
 			<FluxProvider handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
 
 		// Space is a keyboard key, so keyboard should have bindings
-		expect(keyboardBindings.size()).toBeGreaterThan(0);
+		expect(queryByText("keyboard:1")).toBeDefined();
 		// No gamepad bindings defined in the test fixtures
-		expect(gamepadBindings.size()).toBe(0);
+		expect(queryByText("gamepad:0")).toBeDefined();
 	});
 
 	it("should re-render after rebind and flush", () => {
@@ -86,27 +85,24 @@ describe("useBindings", () => {
 		const flux = createFluxReact({ core });
 		const { FluxProvider, useBindings } = flux;
 
-		let captured: ReadonlyArray<BindingLike> = [];
-
 		function Probe(): React.ReactNode {
-			captured = useBindings("jump");
-			return <frame />;
+			const bindings = useBindings("jump");
+			return <textlabel Text={`count:${bindings.size()}`} />;
 		}
 
-		render(
+		const { queryByText } = render(
 			<FluxProvider handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
 
-		const before = captured.size();
+		expect(queryByText("count:1")).toBeDefined();
 
 		core.rebind(handle, "jump", [Enum.KeyCode.ButtonA, Enum.KeyCode.Space]);
 		core.update(FRAME_TIME);
 		flux.flush();
 
-		expect(before).toBe(1);
-		expect(captured.size()).toBe(2);
+		expect(queryByText("count:2")).toBeDefined();
 	});
 
 	it("should not re-render when bindings have not changed", () => {

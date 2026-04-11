@@ -80,38 +80,6 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	getContexts(handle: InputHandle): ReadonlyArray<Contexts>;
 
 	/**
-	 * Returns the effective bindings for a single action on the given handle.
-	 *
-	 * When a context is specified, only bindings from that context are returned.
-	 * Otherwise, bindings from all active contexts are merged.
-	 *
-	 * @param handle - The input consumer handle.
-	 * @param action - The action name to query.
-	 * @param context - Optional context to restrict results to.
-	 * @returns Read-only array of bindings for the action.
-	 */
-	getBindings(
-		handle: InputHandle,
-		action: AllActions<Actions>,
-		context?: Contexts,
-	): ReadonlyArray<BindingLike>;
-
-	/**
-	 * Returns the effective bindings for all actions on the given handle.
-	 *
-	 * When a context is specified, only bindings from that context are returned.
-	 * Otherwise, bindings from all active contexts are merged.
-	 *
-	 * @param handle - The input consumer handle.
-	 * @param context - Optional context to restrict results to.
-	 * @returns A record mapping action names to their bindings.
-	 */
-	getAllBindings(
-		handle: InputHandle,
-		context?: Contexts,
-	): Record<AllActions<Actions>, ReadonlyArray<BindingLike>>;
-
-	/**
 	 * Returns the action state query interface for the given handle.
 	 * @param handle - The input consumer handle.
 	 * @returns The typed action state for querying input.

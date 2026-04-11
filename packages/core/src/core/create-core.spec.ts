@@ -8,7 +8,6 @@ import { FluxError } from "../errors/flux-error";
 import { HandleError } from "../errors/handle-error";
 import { hold, implicit, tap } from "../triggers";
 import type { ActionMap } from "../types/actions";
-import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import { createCore } from "./create-core";

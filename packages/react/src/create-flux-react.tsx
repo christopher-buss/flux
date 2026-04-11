@@ -308,6 +308,17 @@ function createUseBindings<T extends ActionMap>(
 			lastValueRef.current = value;
 		});
 
+		// Immediate resync when handle/action/platform change.
+		useEffect(() => {
+			const updated = getBindingsValue();
+			if (shallowArrayEqual(lastValueRef.current, updated)) {
+				return;
+			}
+
+			lastValueRef.current = updated;
+			setValue(updated);
+		}, [context, handle, action, platform]);
+
 		useEffect(() => {
 			return context.subscribe(() => {
 				const updated = getBindingsValue();

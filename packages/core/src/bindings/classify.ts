@@ -27,6 +27,9 @@ const GAMEPAD_KEYCODES = new Set<Enum.KeyCode>([
 /** Directional field names to check on binding config objects. */
 const DIRECTIONAL_KEYS = ["up", "down", "left", "right", "forward", "backward"] as const;
 
+/** Modifier field names to check on binding config objects. */
+const MODIFIER_KEYS = ["primaryModifier", "secondaryModifier"] as const;
+
 /**
  * Classifies a KeyCode as gamepad or keyboard.
  * @param keyCode - The KeyCode to classify.
@@ -59,9 +62,17 @@ export function classifyBinding(binding: BindingLike): InputPlatform {
 	}
 
 	// Check the keyCode field (BoolBindingConfig, ViewportPositionBindingConfig, etc.).
-	const keyCode = (binding as { keyCode?: Enum.KeyCode }).keyCode;
+	const { keyCode } = binding as { keyCode?: Enum.KeyCode };
 	if (keyCode !== undefined) {
 		return classifyKeyCode(keyCode);
+	}
+
+	// Check modifier fields (primaryModifier, secondaryModifier).
+	for (const key of MODIFIER_KEYS) {
+		const modifier = (binding as Record<string, unknown>)[key] as Enum.KeyCode | undefined;
+		if (modifier !== undefined) {
+			return classifyKeyCode(modifier);
+		}
 	}
 
 	return "touch";
