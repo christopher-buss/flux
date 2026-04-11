@@ -20,6 +20,8 @@ export interface CoreHandleData {
 	readonly internalState: InternalActionState;
 	/** Accumulated wait time per action not yet replicated. Dev-only. */
 	readonly pendingActions: Map<string, number>;
+	/** Previous-frame raw magnitudes, used to detect the release transition. */
+	readonly previousMagnitudes: Map<string, number>;
 	/** Injected values from `simulateAction`. */
 	readonly simulatedValues: Map<string, ActionValueType>;
 	/** Actions that have already emitted a timeout warning. Dev-only. */
@@ -162,8 +164,22 @@ function updateDuration(
 	const magnitude = getMagnitude(rawValue);
 	const previous = handleData.durations.get(actionName);
 	assert(previous !== undefined, `missing duration for action: ${actionName}`);
-	const updated = magnitude > 0 ? previous + deltaTime : 0;
+	const previousMagnitude = handleData.previousMagnitudes.get(actionName);
+	assert(previousMagnitude !== undefined, `missing previous magnitude for action: ${actionName}`);
+
+	let updated: number;
+	if (magnitude > 0) {
+		updated = previous + deltaTime;
+	} else if (previousMagnitude > 0) {
+		// Release frame — preserve accumulated held duration so triggers
+		// (e.g. tap, hold-cancel) can observe the final hold length.
+		updated = previous;
+	} else {
+		updated = 0;
+	}
+
 	handleData.durations.set(actionName, updated);
+	handleData.previousMagnitudes.set(actionName, magnitude);
 	return updated;
 }
 
@@ -227,6 +243,7 @@ function resetAction(
 	deltaTime: number,
 ): void {
 	handleData.durations.set(actionName, 0);
+	handleData.previousMagnitudes.set(actionName, 0);
 	handleData.internalState.updateAction({
 		action: actionName,
 		deltaTime,
@@ -300,6 +317,7 @@ function updateUnprocessedActions(
 		}
 
 		handleData.durations.set(actionName, 0);
+		handleData.previousMagnitudes.set(actionName, 0);
 		handleData.internalState.updateAction({
 			action: actionName,
 			deltaTime,

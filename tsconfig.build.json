@@ -1,0 +1,15 @@
+{
+	"extends": "./tsconfig.json",
+	"references": [
+		{ "path": "packages/test-utils/tsconfig.lib.json" },
+		{ "path": "packages/core/tsconfig.lib.json" },
+		{ "path": "packages/jecs/tsconfig.lib.json" },
+		{ "path": "packages/react/tsconfig.lib.json" },
+		{ "path": "packages/test-utils/tsconfig.spec.json" },
+		{ "path": "packages/core/tsconfig.spec.json" },
+		{ "path": "packages/jecs/tsconfig.spec.json" },
+		{ "path": "packages/react/tsconfig.spec.json" }
+	],
+	"files": [],
+	"include": []
+}

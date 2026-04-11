@@ -1,0 +1,28 @@
+{
+	"$schema": "./node_modules/@isentinel/roblox-ts/schemas/rbxts-tsconfig.schema.json",
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "out-test/tsconfig.tsbuildinfo",
+		"rootDir": null,
+		"rootDirs": ["src", "test"],
+		"customConditions": ["source"],
+		"outDir": "out-test"
+	},
+	"rbxts": {
+		"rojo": "./test.project.json",
+		"type": "game"
+	},
+	"references": [
+		{
+			"path": "../test-utils"
+		},
+		{
+			"path": "./tsconfig.lib.json"
+		},
+		{
+			"path": "../test-utils/tsconfig.lib.json"
+		}
+	],
+	"include": ["src/**/*.spec.ts", "src/**/*.spec.tsx", "test/**/*", "../../types/**/*.d.ts"],
+	"exclude": ["node_modules", "out", "out-test", "**/.*/", "dist"]
+}

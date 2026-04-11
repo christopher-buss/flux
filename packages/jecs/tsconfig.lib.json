@@ -1,4 +1,5 @@
 {
+	"$schema": "./node_modules/@isentinel/roblox-ts/schemas/rbxts-tsconfig.schema.json",
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"tsBuildInfoFile": "out/tsconfig.tsbuildinfo",

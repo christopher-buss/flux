@@ -6,6 +6,7 @@ import RegExp from "@rbxts/regexp";
 import { ContextError } from "../errors/context-error";
 import { FluxError } from "../errors/flux-error";
 import { HandleError } from "../errors/handle-error";
+import { hold, implicit, tap } from "../triggers";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
@@ -38,6 +39,27 @@ const TEST_CONTEXTS = {
 		},
 		priority: 10,
 		sink: true,
+	},
+} satisfies Record<string, ContextConfig>;
+
+const TRIGGER_ACTIONS = {
+	charge: {
+		triggers: [implicit(hold({ attempting: 0.1, threshold: 0.5 }))],
+		type: "Bool" as const,
+	},
+	dash: {
+		triggers: [implicit(tap({ threshold: 0.2 }))],
+		type: "Bool" as const,
+	},
+} satisfies ActionMap;
+
+const TRIGGER_CONTEXTS = {
+	gameplay: {
+		bindings: {
+			charge: [Enum.KeyCode.E],
+			dash: [Enum.KeyCode.Q],
+		},
+		priority: 0,
 	},
 } satisfies Record<string, ContextConfig>;
 
@@ -369,6 +391,42 @@ describe("createCore", () => {
 			const state = core.getState(handle);
 
 			expect(state.direction2d("move")).toBe(Vector2.zero);
+		});
+	});
+
+	describe("triggers", () => {
+		it("should fire tap on release when held for less than threshold", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TRIGGER_ACTIONS, contexts: TRIGGER_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+
+			core.simulateAction(handle, "dash", true);
+			core.update(0.1);
+
+			expect(core.getState(handle).pressed("dash")).toBeFalse();
+
+			core.simulateAction(handle, "dash", false);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("dash")).toBeTrue();
+		});
+
+		it("should cancel hold when released after attempting but before threshold", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TRIGGER_ACTIONS, contexts: TRIGGER_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+
+			core.simulateAction(handle, "charge", true);
+			core.update(0.3);
+
+			expect(core.getState(handle).ongoing("charge")).toBeTrue();
+
+			core.simulateAction(handle, "charge", false);
+			core.update(0.016);
+
+			expect(core.getState(handle).canceled("charge")).toBeTrue();
 		});
 	});
 

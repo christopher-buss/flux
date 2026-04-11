@@ -127,6 +127,15 @@ function createDurations(actions: ActionMap): Map<string, number> {
 	return durations;
 }
 
+function createPreviousMagnitudes(actions: ActionMap): Map<string, number> {
+	const previousMagnitudes = new Map<string, number>();
+	for (const [name] of pairs(actions)) {
+		previousMagnitudes.set(name, 0);
+	}
+
+	return previousMagnitudes;
+}
+
 function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): HandleData<T> {
 	const { actions, contextNames, contexts, parent } = options;
 	const [publicState, internalState] = createActionState(actions);
@@ -145,6 +154,7 @@ function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): Han
 		instanceData,
 		internalState,
 		pendingActions: new Map<string, number>(),
+		previousMagnitudes: createPreviousMagnitudes(actions),
 		publicState,
 		simulatedValues: new Map<string, ActionValueType>(),
 		warnedActions: new Set<string>(),
@@ -179,6 +189,7 @@ function createSubscribeData<T extends ActionMap>(
 		instanceData,
 		internalState,
 		pendingActions: new Map<string, number>(),
+		previousMagnitudes: createPreviousMagnitudes(actions),
 		publicState,
 		simulatedValues: new Map<string, ActionValueType>(),
 		warnedActions: new Set<string>(),

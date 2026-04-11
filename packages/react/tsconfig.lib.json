@@ -1,0 +1,26 @@
+{
+	"$schema": "./node_modules/@isentinel/roblox-ts/schemas/rbxts-tsconfig.schema.json",
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "out/tsconfig.tsbuildinfo",
+		"customConditions": ["source"],
+		"declaration": true,
+		"outDir": "out"
+	},
+	"references": [
+		{
+			"path": "../core/tsconfig.lib.json"
+		}
+	],
+	"include": ["src/**/*.ts", "src/**/*.tsx", "../../types/**/*.d.ts"],
+	"exclude": [
+		"node_modules",
+		"out",
+		"**/.*/",
+		"dist",
+		"test",
+		"src/**/*.spec.ts",
+		"src/**/*.spec.tsx",
+		"src/**/*.spec-d.ts"
+	]
+}

@@ -17,6 +17,9 @@
 			"path": "e2e/jecs"
 		},
 		{
+			"path": "e2e/react"
+		},
+		{
 			"path": "e2e/server-authority"
 		},
 		{
@@ -24,6 +27,9 @@
 		},
 		{
 			"path": "packages/jecs"
+		},
+		{
+			"path": "packages/react"
 		},
 		{
 			"path": "packages/test-utils"
