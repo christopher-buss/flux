@@ -1,4 +1,4 @@
-import type { ActionState, FluxCore, InputHandle } from "@rbxts/flux";
+import type { ActionState, BindingLike, FluxCore, InputHandle, InputPlatform } from "@rbxts/flux";
 import { bool, createCore, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
@@ -10,6 +10,7 @@ import type {
 	FluxReact,
 	FluxReactWrapOptions,
 	FluxUseAction,
+	FluxUseBindings,
 } from "./create-flux-react";
 
 const actions = defineActions({
@@ -76,11 +77,12 @@ describe("createFluxReact", () => {
 });
 
 describe("FluxReact", () => {
-	it("should have core, flush, FluxProvider, and useAction properties", () => {
+	it("should have core, flush, FluxProvider, useAction, and useBindings properties", () => {
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("core");
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("flush");
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("FluxProvider");
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("useAction");
+		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("useBindings");
 	});
 
 	it("should type core as FluxCore<T, Contexts>", () => {
@@ -103,6 +105,10 @@ describe("FluxReact", () => {
 
 	it("should type useAction as FluxUseAction<T>", () => {
 		expectTypeOf(flux.useAction).toEqualTypeOf<FluxUseAction<typeof actions>>();
+	});
+
+	it("should type useBindings as FluxUseBindings<T>", () => {
+		expectTypeOf(flux.useBindings).toEqualTypeOf<FluxUseBindings<typeof actions>>();
 	});
 });
 
@@ -179,6 +185,49 @@ describe("FluxUseAction", () => {
 		it("should reject missing selector", () => {
 			// @ts-expect-error missing selector
 			flux.useAction();
+		});
+	});
+});
+
+describe("FluxUseBindings", () => {
+	const handle = {} as InputHandle;
+
+	describe("single-arg overload", () => {
+		it("should accept action names from the action map", () => {
+			expectTypeOf(flux.useBindings("jump")).toEqualTypeOf<ReadonlyArray<BindingLike>>();
+			expectTypeOf(flux.useBindings("move")).toEqualTypeOf<ReadonlyArray<BindingLike>>();
+		});
+
+		it("should accept optional InputPlatform", () => {
+			const platform: InputPlatform = "keyboard";
+			expectTypeOf(flux.useBindings("jump", platform)).toEqualTypeOf<
+				ReadonlyArray<BindingLike>
+			>();
+		});
+
+		it("should return ReadonlyArray<BindingLike>", () => {
+			expectTypeOf(flux.useBindings("jump")).toEqualTypeOf<ReadonlyArray<BindingLike>>();
+		});
+	});
+
+	describe("handle-override overload", () => {
+		it("should accept InputHandle as first argument", () => {
+			expectTypeOf(flux.useBindings(handle, "jump")).toEqualTypeOf<
+				ReadonlyArray<BindingLike>
+			>();
+		});
+
+		it("should accept optional InputPlatform with handle", () => {
+			expectTypeOf(flux.useBindings(handle, "jump", "gamepad")).toEqualTypeOf<
+				ReadonlyArray<BindingLike>
+			>();
+		});
+	});
+
+	describe("call signature", () => {
+		it("should reject missing action", () => {
+			// @ts-expect-error missing action argument
+			flux.useBindings();
 		});
 	});
 });

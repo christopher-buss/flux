@@ -4,4 +4,5 @@ export type {
 	FluxReact,
 	FluxReactWrapOptions,
 	FluxUseAction,
+	FluxUseBindings,
 } from "./create-flux-react";
