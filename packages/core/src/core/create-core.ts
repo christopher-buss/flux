@@ -1,7 +1,7 @@
 import { FluxError } from "../errors";
 import { ContextError } from "../errors/context-error";
 import type { ActionMap } from "../types/actions";
-import type { BindingForAction, BindingState, TypedBindings } from "../types/bindings";
+import type { BindingForAction, BindingLike, BindingState, TypedBindings } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
@@ -16,6 +16,14 @@ import {
 } from "./handle-lifecycle";
 import type { InputInstanceData } from "./input-instances";
 import { addContextInstances, destroyInputInstances, setContextEnabled } from "./input-instances";
+import {
+	applyRebindAll,
+	applyRebindOne,
+	applyResetAll,
+	applyResetOne,
+	assertOwnedForRebind,
+	serializeFullBindings,
+} from "./rebinding";
 import { updateHandle } from "./update-handle";
 
 /**
@@ -150,18 +158,24 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		hasContext(handle: InputHandle, context: Contexts): boolean {
 			return getHandleData(handles, handle).activeContexts.has(context);
 		},
-		loadBindings(_handle: InputHandle, _data: BindingState<T>): void {
-			error("Not implemented");
+		loadBindings(handle: InputHandle, data: BindingState<T>): void {
+			const handleData = getHandleData(handles, handle);
+			assertOwnedForRebind(handleData);
+			applyRebindAll(handleData, contexts, data);
 		},
 		rebind<A extends keyof T & string>(
-			_handle: InputHandle,
-			_action: A,
-			_bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
+			handle: InputHandle,
+			action: A,
+			bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
 		): void {
-			error("Not implemented");
+			const handleData = getHandleData(handles, handle);
+			assertOwnedForRebind(handleData);
+			applyRebindOne(handleData, action, bindings as ReadonlyArray<BindingLike>);
 		},
-		rebindAll(_handle: InputHandle, _bindings: BindingState<T>): void {
-			error("Not implemented");
+		rebindAll(handle: InputHandle, bindings: BindingState<T>): void {
+			const handleData = getHandleData(handles, handle);
+			assertOwnedForRebind(handleData);
+			applyRebindAll(handleData, contexts, bindings);
 		},
 		register(
 			parent: Instance,
@@ -209,14 +223,19 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			setContextEnabled(data.instanceData, context, false);
 			data.activeContexts.delete(context);
 		},
-		resetAllBindings(_handle: InputHandle): void {
-			error("Not implemented");
+		resetAllBindings(handle: InputHandle): void {
+			const handleData = getHandleData(handles, handle);
+			assertOwnedForRebind(handleData);
+			applyResetAll(handleData, contexts);
 		},
-		resetBindings(_handle: InputHandle, _action: keyof T & string): void {
-			error("Not implemented");
+		resetBindings(handle: InputHandle, action: keyof T & string): void {
+			const handleData = getHandleData(handles, handle);
+			assertOwnedForRebind(handleData);
+			applyResetOne(handleData, contexts, action);
 		},
-		serializeBindings(_handle: InputHandle): BindingState<T> {
-			error("Not implemented");
+		serializeBindings(handle: InputHandle): BindingState<T> {
+			const handleData = getHandleData(handles, handle);
+			return serializeFullBindings(handleData, contexts) as BindingState<T>;
 		},
 		simulateAction<A extends keyof T & string>(
 			handle: InputHandle,

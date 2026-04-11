@@ -141,9 +141,14 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	resetBindings(handle: InputHandle, action: AllActions<Actions>): void;
 
 	/**
-	 * Serializes current bindings for persistence or network transfer.
+	 * Serializes the full effective binding state for persistence.
+	 *
+	 * Returns every action the handle knows about — overridden actions use
+	 * their current override, unchanged actions return their original context
+	 * bindings. The resulting object is self-contained and suitable for
+	 * DataStore save/load round-trips.
 	 * @param handle - The input consumer handle.
-	 * @returns The serialized binding state.
+	 * @returns The full serialized binding state.
 	 */
 	serializeBindings(handle: InputHandle): BindingState<Actions>;
 

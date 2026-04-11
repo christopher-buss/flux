@@ -1,5 +1,6 @@
 import { HandleError } from "../errors/handle-error";
 import type { ActionMap } from "../types/actions";
+import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionState } from "../types/state";
@@ -136,21 +137,16 @@ function createPreviousMagnitudes(actions: ActionMap): Map<string, number> {
 	return previousMagnitudes;
 }
 
-function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): HandleData<T> {
-	const { actions, contextNames, contexts, parent } = options;
+function buildHandleData<T extends ActionMap>(
+	actions: T,
+	contextNames: ReadonlyArray<string>,
+	instanceData: HandleData<T>["instanceData"],
+): HandleData<T> {
 	const [publicState, internalState] = createActionState(actions);
-	const durations = createDurations(actions);
-
-	const instanceData = createInputInstances({
-		actions,
-		contextNames,
-		contexts,
-		parent,
-	});
-
 	return {
 		activeContexts: new Set<string>(contextNames),
-		durations,
+		bindingOverrides: new Map<string, ReadonlyArray<BindingLike>>(),
+		durations: createDurations(actions),
 		instanceData,
 		internalState,
 		pendingActions: new Map<string, number>(),
@@ -159,6 +155,12 @@ function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): Han
 		simulatedValues: new Map<string, ActionValueType>(),
 		warnedActions: new Set<string>(),
 	};
+}
+
+function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): HandleData<T> {
+	const { actions, contextNames, contexts, parent } = options;
+	const instanceData = createInputInstances({ actions, contextNames, contexts, parent });
+	return buildHandleData(actions, contextNames, instanceData);
 }
 
 function validateHandleUnique<T extends ActionMap>(
@@ -174,27 +176,8 @@ function createSubscribeData<T extends ActionMap>(
 	options: SubscribeOptions<T>,
 ): [HandleData<T>, () => void] {
 	const { actions, contextNames, parent } = options;
-	const [publicState, internalState] = createActionState(actions);
-	const durations = createDurations(actions);
-
-	const instanceData = findInputInstances({
-		actions,
-		contextNames,
-		parent,
-	});
-
-	const data: HandleData<T> = {
-		activeContexts: new Set<string>(contextNames),
-		durations,
-		instanceData,
-		internalState,
-		pendingActions: new Map<string, number>(),
-		previousMagnitudes: createPreviousMagnitudes(actions),
-		publicState,
-		simulatedValues: new Map<string, ActionValueType>(),
-		warnedActions: new Set<string>(),
-	};
-
+	const instanceData = findInputInstances({ actions, contextNames, parent });
+	const data = buildHandleData(actions, contextNames, instanceData);
 	const cancel = (): void => {
 		for (const connection of instanceData.connections) {
 			connection.Disconnect();
