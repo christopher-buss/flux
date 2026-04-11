@@ -59,12 +59,15 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
+      - name: Build
+        run: pnpm dev:build --verbose
+
       - env:
           ROBLOX_OPEN_CLOUD_API_KEY: ${{ secrets.ROBLOX_OPEN_CLOUD_API_KEY }}
           ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
           ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}
         name: Test
-        run: pnpm test --coverage --coverageReporters json-summary --coverageReporters json
+        run: pnpm -r --stream test --coverage --coverageReporters json-summary --coverageReporters json
 
       - name: Merge Coverage
         run: node scripts/merge-coverage.ts
