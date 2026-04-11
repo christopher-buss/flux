@@ -138,6 +138,31 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 
 			return noop;
 		},
+		getAllBindings(
+			handle: InputHandle,
+			context?: Contexts,
+		): Record<keyof T & string, ReadonlyArray<BindingLike>> {
+			const handleData = getHandleData(handles, handle);
+			const result = {} as Record<keyof T & string, ReadonlyArray<BindingLike>>;
+			for (const [actionName] of pairs(actions as Record<string, unknown>)) {
+				result[actionName as keyof T & string] = resolveBindings(
+					handleData,
+					contexts,
+					actionName,
+					context,
+				);
+			}
+
+			return result;
+		},
+		getBindings(
+			handle: InputHandle,
+			action: keyof T & string,
+			context?: Contexts,
+		): ReadonlyArray<BindingLike> {
+			const handleData = getHandleData(handles, handle);
+			return resolveBindings(handleData, contexts, action, context);
+		},
 		destroy(): void {
 			for (const [, data] of handles) {
 				destroyInputInstances(data.instanceData);
@@ -303,6 +328,68 @@ function validateContextName(contexts: Record<string, ContextConfig>, name: stri
 	if (contexts[name] === undefined) {
 		throw new ContextError(`unknown context: ${name}`, name);
 	}
+}
+
+/**
+ * Resolves the effective bindings for a single action on a handle.
+ *
+ * If an override exists, it is returned. Otherwise, default bindings are
+ * collected from context configs — either from a single context or merged
+ * from all active contexts (deduped by reference).
+ * @template T - The action map type.
+ * @param handleData - Handle state to read.
+ * @param contexts - Core context config record.
+ * @param action - The action name to resolve.
+ * @param context - Optional context to scope the query.
+ * @returns The effective bindings for the action.
+ */
+function resolveBindings<T extends ActionMap>(
+	handleData: HandleData<T>,
+	contexts: Record<string, ContextConfig>,
+	action: string,
+	context?: string,
+): ReadonlyArray<BindingLike> {
+	const override = handleData.bindingOverrides.get(action);
+	if (override !== undefined) {
+		return override;
+	}
+
+	if (context !== undefined) {
+		const contextConfig = contexts[context];
+		if (contextConfig === undefined) {
+			return [];
+		}
+
+		const bindings = (
+			contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
+		)[action];
+		return bindings ?? [];
+	}
+
+	const result = new Array<BindingLike>();
+	const seen = new Set<BindingLike>();
+	for (const contextName of handleData.activeContexts) {
+		const contextConfig = contexts[contextName];
+		if (contextConfig === undefined) {
+			continue;
+		}
+
+		const bindings = (
+			contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
+		)[action];
+		if (bindings === undefined) {
+			continue;
+		}
+
+		for (const binding of bindings) {
+			if (!seen.has(binding)) {
+				seen.add(binding);
+				result.push(binding);
+			}
+		}
+	}
+
+	return result;
 }
 
 function findExistingContext(

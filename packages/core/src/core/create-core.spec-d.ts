@@ -3,6 +3,7 @@ import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { bool, defineActions, direction2d } from "../actions/define";
 import { defineContexts } from "../contexts/define";
+import type { BindingLike } from "../types/bindings";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState } from "../types/state";
 import type { CreateCoreOptions } from "./create-core";
@@ -256,6 +257,60 @@ describe("createCore", () => {
 		it("should accept number and return void", () => {
 			expectTypeOf<typeof core.update>().parameter(0).toEqualTypeOf<number>();
 			expectTypeOf<typeof core.update>().returns.toEqualTypeOf<void>();
+		});
+	});
+
+	describe("getBindings", () => {
+		it("should constrain action param to valid action names", () => {
+			const handle = {} as InputHandle;
+			expectTypeOf<typeof core.getBindings>().toBeCallableWith(handle, "jump");
+			expectTypeOf<typeof core.getBindings>().toBeCallableWith(handle, "move");
+		});
+
+		it("should constrain context param to valid context names", () => {
+			const handle = {} as InputHandle;
+			expectTypeOf<typeof core.getBindings>().toBeCallableWith(handle, "jump", "gameplay");
+			expectTypeOf<typeof core.getBindings>().toBeCallableWith(handle, "jump", "ui");
+		});
+
+		it("should return ReadonlyArray<BindingLike>", () => {
+			const handle = {} as InputHandle;
+			expectTypeOf(core.getBindings(handle, "jump")).toEqualTypeOf<
+				ReadonlyArray<BindingLike>
+			>();
+		});
+
+		it("should reject invalid action names", () => {
+			const handle = {} as InputHandle;
+			// @ts-expect-error unknown action
+			core.getBindings(handle, INVALID);
+		});
+
+		it("should reject invalid context names", () => {
+			const handle = {} as InputHandle;
+			// @ts-expect-error unknown context
+			core.getBindings(handle, "jump", INVALID);
+		});
+	});
+
+	describe("getAllBindings", () => {
+		it("should return correct record type", () => {
+			const handle = {} as InputHandle;
+			expectTypeOf(core.getAllBindings(handle)).toEqualTypeOf<
+				Record<"jump" | "move", ReadonlyArray<BindingLike>>
+			>();
+		});
+
+		it("should constrain context param to valid context names", () => {
+			const handle = {} as InputHandle;
+			expectTypeOf<typeof core.getAllBindings>().toBeCallableWith(handle, "gameplay");
+			expectTypeOf<typeof core.getAllBindings>().toBeCallableWith(handle, "ui");
+		});
+
+		it("should reject invalid context names", () => {
+			const handle = {} as InputHandle;
+			// @ts-expect-error unknown context
+			core.getAllBindings(handle, INVALID);
 		});
 	});
 });
