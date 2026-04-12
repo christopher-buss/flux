@@ -278,9 +278,7 @@ function createUseBindings<T extends ActionMap>(
 	): ReadonlyArray<BindingLike> {
 		const { handle: defaultHandle, subscribe } = useFluxContext();
 
-		const handle = typeIs(handleOrAction, "string")
-			? defaultHandle
-			: (handleOrAction as InputHandle);
+		const handle = typeIs(handleOrAction, "string") ? defaultHandle : handleOrAction;
 		const action = typeIs(handleOrAction, "string")
 			? handleOrAction
 			: (actionOrPlatform as AllActions<T>);
