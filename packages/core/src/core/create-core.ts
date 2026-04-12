@@ -150,6 +150,10 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			handle: InputHandle,
 			context?: Contexts,
 		): Record<keyof T & string, ReadonlyArray<BindingLike>> {
+			if (context !== undefined) {
+				validateContextName(contexts, context);
+			}
+
 			const handleData = getHandleData(handles, handle);
 			const result = {} as Record<keyof T & string, ReadonlyArray<BindingLike>>;
 			for (const [actionName] of pairs(actions as Record<string, unknown>)) {
@@ -168,6 +172,10 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			action: keyof T & string,
 			context?: Contexts,
 		): ReadonlyArray<BindingLike> {
+			if (context !== undefined) {
+				validateContextName(contexts, context);
+			}
+
 			const handleData = getHandleData(handles, handle);
 			return resolveBindings(handleData, contexts, action, context);
 		},

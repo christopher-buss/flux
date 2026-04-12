@@ -104,6 +104,45 @@ describe("useBindings", () => {
 		expect(queryByText("count:2")).toBeDefined();
 	});
 
+	it("should resync when the Provider handle is swapped", () => {
+		expect.assertions(2);
+
+		afterThis(() => {
+			cleanup();
+		});
+
+		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+		const handleA = core.register(new Instance("Folder"), "gameplay");
+		const handleB = core.register(new Instance("Folder"), "gameplay");
+		core.rebind(handleB, "jump", [Enum.KeyCode.ButtonA, Enum.KeyCode.Space]);
+		const flux = createFluxReact({ core });
+		const { FluxProvider, useBindings } = flux;
+
+		function Probe(): React.ReactNode {
+			const bindings = useBindings("jump");
+			return <textlabel Text={`count:${bindings.size()}`} />;
+		}
+
+		function Host({ handle }: { readonly handle: typeof handleA }): React.ReactNode {
+			return (
+				<FluxProvider handle={handle}>
+					<Probe />
+				</FluxProvider>
+			);
+		}
+
+		const { queryByText, rerender } = render(<Host handle={handleA} />);
+
+		// handleA has 1 default binding (Space)
+		expect(queryByText("count:1")).toBeDefined();
+
+		// Swap to handleB which has 2 bindings (ButtonA + Space)
+		rerender(<Host handle={handleB} />);
+		flux.flush();
+
+		expect(queryByText("count:2")).toBeDefined();
+	});
+
 	it("should not re-render when bindings have not changed", () => {
 		expect.assertions(2);
 

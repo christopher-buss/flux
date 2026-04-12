@@ -68,6 +68,26 @@ describe("classifyBinding", () => {
 		expect(classifyBinding(config)).toBe("gamepad");
 	});
 
+	it("should classify a config with only primaryModifier by its modifier", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = {
+			primaryModifier: Enum.KeyCode.LeftShift,
+		};
+
+		expect(classifyBinding(config)).toBe("keyboard");
+	});
+
+	it("should classify a config with only secondaryModifier by its modifier", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = {
+			secondaryModifier: Enum.KeyCode.ButtonR1,
+		};
+
+		expect(classifyBinding(config)).toBe("gamepad");
+	});
+
 	it("should classify a config with no keyCode or directional keys as touch", () => {
 		expect.assertions(1);
 
