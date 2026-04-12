@@ -16,9 +16,7 @@ export function getContextBindings(
 	action: string,
 ): ReadonlyArray<BindingLike> {
 	const contextConfig = contexts[context];
-	if (contextConfig === undefined) {
-		return [];
-	}
+	assert(contextConfig, `missing context config: ${context}`);
 
 	const bindings = (
 		contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
