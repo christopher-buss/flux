@@ -84,6 +84,7 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * @param context - The context name to query.
 	 * @returns Context info record with `active`, `priority`, `sink`, and `actions`.
 	 * @throws ContextError if the context name is unknown.
+	 * @throws HandleError if the handle is not registered.
 	 * @example
 	 * ```ts
 	 * const info = core.getContextInfo(handle, "menu");

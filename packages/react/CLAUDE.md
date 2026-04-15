@@ -45,7 +45,7 @@ content + `queryByText`, not `Name` + `FindFirstChild`.
 **Render-counting probes mutate via closure functions, not direct
 assignment.** The `react/no-outside-reassign` lint rule blocks writing to
 outer variables or object properties from inside a component. Use
-`makeRenderCounter()` (returns `{ get, tick }`) from `test-probes.tsx`.
+`makeRenderCounter()` (returns `{ get, tick }`) from `test/probes.tsx`.
 
 **Hook files are `.tsx`, not `.ts`.** The `max-lines-per-function` lint cap
 (30) is disabled for `.tsx` but enforced on `.ts`. Hook factory functions

@@ -9,6 +9,7 @@ import { HandleError } from "../errors/handle-error";
 import { hold, implicit, tap } from "../triggers";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
+import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import { createCore } from "./create-core";
 
@@ -272,7 +273,7 @@ describe("createCore", () => {
 			const handle = core.register(new Instance("Folder"), "defaulted");
 			const info = core.getContextInfo(handle, "defaulted");
 
-			expect(info.priority).toBe(1000);
+			expect(info.priority).toBe(DEFAULT_CONTEXT_PRIORITY);
 		});
 
 		it("should default sink to false when omitted", () => {

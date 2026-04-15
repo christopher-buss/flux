@@ -1,3 +1,4 @@
+import { collectContextActions } from "../contexts/collect-actions";
 import { FluxError } from "../errors";
 import { ContextError } from "../errors/context-error";
 import type { ActionMap } from "../types/actions";
@@ -184,13 +185,8 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			validateContextName(contexts, context);
 			const data = getHandleData(handles, handle);
 			const config = contexts[context];
-			const actionList = new Array<keyof T & string>();
-			for (const [actionName] of pairs(config.bindings as Record<string, unknown>)) {
-				actionList.push(actionName as keyof T & string);
-			}
-
 			return {
-				actions: actionList,
+				actions: collectContextActions(actions, config.bindings),
 				active: data.activeContexts.has(context),
 				priority: config.priority ?? DEFAULT_CONTEXT_PRIORITY,
 				sink: config.sink ?? false,

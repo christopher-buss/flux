@@ -4,7 +4,7 @@
 
 Add two React hooks that subscribe to context state: a cheap boolean
 `useActiveContext(name, handle?)` and a fat `useInputContext(name, handle?)`
-returning `{ active, priority, sink, actions }`. Requires a new
+returning `{ isActive, priority, sink, actions }`. Requires a new
 `getContextInfo(handle, name)` method on `FluxCore` — handle-aware so it
 future-proofs against per-handle priority/sink overrides.
 
