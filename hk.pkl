@@ -1,13 +1,19 @@
-amends "package://github.com/jdx/hk/releases/download/v1.38.0/hk@1.38.0#/Config.pkl"
-import "package://github.com/jdx/hk/releases/download/v1.38.0/hk@1.38.0#/Builtins.pkl"
+amends "package://github.com/jdx/hk/releases/download/v1.42.0/hk@1.42.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.42.0/hk@1.42.0#/Builtins.pkl"
 
 // Workaround: hk util commands fail on Windows via cmd.exe, bash -c fixes it
 local bash: String = "bash -c"
 
+// Agent detection: prints "true" if running inside an AI agent (Claude, Cursor, etc.)
+local isAgent: String = #"exec("node scripts/is-agent.ts") == "true""#
+
 local guards = new Mapping<String, Step> {
   ["check-merge-conflict"] = (Builtins.check_merge_conflict) { shell = bash }
   ["detect-private-key"] = (Builtins.detect_private_key) { shell = bash }
-  ["check-added-large-files"] = (Builtins.check_added_large_files) { shell = bash }
+  ["check-added-large-files"] = (Builtins.check_added_large_files) {
+    shell = bash
+    exclude = List("pnpm-lock.yaml")
+  }
 }
 
 local linters = new Mapping<String, Step> {
@@ -19,6 +25,25 @@ local linters = new Mapping<String, Step> {
   }
 }
 
+local build = new Step {
+  glob = List("*.ts", "*.tsx")
+  check = "pnpm build"
+  shell = bash
+  exclusive = true
+}
+
+local test = new Step {
+  glob = List("*.ts", "*.tsx")
+  check = "pnpm test"
+  shell = bash
+  exclusive = true
+}
+
+local agentGates = new Mapping<String, Step> {
+  ["test"] = (test) { condition = isAgent }
+  ["build"] = (build) { condition = isAgent }
+}
+
 hooks {
   ["pre-commit"] {
     fix = true
@@ -26,6 +51,7 @@ hooks {
     steps {
       ...guards
       ...linters
+      ...agentGates
     }
   }
   ["commit-msg"] {
@@ -35,9 +61,15 @@ hooks {
   }
   ["post-merge"] {
     steps {
-      ["install"] {
-        glob = "pnpm-lock.yaml"
+      ["install-deps"] {
+        glob = List("pnpm-lock.yaml")
         check = "pnpm install"
+        shell = bash
+      }
+      ["mise-install"] {
+        glob = List("mise.toml")
+        check = "mise install"
+        shell = bash
       }
     }
   }
@@ -49,6 +81,8 @@ hooks {
     steps {
       ...guards
       ...linters
+      ["test"] = test
+      ["build"] = build
     }
   }
 }
