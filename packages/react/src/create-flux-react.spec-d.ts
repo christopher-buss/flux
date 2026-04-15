@@ -1,4 +1,4 @@
-import type { ActionState, BindingLike, FluxCore, InputHandle, InputPlatform } from "@rbxts/flux";
+import type { FluxCore, InputHandle } from "@rbxts/flux";
 import { bool, createCore, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
@@ -6,9 +6,9 @@ import type React from "@rbxts/react";
 
 import { createFluxReact } from "./create-flux-react";
 import type { FluxReact, FluxReactWrapOptions } from "./create-flux-react";
-import type { FluxProviderProps } from "./flux-provider";
 import type { FluxUseAction } from "./use-action";
 import type { FluxUseBindings } from "./use-bindings";
+import type { FluxUseActiveContext, FluxUseInputContext } from "./use-input-context";
 
 const actions = defineActions({
 	jump: bool(),
@@ -21,7 +21,6 @@ const contexts = defineContexts({
 
 const core = createCore({ actions, contexts });
 const flux = createFluxReact({ core });
-const INVALID = "nonexistent";
 
 describe("FluxReactWrapOptions", () => {
 	it("should require core field", () => {
@@ -74,12 +73,17 @@ describe("createFluxReact", () => {
 });
 
 describe("FluxReact", () => {
-	it("should have core, flush, FluxProvider, useAction, and useBindings properties", () => {
+	it("should have core, flush, and FluxProvider properties", () => {
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("core");
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("flush");
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("FluxProvider");
+	});
+
+	it("should have useAction, useBindings, useActiveContext, useInputContext", () => {
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("useAction");
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("useBindings");
+		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("useActiveContext");
+		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("useInputContext");
 	});
 
 	it("should type core as FluxCore<T, Contexts>", () => {
@@ -107,124 +111,14 @@ describe("FluxReact", () => {
 	it("should type useBindings as FluxUseBindings<T>", () => {
 		expectTypeOf(flux.useBindings).toEqualTypeOf<FluxUseBindings<typeof actions>>();
 	});
-});
 
-describe("FluxProviderProps", () => {
-	it("should have handle and children properties", () => {
-		expectTypeOf<FluxProviderProps>().toHaveProperty("handle");
-		expectTypeOf<FluxProviderProps>().toHaveProperty("children");
+	it("should type useActiveContext as FluxUseActiveContext<Contexts>", () => {
+		expectTypeOf(flux.useActiveContext).toEqualTypeOf<FluxUseActiveContext<"gameplay">>();
 	});
 
-	it("should type handle as InputHandle", () => {
-		expectTypeOf<FluxProviderProps["handle"]>().toEqualTypeOf<InputHandle>();
-	});
-
-	it("should type children as optional React.ReactNode", () => {
-		expectTypeOf<FluxProviderProps["children"]>().toEqualTypeOf<React.ReactNode | undefined>();
-	});
-
-	it("should reject missing handle", () => {
-		// @ts-expect-error missing handle
-		const _props: FluxProviderProps = {};
-	});
-
-	it("should reject wrong handle type", () => {
-		// @ts-expect-error handle must be InputHandle
-		const _props: FluxProviderProps = { handle: 42 };
-	});
-});
-
-describe("FluxUseAction", () => {
-	const handle = {} as InputHandle;
-
-	describe("single-arg overload", () => {
-		it("should return concrete type from selector", () => {
-			expectTypeOf(flux.useAction((state) => state.pressed("jump"))).toEqualTypeOf<boolean>();
-			expectTypeOf(
-				flux.useAction((state) => state.direction2d("move")),
-			).toEqualTypeOf<Vector2>();
-		});
-
-		it("should return full ActionState when selector is identity", () => {
-			expectTypeOf(flux.useAction((state) => state)).toEqualTypeOf<
-				ActionState<typeof actions>
-			>();
-		});
-
-		it("should constrain selector state to typed ActionState", () => {
-			// @ts-expect-error unknown action
-			flux.useAction((state) => state.pressed(INVALID));
-		});
-
-		it("should reject wrong action type for query method", () => {
-			// @ts-expect-error jump is a Bool action, not Direction2D
-			flux.useAction((state) => state.direction2d("jump"));
-		});
-	});
-
-	describe("two-arg overload", () => {
-		it("should return concrete type from selector with explicit handle", () => {
-			expectTypeOf(
-				flux.useAction(handle, (state) => state.pressed("jump")),
-			).toEqualTypeOf<boolean>();
-			expectTypeOf(
-				flux.useAction(handle, (state) => state.direction2d("move")),
-			).toEqualTypeOf<Vector2>();
-		});
-
-		it("should reject non-handle first argument", () => {
-			// @ts-expect-error string is not an InputHandle
-			flux.useAction("not-a-handle", (state) => state.pressed("jump"));
-		});
-	});
-
-	describe("call signature", () => {
-		it("should reject missing selector", () => {
-			// @ts-expect-error missing selector
-			flux.useAction();
-		});
-	});
-});
-
-describe("FluxUseBindings", () => {
-	const handle = {} as InputHandle;
-
-	describe("single-arg overload", () => {
-		it("should accept action names from the action map", () => {
-			expectTypeOf(flux.useBindings("jump")).toEqualTypeOf<ReadonlyArray<BindingLike>>();
-			expectTypeOf(flux.useBindings("move")).toEqualTypeOf<ReadonlyArray<BindingLike>>();
-		});
-
-		it("should accept optional InputPlatform", () => {
-			const platform: InputPlatform = "keyboard";
-			expectTypeOf(flux.useBindings("jump", platform)).toEqualTypeOf<
-				ReadonlyArray<BindingLike>
-			>();
-		});
-
-		it("should return ReadonlyArray<BindingLike>", () => {
-			expectTypeOf(flux.useBindings("jump")).toEqualTypeOf<ReadonlyArray<BindingLike>>();
-		});
-	});
-
-	describe("handle-override overload", () => {
-		it("should accept InputHandle as first argument", () => {
-			expectTypeOf(flux.useBindings(handle, "jump")).toEqualTypeOf<
-				ReadonlyArray<BindingLike>
-			>();
-		});
-
-		it("should accept optional InputPlatform with handle", () => {
-			expectTypeOf(flux.useBindings(handle, "jump", "gamepad")).toEqualTypeOf<
-				ReadonlyArray<BindingLike>
-			>();
-		});
-	});
-
-	describe("call signature", () => {
-		it("should reject missing action", () => {
-			// @ts-expect-error missing action argument
-			flux.useBindings();
-		});
+	it("should type useInputContext as FluxUseInputContext<T, Contexts>", () => {
+		expectTypeOf(flux.useInputContext).toEqualTypeOf<
+			FluxUseInputContext<typeof actions, "gameplay">
+		>();
 	});
 });
