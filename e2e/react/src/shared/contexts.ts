@@ -13,7 +13,16 @@ export const contexts = defineContexts({
 					up: Enum.KeyCode.W,
 				},
 			],
+			toggleMenu: [Enum.KeyCode.M],
 		},
 		priority: 0,
+	},
+	menu: {
+		bindings: {
+			confirm: [Enum.KeyCode.Return],
+			toggleMenu: [Enum.KeyCode.M],
+		},
+		priority: 10,
+		sink: true,
 	},
 });
