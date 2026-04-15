@@ -2,6 +2,8 @@ import type { Except } from "type-fest";
 
 import type { ActionConfig, ActionType } from "../types/actions";
 
+type BaseActionConfig = Except<ActionConfig, "type">;
+
 /**
  * Defines input actions with preserved literal types.
  *
@@ -35,7 +37,7 @@ export function action<T extends ActionType>(config: ActionConfig<T>): ActionCon
  * @param config - Optional action configuration (type is set automatically).
  * @returns A bool action configuration.
  */
-export function bool(config?: Except<ActionConfig, "type">): ActionConfig<"Bool"> {
+export function bool(config?: BaseActionConfig): ActionConfig<"Bool"> {
 	return { ...config, type: "Bool" };
 }
 
@@ -45,7 +47,7 @@ export function bool(config?: Except<ActionConfig, "type">): ActionConfig<"Bool"
  * @param config - Optional action configuration (type is set automatically).
  * @returns A 1D direction action configuration.
  */
-export function direction1d(config?: Except<ActionConfig, "type">): ActionConfig<"Direction1D"> {
+export function direction1d(config?: BaseActionConfig): ActionConfig<"Direction1D"> {
 	return { ...config, type: "Direction1D" };
 }
 
@@ -55,7 +57,7 @@ export function direction1d(config?: Except<ActionConfig, "type">): ActionConfig
  * @param config - Optional action configuration (type is set automatically).
  * @returns A 2D direction action configuration.
  */
-export function direction2d(config?: Except<ActionConfig, "type">): ActionConfig<"Direction2D"> {
+export function direction2d(config?: BaseActionConfig): ActionConfig<"Direction2D"> {
 	return { ...config, type: "Direction2D" };
 }
 
@@ -65,7 +67,7 @@ export function direction2d(config?: Except<ActionConfig, "type">): ActionConfig
  * @param config - Optional action configuration (type is set automatically).
  * @returns A 3D direction action configuration.
  */
-export function direction3d(config?: Except<ActionConfig, "type">): ActionConfig<"Direction3D"> {
+export function direction3d(config?: BaseActionConfig): ActionConfig<"Direction3D"> {
 	return { ...config, type: "Direction3D" };
 }
 
@@ -75,8 +77,6 @@ export function direction3d(config?: Except<ActionConfig, "type">): ActionConfig
  * @param config - Optional action configuration (type is set automatically).
  * @returns A viewport position action configuration.
  */
-export function position2d(
-	config?: Except<ActionConfig, "type">,
-): ActionConfig<"ViewportPosition"> {
+export function position2d(config?: BaseActionConfig): ActionConfig<"ViewportPosition"> {
 	return { ...config, type: "ViewportPosition" };
 }
