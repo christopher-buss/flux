@@ -21,7 +21,7 @@ useAction, useActiveContext, useBindings, useInputContext }`.
   context/triggers/StrictMode, context hooks. Uses real `createCore` — no mocks.
 - **E2E** (`e2e/react/`): full game with real input devices.
 
-Shared test fixtures + helpers at `src/test-fixtures.ts` and `src/test-probes.tsx`.
+Shared test fixtures + helpers at `test/fixtures.ts` and `test/probes.tsx`.
 
 ## Constraints
 
@@ -35,7 +35,8 @@ pattern — it reintroduces spurious rerenders.
 **`useAction` has delayed-resync on Provider handle/selector changes.** A
 Provider `handle` prop swap or a new selector identity does NOT immediately
 update the rendered value — the next `flush()` catches it via the subscribe
-callback. Locked by `src/use-action-handle.spec.tsx`.
+callback. Locked by the `handle and rerender resync` describe block in
+`src/use-action.spec.tsx`.
 
 **JSX intrinsic elements exclude `Name` and `Parent`.** `InstanceAttributes`
 in `@rbxts/react` excludes these. Distinguish probes in tests via `Text`
@@ -55,8 +56,8 @@ exceed 30 lines by nature of the ref-pattern bail-out — keep them in `.tsx`.
 - `src/create-flux-react.tsx` — factory assembling the return object.
 - `src/flux-context.tsx` — shared Provider context + `useFluxContext`.
 - `src/update-signal.ts` — subscribe/fire plumbing used by the wrapper.
-- `src/test-probes.tsx` — shared probe factories.
-- `src/test-fixtures.ts` — shared action map, contexts, and
+- `test/probes.tsx` — shared probe factories.
+- `test/fixtures.ts` — shared action map, contexts, and
   trigger thresholds.
 
 ## Commands

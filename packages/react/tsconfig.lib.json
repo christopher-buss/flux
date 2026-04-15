@@ -21,8 +21,6 @@
 		"test",
 		"src/**/*.spec.ts",
 		"src/**/*.spec.tsx",
-		"src/**/*.spec-d.ts",
-		"src/test-fixtures.ts",
-		"src/test-probes.tsx"
+		"src/**/*.spec-d.ts"
 	]
 }
