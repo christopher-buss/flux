@@ -3,6 +3,7 @@ import { ContextError } from "../errors/context-error";
 import type { ActionMap } from "../types/actions";
 import type { BindingForAction, BindingLike, BindingState, TypedBindings } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
+import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
 import { createHandleFactory } from "./handle-factory";
@@ -178,6 +179,22 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 
 			const handleData = getHandleData(handles, handle);
 			return resolveBindings(handleData, contexts, action, context);
+		},
+		getContextInfo(handle: InputHandle, context: Contexts) {
+			validateContextName(contexts, context);
+			const data = getHandleData(handles, handle);
+			const config = contexts[context];
+			const actionList = new Array<keyof T & string>();
+			for (const [actionName] of pairs(config.bindings as Record<string, unknown>)) {
+				actionList.push(actionName as keyof T & string);
+			}
+
+			return {
+				actions: actionList,
+				active: data.activeContexts.has(context),
+				priority: config.priority ?? DEFAULT_CONTEXT_PRIORITY,
+				sink: config.sink ?? false,
+			};
 		},
 		getContexts(handle: InputHandle): ReadonlyArray<Contexts> {
 			const data = getHandleData(handles, handle);

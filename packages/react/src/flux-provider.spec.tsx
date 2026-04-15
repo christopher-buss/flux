@@ -4,9 +4,9 @@ import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React from "@rbxts/react";
 
-import { createFluxReact } from "../../src";
-import { FRAME_TIME, TEST_ACTIONS, TEST_CONTEXTS } from "./fixtures";
-import { createLabeledJumpProbe } from "./helpers/probes";
+import { createFluxReact } from "./create-flux-react";
+import { FRAME_TIME, TEST_ACTIONS, TEST_CONTEXTS } from "./test-fixtures";
+import { createLabeledJumpProbe } from "./test-probes";
 
 _G.__DEV__ = true;
 
@@ -59,7 +59,7 @@ describe("provider lifecycle", () => {
 		const Probe = createLabeledJumpProbe(useAction);
 
 		expect(() => render(<Probe label="jump" />)).toThrow(
-			"useAction must be used within a FluxProvider",
+			"Flux hooks must be used within a FluxProvider",
 		);
 	});
 

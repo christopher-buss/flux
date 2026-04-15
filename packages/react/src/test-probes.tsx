@@ -1,8 +1,8 @@
 import type { ActionState } from "@rbxts/flux";
 import React from "@rbxts/react";
 
-import type { FluxReact } from "../../../src";
-import type { TEST_ACTIONS } from "../fixtures";
+import type { FluxReact } from "./create-flux-react";
+import type { TEST_ACTIONS } from "./test-fixtures";
 
 /** ActionState bound to the integration fixture's action map. */
 export type FluxActionState = ActionState<typeof TEST_ACTIONS>;

@@ -5,13 +5,10 @@ import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 import type React from "@rbxts/react";
 
 import { createFluxReact } from "./create-flux-react";
-import type {
-	FluxProviderProps,
-	FluxReact,
-	FluxReactWrapOptions,
-	FluxUseAction,
-	FluxUseBindings,
-} from "./create-flux-react";
+import type { FluxReact, FluxReactWrapOptions } from "./create-flux-react";
+import type { FluxProviderProps } from "./flux-provider";
+import type { FluxUseAction } from "./use-action";
+import type { FluxUseBindings } from "./use-bindings";
 
 const actions = defineActions({
 	jump: bool(),

@@ -45,6 +45,7 @@ describe("FluxCore methods", () => {
 		expectTypeOf<FluxCore>().toHaveProperty("addContext");
 		expectTypeOf<FluxCore>().toHaveProperty("destroy");
 		expectTypeOf<FluxCore>().toHaveProperty("getContexts");
+		expectTypeOf<FluxCore>().toHaveProperty("getContextInfo");
 		expectTypeOf<FluxCore>().toHaveProperty("getState");
 		expectTypeOf<FluxCore>().toHaveProperty("hasContext");
 		expectTypeOf<FluxCore>().toHaveProperty("loadBindings");

@@ -73,6 +73,34 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	): ReadonlyArray<BindingLike>;
 
 	/**
+	 * Returns info about a context for the given handle.
+	 *
+	 * Combines static context config (priority, sink, declared actions) with
+	 * the per-handle active state. `priority` and `sink` fall back to engine
+	 * defaults when not specified in the context config. `actions` is the set
+	 * of actions declared in the context's bindings — stable across rebinds.
+	 *
+	 * @param handle - The input consumer handle.
+	 * @param context - The context name to query.
+	 * @returns Context info record with `active`, `priority`, `sink`, and `actions`.
+	 * @throws ContextError if the context name is unknown.
+	 * @example
+	 * ```ts
+	 * const info = core.getContextInfo(handle, "menu");
+	 * if (info.active) print(`menu priority: ${info.priority}`);
+	 * ```
+	 */
+	getContextInfo(
+		handle: InputHandle,
+		context: Contexts,
+	): {
+		readonly actions: ReadonlyArray<AllActions<Actions>>;
+		readonly active: boolean;
+		readonly priority: number;
+		readonly sink: boolean;
+	};
+
+	/**
 	 * Returns the list of active contexts for the given handle.
 	 * @param handle - The input consumer handle.
 	 * @returns Read-only array of active context names.
