@@ -23,6 +23,7 @@ catalogs:
     pncat: 0.10.4
   dev:
     confbox: 0.2.2
+    std-env: 4.1.0
   lint:
     "@eslint/config-inspector": 1.4.2
     "@isentinel/eslint-config": 5.0.0-beta.9

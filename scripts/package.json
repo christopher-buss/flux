@@ -18,6 +18,7 @@
 		"confbox": "catalog:dev",
 		"istanbul-lib-coverage": "catalog:test",
 		"istanbul-lib-report": "catalog:test",
-		"istanbul-reports": "catalog:test"
+		"istanbul-reports": "catalog:test",
+		"std-env": "catalog:dev"
 	}
 }
