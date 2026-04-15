@@ -11,8 +11,8 @@ catalogs:
       version: 3.2.0
   cli:
     pncat:
-      specifier: 0.10.4
-      version: 0.10.4
+      specifier: 0.11.1
+      version: 0.11.1
   dev:
     confbox:
       specifier: 0.2.2
@@ -141,7 +141,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.913
+      version: 1.0.914
     '@types/istanbul-lib-coverage':
       specifier: 2.0.6
       version: 2.0.6
@@ -157,8 +157,6 @@ catalogs:
     type-fest:
       specifier: 5.4.4
       version: 5.4.4
-
-pnpmfileChecksum: sha256-ZfwGjIvQgPR9mEJg5iihJauZ5iv1Ogj5lI/dgVj7pgI=
 
 importers:
 
@@ -229,7 +227,7 @@ importers:
         version: 8.0.0(typescript@5.9.3)
       pncat:
         specifier: catalog:cli
-        version: 0.10.4
+        version: 0.11.1
       rbxts-transformer-jest:
         specifier: catalog:test
         version: 0.0.5(@roblox-ts/path-translator@1.1.0)(@roblox-ts/rojo-resolver@1.1.0)
@@ -297,7 +295,7 @@ importers:
         version: 3.0.0-types.0
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -368,7 +366,7 @@ importers:
         version: 3.0.0-types.0
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -416,7 +414,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -470,7 +468,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260324.1
@@ -584,7 +582,7 @@ importers:
         version: 0.1.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.913
+        version: 1.0.914
       rimraf:
         specifier: catalog:node
         version: 6.1.2
@@ -2165,9 +2163,6 @@ packages:
 
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
-
-  '@rbxts/types@1.0.913':
-    resolution: {integrity: sha512-AweuNYRVJb6y4PNajx2mnpqv+hm0+8GWtH9Dj4EMUuOVN5qcfcOMNSqjvQ4dmF5u0yQ89HKGeXa+4sLnaTIEng==}
 
   '@rbxts/types@1.0.914':
     resolution: {integrity: sha512-Mvi1ETvzFWL14uV79BWop3tCSpEjpw//umzS/1fIpdfydr2Eys3KJJKBAll864xBPAb97s8TMUX+1V4eWBz0sA==}
@@ -4190,8 +4185,8 @@ packages:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
 
-  pncat@0.10.4:
-    resolution: {integrity: sha512-Gm7jtBXFU5Xvz9Pequ2OISdOUnuxlYMHmzo5LnCNjhsCfLhP6VcMjgEerLABCRoM1BAVWBgFf/3T/rsZDYrr4w==}
+  pncat@0.11.1:
+    resolution: {integrity: sha512-1XGBxbJ+Kl5CQIG5sPPh4YJGXAfYBnT5ewxA4IcxVeHLheJ06/f/DvvvnFMj1idFhP6RyvQvPYC0JhsbBdXgZA==}
     hasBin: true
 
   pnpm-workspace-yaml@1.5.0:
@@ -6461,8 +6456,6 @@ snapshots:
   '@rbxts/regexp@0.2.1-ts.4': {}
 
   '@rbxts/services@1.6.0': {}
-
-  '@rbxts/types@1.0.913': {}
 
   '@rbxts/types@1.0.914': {}
 
@@ -8944,7 +8937,7 @@ snapshots:
 
   pluralize@8.0.0: {}
 
-  pncat@0.10.4:
+  pncat@0.11.1:
     dependencies:
       '@clack/prompts': 1.1.0
       ansis: 4.2.0
