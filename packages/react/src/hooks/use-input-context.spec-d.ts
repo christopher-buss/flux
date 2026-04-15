@@ -3,7 +3,7 @@ import { bool, createCore, defineActions, defineContexts, direction2d } from "@r
 import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
-import { createFluxReact } from "./create-flux-react";
+import { createFluxReact } from "../create-flux-react";
 import type {
 	FluxInputContextInfo,
 	FluxUseActiveContext,

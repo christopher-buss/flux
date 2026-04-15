@@ -9,7 +9,7 @@ import type {
 import { getBindingsForPlatform } from "@rbxts/flux";
 import { useEffect, useMemo, useRef, useState } from "@rbxts/react";
 
-import type { FluxContextValue } from "./flux-context";
+import type { FluxContextValue } from "../flux-context";
 
 /**
  * Overloaded `useBindings` hook type.

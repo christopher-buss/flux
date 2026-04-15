@@ -9,9 +9,9 @@ useAction, useActiveContext, useBindings, useInputContext }`.
 - `create-flux-react.tsx` — thin factory assembling the return object.
 - `flux-context.tsx` — internal `FluxContextValue` + `createUseFluxContext`.
 - `flux-provider.tsx` — `FluxProviderProps` + Provider factory.
-- `use-action.tsx` — `useAction` hook + overload interface.
-- `use-bindings.tsx` — `useBindings` hook + overload interface.
-- `use-input-context.tsx` — `useActiveContext` + `useInputContext` hooks.
+- `hooks/use-action.tsx` — `useAction` hook + overload interface.
+- `hooks/use-bindings.tsx` — `useBindings` hook + overload interface.
+- `hooks/use-input-context.tsx` — `useActiveContext` + `useInputContext` hooks.
 
 ## Testing Layering
 
@@ -36,7 +36,7 @@ pattern — it reintroduces spurious rerenders.
 Provider `handle` prop swap or a new selector identity does NOT immediately
 update the rendered value — the next `flush()` catches it via the subscribe
 callback. Locked by the `handle and rerender resync` describe block in
-`src/use-action.spec.tsx`.
+`src/hooks/use-action.spec.tsx`.
 
 **JSX intrinsic elements exclude `Name` and `Parent`.** `InstanceAttributes`
 in `@rbxts/react` excludes these. Distinguish probes in tests via `Text`

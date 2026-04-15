@@ -6,9 +6,9 @@ import type React from "@rbxts/react";
 
 import { createFluxReact } from "./create-flux-react";
 import type { FluxReact, FluxReactWrapOptions } from "./create-flux-react";
-import type { FluxUseAction } from "./use-action";
-import type { FluxUseBindings } from "./use-bindings";
-import type { FluxUseActiveContext, FluxUseInputContext } from "./use-input-context";
+import type { FluxUseAction } from "./hooks/use-action";
+import type { FluxUseBindings } from "./hooks/use-bindings";
+import type { FluxUseActiveContext, FluxUseInputContext } from "./hooks/use-input-context";
 
 const actions = defineActions({
 	jump: bool(),

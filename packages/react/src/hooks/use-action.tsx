@@ -1,7 +1,7 @@
 import type { ActionMap, ActionState, InputHandle } from "@rbxts/flux";
 import { useEffect, useRef, useState } from "@rbxts/react";
 
-import type { FluxContextValue } from "./flux-context";
+import type { FluxContextValue } from "../flux-context";
 
 /**
  * Overloaded `useAction` hook type.
