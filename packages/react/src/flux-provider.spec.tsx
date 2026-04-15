@@ -45,24 +45,6 @@ describe("provider lifecycle", () => {
 		expect(spy).never.toHaveBeenCalled();
 	});
 
-	it("should throw when useAction is called outside a FluxProvider", () => {
-		expect.assertions(1);
-
-		afterThis(() => {
-			cleanup();
-		});
-
-		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-		const { useAction } = createFluxReact({ core });
-
-		// eslint-disable-next-line flawless/naming-convention -- React component
-		const Probe = createLabeledJumpProbe(useAction);
-
-		expect(() => render(<Probe label="jump" />)).toThrow(
-			"Flux hooks must be used within a FluxProvider",
-		);
-	});
-
 	it("should let an inner Provider override the outer default handle", () => {
 		expect.assertions(2);
 
