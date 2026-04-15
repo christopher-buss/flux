@@ -1,6 +1,6 @@
 import { createCore } from "@flux/core";
 import { createFluxReact } from "@flux/react";
-import React from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { Players, RunService } from "@rbxts/services";
 
@@ -11,7 +11,9 @@ const player = Players.LocalPlayer;
 const core = createCore({ actions, contexts });
 const [handle] = core.subscribe(player, "gameplay");
 
-const { flush, FluxProvider, useAction } = createFluxReact({ core });
+const { flush, FluxProvider, useAction, useActiveContext, useInputContext } = createFluxReact({
+	core,
+});
 
 interface StatusRowProps {
 	readonly label: string;
@@ -56,6 +58,66 @@ function MoveIndicator(): React.ReactNode {
 	);
 }
 
+function MenuToggle(): React.ReactNode {
+	const didToggle = useAction((state) => state.justPressed("toggleMenu"));
+	const isMenuActive = useActiveContext("menu");
+
+	useEffect(() => {
+		if (!didToggle) {
+			return;
+		}
+
+		if (isMenuActive) {
+			core.removeContext(handle, "menu");
+		} else {
+			core.addContext(handle, "menu");
+		}
+	}, [didToggle, isMenuActive]);
+
+	return <StatusRow label="menu (press M)" value={isMenuActive ? "OPEN" : "closed"} />;
+}
+
+function ConfirmIndicator(): React.ReactNode {
+	const isMenuActive = useActiveContext("menu");
+	const isConfirming = useAction((state) => state.pressed("confirm"));
+
+	if (!isMenuActive) {
+		return <StatusRow label="confirm" value="(menu closed)" />;
+	}
+
+	return <StatusRow label="confirm" value={isConfirming ? "PRESSED" : "released"} />;
+}
+
+function MenuContextPanel(): React.ReactNode {
+	const info = useInputContext("menu");
+
+	return (
+		<frame
+			BackgroundColor3={new Color3(0.05, 0.05, 0.05)}
+			BackgroundTransparency={0.2}
+			BorderSizePixel={0}
+			Size={new UDim2(1, 0, 0, 90)}
+		>
+			<uicorner CornerRadius={new UDim(0, 6)} />
+			<uipadding PaddingLeft={new UDim(0, 8)} PaddingTop={new UDim(0, 6)} />
+			<uilistlayout Padding={new UDim(0, 2)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<textlabel
+				BackgroundTransparency={1}
+				FontFace={Font.fromEnum(Enum.Font.GothamBold)}
+				Size={new UDim2(1, 0, 0, 18)}
+				Text="[useInputContext('menu')]"
+				TextColor3={new Color3(0.9, 0.7, 0.4)}
+				TextSize={13}
+				TextXAlignment={Enum.TextXAlignment.Left}
+			/>
+			<StatusRow label="isActive" value={tostring(info.isActive)} />
+			<StatusRow label="priority" value={tostring(info.priority)} />
+			<StatusRow label="sink" value={tostring(info.sink)} />
+			<StatusRow label="actions" value={info.actions.join(", ")} />
+		</frame>
+	);
+}
+
 function App(): React.ReactNode {
 	return (
 		<screengui ResetOnSpawn={false}>
@@ -64,7 +126,7 @@ function App(): React.ReactNode {
 				BackgroundTransparency={0.3}
 				BorderSizePixel={0}
 				Position={new UDim2(0, 10, 0, 10)}
-				Size={new UDim2(0, 250, 0, 130)}
+				Size={new UDim2(0, 300, 0, 270)}
 			>
 				<uicorner CornerRadius={new UDim(0, 8)} />
 				<uipadding PaddingLeft={new UDim(0, 10)} PaddingTop={new UDim(0, 10)} />
@@ -81,6 +143,9 @@ function App(): React.ReactNode {
 				<JumpIndicator />
 				<FireIndicator />
 				<MoveIndicator />
+				<MenuToggle />
+				<ConfirmIndicator />
+				<MenuContextPanel />
 			</frame>
 		</screengui>
 	);

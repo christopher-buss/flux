@@ -9,6 +9,7 @@ import { HandleError } from "../errors/handle-error";
 import { hold, implicit, tap } from "../triggers";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
+import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import { createCore } from "./create-core";
 
@@ -211,6 +212,114 @@ describe("createCore", () => {
 
 			expect(contexts).toContain("gameplay");
 			expect(contexts).toContain("ui");
+		});
+	});
+
+	describe("getContextInfo", () => {
+		it("should return info with active=true for an active context", () => {
+			expect.assertions(4);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const info = core.getContextInfo(handle, "gameplay");
+
+			expect(info.active).toBeTrue();
+			expect(info.priority).toBe(0);
+			expect(info.sink).toBeFalse();
+			expect(info.actions).toContain("jump");
+		});
+
+		it("should return info with active=false for an inactive context", () => {
+			expect.assertions(3);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const info = core.getContextInfo(handle, "ui");
+
+			expect(info.active).toBeFalse();
+			expect(info.priority).toBe(10);
+			expect(info.sink).toBeTrue();
+		});
+
+		it("should flip active when addContext/removeContext runs", () => {
+			expect.assertions(3);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+
+			expect(core.getContextInfo(handle, "ui").active).toBeFalse();
+
+			core.addContext(handle, "ui");
+
+			expect(core.getContextInfo(handle, "ui").active).toBeTrue();
+
+			core.removeContext(handle, "ui");
+
+			expect(core.getContextInfo(handle, "ui").active).toBeFalse();
+		});
+
+		it("should apply DEFAULT_CONTEXT_PRIORITY when priority omitted", () => {
+			expect.assertions(1);
+
+			const contexts = {
+				defaulted: {
+					bindings: {
+						jump: [Enum.KeyCode.Space],
+					},
+				},
+			} satisfies Record<string, ContextConfig>;
+			const actions = { jump: { type: "Bool" as const } } satisfies ActionMap;
+			const core = createCore({ actions, contexts });
+			const handle = core.register(new Instance("Folder"), "defaulted");
+			const info = core.getContextInfo(handle, "defaulted");
+
+			expect(info.priority).toBe(DEFAULT_CONTEXT_PRIORITY);
+		});
+
+		it("should default sink to false when omitted", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const info = core.getContextInfo(handle, "gameplay");
+
+			expect(info.sink).toBeFalse();
+		});
+
+		it("should return all declared actions for the context", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const info = core.getContextInfo(handle, "gameplay");
+
+			expect(info.actions.size()).toBe(5);
+			expect(new Set(info.actions)).toStrictEqual(
+				new Set(["cursor", "jump", "look", "move", "throttle"]),
+			);
+		});
+
+		it("should throw on unknown context name", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const query = () => {
+				core.getContextInfo(handle, fromAny("nonexistent"));
+			};
+
+			expect(query).toThrow("unknown context");
+		});
+
+		it("should throw on invalid handle", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const query = () => {
+				core.getContextInfo(fromAny(999), "gameplay");
+			};
+
+			expect(query).toThrow("handle");
 		});
 	});
 

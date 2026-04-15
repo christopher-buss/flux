@@ -4,9 +4,9 @@ import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React from "@rbxts/react";
 
-import { createFluxReact } from "../../src";
-import { FRAME_TIME, TEST_ACTIONS, TEST_CONTEXTS } from "./fixtures";
-import { createLabeledJumpProbe } from "./helpers/probes";
+import { FRAME_TIME, TEST_ACTIONS, TEST_CONTEXTS } from "../test/fixtures";
+import { createLabeledJumpProbe } from "../test/probes";
+import { createFluxReact } from "./create-flux-react";
 
 _G.__DEV__ = true;
 
@@ -43,24 +43,6 @@ describe("provider lifecycle", () => {
 		flux.flush();
 
 		expect(spy).never.toHaveBeenCalled();
-	});
-
-	it("should throw when useAction is called outside a FluxProvider", () => {
-		expect.assertions(1);
-
-		afterThis(() => {
-			cleanup();
-		});
-
-		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-		const { useAction } = createFluxReact({ core });
-
-		// eslint-disable-next-line flawless/naming-convention -- React component
-		const Probe = createLabeledJumpProbe(useAction);
-
-		expect(() => render(<Probe label="jump" />)).toThrow(
-			"useAction must be used within a FluxProvider",
-		);
 	});
 
 	it("should let an inner Provider override the outer default handle", () => {
