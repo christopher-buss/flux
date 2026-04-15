@@ -104,6 +104,97 @@ describe("useBindings", () => {
 		expect(queryByText("count:2")).toBeDefined();
 	});
 
+	it("should read from an explicit handle argument", () => {
+		expect.assertions(1);
+
+		afterThis(() => {
+			cleanup();
+		});
+
+		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+		const providerHandle = core.register(new Instance("Folder"), "gameplay");
+		const explicitHandle = core.register(new Instance("Folder"), "gameplay");
+		core.rebind(explicitHandle, "jump", [
+			Enum.KeyCode.ButtonA,
+			Enum.KeyCode.Space,
+			Enum.KeyCode.Return,
+		]);
+		const flux = createFluxReact({ core });
+		const { FluxProvider, useBindings } = flux;
+
+		function Probe(): React.ReactNode {
+			const bindings = useBindings(explicitHandle, "jump");
+			return <textlabel Text={`count:${bindings.size()}`} />;
+		}
+
+		const { queryByText } = render(
+			<FluxProvider handle={providerHandle}>
+				<Probe />
+			</FluxProvider>,
+		);
+
+		expect(queryByText("count:3")).toBeDefined();
+	});
+
+	it("should read from an explicit handle with platform filter", () => {
+		expect.assertions(1);
+
+		afterThis(() => {
+			cleanup();
+		});
+
+		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+		const providerHandle = core.register(new Instance("Folder"), "gameplay");
+		const explicitHandle = core.register(new Instance("Folder"), "gameplay");
+		const flux = createFluxReact({ core });
+		const { FluxProvider, useBindings } = flux;
+
+		function Probe(): React.ReactNode {
+			const bindings = useBindings(explicitHandle, "jump", "keyboard");
+			return <textlabel Text={`keyboard:${bindings.size()}`} />;
+		}
+
+		const { queryByText } = render(
+			<FluxProvider handle={providerHandle}>
+				<Probe />
+			</FluxProvider>,
+		);
+
+		expect(queryByText("keyboard:1")).toBeDefined();
+	});
+
+	it("should re-render when rebound to same-length but different bindings", () => {
+		expect.assertions(2);
+
+		afterThis(() => {
+			cleanup();
+		});
+
+		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+		const handle = core.register(new Instance("Folder"), "gameplay");
+		const flux = createFluxReact({ core });
+		const { FluxProvider, useBindings } = flux;
+
+		function Probe(): React.ReactNode {
+			const bindings = useBindings("jump");
+			return <textlabel Text={`first:${tostring(bindings[0])}`} />;
+		}
+
+		const { queryByText } = render(
+			<FluxProvider handle={handle}>
+				<Probe />
+			</FluxProvider>,
+		);
+
+		expect(queryByText(`first:${tostring(Enum.KeyCode.Space)}`)).toBeDefined();
+
+		core.rebind(handle, "jump", [Enum.KeyCode.Return]);
+		core.update(FRAME_TIME);
+		flux.flush();
+
+		expect(queryByText(`first:${tostring(Enum.KeyCode.Return)}`)).toBeDefined();
+	});
+
 	it("should resync when the Provider handle is swapped", () => {
 		expect.assertions(2);
 

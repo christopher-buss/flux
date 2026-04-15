@@ -50,7 +50,7 @@ catalogs:
   script:
     jiti: 2.6.1
   test:
-    "@isentinel/jest-roblox": 0.2.1
+    "@isentinel/jest-roblox": 0.2.3
     "@rbxts-js/dom-testing-library-lua": 8.16.0-ts.2
     "@rbxts-js/react-testing-library-lua": 12.3.4-ts.2
     "@rbxts/jest": 3.16.0-ts.1
