@@ -1197,4 +1197,153 @@ describe("createCore", () => {
 			expect(firstArgument).toStrictEqual(expect.stringContaining("jump"));
 		});
 	});
+
+	describe("getBindings", () => {
+		it("should return default bindings when no overrides exist", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const bindings = core.getBindings(handle, "jump");
+
+			expect(bindings).toContain(Enum.KeyCode.Space);
+		});
+
+		it("should return overridden bindings after rebind", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			core.rebind(handle, "jump", [Enum.KeyCode.F]);
+			const bindings = core.getBindings(handle, "jump");
+
+			expect(bindings).toContain(Enum.KeyCode.F);
+			expect(bindings).never.toContain(Enum.KeyCode.Space);
+		});
+
+		it("should return default bindings after resetBindings", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			core.rebind(handle, "jump", [Enum.KeyCode.F]);
+			core.resetBindings(handle, "jump");
+			const bindings = core.getBindings(handle, "jump");
+
+			expect(bindings).toContain(Enum.KeyCode.Space);
+		});
+
+		it("should scope to a single context when context is provided", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
+			const gameplayBindings = core.getBindings(handle, "jump", "gameplay");
+			const uiBindings = core.getBindings(handle, "jump", "ui");
+
+			expect(gameplayBindings).toContain(Enum.KeyCode.Space);
+			expect(uiBindings).toContain(Enum.KeyCode.Return);
+		});
+
+		it("should merge from all active contexts when no context is given", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
+			const bindings = core.getBindings(handle, "jump");
+
+			expect(bindings).toContain(Enum.KeyCode.Space);
+			expect(bindings).toContain(Enum.KeyCode.Return);
+		});
+
+		it("should return empty array for action not in a specific context", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
+			const bindings = core.getBindings(handle, "move", "ui");
+
+			expect(bindings).toHaveLength(0);
+		});
+
+		it("should throw HandleError for unregistered handle", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			core.unregister(handle);
+
+			expect(() => {
+				core.getBindings(handle, "jump");
+			}).toThrowWithMessage(HandleError, RegExp("handle not registered"));
+		});
+
+		it("should deduplicate bindings shared across contexts", () => {
+			expect.assertions(1);
+
+			const sharedBinding = Enum.KeyCode.Space;
+			const actions = { jump: { type: "Bool" as const } } satisfies ActionMap;
+			const contexts = {
+				a: {
+					bindings: { jump: [sharedBinding] },
+					priority: 0,
+				},
+				b: {
+					bindings: { jump: [sharedBinding] },
+					priority: 10,
+				},
+			} satisfies Record<string, ContextConfig>;
+			const core = createCore({ actions, contexts });
+			const handle = core.register(new Instance("Folder"), "a", "b");
+			const bindings = core.getBindings(handle, "jump");
+
+			expect(bindings).toHaveLength(1);
+		});
+	});
+
+	describe("getAllBindings", () => {
+		it("should return all actions with their effective bindings", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const all = core.getAllBindings(handle);
+
+			expect(all.jump).toContain(Enum.KeyCode.Space);
+			expect(all.move).toContain(Enum.KeyCode.W);
+		});
+
+		it("should reflect overrides for specific actions", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			core.rebind(handle, "jump", [Enum.KeyCode.F]);
+			const all = core.getAllBindings(handle);
+
+			expect(all.jump).toContain(Enum.KeyCode.F);
+			expect(all.move).toContain(Enum.KeyCode.W);
+		});
+
+		it("should scope to a single context when context is provided", () => {
+			expect.assertions(2);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
+			const uiBindings = core.getAllBindings(handle, "ui");
+
+			expect(uiBindings.jump).toContain(Enum.KeyCode.Return);
+			expect(uiBindings.move).toHaveLength(0);
+		});
+
+		it("should return empty arrays for actions with no bindings in a context", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
+			const uiBindings = core.getAllBindings(handle, "ui");
+
+			expect(uiBindings.cursor).toHaveLength(0);
+		});
+	});
 });

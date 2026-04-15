@@ -25,6 +25,7 @@ import {
 	replayOverridesIntoContext,
 	serializeFullBindings,
 } from "./rebinding";
+import { resolveBindings } from "./resolve-bindings";
 import { updateHandle } from "./update-handle";
 
 /**
@@ -144,6 +145,39 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			}
 
 			handles.clear();
+		},
+		getAllBindings(
+			handle: InputHandle,
+			context?: Contexts,
+		): Record<keyof T & string, ReadonlyArray<BindingLike>> {
+			if (context !== undefined) {
+				validateContextName(contexts, context);
+			}
+
+			const handleData = getHandleData(handles, handle);
+			const result = {} as Record<keyof T & string, ReadonlyArray<BindingLike>>;
+			for (const [actionName] of pairs(actions as Record<string, unknown>)) {
+				result[actionName as keyof T & string] = resolveBindings(
+					handleData,
+					contexts,
+					actionName,
+					context,
+				);
+			}
+
+			return result;
+		},
+		getBindings(
+			handle: InputHandle,
+			action: keyof T & string,
+			context?: Contexts,
+		): ReadonlyArray<BindingLike> {
+			if (context !== undefined) {
+				validateContextName(contexts, context);
+			}
+
+			const handleData = getHandleData(handles, handle);
+			return resolveBindings(handleData, contexts, action, context);
 		},
 		getContexts(handle: InputHandle): ReadonlyArray<Contexts> {
 			const data = getHandleData(handles, handle);
