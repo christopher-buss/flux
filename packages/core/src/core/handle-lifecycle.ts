@@ -1,4 +1,3 @@
-import { HandleError } from "../errors/handle-error";
 import type { ActionMap } from "../types/actions";
 import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
@@ -113,7 +112,7 @@ export function getHandleData<T extends ActionMap>(
 ): HandleData<T> {
 	const data = handles.get(handle);
 	if (data === undefined) {
-		throw new HandleError(`handle not registered: ${handle}`);
+		error(`handle not registered: ${handle}`);
 	}
 
 	return data;
@@ -168,7 +167,7 @@ function validateHandleUnique<T extends ActionMap>(
 	handle: InputHandle,
 ): void {
 	if (handles.has(handle)) {
-		throw new HandleError(`handle already registered: ${handle}`);
+		error(`handle already registered: ${handle}`);
 	}
 }
 

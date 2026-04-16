@@ -1,7 +1,6 @@
-import { type ActionMap, type ContextConfig, ContextError, HandleError } from "@rbxts/flux";
+import type { ActionMap, ContextConfig } from "@rbxts/flux";
 import Jecs from "@rbxts/jecs";
 import { describe, expect, it } from "@rbxts/jest-globals";
-import RegExp from "@rbxts/regexp";
 
 import { createFluxJecs } from "./create-flux-jecs";
 
@@ -101,7 +100,7 @@ describe("createFluxJecs", () => {
 
 		expect(() => {
 			flux.register(entity, new Instance("Folder"), "ui");
-		}).toThrowWithMessage(HandleError, RegExp("handle already registered"));
+		}).toThrow("handle already registered");
 	});
 
 	describe("unregister", () => {
@@ -138,7 +137,7 @@ describe("createFluxJecs", () => {
 
 			expect(() => {
 				flux.getState(entity);
-			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+			}).toThrow("not registered");
 		});
 	});
 
@@ -160,7 +159,7 @@ describe("createFluxJecs", () => {
 			expect(world.has(entity, flux.contexts.ui)).toBeTrue();
 		});
 
-		it("should throw ContextError on duplicate context", () => {
+		it("should throw on duplicate context", () => {
 			expect.assertions(1);
 
 			const world = Jecs.world();
@@ -174,7 +173,7 @@ describe("createFluxJecs", () => {
 
 			expect(() => {
 				flux.addContext(entity, "gameplay");
-			}).toThrowWithMessage(ContextError, RegExp("context already active"));
+			}).toThrow("context already active");
 		});
 	});
 
@@ -198,7 +197,7 @@ describe("createFluxJecs", () => {
 			expect(world.has(entity, flux.contexts.gameplay)).toBeTrue();
 		});
 
-		it("should throw ContextError on inactive context", () => {
+		it("should throw on inactive context", () => {
 			expect.assertions(1);
 
 			const world = Jecs.world();
@@ -212,7 +211,7 @@ describe("createFluxJecs", () => {
 
 			expect(() => {
 				flux.removeContext(entity, "ui");
-			}).toThrowWithMessage(ContextError, RegExp("context not active"));
+			}).toThrow("context not active");
 		});
 	});
 
@@ -269,7 +268,7 @@ describe("createFluxJecs", () => {
 
 			expect(() => {
 				flux.getState(entity);
-			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+			}).toThrow("not registered");
 		});
 
 		it("should clean up multiple registered entities", () => {
@@ -289,10 +288,10 @@ describe("createFluxJecs", () => {
 
 			expect(() => {
 				flux.getState(first);
-			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+			}).toThrow("not registered");
 			expect(() => {
 				flux.getState(second);
-			}).toThrowWithMessage(HandleError, RegExp("not registered"));
+			}).toThrow("not registered");
 		});
 	});
 
@@ -365,7 +364,7 @@ describe("createFluxJecs", () => {
 
 			expect(() => {
 				flux.subscribe(entity, parent, "gameplay");
-			}).toThrowWithMessage(HandleError, RegExp("handle already registered"));
+			}).toThrow("handle already registered");
 		});
 	});
 });

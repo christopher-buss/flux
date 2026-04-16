@@ -1,4 +1,3 @@
-import { FluxError } from "../errors";
 import type { ActionMap } from "../types/actions";
 import type { BindingLike, BindingState } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
@@ -42,12 +41,10 @@ export function rebuildActionBindings(
  * mutates `InputBinding` instances, which only the owner may modify.
  * @template T - The action map type.
  * @param handleData - Handle state to guard.
- * @throws FluxError if `handleData.instanceData.owned` is `false`.
+ * @throws If `handleData.instanceData.owned` is `false`.
  */
 export function assertOwnedForRebind<T extends ActionMap>(handleData: HandleData<T>): void {
-	if (!handleData.instanceData.owned) {
-		throw new FluxError("cannot rebind a subscribed handle");
-	}
+	assert(handleData.instanceData.owned, "cannot rebind a subscribed handle");
 }
 
 /**
