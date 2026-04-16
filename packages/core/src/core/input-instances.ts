@@ -1,6 +1,5 @@
 import type { KeysOfUnion } from "type-fest";
 
-import { FluxError } from "../errors";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingConfig, BindingLike } from "../types/bindings";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
@@ -309,7 +308,7 @@ const PROPERTY_MAP = {
  * @param bindingLike - The binding definition (KeyCode or config object).
  * @param parent - The `InputAction` to parent the binding under.
  * @param instances - Bulk cleanup array the new instance is appended to.
- * @throws FluxError if a raw `Enum.UserInputType` is passed.
+ * @throws If a raw `Enum.UserInputType` is passed.
  */
 export function createInputBinding(
 	bindingLike: BindingLike,
@@ -317,9 +316,7 @@ export function createInputBinding(
 	instances: Array<Instance>,
 ): void {
 	if (isUserInputType(bindingLike)) {
-		throw new FluxError(
-			`UserInputType bindings are not supported: ${bindingLike}. Use Enum.KeyCode instead`,
-		);
+		error(`UserInputType bindings are not supported: ${bindingLike}. Use Enum.KeyCode instead`);
 	}
 
 	const binding = new Instance("InputBinding");

@@ -1,11 +1,7 @@
 import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { fromAny, fromPartial } from "@rbxts/jest-utils";
-import RegExp from "@rbxts/regexp";
 
-import { ContextError } from "../errors/context-error";
-import { FluxError } from "../errors/flux-error";
-import { HandleError } from "../errors/handle-error";
 import { hold, implicit, tap } from "../triggers";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
@@ -700,8 +696,8 @@ describe("createCore", () => {
 		});
 	});
 
-	describe("error types", () => {
-		it("should throw ContextError for unknown context", () => {
+	describe("error messages", () => {
+		it("should throw for unknown context", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
@@ -709,10 +705,10 @@ describe("createCore", () => {
 				core.register(new Instance("Folder"), fromAny("nonexistent"));
 			};
 
-			expect(register).toThrowWithMessage(ContextError, RegExp("unknown context"));
+			expect(register).toThrow("unknown context");
 		});
 
-		it("should throw ContextError for duplicate context", () => {
+		it("should throw for duplicate context", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
@@ -721,7 +717,7 @@ describe("createCore", () => {
 				core.addContext(handle, "gameplay");
 			};
 
-			expect(addContext).toThrowWithMessage(ContextError, RegExp("context already active"));
+			expect(addContext).toThrow("context already active");
 		});
 
 		it("should throw when addContext called on subscribed handle with native replication", () => {
@@ -741,10 +737,10 @@ describe("createCore", () => {
 
 			expect(() => {
 				core.addContext(handle, "ui");
-			}).toThrowWithMessage(FluxError, RegExp("native replication"));
+			}).toThrow("native replication");
 		});
 
-		it("should throw ContextError for inactive context removal", () => {
+		it("should throw for inactive context removal", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
@@ -753,10 +749,10 @@ describe("createCore", () => {
 				core.removeContext(handle, "ui");
 			};
 
-			expect(removeContext).toThrowWithMessage(ContextError, RegExp("context not active"));
+			expect(removeContext).toThrow("context not active");
 		});
 
-		it("should throw HandleError for unregistered handle", () => {
+		it("should throw for unregistered handle", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
@@ -766,26 +762,7 @@ describe("createCore", () => {
 				core.getState(handle);
 			};
 
-			expect(getState).toThrowWithMessage(HandleError, RegExp("handle not registered"));
-		});
-
-		it("should produce FluxError-compatible inheritance chain", () => {
-			expect.assertions(1);
-
-			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const register = () => {
-				core.register(new Instance("Folder"), fromAny("nonexistent"));
-			};
-
-			expect(register).toThrowWithMessage(FluxError, RegExp("unknown context"));
-		});
-
-		it("should format toString as name and message", () => {
-			expect.assertions(1);
-
-			const thrown = new ContextError("unknown context: nonexistent", "nonexistent");
-
-			expect(thrown.toString()).toBe("ContextError: unknown context: nonexistent");
+			expect(getState).toThrow("handle not registered");
 		});
 	});
 
@@ -1375,7 +1352,7 @@ describe("createCore", () => {
 			expect(bindings).toHaveLength(0);
 		});
 
-		it("should throw HandleError for unregistered handle", () => {
+		it("should throw for unregistered handle", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
@@ -1384,7 +1361,7 @@ describe("createCore", () => {
 
 			expect(() => {
 				core.getBindings(handle, "jump");
-			}).toThrowWithMessage(HandleError, RegExp("handle not registered"));
+			}).toThrow("handle not registered");
 		});
 
 		it("should deduplicate bindings shared across contexts", () => {

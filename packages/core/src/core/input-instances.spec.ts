@@ -1,9 +1,7 @@
 import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it } from "@rbxts/jest-globals";
 import { fromAny } from "@rbxts/jest-utils";
-import RegExp from "@rbxts/regexp";
 
-import { FluxError } from "../errors";
 import type { ActionMap } from "../types/actions";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
@@ -172,7 +170,7 @@ describe("createInputInstances", () => {
 				contexts,
 				parent: new Instance("Folder"),
 			});
-		}).toThrowWithMessage(FluxError, RegExp("UserInputType"));
+		}).toThrow("UserInputType");
 	});
 
 	it("should set priority and sink on InputContext", () => {

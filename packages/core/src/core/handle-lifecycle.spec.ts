@@ -1,8 +1,6 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 import { fromPartial } from "@rbxts/jest-utils";
-import RegExp from "@rbxts/regexp";
 
-import { HandleError } from "../errors/handle-error";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
@@ -88,7 +86,7 @@ describe("registerHandleAs", () => {
 		expect(options.handles.has(handle)).toBeTrue();
 	});
 
-	it("should throw HandleError on duplicate handle", () => {
+	it("should throw on duplicate handle", () => {
 		expect.assertions(1);
 
 		const handle = fromPartial<InputHandle>(42);
@@ -98,7 +96,7 @@ describe("registerHandleAs", () => {
 			registerHandleAs(handle, options);
 		};
 
-		expect(duplicate).toThrowWithMessage(HandleError, RegExp("handle already registered"));
+		expect(duplicate).toThrow("handle already registered");
 	});
 
 	it("should create action state for each action", () => {
@@ -149,7 +147,7 @@ describe("subscribeHandleAs", () => {
 		expect(options.handles.has(handle)).toBeTrue();
 	});
 
-	it("should throw HandleError on duplicate handle", () => {
+	it("should throw on duplicate handle", () => {
 		expect.assertions(1);
 
 		const handle = fromPartial<InputHandle>(42);
@@ -165,7 +163,7 @@ describe("subscribeHandleAs", () => {
 			subscribeHandleAs(handle, options);
 		};
 
-		expect(duplicate).toThrowWithMessage(HandleError, RegExp("handle already registered"));
+		expect(duplicate).toThrow("handle already registered");
 	});
 
 	it("should return cancel function", () => {
@@ -197,7 +195,7 @@ describe("getHandleData", () => {
 		expect(data.publicState.pressed("jump")).toBeFalse();
 	});
 
-	it("should throw HandleError for unregistered handle", () => {
+	it("should throw for unregistered handle", () => {
 		expect.assertions(1);
 
 		const handles = new Map<InputHandle, HandleData<typeof TEST_ACTIONS>>();
@@ -206,6 +204,6 @@ describe("getHandleData", () => {
 			getHandleData(handles, handle);
 		};
 
-		expect(lookup).toThrowWithMessage(HandleError, RegExp("handle not registered"));
+		expect(lookup).toThrow("handle not registered");
 	});
 });

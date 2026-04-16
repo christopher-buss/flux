@@ -83,8 +83,8 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * @param handle - The input consumer handle.
 	 * @param context - The context name to query.
 	 * @returns Context info record with `active`, `priority`, `sink`, and `actions`.
-	 * @throws ContextError if the context name is unknown.
-	 * @throws HandleError if the handle is not registered.
+	 * @throws If the context name is unknown.
+	 * @throws If the handle is not registered.
 	 * @example
 	 * ```ts
 	 * const info = core.getContextInfo(handle, "menu");
@@ -172,7 +172,7 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * @param parent - The instance to parent InputContexts under.
 	 * @param context - First context name to activate (at least one required).
 	 * @param contexts - Additional context names to activate.
-	 * @throws HandleError if handle is already registered.
+	 * @throws If handle is already registered.
 	 */
 	registerAs(
 		handle: InputHandle,
@@ -213,7 +213,7 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * DataStore persistence of user customizations.
 	 * @param handle - The input consumer handle.
 	 * @returns A sparse record of overridden bindings keyed by action name.
-	 * @throws FluxError if called on a subscribed handle.
+	 * @throws If called on a subscribed handle.
 	 */
 	serializeBindings(handle: InputHandle): BindingState<Actions>;
 
@@ -253,7 +253,7 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * @param context - First context name to subscribe to (at least one required).
 	 * @param contexts - Additional context names to subscribe to.
 	 * @returns A cancel function that disconnects ChildAdded listeners.
-	 * @throws HandleError if handle is already registered.
+	 * @throws If handle is already registered.
 	 */
 	subscribeAs(
 		handle: InputHandle,

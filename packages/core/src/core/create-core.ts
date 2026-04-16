@@ -1,6 +1,4 @@
 import { collectContextActions } from "../contexts/collect-actions";
-import { FluxError } from "../errors";
-import { ContextError } from "../errors/context-error";
 import type { ActionMap } from "../types/actions";
 import type { BindingForAction, BindingLike, BindingState, TypedBindings } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
@@ -117,14 +115,13 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			validateContextName(contexts, context);
 			const data = getHandleData(handles, handle);
 			if (data.activeContexts.has(context)) {
-				throw new ContextError(`context already active: ${context}`, context);
+				error(`context already active: ${context}`);
 			}
 
-			if (!data.instanceData.owned && replicationTransport === "native") {
-				throw new FluxError(
-					"cannot call addContext on a subscribed handle with native replication",
-				);
-			}
+			assert(
+				data.instanceData.owned || replicationTransport !== "native",
+				"cannot call addContext on a subscribed handle with native replication",
+			);
 
 			if (!data.instanceData.inputContexts.has(context)) {
 				const existing = findExistingContext(context, data.instanceData);
@@ -266,7 +263,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		removeContext(handle: InputHandle, context: Contexts): void {
 			const data = getHandleData(handles, handle);
 			if (!data.activeContexts.has(context)) {
-				throw new ContextError(`context not active: ${context}`, context);
+				error(`context not active: ${context}`);
 			}
 
 			setContextEnabled(data.instanceData, context, false);
@@ -348,7 +345,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 
 function validateContextName(contexts: Record<string, ContextConfig>, name: string): void {
 	if (contexts[name] === undefined) {
-		throw new ContextError(`unknown context: ${name}`, name);
+		error(`unknown context: ${name}`);
 	}
 }
 
