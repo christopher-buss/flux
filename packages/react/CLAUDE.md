@@ -1,8 +1,11 @@
 ## Package
 
 `@rbxts/flux-react` — thin React wrapper over `@rbxts/flux`. Exports
-`createFluxReact({ core })` returning `{ core, flush, FluxProvider,
-useAction, useActiveContext, useBindings, useInputContext }`.
+`createFluxReact<Actions, Contexts>()` returning `{ flush, FluxProvider,
+useAction, useActiveContext, useBindings, useInputContext }`. Core is
+injected at render time via `<FluxProvider core={core} handle={handle}>`,
+so the factory can live in a shared module that never touches a world or
+core at import time.
 
 ## Module Layout (src/)
 

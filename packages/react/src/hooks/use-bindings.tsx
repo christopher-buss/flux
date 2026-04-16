@@ -1,11 +1,4 @@
-import type {
-	ActionMap,
-	AllActions,
-	BindingLike,
-	FluxCore,
-	InputHandle,
-	InputPlatform,
-} from "@rbxts/flux";
+import type { ActionMap, AllActions, BindingLike, InputHandle, InputPlatform } from "@rbxts/flux";
 import { getBindingsForPlatform } from "@rbxts/flux";
 import { useEffect, useMemo, useRef, useState } from "@rbxts/react";
 
@@ -47,13 +40,12 @@ export interface FluxUseBindings<T extends ActionMap> {
  *   rendered value.
  *
  * @template T - The action map type.
- * @param core - The underlying FluxCore instance.
+ * @template Contexts - Union of valid context name literals.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useBindings` hook.
  */
-export function createUseBindings<T extends ActionMap>(
-	core: FluxCore<T>,
-	useFluxContext: () => FluxContextValue<T>,
+export function createUseBindings<T extends ActionMap, Contexts extends string = string>(
+	useFluxContext: () => FluxContextValue<T, Contexts>,
 ): FluxUseBindings<T> {
 	function useBindings(
 		action: AllActions<T>,
@@ -69,7 +61,7 @@ export function createUseBindings<T extends ActionMap>(
 		actionOrPlatform?: AllActions<T> | InputPlatform,
 		maybePlatform?: InputPlatform,
 	): ReadonlyArray<BindingLike> {
-		const { handle: defaultHandle, subscribe } = useFluxContext();
+		const { core, handle: defaultHandle, subscribe } = useFluxContext();
 
 		const hasStringFirst = typeIs(handleOrAction, "string");
 		const handle = hasStringFirst ? defaultHandle : handleOrAction;
@@ -87,7 +79,7 @@ export function createUseBindings<T extends ActionMap>(
 
 				return bindings;
 			};
-		}, [handle, action, platform]);
+		}, [core, handle, action, platform]);
 
 		const [value, setValue] = useState(getBindingsValue);
 		const lastValueRef = useRef(value);

@@ -5,7 +5,7 @@ import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 import type React from "@rbxts/react";
 
 import { createFluxReact } from "./create-flux-react";
-import type { FluxReact, FluxReactWrapOptions } from "./create-flux-react";
+import type { FluxReact } from "./create-flux-react";
 import type { FluxUseAction } from "./hooks/use-action";
 import type { FluxUseBindings } from "./hooks/use-bindings";
 import type { FluxUseActiveContext, FluxUseInputContext } from "./hooks/use-input-context";
@@ -19,64 +19,50 @@ const contexts = defineContexts({
 	gameplay: { bindings: {}, priority: 0 },
 });
 
-const core = createCore({ actions, contexts });
-const flux = createFluxReact({ core });
+type Contexts = keyof typeof contexts;
 
-describe("FluxReactWrapOptions", () => {
-	it("should require core field", () => {
-		expectTypeOf<FluxReactWrapOptions<typeof actions>>().toHaveProperty("core");
-	});
-
-	it("should type core as FluxCore<T>", () => {
-		expectTypeOf<FluxReactWrapOptions<typeof actions>["core"]>().toEqualTypeOf<
-			FluxCore<typeof actions>
-		>();
-	});
-
-	it("should not have extra fields", () => {
-		expectTypeOf<FluxReactWrapOptions<typeof actions>>().not.toHaveProperty("debug");
-		expectTypeOf<FluxReactWrapOptions<typeof actions>>().not.toHaveProperty("parent");
-	});
-
-	it("should reject missing core", () => {
-		// @ts-expect-error missing core
-		createFluxReact({});
-	});
-});
+// Runtime handle for the FluxCore binding below keeps `defineActions` /
+// `defineContexts` live.
+const runtimeCore = createCore({ actions, contexts });
+const flux = createFluxReact<typeof actions, Contexts>();
 
 describe("createFluxReact", () => {
 	it("should return FluxReact typed with actions and contexts", () => {
 		expectTypeOf(flux).toEqualTypeOf<FluxReact<typeof actions, "gameplay">>();
 	});
 
-	it("should infer T and Contexts from options.core", () => {
-		expectTypeOf(flux.core).toEqualTypeOf<FluxCore<typeof actions, "gameplay">>();
+	it("should accept a core of the matching generic on FluxProvider", () => {
+		expectTypeOf<typeof flux.FluxProvider>().parameter(0).toExtend<{
+			core: FluxCore<typeof actions, "gameplay">;
+		}>();
 	});
 
 	it("should not bleed action types across instances", () => {
+		// eslint-disable-next-line unused-imports/no-unused-vars -- runtime value pins inference below
 		const otherActions = defineActions({
 			shoot: bool(),
 		});
-		const otherCore = createCore({
-			actions: otherActions,
-			contexts: defineContexts({
-				combat: { bindings: {}, priority: 0 },
-			}),
-		});
-		const otherFlux = createFluxReact({ core: otherCore });
+		const otherFlux = createFluxReact<typeof otherActions, "combat">();
 
 		otherFlux.useAction((state) => state.pressed("shoot"));
 
 		// @ts-expect-error unknown action on other instance
 		otherFlux.useAction((state) => state.pressed("jump"));
 	});
+
+	it("should keep runtimeCore compatible with the factory Provider", () => {
+		expectTypeOf(runtimeCore).toExtend<FluxCore<typeof actions, "gameplay">>();
+	});
 });
 
 describe("FluxReact", () => {
-	it("should have core, flush, and FluxProvider properties", () => {
-		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("core");
+	it("should have flush and FluxProvider properties", () => {
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("flush");
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("FluxProvider");
+	});
+
+	it("should not expose core on the factory return", () => {
+		expectTypeOf<FluxReact<typeof actions>>().not.toHaveProperty("core");
 	});
 
 	it("should have useAction, useBindings, useActiveContext, useInputContext", () => {
@@ -86,16 +72,13 @@ describe("FluxReact", () => {
 		expectTypeOf<FluxReact<typeof actions>>().toHaveProperty("useInputContext");
 	});
 
-	it("should type core as FluxCore<T, Contexts>", () => {
-		expectTypeOf(flux.core).toEqualTypeOf<FluxCore<typeof actions, "gameplay">>();
-	});
-
 	it("should type flush as () => void", () => {
 		expectTypeOf(flux.flush).toEqualTypeOf<() => void>();
 	});
 
-	it("should type FluxProvider as callable with FluxProviderProps", () => {
+	it("should type FluxProvider as callable with core and handle", () => {
 		expectTypeOf<typeof flux.FluxProvider>().toBeCallableWith({
+			core: runtimeCore,
 			handle: {} as InputHandle,
 		});
 	});

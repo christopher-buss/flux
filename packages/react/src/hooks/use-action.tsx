@@ -36,11 +36,12 @@ export interface FluxUseAction<T extends ActionMap> {
  *   updater returns the previous value.
  *
  * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useAction` hook.
  */
-export function createUseAction<T extends ActionMap>(
-	useFluxContext: () => FluxContextValue<T>,
+export function createUseAction<T extends ActionMap, Contexts extends string = string>(
+	useFluxContext: () => FluxContextValue<T, Contexts>,
 ): FluxUseAction<T> {
 	function useAction<R>(selector: (state: ActionState<T>) => R): R;
 	function useAction<R>(handle: InputHandle, selector: (state: ActionState<T>) => R): R;
@@ -54,7 +55,7 @@ export function createUseAction<T extends ActionMap>(
 			maybeSelector !== undefined ? (handleOrSelector as InputHandle) : context.handle;
 		const selector = maybeSelector ?? (handleOrSelector as (state: ActionState<T>) => R);
 
-		const state = context.getState(handle);
+		const state = context.core.getState(handle);
 		const [value, setValue] = useState(() => selector(state));
 		const lastValueRef = useRef(value);
 
@@ -64,7 +65,7 @@ export function createUseAction<T extends ActionMap>(
 
 		useEffect(() => {
 			return context.subscribe(() => {
-				const updated = selector(context.getState(handle));
+				const updated = selector(context.core.getState(handle));
 				if (lastValueRef.current === updated) {
 					return;
 				}

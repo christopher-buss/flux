@@ -69,3 +69,6 @@ export const TEST_CONTEXTS = defineContexts({
 		sink: true,
 	},
 }) satisfies Record<string, ContextConfig>;
+
+/** Union of context name literals declared in {@link TEST_CONTEXTS}. */
+export type TestContexts = keyof typeof TEST_CONTEXTS;

@@ -11,9 +11,10 @@ const player = Players.LocalPlayer;
 const core = createCore({ actions, contexts });
 const [handle] = core.subscribe(player, "gameplay");
 
-const { flush, FluxProvider, useAction, useActiveContext, useInputContext } = createFluxReact({
-	core,
-});
+const { flush, FluxProvider, useAction, useActiveContext, useInputContext } = createFluxReact<
+	typeof actions,
+	keyof typeof contexts
+>();
 
 interface StatusRowProps {
 	readonly label: string;
@@ -155,7 +156,7 @@ function App(): React.ReactNode {
 const root = ReactRoblox.createRoot(player.FindFirstChildOfClass("PlayerGui")!);
 
 root.render(
-	<FluxProvider handle={handle}>
+	<FluxProvider core={core} handle={handle}>
 		<App />
 	</FluxProvider>,
 );

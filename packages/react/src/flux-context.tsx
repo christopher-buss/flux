@@ -1,4 +1,4 @@
-import type { ActionMap, ActionState, InputHandle } from "@rbxts/flux";
+import type { ActionMap, FluxCore, InputHandle } from "@rbxts/flux";
 import type React from "@rbxts/react";
 import { useContext } from "@rbxts/react";
 
@@ -8,10 +8,11 @@ import type { Disconnect } from "./update-signal";
  * Internal Provider context value shared by every Flux React hook.
  *
  * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
  */
-export interface FluxContextValue<T extends ActionMap> {
-	/** Reads the current ActionState for an InputHandle. */
-	readonly getState: (handle: InputHandle) => ActionState<T>;
+export interface FluxContextValue<T extends ActionMap, Contexts extends string = string> {
+	/** The FluxCore instance supplied to the FluxProvider. */
+	readonly core: FluxCore<T, Contexts>;
 	/** Default InputHandle to use when a hook omits the handle argument. */
 	readonly handle: InputHandle;
 	/** Subscribes a listener to update-signal flushes. */
@@ -24,12 +25,13 @@ export interface FluxContextValue<T extends ActionMap> {
  *   mounted under a FluxProvider.
  *
  * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
  * @param context - The React context created by the FluxReact factory.
- * @returns A hook that returns the current `FluxContextValue<T>`.
+ * @returns A hook that returns the current `FluxContextValue<T, Contexts>`.
  */
-export function createUseFluxContext<T extends ActionMap>(
-	context: React.Context<FluxContextValue<T> | undefined>,
-): () => FluxContextValue<T> {
+export function createUseFluxContext<T extends ActionMap, Contexts extends string = string>(
+	context: React.Context<FluxContextValue<T, Contexts> | undefined>,
+): () => FluxContextValue<T, Contexts> {
 	return () => {
 		const value = useContext(context);
 		assert(value !== undefined, "Flux hooks must be used within a FluxProvider");

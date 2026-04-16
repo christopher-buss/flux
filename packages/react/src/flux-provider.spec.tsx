@@ -4,6 +4,7 @@ import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React from "@rbxts/react";
 
+import type { TestContexts } from "../test/fixtures";
 import { FRAME_TIME, TEST_ACTIONS, TEST_CONTEXTS } from "../test/fixtures";
 import { createLabeledJumpProbe } from "../test/probes";
 import { createFluxReact } from "./create-flux-react";
@@ -20,14 +21,14 @@ describe("provider lifecycle", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
 		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { unmount } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe label="jump" />
 			</FluxProvider>,
 		);
@@ -55,16 +56,16 @@ describe("provider lifecycle", () => {
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const outerHandle = core.register(new Instance("Folder"), "gameplay");
 		const innerHandle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
 		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(
-			<FluxProvider handle={outerHandle}>
+			<FluxProvider core={core} handle={outerHandle}>
 				<Probe label="outer" />
-				<FluxProvider handle={innerHandle}>
+				<FluxProvider core={core} handle={innerHandle}>
 					<Probe label="inner" />
 				</FluxProvider>
 			</FluxProvider>,
@@ -88,7 +89,7 @@ describe("provider lifecycle", () => {
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handleA = core.register(new Instance("Folder"), "gameplay");
 		const handleB = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
 		// eslint-disable-next-line flawless/naming-convention -- React component
@@ -96,10 +97,10 @@ describe("provider lifecycle", () => {
 
 		const { queryByText } = render(
 			<>
-				<FluxProvider handle={handleA}>
+				<FluxProvider core={core} handle={handleA}>
 					<Probe label="a" />
 				</FluxProvider>
-				<FluxProvider handle={handleB}>
+				<FluxProvider core={core} handle={handleB}>
 					<Probe label="b" />
 				</FluxProvider>
 			</>,
@@ -125,8 +126,8 @@ describe("provider lifecycle", () => {
 		const handleA = coreA.register(new Instance("Folder"), "gameplay");
 		const handleB = coreB.register(new Instance("Folder"), "gameplay");
 
-		const fluxA = createFluxReact({ core: coreA });
-		const fluxB = createFluxReact({ core: coreB });
+		const fluxA = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+		const fluxB = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 
 		// eslint-disable-next-line flawless/naming-convention -- React component
 		const ProbeA = createLabeledJumpProbe(fluxA.useAction);
@@ -136,10 +137,10 @@ describe("provider lifecycle", () => {
 
 		render(
 			<>
-				<fluxA.FluxProvider handle={handleA}>
+				<fluxA.FluxProvider core={coreA} handle={handleA}>
 					<ProbeA label="a" />
 				</fluxA.FluxProvider>
-				<fluxB.FluxProvider handle={handleB}>
+				<fluxB.FluxProvider core={coreB} handle={handleB}>
 					<ProbeB label="b" />
 				</fluxB.FluxProvider>
 			</>,
@@ -163,14 +164,14 @@ describe("provider lifecycle", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
 		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe label="probe" />
 			</FluxProvider>,
 		);
