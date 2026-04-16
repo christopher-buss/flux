@@ -1,4 +1,4 @@
-import type { ActionMap, FluxCore } from "@rbxts/flux";
+import type { ActionMap } from "@rbxts/flux";
 import type React from "@rbxts/react";
 import { createContext } from "@rbxts/react";
 
@@ -10,6 +10,8 @@ import type { FluxUseAction } from "./hooks/use-action";
 import { createUseAction } from "./hooks/use-action";
 import type { FluxUseBindings } from "./hooks/use-bindings";
 import { createUseBindings } from "./hooks/use-bindings";
+import type { FluxUseFluxCore } from "./hooks/use-flux-core";
+import { createUseFluxCore } from "./hooks/use-flux-core";
 import type { FluxUseActiveContext, FluxUseInputContext } from "./hooks/use-input-context";
 import { createUseActiveContext, createUseInputContext } from "./hooks/use-input-context";
 import { createUpdateSignal } from "./update-signal";
@@ -21,14 +23,10 @@ import { createUpdateSignal } from "./update-signal";
  * @template Contexts - Union of valid context name literals.
  */
 export interface FluxReact<T extends ActionMap, Contexts extends string = string> {
-	/** The underlying FluxCore instance. */
-	readonly core: FluxCore<T, Contexts>;
-
 	/**
 	 * Notify React hooks that ActionState has been updated.
 	 *
-	 * In standalone mode this fires automatically after Heartbeat. In wrap
-	 * mode, call this after your own `core.update(dt)`.
+	 * Call this after your own `core.update(dt)` to wake subscribed hooks.
 	 */
 	readonly flush: () => void;
 
@@ -36,10 +34,10 @@ export interface FluxReact<T extends ActionMap, Contexts extends string = string
 	 * Provides Flux context to child components.
 	 *
 	 * Components below this provider can call any Flux hook to reactively read
-	 * input state for the configured handle.
+	 * input state for the supplied core and handle.
 	 */
 	// eslint-disable-next-line flawless/naming-convention -- React component
-	readonly FluxProvider: (props: FluxProviderProps) => React.ReactNode;
+	readonly FluxProvider: (props: FluxProviderProps<T, Contexts>) => React.ReactNode;
 
 	/**
 	 * Hook that subscribes to ActionState changes via a selector. Re-renders
@@ -60,6 +58,15 @@ export interface FluxReact<T extends ActionMap, Contexts extends string = string
 	readonly useBindings: FluxUseBindings<T>;
 
 	/**
+	 * Hook that returns the `FluxCore` supplied to the nearest `FluxProvider`.
+	 *
+	 * Use this for imperative calls like `core.addContext(handle, "menu")` or
+	 * `core.rebind(...)` from inside a component, without having to pass
+	 * `core` down as a prop.
+	 */
+	readonly useFluxCore: FluxUseFluxCore<T, Contexts>;
+
+	/**
 	 * Hook that subscribes to a context's info for a handle.
 	 *
 	 * Returns static config (priority, sink, declared actions) combined with
@@ -70,44 +77,50 @@ export interface FluxReact<T extends ActionMap, Contexts extends string = string
 }
 
 /**
- * Options for creating a FluxReact instance in wrap mode.
- *
- * @template T - The action map type.
- * @template Contexts - Union of valid context name literals.
- */
-export interface FluxReactWrapOptions<T extends ActionMap, Contexts extends string = string> {
-	/** An existing FluxCore instance to wrap. */
-	readonly core: FluxCore<T, Contexts>;
-}
-
-/**
  * - Creates a FluxReact instance for React integration.
- * - Returns the core, a flush function, a Provider component, and typed hooks.
+ * - Returns a flush function, a Provider component, and typed hooks. Core is
+ *   supplied at render time via `<FluxProvider core={...} handle={...}>` so
+ *   the factory can live in a shared module without owning a world or core.
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
- * @param options - Wrap options containing an existing FluxCore.
  * @returns A FluxReact instance with typed hooks.
+ * @example
+ * ```tsx
+ * // shared/flux/react.ts
+ * export const { flush, FluxProvider, useAction } = createFluxReact<
+ *   typeof actions,
+ *   keyof typeof contexts & string
+ * >();
+ *
+ * // client startup
+ * const core = createCore({ actions, contexts });
+ * root.render(
+ *   <FluxProvider core={core} handle={handle}>
+ *     <App />
+ *   </FluxProvider>,
+ * );
+ * ```
  */
-export function createFluxReact<T extends ActionMap, Contexts extends string = string>(
-	options: FluxReactWrapOptions<T, Contexts>,
-): FluxReact<T, Contexts> {
-	const { core } = options;
+export function createFluxReact<T extends ActionMap, Contexts extends string = string>(): FluxReact<
+	T,
+	Contexts
+> {
 	const signal = createUpdateSignal();
 
 	// eslint-disable-next-line flawless/naming-convention -- React convention
-	const FluxContext = createContext<FluxContextValue<T> | undefined>(undefined);
+	const FluxContext = createContext<FluxContextValue<T, Contexts> | undefined>(undefined);
 	FluxContext.displayName = "FluxContext";
 
 	const useFluxContext = createUseFluxContext(FluxContext);
 
 	return {
-		core,
 		flush: signal.fire,
-		FluxProvider: createFluxProvider(core, FluxContext, signal.subscribe),
+		FluxProvider: createFluxProvider(FluxContext, signal.subscribe),
 		useAction: createUseAction(useFluxContext),
-		useActiveContext: createUseActiveContext<T, Contexts>(core, useFluxContext),
-		useBindings: createUseBindings(core, useFluxContext),
-		useInputContext: createUseInputContext<T, Contexts>(core, useFluxContext),
+		useActiveContext: createUseActiveContext<T, Contexts>(useFluxContext),
+		useBindings: createUseBindings(useFluxContext),
+		useFluxCore: createUseFluxCore<T, Contexts>(useFluxContext),
+		useInputContext: createUseInputContext<T, Contexts>(useFluxContext),
 	};
 }

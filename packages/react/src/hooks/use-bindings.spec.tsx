@@ -4,6 +4,7 @@ import { describe, expect, it } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React from "@rbxts/react";
 
+import type { TestContexts } from "../../test/fixtures";
 import { FRAME_TIME, TEST_ACTIONS, TEST_CONTEXTS } from "../../test/fixtures";
 import { makeRenderCounter } from "../../test/probes";
 import { createFluxReact } from "../create-flux-react";
@@ -20,7 +21,7 @@ describe("useBindings", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useBindings } = flux;
 
 		function Probe(): React.ReactNode {
@@ -29,7 +30,7 @@ describe("useBindings", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -46,7 +47,7 @@ describe("useBindings", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useBindings } = flux;
 
 		function Probe(): React.ReactNode {
@@ -61,7 +62,7 @@ describe("useBindings", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -81,7 +82,7 @@ describe("useBindings", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useBindings } = flux;
 
 		function Probe(): React.ReactNode {
@@ -90,7 +91,7 @@ describe("useBindings", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -119,7 +120,7 @@ describe("useBindings", () => {
 			Enum.KeyCode.Space,
 			Enum.KeyCode.Return,
 		]);
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useBindings } = flux;
 
 		function Probe(): React.ReactNode {
@@ -128,7 +129,7 @@ describe("useBindings", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={providerHandle}>
+			<FluxProvider core={core} handle={providerHandle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -146,7 +147,7 @@ describe("useBindings", () => {
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const providerHandle = core.register(new Instance("Folder"), "gameplay");
 		const explicitHandle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useBindings } = flux;
 
 		function Probe(): React.ReactNode {
@@ -155,7 +156,7 @@ describe("useBindings", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={providerHandle}>
+			<FluxProvider core={core} handle={providerHandle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -172,7 +173,7 @@ describe("useBindings", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useBindings } = flux;
 
 		function Probe(): React.ReactNode {
@@ -181,7 +182,7 @@ describe("useBindings", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -206,7 +207,7 @@ describe("useBindings", () => {
 		const handleA = core.register(new Instance("Folder"), "gameplay");
 		const handleB = core.register(new Instance("Folder"), "gameplay");
 		core.rebind(handleB, "jump", [Enum.KeyCode.ButtonA, Enum.KeyCode.Space]);
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useBindings } = flux;
 
 		function Probe(): React.ReactNode {
@@ -216,7 +217,7 @@ describe("useBindings", () => {
 
 		function Host({ handle }: { readonly handle: typeof handleA }): React.ReactNode {
 			return (
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe />
 				</FluxProvider>
 			);
@@ -243,7 +244,7 @@ describe("useBindings", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useBindings } = flux;
 
 		const counter = makeRenderCounter();
@@ -255,7 +256,7 @@ describe("useBindings", () => {
 		}
 
 		render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);

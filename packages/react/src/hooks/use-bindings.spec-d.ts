@@ -14,8 +14,9 @@ const contexts = defineContexts({
 	gameplay: { bindings: {}, priority: 0 },
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars -- keeps runtime imports active
 const core = createCore({ actions, contexts });
-const flux = createFluxReact({ core });
+const flux = createFluxReact<typeof actions, keyof typeof contexts>();
 
 describe("FluxUseBindings", () => {
 	const handle = {} as InputHandle;

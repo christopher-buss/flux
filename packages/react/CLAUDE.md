@@ -1,8 +1,11 @@
 ## Package
 
 `@rbxts/flux-react` — thin React wrapper over `@rbxts/flux`. Exports
-`createFluxReact({ core })` returning `{ core, flush, FluxProvider,
-useAction, useActiveContext, useBindings, useInputContext }`.
+`createFluxReact<Actions, Contexts>()` returning `{ flush, FluxProvider,
+useAction, useActiveContext, useBindings, useFluxCore, useInputContext }`. Core is
+injected at render time via `<FluxProvider core={core} handle={handle}>`,
+so the factory can live in a shared module that never touches a world or
+core at import time.
 
 ## Module Layout (src/)
 
@@ -11,6 +14,7 @@ useAction, useActiveContext, useBindings, useInputContext }`.
 - `flux-provider.tsx` — `FluxProviderProps` + Provider factory.
 - `hooks/use-action.tsx` — `useAction` hook + overload interface.
 - `hooks/use-bindings.tsx` — `useBindings` hook + overload interface.
+- `hooks/use-flux-core.tsx` — `useFluxCore` hook for imperative core access.
 - `hooks/use-input-context.tsx` — `useActiveContext` + `useInputContext` hooks.
 
 ## Testing Layering

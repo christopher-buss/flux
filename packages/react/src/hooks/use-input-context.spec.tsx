@@ -5,6 +5,7 @@ import { describe, expect, it } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React from "@rbxts/react";
 
+import type { TestContexts } from "../../test/fixtures";
 import { FRAME_TIME, TEST_ACTIONS, TEST_CONTEXTS } from "../../test/fixtures";
 import { makeRenderCounter } from "../../test/probes";
 import { createFluxReact } from "../create-flux-react";
@@ -21,7 +22,7 @@ describe("useInputContext", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useInputContext } = flux;
 
 		function Probe(): React.ReactNode {
@@ -34,7 +35,7 @@ describe("useInputContext", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -53,7 +54,7 @@ describe("useInputContext", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useInputContext } = flux;
 
 		function Probe(): React.ReactNode {
@@ -62,7 +63,7 @@ describe("useInputContext", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -91,7 +92,7 @@ describe("useInputContext", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useInputContext } = flux;
 
 		const counter = makeRenderCounter();
@@ -103,7 +104,7 @@ describe("useInputContext", () => {
 		}
 
 		render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -128,7 +129,7 @@ describe("useInputContext", () => {
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const defaultHandle = core.register(new Instance("Folder"), "gameplay");
 		const explicitHandle = core.register(new Instance("Folder"), "menu");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useInputContext } = flux;
 
 		function Probe(): React.ReactNode {
@@ -142,7 +143,7 @@ describe("useInputContext", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={defaultHandle}>
+			<FluxProvider core={core} handle={defaultHandle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -160,7 +161,7 @@ describe("useInputContext", () => {
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handleA = core.register(new Instance("Folder"), "gameplay");
 		const handleB = core.register(new Instance("Folder"), "menu");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useInputContext } = flux;
 
 		function Probe(): React.ReactNode {
@@ -170,7 +171,7 @@ describe("useInputContext", () => {
 
 		function Host({ handle }: { readonly handle: InputHandle }): React.ReactNode {
 			return (
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe />
 				</FluxProvider>
 			);
@@ -197,7 +198,7 @@ describe("useActiveContext", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useActiveContext } = flux;
 
 		function Probe(): React.ReactNode {
@@ -207,7 +208,7 @@ describe("useActiveContext", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -225,7 +226,7 @@ describe("useActiveContext", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useActiveContext } = flux;
 
 		function Probe(): React.ReactNode {
@@ -234,7 +235,7 @@ describe("useActiveContext", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -264,7 +265,7 @@ describe("useActiveContext", () => {
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const defaultHandle = core.register(new Instance("Folder"), "gameplay");
 		const explicitHandle = core.register(new Instance("Folder"), "menu");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useActiveContext } = flux;
 
 		function Probe(): React.ReactNode {
@@ -278,7 +279,7 @@ describe("useActiveContext", () => {
 		}
 
 		const { queryByText } = render(
-			<FluxProvider handle={defaultHandle}>
+			<FluxProvider core={core} handle={defaultHandle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -296,7 +297,7 @@ describe("useActiveContext", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useActiveContext } = flux;
 
 		const counter = makeRenderCounter();
@@ -308,7 +309,7 @@ describe("useActiveContext", () => {
 		}
 
 		render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -333,7 +334,7 @@ describe("useActiveContext", () => {
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handleA = core.register(new Instance("Folder"), "gameplay");
 		const handleB = core.register(new Instance("Folder"), "menu");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useActiveContext } = flux;
 
 		function Probe(): React.ReactNode {
@@ -342,7 +343,7 @@ describe("useActiveContext", () => {
 		}
 
 		const { queryByText, rerender } = render(
-			<FluxProvider handle={handleA}>
+			<FluxProvider core={core} handle={handleA}>
 				<Probe />
 			</FluxProvider>,
 		);
@@ -350,7 +351,7 @@ describe("useActiveContext", () => {
 		expect(queryByText("menu:false")).toBeDefined();
 
 		rerender(
-			<FluxProvider handle={handleB}>
+			<FluxProvider core={core} handle={handleB}>
 				<Probe />
 			</FluxProvider>,
 		);

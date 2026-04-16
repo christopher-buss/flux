@@ -6,6 +6,7 @@ import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React, { StrictMode } from "@rbxts/react";
 
+import type { TestContexts } from "../../test/fixtures";
 import {
 	FRAME_TIME,
 	HOLD_THRESHOLD,
@@ -29,13 +30,13 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const probe = createCountingProbe(useAction, (state) => state.pressed("jump"));
 			const Probe = probe.component;
 
 			render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe />
 				</FluxProvider>,
 			);
@@ -64,13 +65,13 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const probe = createCountingProbe(useAction, (state) => state.pressed("jump"));
 			const Probe = probe.component;
 
 			render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe />
 				</FluxProvider>,
 			);
@@ -99,13 +100,13 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const probe = createCountingProbe(useAction, (state) => state.axis1d("throttle"));
 			const Probe = probe.component;
 
 			render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe />
 				</FluxProvider>,
 			);
@@ -134,7 +135,7 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const probeX = createCountingProbe(useAction, (state) => state.direction2d("move").X);
 			const probeY = createCountingProbe(useAction, (state) => state.direction2d("move").Y);
@@ -142,7 +143,7 @@ describe("useAction", () => {
 			const ProbeY = probeY.component;
 
 			render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<ProbeX />
 					<ProbeY />
 				</FluxProvider>,
@@ -168,13 +169,13 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const probe = createCountingProbe(useAction, (state) => state.direction2d("move"));
 			const Probe = probe.component;
 
 			render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe />
 				</FluxProvider>,
 			);
@@ -203,13 +204,13 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const probe = createCountingProbe(useAction, (state) => [state.pressed("jump")]);
 			const Probe = probe.component;
 
 			render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe />
 				</FluxProvider>,
 			);
@@ -236,7 +237,7 @@ describe("useAction", () => {
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handleA = core.register(new Instance("Folder"), "gameplay");
 			const handleB = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const Probe = createLabeledJumpProbe(useAction);
 
@@ -245,7 +246,7 @@ describe("useAction", () => {
 
 			function Host({ handle }: { readonly handle: InputHandle }): React.ReactNode {
 				return (
-					<FluxProvider handle={handle}>
+					<FluxProvider core={core} handle={handle}>
 						<Probe label="probe" />
 					</FluxProvider>
 				);
@@ -277,7 +278,7 @@ describe("useAction", () => {
 			const defaultHandle = core.register(new Instance("Folder"), "gameplay");
 			const explicitA = core.register(new Instance("Folder"), "gameplay");
 			const explicitB = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 
 			function ProbeA(): React.ReactNode {
@@ -291,7 +292,7 @@ describe("useAction", () => {
 			}
 
 			const { queryByText } = render(
-				<FluxProvider handle={defaultHandle}>
+				<FluxProvider core={core} handle={defaultHandle}>
 					<ProbeA />
 					<ProbeB />
 				</FluxProvider>,
@@ -315,7 +316,7 @@ describe("useAction", () => {
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const defaultHandle = core.register(new Instance("Folder"), "gameplay");
 			const explicitHandle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 
 			function Probe(): React.ReactNode {
@@ -327,7 +328,7 @@ describe("useAction", () => {
 			}
 
 			const { queryByText } = render(
-				<FluxProvider handle={defaultHandle}>
+				<FluxProvider core={core} handle={defaultHandle}>
 					<Probe />
 				</FluxProvider>,
 			);
@@ -353,7 +354,7 @@ describe("useAction", () => {
 			const handleA = core.register(new Instance("Folder"), "gameplay");
 			const handleB = core.register(new Instance("Folder"), "gameplay");
 			const explicitHandle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 
 			core.simulateAction(explicitHandle, "jump", true);
@@ -366,7 +367,7 @@ describe("useAction", () => {
 
 			function Host({ handle }: { readonly handle: InputHandle }): React.ReactNode {
 				return (
-					<FluxProvider handle={handle}>
+					<FluxProvider core={core} handle={handle}>
 						<Explicit />
 					</FluxProvider>
 				);
@@ -395,11 +396,11 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "menu");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const Probe = createLabeledJumpProbe(flux.useAction);
 
 			const { queryByText } = render(
-				<flux.FluxProvider handle={handle}>
+				<flux.FluxProvider core={core} handle={handle}>
 					<Probe label="jump" />
 				</flux.FluxProvider>,
 			);
@@ -429,11 +430,11 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const Probe = createLabeledJumpProbe(flux.useAction);
 
 			const { queryByText } = render(
-				<flux.FluxProvider handle={handle}>
+				<flux.FluxProvider core={core} handle={handle}>
 					<Probe label="jump" />
 				</flux.FluxProvider>,
 			);
@@ -462,7 +463,7 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 
 			function ChargeProbe(): React.ReactNode {
@@ -471,7 +472,7 @@ describe("useAction", () => {
 			}
 
 			const { queryByText } = render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<ChargeProbe />
 				</FluxProvider>,
 			);
@@ -498,7 +499,7 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 
 			function DashProbe(): React.ReactNode {
@@ -507,7 +508,7 @@ describe("useAction", () => {
 			}
 
 			const { queryByText } = render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<DashProbe />
 				</FluxProvider>,
 			);
@@ -534,12 +535,12 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const Probe = createLabeledJumpProbe(useAction);
 
 			const { queryByText } = render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe label="jump" />
 				</FluxProvider>,
 			);
@@ -567,13 +568,13 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const probe = createCountingProbe(useAction, (state) => state.pressed("jump"));
 			const Probe = probe.component;
 
 			render(
-				<FluxProvider handle={handle}>
+				<FluxProvider core={core} handle={handle}>
 					<Probe />
 				</FluxProvider>,
 			);
@@ -593,13 +594,13 @@ describe("useAction", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
-			const flux = createFluxReact({ core });
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const { FluxProvider, useAction } = flux;
 			const Probe = createLabeledJumpProbe(useAction);
 
 			const { queryByText, unmount } = render(
 				<StrictMode>
-					<FluxProvider handle={handle}>
+					<FluxProvider core={core} handle={handle}>
 						<Probe label="jump" />
 					</FluxProvider>
 				</StrictMode>,

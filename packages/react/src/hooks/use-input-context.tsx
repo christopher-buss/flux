@@ -1,4 +1,4 @@
-import type { ActionMap, AllActions, FluxCore, InputHandle } from "@rbxts/flux";
+import type { ActionMap, AllActions, InputHandle } from "@rbxts/flux";
 import { useEffect, useMemo, useRef, useState } from "@rbxts/react";
 
 import type { FluxContextValue } from "../flux-context";
@@ -76,13 +76,11 @@ export interface FluxUseInputContext<T extends ActionMap, Contexts extends strin
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
- * @param core - The underlying FluxCore instance.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useActiveContext` hook.
  */
 export function createUseActiveContext<T extends ActionMap, Contexts extends string>(
-	core: FluxCore<T, Contexts>,
-	useFluxContext: () => FluxContextValue<T>,
+	useFluxContext: () => FluxContextValue<T, Contexts>,
 ): FluxUseActiveContext<Contexts> {
 	function useActiveContext(context: Contexts): boolean;
 	function useActiveContext(handle: InputHandle, context: Contexts): boolean;
@@ -90,7 +88,7 @@ export function createUseActiveContext<T extends ActionMap, Contexts extends str
 		handleOrContext: Contexts | InputHandle,
 		maybeContext?: Contexts,
 	): boolean {
-		const { handle: defaultHandle, subscribe } = useFluxContext();
+		const { core, handle: defaultHandle, subscribe } = useFluxContext();
 
 		const handle =
 			maybeContext !== undefined ? (handleOrContext as InputHandle) : defaultHandle;
@@ -98,7 +96,7 @@ export function createUseActiveContext<T extends ActionMap, Contexts extends str
 
 		const getActive = useMemo(
 			() => (): boolean => core.hasContext(handle, context),
-			[handle, context],
+			[core, handle, context],
 		);
 
 		const [isActive, setIsActive] = useState(getActive);
@@ -144,13 +142,11 @@ export function createUseActiveContext<T extends ActionMap, Contexts extends str
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
- * @param core - The underlying FluxCore instance.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useInputContext` hook.
  */
 export function createUseInputContext<T extends ActionMap, Contexts extends string>(
-	core: FluxCore<T, Contexts>,
-	useFluxContext: () => FluxContextValue<T>,
+	useFluxContext: () => FluxContextValue<T, Contexts>,
 ): FluxUseInputContext<T, Contexts> {
 	function useInputContext(context: Contexts): FluxInputContextInfo<T>;
 	function useInputContext(handle: InputHandle, context: Contexts): FluxInputContextInfo<T>;
@@ -158,7 +154,7 @@ export function createUseInputContext<T extends ActionMap, Contexts extends stri
 		handleOrContext: Contexts | InputHandle,
 		maybeContext?: Contexts,
 	): FluxInputContextInfo<T> {
-		const { handle: defaultHandle, subscribe } = useFluxContext();
+		const { core, handle: defaultHandle, subscribe } = useFluxContext();
 
 		const handle =
 			maybeContext !== undefined ? (handleOrContext as InputHandle) : defaultHandle;
@@ -171,13 +167,13 @@ export function createUseInputContext<T extends ActionMap, Contexts extends stri
 				priority: sourceInfo.priority,
 				sink: sourceInfo.sink,
 			};
-		}, [handle, context]);
+		}, [core, handle, context]);
 
 		const getInfo = useMemo(() => {
 			return (): FluxInputContextInfo<T> => {
 				return { ...staticSlice, isActive: core.hasContext(handle, context) };
 			};
-		}, [handle, context, staticSlice]);
+		}, [core, handle, context, staticSlice]);
 
 		const [info, setInfo] = useState(getInfo);
 		const lastActiveRef = useRef(info.isActive);
@@ -214,7 +210,7 @@ export function createUseInputContext<T extends ActionMap, Contexts extends stri
 				lastInfoRef.current = updatedInfo;
 				setInfo(updatedInfo);
 			});
-		}, [subscribe, handle, context, getInfo]);
+		}, [subscribe, core, handle, context, getInfo]);
 
 		return info;
 	}

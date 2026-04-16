@@ -4,6 +4,7 @@ import { describe, expect, it } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React from "@rbxts/react";
 
+import type { TestContexts } from "../test/fixtures";
 import { TEST_ACTIONS, TEST_CONTEXTS } from "../test/fixtures";
 import { createLabeledJumpProbe } from "../test/probes";
 import { createFluxReact } from "./create-flux-react";
@@ -18,8 +19,7 @@ describe("createUseFluxContext", () => {
 			cleanup();
 		});
 
-		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-		const { useAction } = createFluxReact({ core });
+		const { useAction } = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 
 		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
@@ -38,14 +38,14 @@ describe("createUseFluxContext", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
 		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe label="jump" />
 			</FluxProvider>,
 		);
@@ -62,14 +62,14 @@ describe("createUseFluxContext", () => {
 
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const flux = createFluxReact({ core });
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
 		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(
-			<FluxProvider handle={handle}>
+			<FluxProvider core={core} handle={handle}>
 				<Probe label="smoke" />
 			</FluxProvider>,
 		);

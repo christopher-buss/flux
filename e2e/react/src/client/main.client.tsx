@@ -11,9 +11,8 @@ const player = Players.LocalPlayer;
 const core = createCore({ actions, contexts });
 const [handle] = core.subscribe(player, "gameplay");
 
-const { flush, FluxProvider, useAction, useActiveContext, useInputContext } = createFluxReact({
-	core,
-});
+const { flush, FluxProvider, useAction, useActiveContext, useFluxCore, useInputContext } =
+	createFluxReact<typeof actions, keyof typeof contexts>();
 
 interface StatusRowProps {
 	readonly label: string;
@@ -59,6 +58,7 @@ function MoveIndicator(): React.ReactNode {
 }
 
 function MenuToggle(): React.ReactNode {
+	const fluxCore = useFluxCore();
 	const didToggle = useAction((state) => state.justPressed("toggleMenu"));
 	const isMenuActive = useActiveContext("menu");
 
@@ -68,11 +68,11 @@ function MenuToggle(): React.ReactNode {
 		}
 
 		if (isMenuActive) {
-			core.removeContext(handle, "menu");
+			fluxCore.removeContext(handle, "menu");
 		} else {
-			core.addContext(handle, "menu");
+			fluxCore.addContext(handle, "menu");
 		}
-	}, [didToggle, isMenuActive]);
+	}, [didToggle, isMenuActive, fluxCore]);
 
 	return <StatusRow label="menu (press M)" value={isMenuActive ? "OPEN" : "closed"} />;
 }
@@ -155,7 +155,7 @@ function App(): React.ReactNode {
 const root = ReactRoblox.createRoot(player.FindFirstChildOfClass("PlayerGui")!);
 
 root.render(
-	<FluxProvider handle={handle}>
+	<FluxProvider core={core} handle={handle}>
 		<App />
 	</FluxProvider>,
 );
