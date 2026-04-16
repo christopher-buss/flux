@@ -10,6 +10,8 @@ import type { FluxUseAction } from "./hooks/use-action";
 import { createUseAction } from "./hooks/use-action";
 import type { FluxUseBindings } from "./hooks/use-bindings";
 import { createUseBindings } from "./hooks/use-bindings";
+import type { FluxUseFluxCore } from "./hooks/use-flux-core";
+import { createUseFluxCore } from "./hooks/use-flux-core";
 import type { FluxUseActiveContext, FluxUseInputContext } from "./hooks/use-input-context";
 import { createUseActiveContext, createUseInputContext } from "./hooks/use-input-context";
 import { createUpdateSignal } from "./update-signal";
@@ -54,6 +56,15 @@ export interface FluxReact<T extends ActionMap, Contexts extends string = string
 	 * when the bindings array changes.
 	 */
 	readonly useBindings: FluxUseBindings<T>;
+
+	/**
+	 * Hook that returns the `FluxCore` supplied to the nearest `FluxProvider`.
+	 *
+	 * Use this for imperative calls like `core.addContext(handle, "menu")` or
+	 * `core.rebind(...)` from inside a component, without having to pass
+	 * `core` down as a prop.
+	 */
+	readonly useFluxCore: FluxUseFluxCore<T, Contexts>;
 
 	/**
 	 * Hook that subscribes to a context's info for a handle.
@@ -109,6 +120,7 @@ export function createFluxReact<T extends ActionMap, Contexts extends string = s
 		useAction: createUseAction(useFluxContext),
 		useActiveContext: createUseActiveContext<T, Contexts>(useFluxContext),
 		useBindings: createUseBindings(useFluxContext),
+		useFluxCore: createUseFluxCore<T, Contexts>(useFluxContext),
 		useInputContext: createUseInputContext<T, Contexts>(useFluxContext),
 	};
 }
