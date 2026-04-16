@@ -24,13 +24,14 @@ type TestContexts = keyof typeof TEST_CONTEXTS;
 
 describe("createFluxReact", () => {
 	it("should return flush, FluxProvider, and hook factories without requiring core", () => {
-		expect.assertions(3);
+		expect.assertions(4);
 
 		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 
 		expect(flux.flush).toBeFunction();
 		expect(flux.FluxProvider).toBeFunction();
 		expect(flux.useAction).toBeFunction();
+		expect(flux.useFluxCore).toBeFunction();
 	});
 
 	it("should produce a FluxProvider that accepts a core plus a handle", () => {
