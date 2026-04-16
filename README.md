@@ -127,10 +127,11 @@ it by cloning the repo.
 
 ## Packages
 
-| Package                       | Description                                                                       |
-| ----------------------------- | --------------------------------------------------------------------------------- |
-| [flux](packages/core)         | Core input system — actions, contexts, triggers, modifiers                        |
+| Package                       | Description                                                                        |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| [flux](packages/core)         | Core input system — actions, contexts, triggers, modifiers                         |
 | [flux-jecs](packages/jecs)    | JECS integration — maps entities to input handles. Requires `flux` as a dependency |
+| [flux-react](packages/react)  | React wrapper — Provider, hooks for actions, contexts, and bindings                |
 
 The core has no framework dependencies. Integration packages like flux-jecs
 connect it to whatever you're using.
