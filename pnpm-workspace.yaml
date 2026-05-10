@@ -19,6 +19,7 @@ packages:
 catalogs:
   build:
     "@isentinel/roblox-ts": 3.2.0
+    turbo: 2.9.12
   cli:
     pncat: 0.11.1
   dev:

@@ -17,6 +17,7 @@ sourcemap.json
 
 .env
 .eslintcache
+.turbo/
 /.claude/state
 
 rojo-sync/

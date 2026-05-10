@@ -41,11 +41,20 @@ jobs:
           path: .eslintcache
           restore-keys: eslint-${{ runner.os }}-
 
+      - name: Cache Turbo
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
+          path: .turbo
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ github.job }}-
+            turbo-${{ runner.os }}-
+
       - name: Typecheck
-        run: pnpm typecheck
+        run: pnpm exec turbo run typecheck
 
       - name: Lint
-        run: pnpm lint:ci
+        run: pnpm exec turbo run lint:ci
 
     timeout-minutes: 5
 
@@ -59,15 +68,21 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Build
-        run: pnpm dev:build --verbose
+      - name: Cache Turbo
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
+          path: .turbo
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ github.job }}-
+            turbo-${{ runner.os }}-
 
       - env:
           ROBLOX_OPEN_CLOUD_API_KEY: ${{ secrets.ROBLOX_OPEN_CLOUD_API_KEY }}
           ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
           ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}
         name: Test
-        run: pnpm -r --stream --workspace-concurrency=1 test --coverage --coverageReporters json-summary --coverageReporters json
+        run: pnpm exec turbo run test -- --coverage --coverageReporters json-summary --coverageReporters json
 
       - name: Merge Coverage
         run: node scripts/merge-coverage.ts

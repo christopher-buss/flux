@@ -1,0 +1,93 @@
+{
+	"$schema": "https://turborepo.com/schema.json",
+	"ui": "stream",
+	"globalDependencies": [
+		"tsconfig.json",
+		"tsconfig.build.json",
+		"tsconfig.node.json",
+		"eslint.config.ts",
+		"pnpm-lock.yaml",
+		"pnpm-workspace.yaml",
+		"mise.toml",
+		"types/**",
+		"jest.shared.ts"
+	],
+	"globalEnv": ["CI"],
+	"globalPassThroughEnv": ["FORCE_COLOR", "COLUMNS"],
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"inputs": [
+				"src/**",
+				"tsconfig*.json",
+				"package.json",
+				"default.project.json",
+				"bundled.project.json"
+			],
+			"outputs": ["dist/**", "out/**", "*.rbxl", "!**/*.tsbuildinfo"]
+		},
+		"//#dev:build": {
+			"inputs": [
+				"packages/*/src/**",
+				"packages/*/test/**",
+				"packages/*/tsconfig*.json",
+				"packages/*/test.project.json",
+				"packages/*/package.json",
+				"tsconfig.build.json",
+				"tsconfig.json"
+			],
+			"outputs": [
+				"packages/*/out/**",
+				"packages/*/out-test/**",
+				"!packages/*/**/*.tsbuildinfo"
+			]
+		},
+		"test": {
+			"dependsOn": ["//#dev:build"],
+			"inputs": ["src/**", "test/**", "tsconfig.spec.json", "package.json"],
+			"outputs": [".jest-roblox-coverage/**", "coverage/**"],
+			"env": ["ROBLOX_OPEN_CLOUD_API_KEY", "ROBLOX_PLACE_ID", "ROBLOX_UNIVERSE_ID"]
+		},
+		"//#lint": {
+			"inputs": [
+				"packages/*/src/**",
+				"packages/*/test/**",
+				"e2e/*/src/**",
+				"scripts/*.ts",
+				"eslint.config.ts",
+				"package.json"
+			],
+			"outputs": [".eslintcache"]
+		},
+		"//#lint:ci": {
+			"inputs": [
+				"packages/*/src/**",
+				"packages/*/test/**",
+				"e2e/*/src/**",
+				"scripts/*.ts",
+				"eslint.config.ts",
+				"package.json"
+			],
+			"outputs": [".eslintcache"]
+		},
+		"//#typecheck": {
+			"inputs": [
+				"packages/*/src/**",
+				"packages/*/test/**",
+				"packages/*/tsconfig*.json",
+				"e2e/*/src/**",
+				"e2e/*/tsconfig*.json",
+				"tsconfig.build.json",
+				"tsconfig.json"
+			],
+			"outputs": ["packages/*/**/*.d.ts", "!packages/*/**/*.tsbuildinfo"]
+		},
+		"typecheck:types": {
+			"inputs": ["src/**", "tsconfig.typetest.json", "package.json"],
+			"outputs": []
+		},
+		"clean": {
+			"cache": false
+		}
+	}
+}

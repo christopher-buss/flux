@@ -11,8 +11,8 @@
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
 	"scripts": {
-		"build": "pnpm -r run build",
-		"clean": "pnpm -r run clean",
+		"build": "turbo run build",
+		"clean": "turbo run clean",
 		"commit": "commit",
 		"dev:build": "rbxtsc --build tsconfig.build.json --type=game",
 		"eslint-config": "npx @eslint/config-inspector",
@@ -20,7 +20,7 @@
 		"lint": "node scripts/lint.ts",
 		"lint:ci": "eslint --cache --cache-strategy content",
 		"rojo-sync": "node scripts/rojo-sync.ts",
-		"test": "pnpm dev:build && COLUMNS=${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} FORCE_COLOR=1 pnpm -r --parallel --stream test",
+		"test": "FORCE_COLOR=1 turbo run test",
 		"typecheck": "tsgo --build --emitDeclarationOnly"
 	},
 	"devDependencies": {
@@ -47,6 +47,7 @@
 		"madge": "catalog:lint",
 		"pncat": "catalog:cli",
 		"rbxts-transformer-jest": "catalog:test",
+		"turbo": "catalog:build",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
 	},
