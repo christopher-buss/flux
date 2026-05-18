@@ -22,7 +22,7 @@ catalogs:
   cli:
     pncat: 0.11.1
   dev:
-    confbox: 0.2.2
+    confbox: 0.2.4
     std-env: 4.1.0
   lint:
     "@eslint/config-inspector": 1.4.2
