@@ -19,6 +19,20 @@
 	"license": "MIT",
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
+	"imports": {
+		"#src/*": {
+			"source": [
+				"./src/*.ts",
+				"./src/*.tsx"
+			]
+		},
+		"#test/fixtures": {
+			"source": "./test/fixtures.ts"
+		},
+		"#test/probes": {
+			"source": "./test/probes.tsx"
+		}
+	},
 	"exports": {
 		".": {
 			"source": "./src/index.ts",

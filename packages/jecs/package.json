@@ -20,6 +20,14 @@
 	"license": "MIT",
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
+	"imports": {
+		"#src/*": {
+			"source": "./src/*.ts"
+		},
+		"#test/*": {
+			"source": "./test/*.ts"
+		}
+	},
 	"exports": {
 		".": {
 			"source": "./src/index.ts",

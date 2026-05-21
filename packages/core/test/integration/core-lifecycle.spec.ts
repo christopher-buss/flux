@@ -1,5 +1,3 @@
-import { describe, expect, it } from "@rbxts/jest-globals";
-
 import {
 	bool,
 	createCore,
@@ -10,7 +8,8 @@ import {
 	hold,
 	implicit,
 	scale,
-} from "../../src";
+} from "@rbxts/flux";
+import { describe, expect, it } from "@rbxts/jest-globals";
 
 const FRAME_TIME = 0.016;
 
