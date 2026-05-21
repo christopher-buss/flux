@@ -1,0 +1,33 @@
+diff --git a/types/Iterable.d.ts b/types/Iterable.d.ts
+index a330510669c3f4178261079ba1415a3a91603655..d8b49a0a71577774753e6c47e352f4f7511c8786 100644
+--- a/types/Iterable.d.ts
++++ b/types/Iterable.d.ts
+@@ -32,20 +32,20 @@ interface AsyncGenerator<Yields = unknown, Returns = any, Next = unknown> extend
+ 	[Symbol.asyncIterator](): AsyncGenerator<Yields, Returns, Next>;
+ }
+ 
+-interface AsyncIterable<T> {
+-	[Symbol.asyncIterator](): AsyncIterator<T>;
++interface AsyncIterable<T, Returns = any, Next = undefined> {
++	[Symbol.asyncIterator](): AsyncIterator<T, Returns, Next>;
+ }
+ 
+-interface Iterable<T> {
+-	[Symbol.iterator](): Iterator<T>;
++interface Iterable<T, Returns = void, Next = undefined> {
++	[Symbol.iterator](): Iterator<T, Returns, Next>;
+ }
+ 
+-interface AsyncIterableIterator<T> extends AsyncIterator<T> {
+-	[Symbol.asyncIterator](): AsyncIterableIterator<T>;
++interface AsyncIterableIterator<T, Returns = any, Next = undefined> extends AsyncIterator<T, Returns, Next> {
++	[Symbol.asyncIterator](): AsyncIterableIterator<T, Returns, Next>;
+ }
+ 
+-interface IterableIterator<T> extends Iterator<T> {
+-	[Symbol.iterator](): IterableIterator<T>;
++interface IterableIterator<T, Returns = void, Next = undefined> extends Iterator<T, Returns, Next> {
++	[Symbol.iterator](): IterableIterator<T, Returns, Next>;
+ }
+ 
+ interface IterableFunction<T> extends Iterable<T> {
