@@ -6,15 +6,16 @@ import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React, { StrictMode } from "@rbxts/react";
 
-import type { TestContexts } from "../../test/fixtures";
+import type { TestContexts } from "#test/fixtures";
 import {
 	FRAME_TIME,
 	HOLD_THRESHOLD,
 	TAP_THRESHOLD,
 	TEST_ACTIONS,
 	TEST_CONTEXTS,
-} from "../../test/fixtures";
-import { createCountingProbe, createLabeledJumpProbe } from "../../test/probes";
+} from "#test/fixtures";
+import { createCountingProbe, createLabeledJumpProbe } from "#test/probes";
+
 import { createFluxReact } from "../create-flux-react";
 
 _G.__DEV__ = true;
