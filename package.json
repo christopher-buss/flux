@@ -11,8 +11,8 @@
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
 	"scripts": {
-		"build": "pnpm -r run build",
-		"clean": "pnpm -r run clean",
+		"build": "turbo run build",
+		"clean": "turbo run clean && rimraf .jest-roblox/",
 		"commit": "commit",
 		"dev:build": "rbxtsc --build tsconfig.build.json --type=game",
 		"eslint-config": "npx @eslint/config-inspector",
@@ -20,7 +20,8 @@
 		"lint": "node scripts/lint.ts",
 		"lint:ci": "eslint --cache --cache-strategy content",
 		"rojo-sync": "node scripts/rojo-sync.ts",
-		"test": "pnpm dev:build && COLUMNS=${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} FORCE_COLOR=1 pnpm -r --parallel --stream test",
+		"test": "FORCE_COLOR=1 turbo run dev:build && jest-roblox --workspace --packages @rbxts/flux,@rbxts/flux-jecs,@rbxts/flux-react,@flux/test-utils",
+		"test:affected": "FORCE_COLOR=1 turbo run dev:build && jest-roblox --workspace --affected-since=${BASE_REF:-main}",
 		"typecheck": "tsgo --build --emitDeclarationOnly"
 	},
 	"devDependencies": {
@@ -47,8 +48,10 @@
 		"madge": "catalog:lint",
 		"pncat": "catalog:cli",
 		"rbxts-transformer-jest": "catalog:test",
+		"rimraf": "catalog:node",
+		"turbo": "catalog:build",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
 	},
-	"packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
+	"packageManager": "pnpm@11.1.1+sha512.d1fdf5f73c617b64fa1a56a81c3c8dfe0e966e33a6010aa256b517ae77be21d93e05affc0de1a83b0e4f29d569f68b446ae8f068cd7247c0bb3df0fb4d7bdf9a"
 }

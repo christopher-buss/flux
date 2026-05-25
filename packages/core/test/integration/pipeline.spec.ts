@@ -1,10 +1,11 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
-import type { PipelineOptions } from "../../src/core/pipeline";
-import { processPipeline } from "../../src/core/pipeline";
-import type { ModifierContext } from "../../src/modifiers";
-import { deadZone, negate, scale } from "../../src/modifiers";
-import { hold, implicit } from "../../src/triggers";
+import type { PipelineOptions } from "#src/core/pipeline";
+import { processPipeline } from "#src/core/pipeline";
+import type { ModifierContext } from "#src/modifiers";
+import { deadZone, negate, scale } from "#src/modifiers";
+import { hold, implicit } from "#src/triggers";
+
 import type { InputHandle } from "../types/core";
 
 const modifierContext = {

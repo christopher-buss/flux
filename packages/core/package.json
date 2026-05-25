@@ -18,6 +18,20 @@
 	"license": "MIT",
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
+	"imports": {
+		"#src/*": {
+			"source": "./src/*.ts"
+		},
+		"#src/modifiers": {
+			"source": "./src/modifiers/index.ts"
+		},
+		"#src/triggers": {
+			"source": "./src/triggers/index.ts"
+		},
+		"#test/*": {
+			"source": "./test/*.ts"
+		}
+	},
 	"exports": {
 		".": {
 			"source": "./src/index.ts",
@@ -33,8 +47,7 @@
 	],
 	"scripts": {
 		"build": "rbxtsc --project tsconfig.lib.json",
-		"clean": "rimraf .jest-roblox-coverage/ out/ out-test/ dist/",
-		"darklua": "darklua process out dist --verbose",
+		"clean": "rimraf .jest-roblox/ out/ out-test/ dist/",
 		"dev:build": "rbxtsc --build --type=game --project tsconfig.spec.json",
 		"test": "jest-roblox",
 		"typecheck": "tsgo --noEmit",

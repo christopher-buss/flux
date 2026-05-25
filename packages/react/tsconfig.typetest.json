@@ -2,6 +2,8 @@
 	"$schema": "./node_modules/@isentinel/roblox-ts/schemas/rbxts-tsconfig.schema.json",
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
+		"rootDir": null,
+		"rootDirs": ["src", "test"],
 		"customConditions": ["source"],
 		"noEmit": true
 	},

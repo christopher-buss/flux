@@ -17,10 +17,11 @@ sourcemap.json
 
 .env
 .eslintcache
+.turbo/
 /.claude/state
 
 rojo-sync/
 game-output.log
 jest-output.log
-.jest-roblox-coverage/
+.jest-roblox/
 coverage/
