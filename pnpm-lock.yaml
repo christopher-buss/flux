@@ -31,8 +31,8 @@ catalogs:
       specifier: 4.0.1
       version: 4.0.1
     turbo:
-      specifier: 2.9.12
-      version: 2.9.12
+      specifier: 2.9.14
+      version: 2.9.14
   cli:
     pncat:
       specifier: 0.11.1
@@ -111,8 +111,8 @@ catalogs:
       version: 2.6.1
   test:
     '@isentinel/jest-roblox':
-      specifier: 0.2.3
-      version: 0.2.3
+      specifier: 0.3.0
+      version: 0.3.0
     '@rbxts-js/dom-testing-library-lua':
       specifier: 8.16.0-ts.2
       version: 8.16.0-ts.2
@@ -137,15 +137,6 @@ catalogs:
     '@rbxts/regexp':
       specifier: 0.2.1-ts.4
       version: 0.2.1-ts.4
-    istanbul-lib-coverage:
-      specifier: 3.2.2
-      version: 3.2.2
-    istanbul-lib-report:
-      specifier: 3.0.1
-      version: 3.0.1
-    istanbul-reports:
-      specifier: 3.2.0
-      version: 3.2.0
     rbxts-transformer-jest:
       specifier: 0.0.5
       version: 0.0.5
@@ -166,15 +157,6 @@ catalogs:
     '@rbxts/types':
       specifier: latest
       version: 1.0.921
-    '@types/istanbul-lib-coverage':
-      specifier: 2.0.6
-      version: 2.0.6
-    '@types/istanbul-lib-report':
-      specifier: 3.0.3
-      version: 3.0.3
-    '@types/istanbul-reports':
-      specifier: 3.0.4
-      version: 3.0.4
     '@types/node':
       specifier: 24.10.4
       version: 24.10.4
@@ -200,7 +182,7 @@ importers:
         version: 1.5.1(@typescript/native-preview@7.0.0-dev.20260521.1)(jiti@2.6.1)(typescript@6.0.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.3(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
+        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.1
@@ -258,9 +240,12 @@ importers:
       rbxts-transformer-jest:
         specifier: catalog:test
         version: 0.0.5(@roblox-ts/path-translator@1.1.0)(@roblox-ts/rojo-resolver@1.1.0)
+      rimraf:
+        specifier: catalog:node
+        version: 6.1.2
       turbo:
         specifier: catalog:build
-        version: 2.9.12
+        version: 2.9.14
       type-fest:
         specifier: catalog:types
         version: 5.4.4
@@ -414,7 +399,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.3(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
+        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.1
@@ -465,7 +450,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.3(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
+        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.1
@@ -519,7 +504,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.3(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
+        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.1
@@ -582,7 +567,7 @@ importers:
     devDependencies:
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.2.3(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
+        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.1
@@ -625,30 +610,12 @@ importers:
       '@isentinel/hooks':
         specifier: catalog:lint
         version: 1.5.1(@typescript/native-preview@7.0.0-dev.20260521.1)(jiti@2.6.1)(typescript@5.9.3)
-      '@types/istanbul-lib-coverage':
-        specifier: catalog:types
-        version: 2.0.6
-      '@types/istanbul-lib-report':
-        specifier: catalog:types
-        version: 3.0.3
-      '@types/istanbul-reports':
-        specifier: catalog:types
-        version: 3.0.4
       '@types/node':
         specifier: catalog:types
         version: 24.10.4
       confbox:
         specifier: catalog:dev
         version: 0.2.2
-      istanbul-lib-coverage:
-        specifier: catalog:test
-        version: 3.2.2
-      istanbul-lib-report:
-        specifier: catalog:test
-        version: 3.0.1
-      istanbul-reports:
-        specifier: catalog:test
-        version: 3.2.0
       std-env:
         specifier: catalog:dev
         version: 4.1.0
@@ -733,6 +700,10 @@ packages:
   '@babel/types@7.29.0':
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
+
+  '@bedrock-rbx/ocale@0.1.0-beta.15':
+    resolution: {integrity: sha512-3oVJEkPKCizy0Of/6fZB50w3ZMb1nkH66E6Kaw87jAvY0wIIY/mlb6JhAOMFPIfwdwBmvzT2mEYYF5nWCT8FGg==}
+    engines: {bun: '>=1.3.0', node: '>=24.12.0'}
 
   '@cacheable/memory@2.0.8':
     resolution: {integrity: sha512-FvEb29x5wVwu/Kf93IWwsOOEuhHh6dYCJF3vcKLzXc0KXIW181AOzv6ceT4ZpBHDvAfG60eqb+ekmrnLHIy+jw==}
@@ -1342,8 +1313,8 @@ packages:
       '@typescript/native-preview':
         optional: true
 
-  '@isentinel/jest-roblox@0.2.3':
-    resolution: {integrity: sha512-T+rl87+5+cp4J+LGEUWpg9VwnR0Ickty0yF3rWfaICaM+8QBcEn0w1nTEpPKpZLFKYuYOiddvk877Pq25qQzJA==}
+  '@isentinel/jest-roblox@0.3.0':
+    resolution: {integrity: sha512-+VzJR+jyH+Nu8TAeCp9ArlEHq7ItqdgWzxGTG604c7EIiDcky8E87E56uJYVinJXYX/yjT/cmyrknmJQCNJqFA==}
     engines: {node: '>=24.10.0'}
     hasBin: true
 
@@ -2353,33 +2324,33 @@ packages:
     resolution: {integrity: sha512-w071DSzP94YfN6XiWhOxnLpYT3uqtxJBDYdh6Jdjzt+Ce6DNspJsPQgpC7rbts/B8tEkq0LHoYuIF/O5Jh5rPg==}
     engines: {node: '>=18'}
 
-  '@turbo/darwin-64@2.9.12':
-    resolution: {integrity: sha512-eu3eFRmE9NjgZ0wPdRJ44l+LGSeIky+tz5ZQd8zQkw/Yqi+BM7wq+8nbabeoiVUcICi/IZweMOKl/MCmkrd1+g==}
+  '@turbo/darwin-64@2.9.14':
+    resolution: {integrity: sha512-t7QiPflaEyBE4oayeZtSmu4mEfjgIrcNlNNl1z1dmIVPqEdtA7+CfTf8d7KXsOGPh6aNgWjKxyvQg9uGfDQF+A==}
     cpu: [x64]
     os: [darwin]
 
-  '@turbo/darwin-arm64@2.9.12':
-    resolution: {integrity: sha512-RUkAE404z/J8NsyrUosMcBaXT6M4bRFxTQrmkDQBLQVXaC8Jl0e9bMvYDSX0GW7Ffm2m3j9y7RXgR1foeUAM9w==}
+  '@turbo/darwin-arm64@2.9.14':
+    resolution: {integrity: sha512-d23147mC9BsCPA9mJ0h/ubcpbRgcJBXbcG3+Vq7YLhjz3IXuvQsJ1UXH8f4MD76ZjJ4m/E4aRdJV+MW88CDfbw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/linux-64@2.9.12':
-    resolution: {integrity: sha512-InIUtH7cw/vqXNX1Gr7QgWfmw3ct08pV5CpfdEOR48z2u2rzdmpIuk00B/Q2xCb0PMWtKgiMQynfuphmEuUyTQ==}
+  '@turbo/linux-64@2.9.14':
+    resolution: {integrity: sha512-P3ZKB5tuUDdDQWuAsACGUR1qv9W7BNWxdxqVJ0kZNuNNPRaVYTPPikLcp79+GiEcW3npsR+KyP38lnQiBc5aSA==}
     cpu: [x64]
     os: [linux]
 
-  '@turbo/linux-arm64@2.9.12':
-    resolution: {integrity: sha512-lC6nD//Xh67fmJM0LKaLsg74Wry0aYrgMklpiNgCbUaMdPIOqj0A00iri3NU7Lb7pZHx8ViisgpeDKlpSgFUCA==}
+  '@turbo/linux-arm64@2.9.14':
+    resolution: {integrity: sha512-ZRTlzcUMrrPv9ZuDzRF9n60Ym13bKeG9jDB8WjxyLhWNzV+AJQN+zdpIk3NJYf2zQsGUm1mNar2P0elRzLw25g==}
     cpu: [arm64]
     os: [linux]
 
-  '@turbo/windows-64@2.9.12':
-    resolution: {integrity: sha512-conYri8VUl72JOdYnLDPYwzqbPcY5ECoHmo9FWoKznemhaAIilj4maHqs9Uar0aKfNoZIULniy+6iWaLtLO34A==}
+  '@turbo/windows-64@2.9.14':
+    resolution: {integrity: sha512-exanwN6sIduZwykYeiTQj8kCmOhazP5WOz3bvXMcYtjhL6Z3iRWLewKrXCBq0bqwSP3iBMb/AerRCnHI4lx46A==}
     cpu: [x64]
     os: [win32]
 
-  '@turbo/windows-arm64@2.9.12':
-    resolution: {integrity: sha512-XoR4bsg62/L/esRVcmoMESEiNZ36+YmyjYGLpoqk8nwMgXzzVjNOgX0lRSz5w/U/ajLGv3nhMsS0Q2QOdvp2AQ==}
+  '@turbo/windows-arm64@2.9.14':
+    resolution: {integrity: sha512-fVdCsnmYoKICsycbWuuGp6Jvi51/3G/UluFWuAUCvR8PIW5IJkAk5BM9UF8PSm0Q2IphWHFZjYEgjHsh3B9y/g==}
     cpu: [arm64]
     os: [win32]
 
@@ -2394,15 +2365,6 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
-
-  '@types/istanbul-lib-coverage@2.0.6':
-    resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
-
-  '@types/istanbul-lib-report@3.0.3':
-    resolution: {integrity: sha512-NQn7AHQnk/RSLOxrBbGyJM/aVQ+pjj5HCgasFxc0K/KhoATfQ/47AyUl15I2yBUpihjmas+a+VJBOqecrFH+uA==}
-
-  '@types/istanbul-reports@3.0.4':
-    resolution: {integrity: sha512-pk2B1NWalF9toCRu6gjBzR69syFjP4Od8WRAX+0mmf9lAjCRicLOWc+ZrxZHx/0XRjotgkF9t6iaMJ+aXcOdZQ==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -2821,8 +2783,8 @@ packages:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
     engines: {node: '>= 0.8'}
 
-  c12@4.0.0-beta.4:
-    resolution: {integrity: sha512-gcWQAloC/SwGx4U7l3iQdalUQQLLXwYS1d3SqIwFj4UUrTXh8L9yGkBcA00B0gxELMwbxtsrt6VrAxtSgqZZoA==}
+  c12@4.0.0-beta.5:
+    resolution: {integrity: sha512-yWGCPCQGJeFq4R0mFg5HOhC3Rg+B0PCdM+ldXWUhughoGgeeq8/tjRmXh4/lmhKWyhf+KOFxB/JMXf0Yv1Fd5A==}
     peerDependencies:
       chokidar: ^5
       dotenv: '*'
@@ -3016,9 +2978,6 @@ packages:
 
   defu@6.1.4:
     resolution: {integrity: sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==}
-
-  defu@6.1.6:
-    resolution: {integrity: sha512-f8mefEW4WIVg4LckePx3mALjQSPQgFlg9U8yaPdlsbdYcHQyj9n2zL2LJEA52smeYxOvmd/nB7TpMtHGMTHcug==}
 
   defu@6.1.7:
     resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
@@ -3589,9 +3548,6 @@ packages:
 
   get-tsconfig@4.13.6:
     resolution: {integrity: sha512-shZT/QMiSHc/YBLxxOkMtgSid5HFoauqCE3/exfsEcwg1WkeqjG+V40yBbBrsD+jW2HDXcs28xOfcbm2jI8Ddw==}
-
-  get-tsconfig@4.13.7:
-    resolution: {integrity: sha512-7tN6rFgBlMgpBML5j8typ92BKFi2sFQvIdpAqLA2beia5avZDrMs0FLZiM5etShWq5irVyGcGMEA1jcDaK7A/Q==}
 
   get-tsconfig@4.14.0:
     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
@@ -4223,6 +4179,9 @@ packages:
   pkg-types@2.3.0:
     resolution: {integrity: sha512-SIqCzDRg0s9npO5XQ3tNZioRY1uK06lA41ynBC1YmFTmnY6FjUjVt6s4LoADmwoig1qqD0oK8h1p/8mlMx8Oig==}
 
+  pkg-types@2.3.1:
+    resolution: {integrity: sha512-y+ichcgc2LrADuhLNAx8DFjVfgz91pRxfZdI3UDhxHvcVEZsenLO+7XaU5vOp0u/7V/wZ+plyuQxtrDlZJ+yeg==}
+
   pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
@@ -4596,8 +4555,8 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  turbo@2.9.12:
-    resolution: {integrity: sha512-lCPgus1NuTiBdaITWqzSH/Ff6HVL8HHGBtOXHg1dHRfcshN79XkygSdh0M6g8b0td91ILLG5MTkLOkp5UvyPJw==}
+  turbo@2.9.14:
+    resolution: {integrity: sha512-BQqXRr4UoWI3UPFrtznCLykYHxwxWh53iCB57x092jPMjIlW1wnm3N895g5irpiXmnxUhREBB0n6+y8BHhs4nw==}
     hasBin: true
 
   type-check@0.4.0:
@@ -4713,8 +4672,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.20.0:
-    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+  ws@8.20.1:
+    resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -4887,6 +4846,8 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
+
+  '@bedrock-rbx/ocale@0.1.0-beta.15': {}
 
   '@cacheable/memory@2.0.8':
     dependencies:
@@ -5533,15 +5494,15 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/jest-roblox@0.2.3(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)':
+  '@isentinel/jest-roblox@0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(jiti@2.6.1)':
     dependencies:
+      '@bedrock-rbx/ocale': 0.1.0-beta.15
       '@jridgewell/trace-mapping': 0.3.31
-      '@roblox-ts/rojo-resolver': 1.1.0
       arktype: 2.2.0
-      c12: 4.0.0-beta.4(jiti@2.6.1)
+      c12: 4.0.0-beta.5(jiti@2.6.1)
       confbox: 0.2.4
-      defu: 6.1.6
-      get-tsconfig: 4.13.7
+      defu: 6.1.7
+      get-tsconfig: 4.14.0
       highlight.js: 11.11.1
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
@@ -5550,7 +5511,7 @@ snapshots:
       picomatch: 4.0.4
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      ws: 8.20.0
+      ws: 8.20.1
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -6623,22 +6584,22 @@ snapshots:
       '@ts-graphviz/ast': 2.0.7
       '@ts-graphviz/common': 2.1.5
 
-  '@turbo/darwin-64@2.9.12':
+  '@turbo/darwin-64@2.9.14':
     optional: true
 
-  '@turbo/darwin-arm64@2.9.12':
+  '@turbo/darwin-arm64@2.9.14':
     optional: true
 
-  '@turbo/linux-64@2.9.12':
+  '@turbo/linux-64@2.9.14':
     optional: true
 
-  '@turbo/linux-arm64@2.9.12':
+  '@turbo/linux-arm64@2.9.14':
     optional: true
 
-  '@turbo/windows-64@2.9.12':
+  '@turbo/windows-64@2.9.14':
     optional: true
 
-  '@turbo/windows-arm64@2.9.12':
+  '@turbo/windows-arm64@2.9.14':
     optional: true
 
   '@tybys/wasm-util@0.10.1':
@@ -6653,16 +6614,6 @@ snapshots:
   '@types/esrecurse@4.3.1': {}
 
   '@types/estree@1.0.8': {}
-
-  '@types/istanbul-lib-coverage@2.0.6': {}
-
-  '@types/istanbul-lib-report@3.0.3':
-    dependencies:
-      '@types/istanbul-lib-coverage': 2.0.6
-
-  '@types/istanbul-reports@3.0.4':
-    dependencies:
-      '@types/istanbul-lib-report': 3.0.3
 
   '@types/json-schema@7.0.15': {}
 
@@ -7199,13 +7150,13 @@ snapshots:
 
   bytes@3.1.2: {}
 
-  c12@4.0.0-beta.4(jiti@2.6.1):
+  c12@4.0.0-beta.5(jiti@2.6.1):
     dependencies:
       confbox: 0.2.4
       defu: 6.1.7
       exsolve: 1.0.8
       pathe: 2.0.3
-      pkg-types: 2.3.0
+      pkg-types: 2.3.1
       rc9: 3.0.1
     optionalDependencies:
       jiti: 2.6.1
@@ -7393,8 +7344,6 @@ snapshots:
       clone: 1.0.4
 
   defu@6.1.4: {}
-
-  defu@6.1.6: {}
 
   defu@6.1.7: {}
 
@@ -8131,10 +8080,6 @@ snapshots:
   get-own-enumerable-property-symbols@3.0.2: {}
 
   get-tsconfig@4.13.6:
-    dependencies:
-      resolve-pkg-maps: 1.0.0
-
-  get-tsconfig@4.13.7:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
@@ -9017,6 +8962,12 @@ snapshots:
       exsolve: 1.0.8
       pathe: 2.0.3
 
+  pkg-types@2.3.1:
+    dependencies:
+      confbox: 0.2.4
+      exsolve: 1.0.8
+      pathe: 2.0.3
+
   pluralize@8.0.0: {}
 
   pncat@0.11.1:
@@ -9397,14 +9348,14 @@ snapshots:
   tslib@2.8.1:
     optional: true
 
-  turbo@2.9.12:
+  turbo@2.9.14:
     optionalDependencies:
-      '@turbo/darwin-64': 2.9.12
-      '@turbo/darwin-arm64': 2.9.12
-      '@turbo/linux-64': 2.9.12
-      '@turbo/linux-arm64': 2.9.12
-      '@turbo/windows-64': 2.9.12
-      '@turbo/windows-arm64': 2.9.12
+      '@turbo/darwin-64': 2.9.14
+      '@turbo/darwin-arm64': 2.9.14
+      '@turbo/linux-64': 2.9.14
+      '@turbo/linux-arm64': 2.9.14
+      '@turbo/windows-64': 2.9.14
+      '@turbo/windows-arm64': 2.9.14
 
   type-check@0.4.0:
     dependencies:
@@ -9505,7 +9456,7 @@ snapshots:
 
   ws@8.18.3: {}
 
-  ws@8.20.0: {}
+  ws@8.20.1: {}
 
   xdg-basedir@5.1.0: {}
 

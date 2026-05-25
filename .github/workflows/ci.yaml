@@ -64,6 +64,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -78,16 +80,14 @@ jobs:
             turbo-${{ runner.os }}-
 
       - env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
           ROBLOX_OPEN_CLOUD_API_KEY: ${{ secrets.ROBLOX_OPEN_CLOUD_API_KEY }}
           ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
           ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}
         name: Test
-        run: pnpm exec turbo run test -- --coverage --coverageReporters json-summary --coverageReporters json
+        run: pnpm run test:affected -- --coverage --coverageReporters json-summary --coverageReporters json
 
-      - name: Merge Coverage
-        run: node scripts/merge-coverage.ts
-
-      - if: always()
+      - if: ${{ always() && hashFiles('coverage/coverage-summary.json') != '' }}
         name: Coverage Report
         uses: davelosert/vitest-coverage-report-action@2500dafcee7dd64f85ab689c0b83798a8359770e # v2.9.3
         with:

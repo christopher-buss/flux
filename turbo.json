@@ -45,7 +45,7 @@
 		"test": {
 			"dependsOn": ["//#dev:build"],
 			"inputs": ["src/**", "test/**", "tsconfig.spec.json", "package.json"],
-			"outputs": [".jest-roblox-coverage/**", "coverage/**"],
+			"outputs": [".jest-roblox/**", "coverage/**"],
 			"env": ["ROBLOX_OPEN_CLOUD_API_KEY", "ROBLOX_PLACE_ID", "ROBLOX_UNIVERSE_ID"]
 		},
 		"//#lint": {
