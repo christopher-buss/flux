@@ -64,8 +64,8 @@ catalogs:
       specifier: 3.0.1
       version: 3.0.1
     eslint-plugin-pnpm:
-      specifier: 1.6.0
-      version: 1.6.0
+      specifier: 1.6.1
+      version: 1.6.1
     eslint-plugin-react-hooks:
       specifier: 7.0.1
       version: 7.0.1
@@ -209,7 +209,7 @@ importers:
         version: 3.0.1(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.3)
       eslint-plugin-pnpm:
         specifier: catalog:lint
-        version: 1.6.0(eslint@9.39.4(jiti@2.6.1))
+        version: 1.6.1(eslint@9.39.4(jiti@2.6.1))
       eslint-plugin-react-hooks:
         specifier: catalog:lint
         version: 7.0.1(eslint@9.39.4(jiti@2.6.1))
@@ -3063,6 +3063,10 @@ packages:
     resolution: {integrity: sha512-i6UzDscO/XfAcNYD75CfICkmfLedpyPDdozrLMmQc5ORaQcdMoc21OnlEylMIqI7U8eniKrPMxxtj8k0vhmJhA==}
     engines: {node: '>=14'}
 
+  empathic@2.0.1:
+    resolution: {integrity: sha512-YGRs8knHhKHVShLkFET/rWAU8kmHbOV5LwN938RHI0pljAJ1Gf6SzXsSmRaEzcXTtOOmVqJ5+WtQPL5uigY50Q==}
+    engines: {node: '>=14'}
+
   enhanced-resolve@5.20.0:
     resolution: {integrity: sha512-/ce7+jQ1PQ6rVXwe+jKEg5hW5ciicHwIQUagZkp6IufBoY3YDgdTTY1azVs0qoRgVmvsNB+rbjLJxDAeHHtwsQ==}
     engines: {node: '>=10.13.0'}
@@ -3256,8 +3260,8 @@ packages:
     peerDependencies:
       eslint: ^9.0.0
 
-  eslint-plugin-pnpm@1.6.0:
-    resolution: {integrity: sha512-dxmt9r3zvPaft6IugS4i0k16xag3fTbOvm/road5uV9Y8qUCQT0xzheSh3gMlYAlC6vXRpfArBDsTZ7H7JKCbg==}
+  eslint-plugin-pnpm@1.6.1:
+    resolution: {integrity: sha512-pgcaJclu3YxZ/WMsiKMF58bHQasbGVARSMqCJvFaETYxSc7KcR2H74UVWV6exuGv9nNv9c0KKqn4PVHQlzMSEg==}
     peerDependencies:
       eslint: ^9.0.0 || ^10.0.0
 
@@ -4195,6 +4199,9 @@ packages:
   pnpm-workspace-yaml@1.6.0:
     resolution: {integrity: sha512-uUy4dK3E11sp7nK+hnT7uAWfkBMe00KaUw8OG3NuNlYQoTk4sc9pcdIy1+XIP85v9Tvr02mK3JPaNNrP0QyRaw==}
 
+  pnpm-workspace-yaml@1.6.1:
+    resolution: {integrity: sha512-yTeZntGWi8m9WNuhoVsP0DpFc4sC1U0+rr/qR6Zi9n2g3sxXY+JfccjXjjruNz96tM8I09yaJUA86doRnNLkbg==}
+
   postcss-values-parser@6.0.2:
     resolution: {integrity: sha512-YLJpK0N1brcNJrs9WatuJFtHaV9q5aAOj+S4DI5S7jgHlRfm0PIbDCAFRYMQD5SHq7Fy6xsDhyutgS0QOAs0qw==}
     engines: {node: '>=10'}
@@ -4509,6 +4516,10 @@ packages:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
 
+  tinyglobby@0.2.16:
+    resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
+    engines: {node: '>=12.0.0'}
+
   tinypool@2.1.0:
     resolution: {integrity: sha512-Pugqs6M0m7Lv1I7FtxN4aoyToKg1C4tu+/381vH35y8oENM/Ai7f7C4StcoK4/+BSw9ebcS8jRiVrORFKCALLw==}
     engines: {node: ^20.0.0 || >=22.0.0}
@@ -4700,6 +4711,11 @@ packages:
 
   yaml@2.8.2:
     resolution: {integrity: sha512-mplynKqc1C2hTVYxd0PU2xQAc22TI1vShAYGksCCfxbn/dFwnHTNi1bvYsBTkhdUNtGIf5xNOg938rrSSYvS9A==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
+  yaml@2.9.0:
+    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
     engines: {node: '>= 14.6'}
     hasBin: true
 
@@ -7437,6 +7453,8 @@ snapshots:
 
   empathic@2.0.0: {}
 
+  empathic@2.0.1: {}
+
   enhanced-resolve@5.20.0:
     dependencies:
       graceful-fs: 4.2.11
@@ -7676,15 +7694,15 @@ snapshots:
       yaml: 2.8.2
       yaml-eslint-parser: 2.0.0
 
-  eslint-plugin-pnpm@1.6.0(eslint@9.39.4(jiti@2.6.1)):
+  eslint-plugin-pnpm@1.6.1(eslint@9.39.4(jiti@2.6.1)):
     dependencies:
-      empathic: 2.0.0
+      empathic: 2.0.1
       eslint: 9.39.4(jiti@2.6.1)
       jsonc-eslint-parser: 3.1.0
       pathe: 2.0.3
-      pnpm-workspace-yaml: 1.6.0
-      tinyglobby: 0.2.15
-      yaml: 2.8.2
+      pnpm-workspace-yaml: 1.6.1
+      tinyglobby: 0.2.16
+      yaml: 2.9.0
       yaml-eslint-parser: 2.0.0
 
   eslint-plugin-promise@7.2.1(eslint@9.39.4(jiti@2.6.1)):
@@ -8006,6 +8024,10 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.3):
     optionalDependencies:
       picomatch: 4.0.3
+
+  fdir@6.5.0(picomatch@4.0.4):
+    optionalDependencies:
+      picomatch: 4.0.4
 
   file-entry-cache@11.1.2:
     dependencies:
@@ -9002,6 +9024,10 @@ snapshots:
     dependencies:
       yaml: 2.8.2
 
+  pnpm-workspace-yaml@1.6.1:
+    dependencies:
+      yaml: 2.9.0
+
   postcss-values-parser@6.0.2(postcss@8.5.8):
     dependencies:
       color-name: 1.1.4
@@ -9311,6 +9337,11 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
 
+  tinyglobby@0.2.16:
+    dependencies:
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
+
   tinypool@2.1.0: {}
 
   tinyrainbow@3.1.0: {}
@@ -9481,6 +9512,8 @@ snapshots:
       yaml: 2.8.2
 
   yaml@2.8.2: {}
+
+  yaml@2.9.0: {}
 
   yargs-parser@22.0.0: {}
 
