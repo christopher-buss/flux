@@ -76,8 +76,8 @@ catalogs:
       specifier: 2.13.0
       version: 2.13.0
     eslint_d:
-      specifier: 15.0.0
-      version: 15.0.0
+      specifier: 15.0.2
+      version: 15.0.2
     file-entry-cache:
       specifier: 11.1.2
       version: 11.1.2
@@ -221,7 +221,7 @@ importers:
         version: 2.13.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.3)
       eslint_d:
         specifier: catalog:lint
-        version: 15.0.0(jiti@2.6.1)
+        version: 15.0.2(jiti@2.6.1)
       file-entry-cache:
         specifier: catalog:lint
         version: 11.1.2
@@ -3376,6 +3376,11 @@ packages:
 
   eslint_d@15.0.0:
     resolution: {integrity: sha512-4GKp4YK4oxTFCNdz7ygOaB+T9+kDR/xY8RdfeB1JFU+IUuHJzXO1CBfNyVjKSy3b12sdrw6e0XA7ku5I2s+ItA==}
+    engines: {node: '>=22'}
+    hasBin: true
+
+  eslint_d@15.0.2:
+    resolution: {integrity: sha512-08qxnTNAHi6gaOJdixu/5gliLFRQzTAeX/aXxcFK78FPK9RQuCNnvwq2tDzlSmXc/dkK/Q2n3P4nvPhvTQJa2Q==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -7917,6 +7922,14 @@ snapshots:
       - supports-color
 
   eslint_d@15.0.0(jiti@2.6.1):
+    dependencies:
+      debug: 4.4.3(supports-color@10.2.2)
+      eslint: 10.0.3(jiti@2.6.1)(supports-color@10.2.2)
+      supports-color: 10.2.2
+    transitivePeerDependencies:
+      - jiti
+
+  eslint_d@15.0.2(jiti@2.6.1):
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       eslint: 10.0.3(jiti@2.6.1)(supports-color@10.2.2)
