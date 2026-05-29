@@ -82,8 +82,8 @@ catalogs:
       specifier: 11.1.3
       version: 11.1.3
     get-tsconfig:
-      specifier: 4.13.6
-      version: 4.13.6
+      specifier: 4.14.0
+      version: 4.14.0
     madge:
       specifier: 8.0.0
       version: 8.0.0
@@ -227,7 +227,7 @@ importers:
         version: 11.1.3
       get-tsconfig:
         specifier: catalog:lint
-        version: 4.13.6
+        version: 4.14.0
       jiti:
         specifier: catalog:script
         version: 2.7.0
@@ -3551,9 +3551,6 @@ packages:
 
   get-own-enumerable-property-symbols@3.0.2:
     resolution: {integrity: sha512-I0UBV/XOz1XkIJHEUDMZAbzCThU/H8DxmSfmdGcKPnVhu2VfFqr34jr9777IyaTYvxjedWhqVIilEDsCdP5G6g==}
-
-  get-tsconfig@4.13.6:
-    resolution: {integrity: sha512-shZT/QMiSHc/YBLxxOkMtgSid5HFoauqCE3/exfsEcwg1WkeqjG+V40yBbBrsD+jW2HDXcs28xOfcbm2jI8Ddw==}
 
   get-tsconfig@4.14.0:
     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
@@ -8115,10 +8112,6 @@ snapshots:
   get-east-asian-width@1.4.0: {}
 
   get-own-enumerable-property-symbols@3.0.2: {}
-
-  get-tsconfig@4.13.6:
-    dependencies:
-      resolve-pkg-maps: 1.0.0
 
   get-tsconfig@4.14.0:
     dependencies:
