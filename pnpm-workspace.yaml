@@ -71,7 +71,7 @@ catalogs:
   types:
     "@rbxts/compiler-types": 3.0.0-types.0
     "@rbxts/types": latest
-    "@types/node": 24.10.4
+    "@types/node": 24.12.4
     type-fest: 5.4.4
 
 allowBuilds:
