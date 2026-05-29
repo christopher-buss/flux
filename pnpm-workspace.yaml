@@ -52,7 +52,7 @@ catalogs:
   prod:
     "@rbxts/services": 1.6.0
   script:
-    jiti: 2.6.1
+    jiti: 2.7.0
   test:
     "@isentinel/jest-roblox": 0.3.0
     "@rbxts-js/dom-testing-library-lua": 8.16.0-ts.2
