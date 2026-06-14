@@ -1,0 +1,32 @@
+diff --git a/src/init.lua b/src/init.lua
+index 3ef26226c6befc783885d787ac6cd733a9cfd713..6747fcd14df799559b20d925d4ff077d72c68e17 100644
+--- a/src/init.lua
++++ b/src/init.lua
+@@ -453,27 +453,20 @@ function Emittery:emit(eventName, eventData, allowMetaEvents)
+ 
+ 		enqueueProducers(self, eventName, eventData)
+ 
+ 		local listeners = getListeners(self, eventName)
+ 		local anyListeners = anyMap:get(self)
+ 		local staticListeners = Array.concat({}, Array.from(listeners))
+ 		local staticAnyListeners = if Boolean.toJSBoolean(isMetaEvent(eventName))
+ 			then {}
+ 			else Array.concat({}, Array.from(anyListeners))
+ 
+-		-- ROBLOX deviation START: need to delay a promise as awaited promises are deferred in JS
+-		resolvedPromise
+-			:andThen(function(...)
+-				return Promise.delay(0):andThenReturn(...)
+-			end)
+-			:expect()
+-		-- ROBLOX deviation END
+ 		Promise.all(Array.concat(
+ 			{},
+ 			Array.map(staticListeners, function(listener)
+ 				return Promise.resolve():andThen(function()
+ 					if listeners:has(listener) then
+ 						return listener(eventData)
+ 					end
+ 					return
+ 				end)
+ 			end),
