@@ -31,7 +31,7 @@ catalogs:
     "@isentinel/roblox-ts": 4.0.3
     turbo: 2.9.15
   cli:
-    pncat: 0.11.1
+    pncat: 0.12.0
   dev:
     confbox: 0.2.2
     std-env: 4.1.0
