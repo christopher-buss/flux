@@ -5,6 +5,7 @@ export default defineConfig({
 	gameOutput: "game-output.log",
 	jestPath: "ReplicatedStorage/rbxts_include/node_modules/@rbxts/jest/src",
 	outputFile: "jest-output.log",
+	parallel: "auto",
 	placeFile: "test.rbxl",
 	rojoProject: "test.project.json",
 	test: {
@@ -20,7 +21,13 @@ export default defineConfig({
 		setupFiles: ["@flux/test-utils/out/setup"],
 		setupFilesAfterEnv: ["@flux/test-utils/loaders/jest-extended"],
 		testTimeout: 5000,
+		typecheck: {
+			enabled: true,
+			tsconfig: "tsconfig.typetest.json",
+		},
 	},
 	timeout: 30000,
-	typecheck: true,
+	workspace: {
+		outputFile: true,
+	},
 });

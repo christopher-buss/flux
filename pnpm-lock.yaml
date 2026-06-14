@@ -111,8 +111,8 @@ catalogs:
       version: 2.7.0
   test:
     '@isentinel/jest-roblox':
-      specifier: 0.3.0
-      version: 0.3.0
+      specifier: 0.3.4
+      version: 0.3.4
     '@rbxts-js/dom-testing-library-lua':
       specifier: 8.16.0-ts.2
       version: 8.16.0-ts.2
@@ -156,7 +156,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.924
+      version: 1.0.925
     '@types/node':
       specifier: 24.12.4
       version: 24.12.4
@@ -165,6 +165,8 @@ catalogs:
       version: 5.6.0
 
 patchedDependencies:
+  '@rbxts-js/emittery@3.16.0-ts.1': 497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496
+  '@rbxts-js/expect@3.16.0-ts.1': 34f2597293f2c360ff17efbcf9640c085be30065a528382a3c7fcae22f686b10
   '@rbxts/compiler-types': 0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def
 
 importers:
@@ -182,7 +184,7 @@ importers:
         version: 1.5.1(@typescript/native-preview@7.0.0-dev.20260527.1)(jiti@2.7.0)(typescript@6.0.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
+        version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.3
@@ -273,7 +275,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.924
+        version: 1.0.925
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260527.1
@@ -310,7 +312,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.924
+        version: 1.0.925
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260527.1
@@ -350,7 +352,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.924
+        version: 1.0.925
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260527.1
@@ -381,7 +383,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.924
+        version: 1.0.925
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260527.1
@@ -399,7 +401,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
+        version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.3
@@ -429,7 +431,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.924
+        version: 1.0.925
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260527.1
@@ -450,7 +452,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
+        version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.3
@@ -483,7 +485,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.924
+        version: 1.0.925
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260527.1
@@ -504,7 +506,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
+        version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.3
@@ -549,7 +551,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.924
+        version: 1.0.925
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260527.1
@@ -567,7 +569,7 @@ importers:
     devDependencies:
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
+        version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.3
@@ -597,7 +599,7 @@ importers:
         version: 0.1.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.924
+        version: 1.0.925
       rimraf:
         specifier: catalog:node
         version: 6.1.3
@@ -701,8 +703,8 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@bedrock-rbx/ocale@0.1.0-beta.15':
-    resolution: {integrity: sha512-3oVJEkPKCizy0Of/6fZB50w3ZMb1nkH66E6Kaw87jAvY0wIIY/mlb6JhAOMFPIfwdwBmvzT2mEYYF5nWCT8FGg==}
+  '@bedrock-rbx/ocale@0.1.0-beta.16':
+    resolution: {integrity: sha512-JryFv44D07o2b6a+50DmBnAwadbNcCrQSBn5Bt09aRcmb6hJny+hinB3zdcHxI+JFAONgAYXLfbIjMbnOV3hRw==}
     engines: {bun: '>=1.3.0', node: '>=24.12.0'}
 
   '@cacheable/memory@2.0.8':
@@ -1313,9 +1315,9 @@ packages:
       '@typescript/native-preview':
         optional: true
 
-  '@isentinel/jest-roblox@0.3.0':
-    resolution: {integrity: sha512-+VzJR+jyH+Nu8TAeCp9ArlEHq7ItqdgWzxGTG604c7EIiDcky8E87E56uJYVinJXYX/yjT/cmyrknmJQCNJqFA==}
-    engines: {node: '>=24.10.0'}
+  '@isentinel/jest-roblox@0.3.4':
+    resolution: {integrity: sha512-O0/CutKKlGQTYab7wdiTcWbc2tpR514ILE6G2u/jyQ8NGf0fdnEP3UbjBXxXN0v7p1IPH7tJGT7xthaOLJUBWQ==}
+    engines: {node: '>=24.12.0'}
     hasBin: true
 
   '@isentinel/roblox-ts@4.0.3':
@@ -2162,8 +2164,8 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.924':
-    resolution: {integrity: sha512-ez4ymlah37fHqJUH1xFXWLz+ehmcEFHlFVgiGKKrRlzqqXD/8jCOUbg+q0K2hjp/0OdoGovQZGj0vkSfyNvUhQ==}
+  '@rbxts/types@1.0.925':
+    resolution: {integrity: sha512-wUbRd/6m1NOGVw5sYKerRnSKj7Vbj0e+tZLQ3TsjMmA5uS2wl36Jzep66BYIpaKn8DvhMhLxntjFBd318S66bA==}
 
   '@roblox-ts/luau-ast@2.0.1':
     resolution: {integrity: sha512-jej2mzRGwhR9wu4woAtgTwqsKADlegZYlQ+M5qVHRojvjoyJVFkLrSbhBKRr8HR+fVW5nCz0qX7kNa0tSpAY+A==}
@@ -4172,10 +4174,6 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
 
-  picomatch@4.0.3:
-    resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
-    engines: {node: '>=12'}
-
   picomatch@4.0.4:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
@@ -4432,9 +4430,6 @@ packages:
 
   spdx-license-ids@3.0.22:
     resolution: {integrity: sha512-4PRT4nh1EImPbt2jASOKHX7PB7I+e4IWNLvkKFDxNhJlfjbYlleYQh285Z/3mPTHSAK/AvdMmw5BNNuYH8ShgQ==}
-
-  std-env@4.0.0:
-    resolution: {integrity: sha512-zUMPtQ/HBY3/50VbpkupYHbRroTRZJPRLvreamgErJVys0ceuzMkD44J/QjqhHjOzK42GQ3QZIeFG1OYfOtKqQ==}
 
   std-env@4.1.0:
     resolution: {integrity: sha512-Rq7ybcX2RuC55r9oaPVEW7/xu3tj8u4GeBYHBWCychFtzMIr86A7e3PPEBPT37sHStKX3+TiX/Fr/ACmJLVlLQ==}
@@ -4862,7 +4857,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@bedrock-rbx/ocale@0.1.0-beta.15': {}
+  '@bedrock-rbx/ocale@0.1.0-beta.16': {}
 
   '@cacheable/memory@2.0.8':
     dependencies:
@@ -5511,9 +5506,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/jest-roblox@0.3.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)':
+  '@isentinel/jest-roblox@0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)':
     dependencies:
-      '@bedrock-rbx/ocale': 0.1.0-beta.15
+      '@bedrock-rbx/ocale': 0.1.0-beta.16
       '@jridgewell/trace-mapping': 0.3.31
       arktype: 2.2.0
       c12: 4.0.0-beta.5(chokidar@5.0.0)(jiti@2.7.0)
@@ -5526,7 +5521,7 @@ snapshots:
       istanbul-reports: 3.2.0
       oxc-parser: 0.123.0(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)
       picomatch: 4.0.4
-      std-env: 4.0.0
+      std-env: 4.1.0
       tinyrainbow: 3.1.0
       ws: 8.20.1
     transitivePeerDependencies:
@@ -5921,7 +5916,7 @@ snapshots:
       '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
       '@rbxts-js/roblox-shared': 3.13.3-ts.3
 
-  '@rbxts-js/emittery@3.16.0-ts.1':
+  '@rbxts-js/emittery@3.16.0-ts.1(patch_hash=497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496)':
     dependencies:
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
       '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
@@ -5940,7 +5935,7 @@ snapshots:
       '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
       '@rbxts-js/roblox-shared': 3.13.3-ts.3
 
-  '@rbxts-js/expect@3.16.0-ts.1':
+  '@rbxts-js/expect@3.16.0-ts.1(patch_hash=34f2597293f2c360ff17efbcf9640c085be30065a528382a3c7fcae22f686b10)':
     dependencies:
       '@rbxts-js/jest-get-type': 3.16.0-ts.1
       '@rbxts-js/jest-matcher-utils': 3.16.0-ts.1
@@ -5957,7 +5952,7 @@ snapshots:
   '@rbxts-js/jest-circus@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/chalk-lua': 0.2.2-ts.2
-      '@rbxts-js/expect': 3.16.0-ts.1
+      '@rbxts-js/expect': 3.16.0-ts.1(patch_hash=34f2597293f2c360ff17efbcf9640c085be30065a528382a3c7fcae22f686b10)
       '@rbxts-js/jest-each': 3.16.0-ts.1
       '@rbxts-js/jest-environment': 3.16.0-ts.1
       '@rbxts-js/jest-matcher-utils': 3.16.0-ts.1
@@ -6001,7 +5996,7 @@ snapshots:
   '@rbxts-js/jest-core@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/chalk-lua': 0.2.2-ts.2
-      '@rbxts-js/emittery': 3.16.0-ts.1
+      '@rbxts-js/emittery': 3.16.0-ts.1(patch_hash=497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496)
       '@rbxts-js/jest-config': 3.16.0-ts.1
       '@rbxts-js/jest-console': 3.16.0-ts.1
       '@rbxts-js/jest-message-util': 3.16.0-ts.1
@@ -6102,7 +6097,7 @@ snapshots:
 
   '@rbxts-js/jest-globals@3.16.0-ts.1':
     dependencies:
-      '@rbxts-js/expect': 3.16.0-ts.1
+      '@rbxts-js/expect': 3.16.0-ts.1(patch_hash=34f2597293f2c360ff17efbcf9640c085be30065a528382a3c7fcae22f686b10)
       '@rbxts-js/jest-environment': 3.16.0-ts.1
       '@rbxts-js/jest-types': 3.16.0-ts.1
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
@@ -6193,7 +6188,7 @@ snapshots:
   '@rbxts-js/jest-runner@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/chalk-lua': 0.2.2-ts.2
-      '@rbxts-js/emittery': 3.16.0-ts.1
+      '@rbxts-js/emittery': 3.16.0-ts.1(patch_hash=497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496)
       '@rbxts-js/jest-circus': 3.16.0-ts.1
       '@rbxts-js/jest-console': 3.16.0-ts.1
       '@rbxts-js/jest-environment': 3.16.0-ts.1
@@ -6209,7 +6204,7 @@ snapshots:
 
   '@rbxts-js/jest-runtime@3.16.0-ts.1':
     dependencies:
-      '@rbxts-js/expect': 3.16.0-ts.1
+      '@rbxts-js/expect': 3.16.0-ts.1(patch_hash=34f2597293f2c360ff17efbcf9640c085be30065a528382a3c7fcae22f686b10)
       '@rbxts-js/jest-fake-timers': 3.16.0-ts.1
       '@rbxts-js/jest-mock': 3.16.0-ts.1
       '@rbxts-js/jest-mock-genv': 3.16.0-ts.1
@@ -6436,7 +6431,7 @@ snapshots:
 
   '@rbxts/emittery@3.16.0-ts.1':
     dependencies:
-      '@rbxts-js/emittery': 3.16.0-ts.1
+      '@rbxts-js/emittery': 3.16.0-ts.1(patch_hash=497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496)
 
   '@rbxts/jecs@0.11.0': {}
 
@@ -6495,7 +6490,7 @@ snapshots:
 
   '@rbxts/services@1.6.0': {}
 
-  '@rbxts/types@1.0.924': {}
+  '@rbxts/types@1.0.925': {}
 
   '@roblox-ts/luau-ast@2.0.1': {}
 
@@ -8016,10 +8011,6 @@ snapshots:
     dependencies:
       format: 0.2.2
 
-  fdir@6.5.0(picomatch@4.0.3):
-    optionalDependencies:
-      picomatch: 4.0.3
-
   fdir@6.5.0(picomatch@4.0.4):
     optionalDependencies:
       picomatch: 4.0.4
@@ -8988,8 +8979,6 @@ snapshots:
 
   picomatch@2.3.1: {}
 
-  picomatch@4.0.3: {}
-
   picomatch@4.0.4: {}
 
   pkg-types@1.3.1:
@@ -9268,8 +9257,6 @@ snapshots:
 
   spdx-license-ids@3.0.22: {}
 
-  std-env@4.0.0: {}
-
   std-env@4.1.0: {}
 
   stream-to-array@2.3.0:
@@ -9338,8 +9325,8 @@ snapshots:
 
   tinyglobby@0.2.15:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
 
   tinyglobby@0.2.16:
     dependencies:
