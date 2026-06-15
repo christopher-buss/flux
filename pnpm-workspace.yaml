@@ -28,7 +28,7 @@ patchedDependencies:
   "@rbxts/compiler-types": patches/@rbxts__compiler-types@3.0.0-types.0.patch
 catalogs:
   build:
-    "@isentinel/roblox-ts": 4.0.3
+    "@isentinel/roblox-ts": 4.0.6
     turbo: 2.9.15
   cli:
     pncat: 0.11.1

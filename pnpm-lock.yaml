@@ -28,8 +28,8 @@ settings:
 catalogs:
   build:
     '@isentinel/roblox-ts':
-      specifier: 4.0.3
-      version: 4.0.3
+      specifier: 4.0.6
+      version: 4.0.6
     turbo:
       specifier: 2.9.15
       version: 2.9.15
@@ -187,7 +187,7 @@ importers:
         version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -266,7 +266,7 @@ importers:
     devDependencies:
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -303,7 +303,7 @@ importers:
     devDependencies:
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -343,7 +343,7 @@ importers:
     devDependencies:
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -374,7 +374,7 @@ importers:
     devDependencies:
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -404,7 +404,7 @@ importers:
         version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -455,7 +455,7 @@ importers:
         version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -509,7 +509,7 @@ importers:
         version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -572,7 +572,7 @@ importers:
         version: 0.3.4(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(chokidar@5.0.0)(jiti@2.7.0)
       '@isentinel/roblox-ts':
         specifier: catalog:build
-        version: 4.0.3
+        version: 4.0.6
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
@@ -1320,8 +1320,8 @@ packages:
     engines: {node: '>=24.12.0'}
     hasBin: true
 
-  '@isentinel/roblox-ts@4.0.3':
-    resolution: {integrity: sha512-PMTYc9DPC+Wcu7RyWstVceywpTpIvT6lRc123YDqy30uBkZjwgU83J7nEmSBwzHZ/Bb3YwWK3Jnp6f/ewzVsXQ==}
+  '@isentinel/roblox-ts@4.0.6':
+    resolution: {integrity: sha512-ijGAinvyCH1Y6L25jodgYkqgl67N1rDk05QkLpUb2U0HHb5kJIZHqxU+yVMWVRO3x1y9bfQhbHGekAH7aeRhYA==}
     hasBin: true
 
   '@isentinel/stylua@2.1.0-esm.3':
@@ -5535,7 +5535,7 @@ snapshots:
       - magicast
       - utf-8-validate
 
-  '@isentinel/roblox-ts@4.0.3':
+  '@isentinel/roblox-ts@4.0.6':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
