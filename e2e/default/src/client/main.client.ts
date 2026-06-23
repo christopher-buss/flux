@@ -135,6 +135,7 @@ function buildStatusText(state: ReturnType<typeof core.getState>, isNearby: bool
 		"[Flux E2E]",
 		`context: ${activeContext}`,
 		`move: (${string.format("%.1f", move.X)}, ${string.format("%.1f", move.Y)})`,
+		`chord (Ctrl+Shift+C): ${state.pressed("chord") ? "PRESSED" : "idle"}`,
 		`fire: ${state.pressed("fire") ? "pressed" : ""}`,
 		`jump: ${state.pressed("jump")}`,
 		`interact: ${isNearby ? "nearby" : "far"} | ${getInteractStatus(state)}`,
