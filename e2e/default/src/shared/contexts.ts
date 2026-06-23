@@ -3,6 +3,14 @@ import { defineContexts } from "@flux/core";
 export const contexts = defineContexts({
 	gameplay: {
 		bindings: {
+			// Chord: C only fires while LeftControl + LeftShift are held.
+			chord: [
+				{
+					keyCode: Enum.KeyCode.C,
+					primaryModifier: Enum.KeyCode.LeftControl,
+					secondaryModifier: Enum.KeyCode.LeftShift,
+				},
+			],
 			fire: [Enum.KeyCode.MouseRightButton],
 			interact: [Enum.KeyCode.E],
 			jump: [Enum.KeyCode.Space],

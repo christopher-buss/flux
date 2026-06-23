@@ -147,6 +147,82 @@ describe("createInputInstances", () => {
 		expect(data.inputActions.has("move")).toBeTrue();
 	});
 
+	it("should map chord modifiers onto the InputBinding", () => {
+		expect.assertions(3);
+
+		const actions = {
+			ability: { type: "Bool" as const },
+		} satisfies ActionMap;
+
+		const contexts = {
+			gameplay: {
+				bindings: {
+					ability: [
+						{
+							keyCode: Enum.KeyCode.C,
+							primaryModifier: Enum.KeyCode.LeftControl,
+							secondaryModifier: Enum.KeyCode.LeftShift,
+						},
+					],
+				},
+				priority: 0,
+			},
+		} satisfies Record<string, ContextConfig>;
+
+		const data = createInputInstances({
+			actions,
+			contextNames: ["gameplay"],
+			contexts,
+			parent: new Instance("Folder"),
+		});
+
+		const abilityAction = data.inputActions.get("ability");
+		assert(abilityAction);
+		const binding = abilityAction.FindFirstChildOfClass("InputBinding");
+		assert(binding);
+
+		expect(binding.KeyCode).toBe(Enum.KeyCode.C);
+		expect(binding.PrimaryModifier).toBe(Enum.KeyCode.LeftControl);
+		expect(binding.SecondaryModifier).toBe(Enum.KeyCode.LeftShift);
+	});
+
+	it("should leave the secondary modifier unset for a two-key chord", () => {
+		expect.assertions(2);
+
+		const actions = {
+			ability: { type: "Bool" as const },
+		} satisfies ActionMap;
+
+		const contexts = {
+			gameplay: {
+				bindings: {
+					ability: [
+						{
+							keyCode: Enum.KeyCode.C,
+							primaryModifier: Enum.KeyCode.LeftControl,
+						},
+					],
+				},
+				priority: 0,
+			},
+		} satisfies Record<string, ContextConfig>;
+
+		const data = createInputInstances({
+			actions,
+			contextNames: ["gameplay"],
+			contexts,
+			parent: new Instance("Folder"),
+		});
+
+		const abilityAction = data.inputActions.get("ability");
+		assert(abilityAction);
+		const binding = abilityAction.FindFirstChildOfClass("InputBinding");
+		assert(binding);
+
+		expect(binding.PrimaryModifier).toBe(Enum.KeyCode.LeftControl);
+		expect(binding.SecondaryModifier).toBe(Enum.KeyCode.Unknown);
+	});
+
 	it("should throw on UserInputType bindings", () => {
 		expect.assertions(1);
 
