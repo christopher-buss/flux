@@ -17,7 +17,7 @@ export function collectContextActions<T extends ActionMap>(
 	const result = new Array<keyof T & string>();
 	for (const [name] of pairs(actions as Record<string, unknown>)) {
 		if ((bindings as Record<string, unknown>)[name] !== undefined) {
-			result.push(name as keyof T & string);
+			result.push(name);
 		}
 	}
 

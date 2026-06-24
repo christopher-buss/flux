@@ -1,0 +1,44 @@
+diff --git a/src/init.lua b/src/init.lua
+index 1af90ebe4aed420f3b5ed6116fea75bc15fb6064..33128d1f4ea50063f213f2a4074b3e53d8a29293 100644
+--- a/src/init.lua
++++ b/src/init.lua
+@@ -246,7 +246,17 @@ function TestRunner:_createInBandTestRun(
+ 					end) :: Promise<nil>
+ 				-- ROBLOX FIXME END
+ 			end)
+-		end, Promise.resolve())
++		end, Promise.resolve()):andThen(function(lastResult)
++			-- End-of-run flush: drain `LogService.MessageOut`'s deferred queue
++			-- once before the runner disconnects its listener. Required after the
++			-- per-file `setImmediate` was removed in `runTest.lua` (was ~700 ms
++			-- of frame yields across 113 files). `task.defer` drains in the
++			-- current resumption cycle (same frame); `Heartbeat:Wait()` would
++			-- NOT flush the queue. Relies on `SignalBehavior = "Deferred"`.
++			return Promise.new(function(resolve)
++				task.defer(resolve, lastResult)
++			end)
++		end)
+ 	end)
+ end
+ 
+diff --git a/src/runTest.lua b/src/runTest.lua
+index 238db471e10a77cca421f6a599df808154683d3a..3fe5e4e91aae2f41bb834e5d8ec2760523b3f15b 100644
+--- a/src/runTest.lua
++++ b/src/runTest.lua
+@@ -389,12 +389,10 @@ local function runTestInternal(
+ 			-- end
+ 			-- ROBLOX deviation END
+ 			--#endregion
+-			-- Delay the resolution to allow log messages to be output.
+-			return Promise.new(function(resolve)
+-				setImmediate(function()
+-					return resolve({ leakDetector = leakDetector, result = result })
+-				end)
+-			end)
++			-- Per-file `setImmediate` removed (~−552 ms across 113 files); the
++			-- deferred `LogService.MessageOut` queue is now drained once at the
++			-- end of the run via `_createInBandTestRun` instead of per file.
++			return { leakDetector = leakDetector, result = result }
+ 		end)
+ 		runtime:teardown()
+ 		environment:teardown():expect()

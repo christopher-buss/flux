@@ -1147,7 +1147,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const parent = new Instance("Folder");
-			const [mockWarn, mockWarnFunction] = jest.fn<void, [message: string]>();
+			const [mockWarn, mockWarnFunction] = jest.fn<(message: string) => void>();
 			const core = createCore({
 				actions: TEST_ACTIONS,
 				contexts: TEST_CONTEXTS,
@@ -1168,7 +1168,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const parent = new Instance("Folder");
-			const [mockWarn, mockWarnFunction] = jest.fn<void, [message: string]>();
+			const [mockWarn, mockWarnFunction] = jest.fn<(message: string) => void>();
 			const core = createCore({
 				actions: { jump: { type: "Bool" as const } },
 				contexts: {
@@ -1191,7 +1191,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const parent = new Instance("Folder");
-			const [mockWarn, mockWarnFunction] = jest.fn<void, [message: string]>();
+			const [mockWarn, mockWarnFunction] = jest.fn<(message: string) => void>();
 			const core = createCore({
 				actions: TEST_ACTIONS,
 				contexts: TEST_CONTEXTS,
@@ -1219,7 +1219,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const parent = new Instance("Folder");
-			const [mockWarn, mockWarnFunction] = jest.fn<void, [message: string]>();
+			const [mockWarn, mockWarnFunction] = jest.fn<(message: string) => void>();
 			const core = createCore({
 				actions: TEST_ACTIONS,
 				contexts: TEST_CONTEXTS,

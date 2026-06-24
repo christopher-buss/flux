@@ -193,7 +193,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			const data = getHandleData(handles, handle);
 			const result = new Array<Contexts>();
 			for (const name of data.activeContexts) {
-				result.push(name as Contexts);
+				result.push(name);
 			}
 
 			return result;

@@ -15,11 +15,14 @@ project -- no default exports, uses Roblox globals (`Vector2`, `Vector3`,
 
 Phase 1 must be complete. The following files must exist with full JSDoc:
 
-- `packages/core/src/types/actions.ts` -- ActionType, ActionConfig, ActionMap, type extractors
+- `packages/core/src/types/actions.ts` -- ActionType, ActionConfig, ActionMap,
+  type extractors
 - `packages/core/src/types/bindings.ts` -- BindingLike
 - `packages/core/src/types/contexts.ts` -- ContextConfig
-- `packages/core/src/modifiers/types.ts` -- Modifier, ModifierContext (full interfaces)
-- `packages/core/src/triggers/types.ts` -- Trigger, TriggerState, TriggerType, TypedTrigger (full interfaces)
+- `packages/core/src/modifiers/types.ts` -- Modifier, ModifierContext (full
+  interfaces)
+- `packages/core/src/triggers/types.ts` -- Trigger, TriggerState, TriggerType,
+  TypedTrigger (full interfaces)
 
 ## Target File Structure
 
@@ -77,8 +80,9 @@ Test files are `.spec.ts`, co-located with source files.
 ### Task 2.1 Description
 
 Implement `deadZone`, `negate`, and `scale` modifier helpers. The `Modifier` and
-`ModifierContext` interfaces already exist at `packages/core/src/modifiers/types.ts`
-with full JSDoc from Phase 1 -- no changes needed.
+`ModifierContext` interfaces already exist at
+`packages/core/src/modifiers/types.ts` with full JSDoc from Phase 1 -- no
+changes needed.
 
 **Note**: `ModifierContext.handle` will be added in Phase 3 when `InputHandle`
 is introduced.
@@ -92,7 +96,8 @@ Implement the `deadZone(threshold)` modifier:
 - For `number`: if `math.abs(value) < threshold`, return 0. Otherwise rescale:
   `math.sign(value) * (math.abs(value) - threshold) / (1 - threshold)`.
 - For `Vector2`: if `value.Magnitude < threshold`, return `Vector2.zero`.
-  Otherwise rescale the magnitude: `value.Unit.mul((value.Magnitude - threshold) / (1 - threshold))`.
+  Otherwise rescale the magnitude:
+  `value.Unit.mul((value.Magnitude - threshold) / (1 - threshold))`.
 - For `Vector3`: same logic as Vector2 but with Vector3.
 - **Important**: Use scaled output (rescale after threshold). There must be no
   jump discontinuity at the threshold boundary. The output range is `[0, 1]`
@@ -112,7 +117,9 @@ export function deadZone(threshold: number): Modifier {
 					return 0;
 				}
 
-				return (math.sign(value) * (math.abs(value) - threshold)) / (1 - threshold);
+				return (
+					(math.sign(value) * (math.abs(value) - threshold)) / (1 - threshold)
+				);
 			}
 
 			if (typeIs(value, "Vector2")) {
@@ -203,9 +210,11 @@ export type { Modifier, ModifierContext } from "./types";
 **`packages/core/src/modifiers/dead-zone.spec.ts`**:
 
 Test cases:
+
 - `number` below threshold returns 0
 - `number` above threshold returns rescaled value (no jump at threshold)
-- `number` at threshold boundary returns 0 (just below) or near-zero (just above)
+- `number` at threshold boundary returns 0 (just below) or near-zero (just
+  above)
 - `Vector2` below threshold returns `Vector2.zero`
 - `Vector2` above threshold returns rescaled vector
 - `Vector3` below threshold returns `Vector3.zero`
@@ -216,6 +225,7 @@ Test cases:
 **`packages/core/src/modifiers/negate.spec.ts`**:
 
 Test cases:
+
 - Negates positive and negative numbers
 - Negates Vector2
 - Negates Vector3
@@ -223,6 +233,7 @@ Test cases:
 **`packages/core/src/modifiers/scale.spec.ts`**:
 
 Test cases:
+
 - Scales number by factor
 - Scales Vector2 by factor
 - Scales Vector3 by factor
@@ -250,10 +261,10 @@ pnpm test
 
 ### Task 2.2 Description
 
-Implement `hold`, `tap`, `doubleTap` triggers and `implicit`/`explicit`/`blocker`
-wrappers. The trigger type interfaces already exist at
-`packages/core/src/triggers/types.ts` with full JSDoc from Phase 1 -- no changes
-needed.
+Implement `hold`, `tap`, `doubleTap` triggers and
+`implicit`/`explicit`/`blocker` wrappers. The trigger type interfaces already
+exist at `packages/core/src/triggers/types.ts` with full JSDoc from Phase 1 --
+no changes needed.
 
 ### Task 2.2 Dependencies
 
@@ -292,7 +303,11 @@ export function hold({ attempting, oneShot, threshold }: HoldOptions): Trigger {
 			hasTriggered = false;
 		},
 
-		update(magnitude: number, duration: number, _deltaTime: number): TriggerState {
+		update(
+			magnitude: number,
+			duration: number,
+			_deltaTime: number,
+		): TriggerState {
 			if (magnitude === 0) {
 				const wasTrying = duration > attempting && !hasTriggered;
 				hasTriggered = false;
@@ -330,7 +345,11 @@ export function tap({ threshold }: TapOptions): Trigger {
 			// no-op
 		},
 
-		update(magnitude: number, duration: number, _deltaTime: number): TriggerState {
+		update(
+			magnitude: number,
+			duration: number,
+			_deltaTime: number,
+		): TriggerState {
 			if (magnitude === 0 && duration > 0 && duration < threshold) {
 				return "triggered";
 			}
@@ -361,7 +380,11 @@ export function doubleTap({ window: tapWindow }: DoubleTapOptions): Trigger {
 			tapCount = 0;
 		},
 
-		update(magnitude: number, _duration: number, _deltaTime: number): TriggerState {
+		update(
+			magnitude: number,
+			_duration: number,
+			_deltaTime: number,
+		): TriggerState {
 			const now = os.clock();
 
 			if (magnitude > 0) {
@@ -420,6 +443,7 @@ export { blocker, explicit, implicit } from "./wrappers";
 **`packages/core/src/triggers/hold.spec.ts`**:
 
 Test cases:
+
 - Returns `"none"` when magnitude is 0 and no prior input
 - Returns `"ongoing"` while held but below threshold duration
 - Returns `"triggered"` when duration reaches threshold
@@ -430,6 +454,7 @@ Test cases:
 **`packages/core/src/triggers/tap.spec.ts`**:
 
 Test cases:
+
 - Returns `"ongoing"` while magnitude > 0
 - Returns `"triggered"` on release if duration < threshold
 - Returns `"none"` on release if duration >= threshold
@@ -438,6 +463,7 @@ Test cases:
 **`packages/core/src/triggers/double-tap.spec.ts`**:
 
 Test cases:
+
 - Returns `"none"` on first tap
 - Returns `"triggered"` on second tap within window
 - Returns `"none"` if second tap is outside window (resets to first tap)
@@ -446,6 +472,7 @@ Test cases:
 **`packages/core/src/triggers/wrappers.spec.ts`**:
 
 Test cases:
+
 - `implicit()` wraps a trigger with type `"implicit"`
 - `explicit()` wraps a trigger with type `"explicit"`
 - `blocker()` wraps a trigger with type `"blocker"`

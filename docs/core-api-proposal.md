@@ -55,7 +55,9 @@ const actions = defineActions({
 	}),
 
 	heavyAttack: action({
-		triggers: [implicit(hold({ attempting: 0.2, oneShot: true, threshold: 0.5 }))],
+		triggers: [
+			implicit(hold({ attempting: 0.2, oneShot: true, threshold: 0.5 })),
+		],
 		type: "Bool",
 	}),
 
@@ -83,7 +85,12 @@ const actions = defineActions({
 ## Action Config Shape
 
 ```ts
-type ActionType = "Bool" | "Direction1D" | "Direction2D" | "Direction3D" | "ViewportPosition";
+type ActionType =
+	| "Bool"
+	| "Direction1D"
+	| "Direction2D"
+	| "Direction3D"
+	| "ViewportPosition";
 
 interface ActionConfig<T extends ActionType = ActionType> {
 	readonly description?: string;
@@ -99,7 +106,8 @@ interface ActionConfig<T extends ActionType = ActionType> {
 - `type` maps directly to Roblox `InputAction.Type`
 - `enabled` is per-action default authoring config
 - wrappers like `bool()` and `direction2d()` are sugar only
-- `ActionConfig` is generic over `T extends ActionType` so literal types propagate
+- `ActionConfig` is generic over `T extends ActionType` so literal types
+  propagate
 
 ## Convenience Wrappers
 
@@ -109,10 +117,18 @@ Each wrapper fixes the `type` literal in its return type:
 function action<T extends ActionType>(config: ActionConfig<T>): ActionConfig<T>;
 
 function bool(config?: Omit<ActionConfig, "type">): ActionConfig<"Bool">;
-function direction1d(config?: Omit<ActionConfig, "type">): ActionConfig<"Direction1D">;
-function direction2d(config?: Omit<ActionConfig, "type">): ActionConfig<"Direction2D">;
-function direction3d(config?: Omit<ActionConfig, "type">): ActionConfig<"Direction3D">;
-function position2d(config?: Omit<ActionConfig, "type">): ActionConfig<"ViewportPosition">;
+function direction1d(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"Direction1D">;
+function direction2d(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"Direction2D">;
+function direction3d(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"Direction3D">;
+function position2d(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"ViewportPosition">;
 ```
 
 ## Type Extractors
@@ -200,7 +216,8 @@ interface ContextConfig {
 
 ### Extra Notes
 
-- `bindings` keys are validated against action names at `createCore` — typos are compile errors
+- `bindings` keys are validated against action names at `createCore` — typos are
+  compile errors
 - `bindings` maps action names to one or more `InputBinding`-like definitions
 - `sink` is Flux behavior for blocking lower-priority contexts
 - `priority` controls conflict resolution between active contexts
@@ -211,7 +228,9 @@ Identity function that preserves literal keys. No action validation here —
 cross-validation of binding keys against action names happens at `createCore`.
 
 ```ts
-function defineContexts<T extends Record<string, ContextConfig>>(contexts: T): T;
+function defineContexts<T extends Record<string, ContextConfig>>(
+	contexts: T,
+): T;
 ```
 
 ## Core Creation
@@ -246,7 +265,9 @@ type ValidateContextBindings<
 	TContexts extends Record<string, ContextConfig>,
 > = {
 	readonly [K in keyof TContexts]: {
-		readonly bindings: Partial<Record<AllActions<TActions>, ReadonlyArray<BindingLike>>>;
+		readonly bindings: Partial<
+			Record<AllActions<TActions>, ReadonlyArray<BindingLike>>
+		>;
 		readonly priority: TContexts[K]["priority"];
 		readonly sink?: TContexts[K]["sink"];
 	};
@@ -254,13 +275,19 @@ type ValidateContextBindings<
 
 interface CoreConfig<
 	TActions extends ActionMap = ActionMap,
-	TContexts extends Record<string, ContextConfig> = Record<string, ContextConfig>,
+	TContexts extends Record<string, ContextConfig> = Record<
+		string,
+		ContextConfig
+	>,
 > {
 	readonly actions: TActions;
 	readonly contexts: TContexts & ValidateContextBindings<TActions, TContexts>;
 	readonly replication?: {
 		readonly flush?: "auto" | "manual";
-		readonly onDiffs?: (handle: InputHandle, diffs: ReadonlyArray<ActionDiff>) => void;
+		readonly onDiffs?: (
+			handle: InputHandle,
+			diffs: ReadonlyArray<ActionDiff>,
+		) => void;
 		readonly transport?: "native" | "remote";
 	};
 }
@@ -328,7 +355,8 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 - `register(...contexts)` is the simplest spawn/setup path
 - `register()` returns an `InputHandle`, not a player/entity instance
 - `update(deltaTime)` is the canonical per-frame entry point
-- `getState(handle)` is the primary way to read input — caller maps handles to players/entities
+- `getState(handle)` is the primary way to read input — caller maps handles to
+  players/entities
 - `simulateAction()` is the only method for script-driven input injection
 - `getContexts()` is runtime/controller state, not `ActionState`
 - `rebind()` updates one action
@@ -344,11 +372,16 @@ type BindingState<TActions extends ActionMap = ActionMap> = Partial<
 
 ### Binding State Notes
 
-- `BindingState` represents the full current binding set for one registered owner/handle
-- `rebindAll()` is for settings flows where several edits are staged, then saved together
-- `rebindAll()` should replace the current override state, not patch it incrementally
-- `serializeBindings()` returns a `BindingState` object; `loadBindings()` accepts one
-- Core exports/imports typed `BindingState` objects — the user handles JSON encode/decode for persistence
+- `BindingState` represents the full current binding set for one registered
+  owner/handle
+- `rebindAll()` is for settings flows where several edits are staged, then saved
+  together
+- `rebindAll()` should replace the current override state, not patch it
+  incrementally
+- `serializeBindings()` returns a `BindingState` object; `loadBindings()`
+  accepts one
+- Core exports/imports typed `BindingState` objects — the user handles JSON
+  encode/decode for persistence
 
 ### Settings Example
 
@@ -368,9 +401,9 @@ function saveBindings(handle: InputHandle): void {
 }
 
 function restoreBindings(handle: InputHandle, json: string): void {
-	const bindingState = game.GetService("HttpService").JSONDecode(json) as BindingState<
-		typeof actions
-	>;
+	const bindingState = game
+		.GetService("HttpService")
+		.JSONDecode(json) as BindingState<typeof actions>;
 	flux.loadBindings(handle, bindingState);
 }
 ```
@@ -435,9 +468,10 @@ Infers `TActions` from config, cross-validates context binding keys against
 action names, and returns a typed `FluxCore`:
 
 ```ts
-function createCore<TActions extends ActionMap, TContexts extends Record<string, ContextConfig>>(
-	config: CoreConfig<TActions, TContexts>,
-): FluxCore<TActions>;
+function createCore<
+	TActions extends ActionMap,
+	TContexts extends Record<string, ContextConfig>,
+>(config: CoreConfig<TActions, TContexts>): FluxCore<TActions>;
 ```
 
 ## Type Safety
@@ -446,10 +480,10 @@ The generic approach ensures compile-time correctness at every layer:
 
 - **Action names** — `defineActions` preserves literal keys; typos in context
   bindings, `rebind()`, or `simulateAction()` calls are caught at compile time
-- **Action type constraints** — `pressed("move")` is a type error when `move`
-  is `Direction2D`; `axis1d("jump")` is a type error when `jump` is `Bool`
-- **Return types** — `getState()` returns the correct value type
-  (`boolean`, `number`, `Vector2`, `Vector3`) based on the action's `type`
+- **Action type constraints** — `pressed("move")` is a type error when `move` is
+  `Direction2D`; `axis1d("jump")` is a type error when `jump` is `Bool`
+- **Return types** — `getState()` returns the correct value type (`boolean`,
+  `number`, `Vector2`, `Vector3`) based on the action's `type`
 - **Context bindings** — `createCore` cross-validates binding keys against
   `keyof TActions`, catching misspelled or missing action names at compile time
 
@@ -549,7 +583,11 @@ function hold({ attempting, oneShot, threshold }: HoldOptions): Trigger {
 			hasTriggered = false;
 		},
 
-		update(magnitude: number, duration: number, _deltaTime: number): TriggerState {
+		update(
+			magnitude: number,
+			duration: number,
+			_deltaTime: number,
+		): TriggerState {
 			if (magnitude === 0) {
 				const wasTrying = duration > attempting && !hasTriggered;
 				hasTriggered = false;
@@ -586,7 +624,11 @@ function tap({ threshold }: TapOptions): Trigger {
 			// no-op
 		},
 
-		update(magnitude: number, duration: number, _deltaTime: number): TriggerState {
+		update(
+			magnitude: number,
+			duration: number,
+			_deltaTime: number,
+		): TriggerState {
 			if (magnitude === 0 && duration > 0 && duration < threshold) {
 				return "triggered";
 			}
@@ -616,7 +658,11 @@ function doubleTap({ window }: DoubleTapOptions): Trigger {
 			tapCount = 0;
 		},
 
-		update(magnitude: number, _duration: number, _deltaTime: number): TriggerState {
+		update(
+			magnitude: number,
+			_duration: number,
+			_deltaTime: number,
+		): TriggerState {
 			const now = os.clock();
 
 			if (magnitude > 0) {
@@ -673,7 +719,9 @@ import {
 const actions = defineActions({
 	aim: action({ type: "ViewportPosition" }),
 	heavyAttack: action({
-		triggers: [implicit(hold({ attempting: 0.2, oneShot: true, threshold: 0.5 }))],
+		triggers: [
+			implicit(hold({ attempting: 0.2, oneShot: true, threshold: 0.5 })),
+		],
 		type: "Bool",
 	}),
 	jump: action({ type: "Bool" }),

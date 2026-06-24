@@ -35,7 +35,9 @@ import {
 const actions = defineActions({
 	aim: position2d(),
 	heavyAttack: bool({
-		triggers: [implicit(hold({ attempting: 0.2, oneShot: true, threshold: 0.5 }))],
+		triggers: [
+			implicit(hold({ attempting: 0.2, oneShot: true, threshold: 0.5 })),
+		],
 	}),
 	jump: bool(),
 	move: direction2d({ modifiers: [deadZone(0.1)] }),
@@ -127,11 +129,11 @@ it by cloning the repo.
 
 ## Packages
 
-| Package                       | Description                                                                        |
-| ----------------------------- | ---------------------------------------------------------------------------------- |
-| [flux](packages/core)         | Core input system — actions, contexts, triggers, modifiers                         |
-| [flux-jecs](packages/jecs)    | JECS integration — maps entities to input handles. Requires `flux` as a dependency |
-| [flux-react](packages/react)  | React wrapper — Provider, hooks for actions, contexts, and bindings                |
+| Package                      | Description                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------------- |
+| [flux](packages/core)        | Core input system — actions, contexts, triggers, modifiers                         |
+| [flux-jecs](packages/jecs)   | JECS integration — maps entities to input handles. Requires `flux` as a dependency |
+| [flux-react](packages/react) | React wrapper — Provider, hooks for actions, contexts, and bindings                |
 
 The core has no framework dependencies. Integration packages like flux-jecs
 connect it to whatever you're using.

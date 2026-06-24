@@ -19,13 +19,15 @@ system is validated from authoring to runtime.
 
 Phases 1 and 2 must be complete. The following must exist and pass typechecking:
 
-- `packages/core/src/types/actions.ts` -- ActionType, ActionConfig, ActionMap, type extractors
+- `packages/core/src/types/actions.ts` -- ActionType, ActionConfig, ActionMap,
+  type extractors
 - `packages/core/src/types/bindings.ts` -- BindingLike
 - `packages/core/src/types/contexts.ts` -- ContextConfig
 - `packages/core/src/actions/define.ts` -- defineActions, action, bool, etc.
 - `packages/core/src/contexts/define.ts` -- defineContexts
 - `packages/core/src/modifiers/` -- deadZone, negate, scale, Modifier interface
-- `packages/core/src/triggers/` -- hold, tap, doubleTap, implicit/explicit/blocker, Trigger interface
+- `packages/core/src/triggers/` -- hold, tap, doubleTap,
+  implicit/explicit/blocker, Trigger interface
 
 **Note**: `types/core.ts` and `types/state.ts` are created in this phase.
 
@@ -88,7 +90,12 @@ type InputHandle = number & { readonly __brand: unique symbol };
 **ActionConfig** (from `types/actions.ts`):
 
 ```ts
-type ActionType = "Bool" | "Direction1D" | "Direction2D" | "Direction3D" | "ViewportPosition";
+type ActionType =
+	| "Bool"
+	| "Direction1D"
+	| "Direction2D"
+	| "Direction3D"
+	| "ViewportPosition";
 
 interface ActionConfig<T extends ActionType = ActionType> {
 	readonly description?: string;
@@ -181,7 +188,8 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 }
 ```
 
-**Modifier** (from `modifiers/types.ts` -- updated in this phase to add `handle`):
+**Modifier** (from `modifiers/types.ts` -- updated in this phase to add
+`handle`):
 
 ```ts
 type ModifierValue = number | Vector2 | Vector3;
@@ -230,8 +238,8 @@ implementation, and extending `ModifierContext` with the handle.
 
 #### `packages/core/src/types/state.ts` (new)
 
-Define `ActionValueMap`, `ActionValue`, and the `ActionState` interface as
-shown in the Key Type Definitions section above.
+Define `ActionValueMap`, `ActionValue`, and the `ActionState` interface as shown
+in the Key Type Definitions section above.
 
 #### `packages/core/src/types/bindings.ts` (modify existing)
 
@@ -267,6 +275,7 @@ A simple monotonically increasing ID allocator that returns branded
 `InputHandle` values.
 
 Implementation notes:
+
 - Start at 0 (roblox-ts handles Lua truthiness translation)
 - `allocate()` returns the next handle
 - `release(handle)` marks it available (optional: can just increment forever)
@@ -275,10 +284,11 @@ Implementation notes:
 #### `packages/core/src/core/action-state.ts`
 
 Factory function `createActionState()` returning an object that satisfies
-`ActionState<TActions>`. No classes -- uses closure-captured state for Luau
-perf (avoids metatables).
+`ActionState<TActions>`. No classes -- uses closure-captured state for Luau perf
+(avoids metatables).
 
 **Internal closure state** per action (keyed by action name string):
+
 - `value`: `boolean | number | Vector2 | Vector3` -- current post-pipeline value
 - `previousValue`: same type -- value from previous frame
 - `triggerState`: `TriggerState` -- current trigger output
@@ -289,6 +299,7 @@ perf (avoids metatables).
 - `claimed`: `boolean` -- exclusive consumption flag
 
 **Public methods** (on returned `ActionState`):
+
 - `pressed(action)` -- returns `value === true`
 - `justPressed(action)` -- `value === true && previousValue === false`
 - `justReleased(action)` -- `value === false && previousValue === true`
@@ -311,6 +322,7 @@ perf (avoids metatables).
 
 **Internal mutation methods** (returned separately or on an extended internal
 type, not exposed on the public `ActionState` interface):
+
 - `updateAction(name, value, triggerState, deltaTime)` -- called by pipeline
 - `endFrame()` -- shifts current to previous, resets claimed flags
 - `setEnabled(name, enabled)` -- sets enabled state
@@ -322,11 +334,13 @@ but consumers never see.
 ### Task 3.1 Test Files
 
 **`packages/core/src/core/handle-factory.spec.ts`**:
+
 - Allocates unique handles
 - Handles are sequential
 - First handle is 0
 
 **`packages/core/src/core/action-state.spec.ts`**:
+
 - `pressed` returns true when bool value is true
 - `justPressed` detects frame transition false->true
 - `justReleased` detects frame transition true->false
@@ -342,7 +356,8 @@ but consumers never see.
 ### Task 3.1 Acceptance Criteria
 
 - [ ] `InputHandle` factory allocates unique handles (starting at 0)
-- [ ] `createActionState()` factory returns object satisfying `ActionState` interface
+- [ ] `createActionState()` factory returns object satisfying `ActionState`
+      interface
 - [ ] Internal mutation methods work correctly for frame updates
 - [ ] All tests pass
 - [ ] `pnpm typecheck` passes
@@ -362,21 +377,23 @@ pnpm test
 
 #### `packages/core/src/core/pipeline.ts`
 
-The modifier -> trigger pipeline that processes raw input into final
-ActionState values.
+The modifier -> trigger pipeline that processes raw input into final ActionState
+values.
 
 The pipeline for a single action per frame:
 
 1. **Read raw value** from Roblox IAS (`InputAction.ReadValue()` or equivalent)
-2. **Apply modifiers** in order: each modifier's `modify()` receives the
-   current value and returns the transformed value
+2. **Apply modifiers** in order: each modifier's `modify()` receives the current
+   value and returns the transformed value
 3. **Compute magnitude**: `boolean` -> 0 or 1, `number` -> `math.abs(value)`,
    `Vector2` -> `value.Magnitude`, `Vector3` -> `value.Magnitude`
-4. **Run triggers**: evaluate each `TypedTrigger` with `(magnitude, duration, deltaTime)`
+4. **Run triggers**: evaluate each `TypedTrigger` with
+   `(magnitude, duration, deltaTime)`
 5. **Resolve trigger state** from typed triggers:
    - If any `blocker` returns `"triggered"` -> final state is `"none"`
    - If any `explicit` returns `"triggered"` -> final state is `"triggered"`
-   - If all `implicit` triggers return `"triggered"` -> final state is `"triggered"`
+   - If all `implicit` triggers return `"triggered"` -> final state is
+     `"triggered"`
    - Otherwise combine: ongoing > none, canceled overrides none
    - If no triggers defined -> default triggered when magnitude > 0
 6. **Return** `{ value, triggerState }` for ActionState to consume
@@ -403,6 +420,7 @@ function processPipeline(
 **`packages/core/src/core/pipeline.spec.ts`**:
 
 Test cases:
+
 - No modifiers/triggers: value passes through, triggered when magnitude > 0
 - Single modifier transforms value
 - Multiple modifiers chain in order
@@ -417,6 +435,7 @@ Test cases:
 **`packages/core/test/integration/pipeline.spec.ts`**:
 
 Integration tests using real modifier and trigger instances:
+
 - deadZone + hold trigger: input below dead zone threshold never triggers hold
 - scale + implicit trigger: scaled magnitude affects trigger evaluation
 - negate modifier preserves trigger behavior (negated value, same magnitude)
@@ -450,6 +469,7 @@ This is the central runtime. It wires everything together.
 Implement `createCore` matching the `FluxCore` interface.
 
 **Internal state per handle:**
+
 - `createActionState()` result (public ActionState + internal mutators)
 - Active context names (set)
 - Per-action Roblox IAS instances (created at register time)
@@ -457,47 +477,53 @@ Implement `createCore` matching the `FluxCore` interface.
 - Binding overrides (for rebind support -- can be empty map initially)
 
 **`register(...contexts)`**:
+
 1. Allocate an `InputHandle` via the handle factory
 2. Create action state via `createActionState()` for this handle
 3. For each action in the config:
    - Create a Roblox `InputAction` instance (via `new Instance("InputAction")`)
    - Set its `Type` from `ActionConfig.type`
-   - For each requested context, look up bindings and create `InputBinding` instances
+   - For each requested context, look up bindings and create `InputBinding`
+     instances
 4. For each requested context:
    - Create a Roblox `InputContext` instance
    - Set priority
    - Parent `InputAction`s and `InputBinding`s under it
-   - **Important**: InputContext instances must be descendants of the Player instance in the DataModel for Roblox network ownership
+   - **Important**: InputContext instances must be descendants of the Player
+     instance in the DataModel for Roblox network ownership
 5. Add contexts to the handle's active set
 6. Return the handle
 
-**`update(deltaTime)`**:
-For each registered handle:
+**`update(deltaTime)`**: For each registered handle:
+
 1. For each action:
    - Read the current value from the Roblox `InputAction`
    - Run the pipeline (`processPipeline`)
    - Update action state with the result via internal mutators
 2. After all actions processed, call `endFrame()` on the action state
 
-**`getState(handle)`**:
-Return the public `ActionState` for the handle.
+**`getState(handle)`**: Return the public `ActionState` for the handle.
 
 **`addContext(handle, context)` / `removeContext(handle, context)`**:
+
 - Add/remove context from the handle's active set
 - Enable/disable the corresponding Roblox `InputContext`
 - Priority resolution: when multiple contexts are active, higher priority wins
 - `sink: true` on a context blocks all lower-priority contexts
 
 **`unregister(handle)`**:
+
 - Destroy all Roblox instances created for this handle
 - Remove handle from internal maps
 - Release the handle ID
 
 **`destroy()`**:
+
 - Unregister all handles
 - Clean up any shared state
 
 **P1 methods** (stub with `error("Not implemented")` for now):
+
 - `rebind`, `rebindAll`, `resetBindings`, `resetAllBindings`
 - `serializeBindings`, `loadBindings`
 - `simulateAction`
@@ -505,6 +531,7 @@ Return the public `ActionState` for the handle.
 ### Context Priority Resolution with Sink
 
 When `update()` processes a handle:
+
 1. Sort active contexts by priority (descending)
 2. Walk from highest to lowest priority
 3. Process actions that have bindings in each context
@@ -516,6 +543,7 @@ When `update()` processes a handle:
 **`packages/core/src/core/create-core.spec.ts`**:
 
 Test cases (these test the public API, mocking Roblox instances as needed):
+
 - `createCore` returns an object with all FluxCore methods
 - `register()` returns a unique InputHandle
 - `register("gameplay")` sets up the gameplay context
@@ -534,10 +562,15 @@ provides them. Use the project's existing test infrastructure.
 **`packages/core/test/integration/core-lifecycle.spec.ts`**:
 
 End-to-end integration tests:
-- Full lifecycle: defineActions -> defineContexts -> createCore -> register -> update -> getState -> pressed/triggered
-- Context switch: register two contexts, remove one mid-frame, verify only active context's actions fire
-- Sink blocking: high-priority sink context blocks lower-priority context's actions
-- Multi-handle: two handles with independent state (one pressed doesn't affect the other)
+
+- Full lifecycle: defineActions -> defineContexts -> createCore -> register ->
+  update -> getState -> pressed/triggered
+- Context switch: register two contexts, remove one mid-frame, verify only
+  active context's actions fire
+- Sink blocking: high-priority sink context blocks lower-priority context's
+  actions
+- Multi-handle: two handles with independent state (one pressed doesn't affect
+  the other)
 
 ### Task 3.3 Acceptance Criteria
 
@@ -566,7 +599,8 @@ pnpm test
 This is the P0 milestone. All of the following must be true:
 
 - [ ] `createCore` returns a fully functional `FluxCore`
-- [ ] End-to-end flow works: define actions -> define contexts -> createCore -> register -> update -> getState -> query
+- [ ] End-to-end flow works: define actions -> define contexts -> createCore ->
+      register -> update -> getState -> query
 - [ ] Pipeline processes: raw input -> modifiers -> triggers -> ActionState
 - [ ] Context switching with priority and sink works
 - [ ] Handle lifecycle works: register -> use -> unregister

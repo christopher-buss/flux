@@ -1,0 +1,18 @@
+diff --git a/lib/rules/valid-expect-with-promise.js b/lib/rules/valid-expect-with-promise.js
+index a43774fdee027e18ea5fc7046c381cb8e6388978..f1673a3687cf2f6adbfb8edcc6bb5d4748ff81c6 100644
+--- a/lib/rules/valid-expect-with-promise.js
++++ b/lib/rules/valid-expect-with-promise.js
+@@ -30,7 +30,12 @@ var _default = exports.default = (0, _utils2.createRule)({
+           return;
+         }
+         const [argument] = jestFnCall.head.node.parent.arguments;
+-        const isPromiseLike = (0, _utils2.isBuiltinSymbolLike)(services.program, services.getTypeAtLocation(argument), 'Promise');
++        const argumentType = services.getTypeAtLocation(argument);
++        // roblox-ts compiles with `noLib`, so its global `Promise` is declared in
++        // `@rbxts/compiler-types` rather than a TypeScript default library. That makes
++        // `isBuiltinSymbolLike(type, 'Promise')` always false, so fall back to a
++        // structural thenable check (a `then` member) to recognise roblox-ts promises.
++        const isPromiseLike = (0, _utils2.isBuiltinSymbolLike)(services.program, argumentType, 'Promise') || argumentType.getProperty('then') !== undefined;
+         const promiseModifier = jestFnCall.modifiers.find(nod => (0, _utils2.getAccessorValue)(nod) !== 'not');
+         if (isPromiseLike && !promiseModifier) {
+           context.report({

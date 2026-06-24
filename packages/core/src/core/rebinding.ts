@@ -233,12 +233,13 @@ function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): v
 
 /**
  * Reads the original bindings defined in a specific context's config for
- * the given action. Returns an empty array if the action is not bound in
- * that context.
+ * the given action. Callers only resolve actions a context declares, so the
+ * lookup is expected to hit; a miss is an invariant violation.
  * @param contexts - The core's context config record.
  * @param contextName - The context to read from.
  * @param action - The action whose original bindings to look up.
- * @returns The declared bindings or an empty array.
+ * @returns The declared bindings for the action in that context.
+ * @throws If the action is not bound in the given context.
  */
 function getContextOriginalBindings(
 	contexts: Record<string, ContextConfig>,
@@ -250,5 +251,6 @@ function getContextOriginalBindings(
 	const bindings = (
 		contextConfig.bindings as Record<string, ReadonlyArray<BindingLike> | undefined>
 	)[action];
-	return bindings ?? [];
+	assert(bindings, `action not bound in context: ${contextName}.${action}`);
+	return bindings;
 }
