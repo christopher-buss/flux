@@ -13,7 +13,7 @@ I follow Test-Driven Development (TDD) with a strong emphasis on behavior-driven
 testing and functional programming principles. All work should be done in small,
 incremental changes that maintain a working state throughout development.
 
-Load the `test-driven-development` and `jest` skill for all testing-related work.
+Load the `tdd` and `jest` skill for all testing-related work.
 
 # Testing Rules
 
@@ -52,3 +52,30 @@ describe(myFunction, () => {
 	});
 });
 ```
+
+## Integration tests
+
+Integration tests cover **seams** — where one subsystem produces what another
+consumes (one system writes a component another reads with a transform or
+lifecycle; a flow crossing a `world.removed`/cascade/multi-frame boundary; a
+network event across the client↔server boundary).
+
+There is no coverage target for integration tests. The gate is a **trigger**, not
+a percentage: if a unit test mocks or hand-rolls input that a real subsystem you
+own produces, the handoff is untested — write one integration test for it.
+*How many / how well* is a review judgment, not a metric.
+
+**Cover:** drive through the producer's public entry point, assert the
+consumer's observable end-state, run the real systems in real order. One test
+per seam-behavior (apply, reverse-on-expire, reverse-on-cascade) — not per input
+permutation.
+
+**Don't:**
+- assert internal component fields — white-box, belongs in a unit spec
+- re-assert logic a unit spec already covers
+- write a test that passes identically with the collaborator mocked — that's a
+  unit test, demote it
+- add a second integration test for one seam differing only by input values
+- chase line coverage at this layer
+
+**Location:** `{package}/test/integration/`.
