@@ -104,6 +104,7 @@ export const AD = {
 #### File: `packages/core/src/bindings/presets.spec.ts`
 
 Test cases:
+
 - `WASD` has correct keycodes for up/down/left/right (W/S/A/D)
 - `ARROWS` has correct keycodes for up/down/left/right arrow keys
 - `AD` has correct keycodes for positive/negative (D/A)
@@ -132,8 +133,8 @@ pnpm test
 
 ### Task 5.2 What to Build
 
-Set up `packages/core/src/index.ts` to export the full public API in two
-styles: named imports and `Flux.*` namespace.
+Set up `packages/core/src/index.ts` to export the full public API in two styles:
+named imports and `Flux.*` namespace.
 
 Both styles must expose identical functionality:
 
@@ -236,12 +237,28 @@ export { hold } from "./triggers/hold";
 export type { HoldOptions } from "./triggers/hold";
 export { tap } from "./triggers/tap";
 export type { TapOptions } from "./triggers/tap";
-export type { Trigger, TriggerState, TriggerType, TypedTrigger } from "./triggers/types";
+export type {
+	Trigger,
+	TriggerState,
+	TriggerType,
+	TypedTrigger,
+} from "./triggers/types";
 export { blocker, explicit, implicit } from "./triggers/wrappers";
 // -- Types (re-export for consumers) --
-export type { ActionConfig, ActionMap, ActionType, AllActions } from "./types/actions";
+export type {
+	ActionConfig,
+	ActionMap,
+	ActionType,
+	AllActions,
+} from "./types/actions";
 export type { BindingLike, BindingState } from "./types/bindings";
-export type { ActionDiff, ContextConfig, CoreConfig, FluxCore, InputHandle } from "./types/core";
+export type {
+	ActionDiff,
+	ContextConfig,
+	CoreConfig,
+	FluxCore,
+	InputHandle,
+} from "./types/core";
 export type { ActionState, ActionValue } from "./types/state";
 
 export const Flux = {
@@ -270,8 +287,10 @@ export const Flux = {
 ```
 
 **Important notes for roblox-ts:**
+
 - No default exports
-- The `Flux` namespace is a plain object, not a TypeScript `namespace` declaration
+- The `Flux` namespace is a plain object, not a TypeScript `namespace`
+  declaration
 - All named exports are first-class; the namespace is a convenience alias
 
 #### Verification that both styles work
@@ -314,11 +333,13 @@ All of the following must be true. This is the complete `@rbxts/flux` core
 package:
 
 **Functionality:**
+
 - [ ] `defineActions` + convenience wrappers (`bool`, `direction2d`, etc.)
 - [ ] `defineContexts` with priority and sink
 - [ ] `createCore` cross-validates context binding keys against action names
 - [ ] `register` / `unregister` lifecycle
-- [ ] `update(dt)` processes full pipeline: raw input -> modifiers -> triggers -> ActionState
+- [ ] `update(dt)` processes full pipeline: raw input -> modifiers -> triggers
+      -> ActionState
 - [ ] `getState(handle)` returns typed ActionState with all query methods
 - [ ] Context switching with priority resolution and sink
 - [ ] Modifiers: `deadZone`, `negate`, `scale`
@@ -331,6 +352,7 @@ package:
 - [ ] Both `import { createCore }` and `import { Flux }` styles work
 
 **Quality:**
+
 - [ ] Zero `any` casts in public API
 - [ ] All action/context types inferred at compile time
 - [ ] All tests pass (`pnpm test`)

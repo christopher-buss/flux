@@ -23,7 +23,11 @@ STRIPPED=$(echo "$COMMAND" | sed -E '/git commit/,$d; s/"[^"]*"//g; s/'"'"'[^'"'
 for rule in "${RULES[@]}"; do
   tool="${rule%%|*}"
   suggestion="${rule#*|}"
-  if echo "$STRIPPED" | grep -qE "(^|\s|&&|\|\||;)${tool}(\s|$)"; then
+  # Only match the tool at a command position: start of the command, or right
+  # after a shell separator (; && || | ( {), optionally followed by whitespace.
+  # This avoids false positives when the tool name appears as an argument or in
+  # prose (e.g. a PR title/body passed to `gh`).
+  if echo "$STRIPPED" | grep -qE "(^|[;|&({])[[:space:]]*${tool}([[:space:]]|$)"; then
     if ! echo "$STRIPPED" | grep -qE "(pnpm run|pnpmx|pnpm x|pnpx|nr)"; then
       blocked "$tool" "$suggestion"
     fi

@@ -2,7 +2,6 @@ import { describe, expect, it } from "@rbxts/jest-globals";
 
 import type { ModifierContext } from "#src/modifiers";
 import { deadZone, negate, scale } from "#src/modifiers";
-
 import type { InputHandle } from "../types/core";
 
 describe("modifier chaining", () => {

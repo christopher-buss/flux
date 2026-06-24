@@ -2,7 +2,6 @@ import type { ActionState } from "@rbxts/flux";
 import React from "@rbxts/react";
 
 import type { FluxReact } from "#src/create-flux-react";
-
 import type { TEST_ACTIONS } from "./fixtures";
 
 /** ActionState bound to the integration fixture's action map. */

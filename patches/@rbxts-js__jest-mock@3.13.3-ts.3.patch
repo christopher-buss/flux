@@ -1,0 +1,65 @@
+diff --git a/package.json b/package.json
+index 1e4b2806caccd4633cace0d4d9acfe1a377ea32b..4ace63e16b1c65ef751d8213bae4da4740af751d 100644
+--- a/package.json
++++ b/package.json
+@@ -18,6 +18,7 @@
+     "@rbxts-js/luau-polyfill": "1.2.3-ts.1",
+     "@rbxts-js/jest-mock-rbx": "^3.13.3-ts.3",
+     "@rbxts-js/jest-types": "^3.13.3-ts.3",
+-    "@rbxts-js/jest-mock-genv": "^3.13.3-ts.3"
++    "@rbxts-js/jest-mock-genv": "^3.13.3-ts.3",
++    "@rbxts-js/roblox-lua-promise": "3.5.0-ts.2"
+   }
+ }
+\ No newline at end of file
+diff --git a/src/init.lua b/src/init.lua
+index f752da62c8dfc7f4a16ab5666031f9ec9d6a7313..7623b9c0366b3d224597b5b0680ec836b552af5a 100644
+--- a/src/init.lua
++++ b/src/init.lua
+@@ -16,6 +16,8 @@
+ local CurrentModule = script
+ local Packages = CurrentModule.Parent
+ 
++local Promise = require(Packages.Promise)
++
+ local LuauPolyfill = require(Packages.LuauPolyfill)
+ local Array = LuauPolyfill.Array
+ local Boolean = LuauPolyfill.Boolean
+@@ -361,7 +363,17 @@ function ModuleMockerClass:_makeComponent(metadata: any, restore)
+ 			end
+ 		end
+ 
+-		-- ROBLOX deviation: omitted mockResolvedValue and mockRejectedValue
++		f.mockResolvedValue = function(value)
++			return f.mockImplementation(function()
++				return Promise.resolve(value)
++			end)
++		end
++
++		f.mockRejectedValue = function(value)
++			return f.mockImplementation(function()
++				return Promise.reject(value)
++			end)
++		end
+ 
+ 		f.mockImplementationOnce = function(fn)
+ 			-- next function call will use this mock implementation return value
+@@ -385,7 +397,17 @@ function ModuleMockerClass:_makeComponent(metadata: any, restore)
+ 			end)
+ 		end
+ 
+-		-- ROBLOX deviation: omitted mockResolvedValueOnce and mockRejectedValueOnce
++		f.mockResolvedValueOnce = function(value)
++			return f.mockImplementationOnce(function()
++				return Promise.resolve(value)
++			end)
++		end
++
++		f.mockRejectedValueOnce = function(value)
++			return f.mockImplementationOnce(function()
++				return Promise.reject(value)
++			end)
++		end
+ 
+ 		f.mockReturnValue = function(value)
+ 			-- next function call will return specified return value or this one

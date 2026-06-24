@@ -4,12 +4,12 @@
 version: "0.2"
 language: en
 words:
-  - CLAUDECODE
-  - Exclusify
+  - claudecode
+  - exclusify
   - interactable
-  - Jecs
   - jecs
   - rbxl
   - rojo
   - thumbstick
+  - typetest
   - wasd

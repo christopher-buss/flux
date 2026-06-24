@@ -76,7 +76,10 @@ type InputHandle = number & { readonly __brand: unique symbol };
 **BindingState** (from `types/bindings.ts`):
 
 ```ts
-type BindingLike = Enum.KeyCode | Enum.UserInputType | Record<string, Enum.KeyCode>;
+type BindingLike =
+	| Enum.KeyCode
+	| Enum.UserInputType
+	| Record<string, Enum.KeyCode>;
 
 type BindingState<TActions extends ActionMap = ActionMap> = Partial<
 	Record<AllActions<TActions>, ReadonlyArray<BindingLike>>
@@ -145,7 +148,10 @@ interface FluxCoreMethods<TActions extends ActionMap> {
 interface CoreConfigReplication {
 	readonly replication?: {
 		readonly flush?: "auto" | "manual";
-		readonly onDiffs?: (handle: InputHandle, diffs: ReadonlyArray<ActionDiff>) => void;
+		readonly onDiffs?: (
+			handle: InputHandle,
+			diffs: ReadonlyArray<ActionDiff>,
+		) => void;
 		/**
 		 * "remote" (default) -- diff-based replication via onDiffs callback.
 		 * "native" -- no-op; for games using server authority (beta), where
@@ -162,8 +168,8 @@ interface CoreConfigReplication {
 
 ### Task 4.1 Overview
 
-Implement the rebinding and persistence methods on `FluxCore`. These replace
-the Phase 3 stubs.
+Implement the rebinding and persistence methods on `FluxCore`. These replace the
+Phase 3 stubs.
 
 **These three tasks (4.1, 4.2, 4.3) are independent and can run in parallel.**
 
@@ -180,37 +186,44 @@ The original bindings come from `CoreConfig.contexts`. Overrides replace
 specific action bindings at runtime.
 
 **`rebind(handle, action, bindings)`**:
+
 1. Store the override: `overrides.set(action, bindings)`
 2. Destroy existing Roblox `InputBinding` instances for this action
 3. Create new `InputBinding` instances from the new bindings
 4. Parent them under the appropriate `InputContext`
 
 **`rebindAll(handle, bindings)`**:
+
 1. Replace the entire override map for this handle
 2. Rebuild all Roblox `InputBinding` instances
 3. This is a full replace, not a patch
 
 **`resetBindings(handle, action)`**:
+
 1. Remove the override for this action: `overrides.delete(action)`
 2. Rebuild Roblox `InputBinding` instances from original context bindings
 
 **`resetAllBindings(handle)`**:
+
 1. Clear the entire override map
 2. Rebuild all Roblox `InputBinding` instances from original context bindings
 
 **`serializeBindings(handle)`**:
+
 1. Build a `BindingState` from the current effective bindings
 2. Include both overrides and original bindings
 3. Return as a plain object (user handles JSON encode/decode)
 
 **`loadBindings(handle, data)`**:
+
 1. Set overrides from the provided `BindingState`
 2. Rebuild Roblox `InputBinding` instances
 3. Equivalent to calling `rebindAll` with the loaded data
 
 ### Task 4.1 Test Cases
 
-**`packages/core/src/core/rebinding.spec.ts`** (or add to `create-core.spec.ts`):
+**`packages/core/src/core/rebinding.spec.ts`** (or add to
+`create-core.spec.ts`):
 
 - `rebind` updates bindings for a single action
 - `rebind` does not affect other actions
@@ -251,8 +264,8 @@ captures action state changes for transmission via RemoteEvents.
 **These three tasks (4.1, 4.2, 4.3) are independent and can run in parallel.**
 
 **Note (2026-03-30):** e2e validated that when server authority (beta) is
-enabled, `InputAction.GetState()` replicates to the server natively. Games
-using server authority can opt into `"native"` transport to skip diff-based
+enabled, `InputAction.GetState()` replicates to the server natively. Games using
+server authority can opt into `"native"` transport to skip diff-based
 replication entirely. Most games will use `"remote"` (default).
 
 ### Task 4.2 Implementation Details
@@ -275,24 +288,29 @@ interface ActionDiff {
 }
 ```
 
-**Flush modes** (from `CoreConfig.replication.flush`, only relevant for `"remote"`):
-- `"auto"` (default) -- at the end of `update()`, automatically call flush
-  and invoke `onDiffs(handle, diffs)` if there are pending diffs
+**Flush modes** (from `CoreConfig.replication.flush`, only relevant for
+`"remote"`):
+
+- `"auto"` (default) -- at the end of `update()`, automatically call flush and
+  invoke `onDiffs(handle, diffs)` if there are pending diffs
 - `"manual"` -- diffs accumulate until `flushDiffs(handle)` is called
 
 **`flushDiffs(handle)`**:
+
 1. Return the current diff buffer for this handle
 2. Clear the buffer
 3. If `onDiffs` callback is configured, invoke it with the diffs
 
 **`applyDiff(handle, diff)`**:
+
 1. Apply a received diff to the handle's ActionState
 2. Set the action's value and trigger state from the diff
 3. This is the server-side entry point for consuming client input
 
 ### Task 4.2 Test Cases
 
-**`packages/core/src/core/replication.spec.ts`** (or add to `create-core.spec.ts`):
+**`packages/core/src/core/replication.spec.ts`** (or add to
+`create-core.spec.ts`):
 
 - Diffs are generated when action state changes during update
 - `flushDiffs` returns pending diffs and clears the buffer
@@ -335,6 +353,7 @@ tutorials, cutscenes, tests, and AI-controlled entities.
 ### Task 4.3 Implementation Details
 
 **`simulateAction(handle, action, value)`**:
+
 1. Validate the handle exists
 2. The value type is constrained by `ActionValue<TActions, A>` at compile time
 3. Feed the value through the normal pipeline:
@@ -343,10 +362,11 @@ tutorials, cutscenes, tests, and AI-controlled entities.
    - Run triggers
    - Update ActionState
 4. The simulated value replaces the raw input for this frame only
-5. On the next `update()` call, if no new simulation, the action reverts to
-   real input
+5. On the next `update()` call, if no new simulation, the action reverts to real
+   input
 
 Implementation approach:
+
 - Store a "simulated value" override per action per handle
 - In `update()`, check for simulated values before reading from Roblox IAS
 - After processing, clear the simulated value (one-shot)

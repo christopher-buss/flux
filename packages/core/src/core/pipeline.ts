@@ -69,10 +69,10 @@ function applyModifiers(
 
 	let current = value as ModifierValue;
 	for (const modifier of modifiers) {
-		current = modifier.modify(current as never, modifierContext) as ModifierValue;
+		current = modifier.modify(current as never, modifierContext);
 	}
 
-	return current as ActionValueType;
+	return current;
 }
 
 function createTriggerTally(): TriggerTally {

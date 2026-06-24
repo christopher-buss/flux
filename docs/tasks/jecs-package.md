@@ -3,8 +3,9 @@
 ## Overview
 
 Thin wrapper using jecs entity IDs as Flux handles via registerAs/subscribeAs.
-Exposes ActionState as a jecs component and contexts as jecs tags. Lets ECS systems query input state
-via `world.query(flux.ActionState, flux.contexts.gameplay)`.
+Exposes ActionState as a jecs component and contexts as jecs tags. Lets ECS
+systems query input state via
+`world.query(flux.ActionState, flux.contexts.gameplay)`.
 
 Design doc: `flux/jecs-package-example.ts`
 
@@ -62,8 +63,8 @@ implementation.**
 
 One thin slice through all layers: scaffold just enough, define just enough
 types, implement just enough code to get a single test passing that proves the
-full path works: `createFluxJecs` → `register` → `getState` → `update` →
-query `ActionState` from the mock world.
+full path works: `createFluxJecs` → `register` → `getState` → `update` → query
+`ActionState` from the mock world.
 
 - [ ] **Task 1: Minimal scaffold**
   - `package.json` — name, peer deps, dev deps, scripts
@@ -88,8 +89,8 @@ query `ActionState` from the mock world.
     calls update, verifies ActionState was set on mock world, verifies context
     tag was added
   - Green: implement `createFluxJecs` with just register/getState/update —
-    creates core, uses entity IDs directly as handles via registerAs,
-    world.set for ActionState, world.add for context tag
+    creates core, uses entity IDs directly as handles via registerAs, world.set
+    for ActionState, world.add for context tag
   - `src/index.ts` exports `createFluxJecs`
   - `src/index.spec.ts` — smoke test
   - Acceptance: test passes, proves full path works end-to-end

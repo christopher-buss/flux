@@ -32,7 +32,8 @@ implementation.**
 
 ## Architecture Decisions
 
-- **Core is a peer dep** — user installs `@rbxts/flux-core` + `@rbxts/flux-react`
+- **Core is a peer dep** — user installs `@rbxts/flux-core` +
+  `@rbxts/flux-react`
 - **`@rbxts/react` is a peer dep** — same reason
 - **No re-exports from core** — react package exports `createFluxReact`,
   `FluxProvider`, standalone hooks, and types
@@ -52,11 +53,11 @@ implementation.**
 - **Standalone auto-updates** — in standalone mode, Provider connects to
   `RunService.Heartbeat` and calls `core.update(dt)` automatically. In wrap
   mode, the caller manages the update loop and fires the update signal.
-- **Smart equality** — selector results compared with a built-in comparator
-  that handles Roblox value types automatically. Uses `===` for primitives
-  (boolean, number, string) and structural comparison for Vector2 (X, Y) and
-  Vector3 (X, Y, Z) via `typeOf()` checks at runtime. Users never need to
-  think about equality.
+- **Smart equality** — selector results compared with a built-in comparator that
+  handles Roblox value types automatically. Uses `===` for primitives (boolean,
+  number, string) and structural comparison for Vector2 (X, Y) and Vector3 (X,
+  Y, Z) via `typeOf()` checks at runtime. Users never need to think about
+  equality.
 
 ## API Proposal
 
@@ -89,7 +90,10 @@ const flux = createFluxReact({ core });
 #### Standalone options
 
 ```ts
-interface FluxReactStandaloneOptions<T extends ActionMap, C extends Record<string, ContextConfig>> {
+interface FluxReactStandaloneOptions<
+	T extends ActionMap,
+	C extends Record<string, ContextConfig>,
+> {
 	readonly actions: T;
 	readonly contexts: C & ValidatedContexts<T, C>;
 	readonly parent?: Instance; // default: LocalPlayer
@@ -153,7 +157,10 @@ from Provider context.
 // Read from Provider handle
 function useAction<R>(selector: (state: ActionState) => R): R;
 // Explicit handle (overrides Provider)
-function useAction<R>(handle: InputHandle, selector: (state: ActionState) => R): R;
+function useAction<R>(
+	handle: InputHandle,
+	selector: (state: ActionState) => R,
+): R;
 ```
 
 #### Examples
@@ -243,7 +250,10 @@ function inputSystem(deltaTime: number): void {
 }
 
 function movementSystem(): void {
-	for (const [entity, state] of world.query(flux.ActionState, flux.contexts.gameplay)) {
+	for (const [entity, state] of world.query(
+		flux.ActionState,
+		flux.contexts.gameplay,
+	)) {
 		// ECS reads state directly — no React involved
 	}
 }
@@ -258,13 +268,17 @@ function reactFlushSystem(): void {
 
 ### Provider receives jecs entity as handle
 
-Jecs entity IDs are InputHandles (via `registerAs`). Pass the FluxReact
-instance and handle to FluxProvider:
+Jecs entity IDs are InputHandles (via `registerAs`). Pass the FluxReact instance
+and handle to FluxProvider:
 
 ```tsx
 import { FluxProvider } from "@rbxts/flux-react";
 
-const playerEntity = flux.register(localPlayerEntity, playerInstance, "gameplay");
+const playerEntity = flux.register(
+	localPlayerEntity,
+	playerInstance,
+	"gameplay",
+);
 
 // Entity ID is the handle — cast is safe because registerAs uses entity as handle
 <FluxProvider flux={fluxReact} handle={playerEntity as unknown as InputHandle}>
@@ -334,10 +348,9 @@ the full path works.
   - Files: `packages/react/src/update-signal.ts`
 
 - [ ] **Task 3: Tracer bullet — Provider + useAction (TDD)**
-  - Red: test that creates FluxReact in wrap mode, renders Provider with
-    handle, renders component using `useAction(selector)`, asserts initial
-    value, calls `core.update(dt)` + `flush()`, asserts re-render with new
-    value
+  - Red: test that creates FluxReact in wrap mode, renders Provider with handle,
+    renders component using `useAction(selector)`, asserts initial value, calls
+    `core.update(dt)` + `flush()`, asserts re-render with new value
   - Green: implement `createFluxReact`, Provider context, `useAction` with
     selector comparison
   - Acceptance: test passes end-to-end
@@ -348,7 +361,8 @@ the full path works.
 ### Checkpoint: Tracer Bullet
 
 - [ ] `pnpm --filter @rbxts/flux-react test` passes
-- [ ] One test proves: createFluxReact → Provider → useAction → flush → re-render
+- [ ] One test proves: createFluxReact → Provider → useAction → flush →
+      re-render
 - [ ] Seek feedback before expanding
 
 ---
@@ -396,7 +410,8 @@ the full path works.
 
 ### Checkpoint: Standalone Mode
 
-- [ ] Standalone mode creates core, auto-updates, hooks work without manual flush
+- [ ] Standalone mode creates core, auto-updates, hooks work without manual
+      flush
 
 ---
 
@@ -410,8 +425,8 @@ the full path works.
     `packages/react/src/create-flux-react.spec.ts`
 
 - [ ] **Task 10: Stale handle guard (TDD)**
-  - If handle is unregistered while component is mounted, useAction returns
-    last known value (or throws?)
+  - If handle is unregistered while component is mounted, useAction returns last
+    known value (or throws?)
   - Acceptance: no runtime crash on stale handle
   - Files: same as Task 9
 
@@ -454,17 +469,19 @@ the full path works.
 
 ## Risks
 
-| Risk | Mitigation |
-|------|------------|
-| Vector2/Vector3 equality | Built-in smart comparator via `typeOf()` — structural compare for vectors, `===` for primitives |
-| Heartbeat lifecycle | Disconnect on Provider unmount, test explicitly |
-| Stale handle after unregister | Guard in useAction, return last value or throw |
-| Testing React hooks in roblox-ts | May need `@rbxts/react-test-renderer` or similar; verify in tracer bullet |
-| Signal memory leaks | Auto-cleanup when last subscriber disconnects (same pattern as anime-rush hooks) |
+| Risk                             | Mitigation                                                                                      |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Vector2/Vector3 equality         | Built-in smart comparator via `typeOf()` — structural compare for vectors, `===` for primitives |
+| Heartbeat lifecycle              | Disconnect on Provider unmount, test explicitly                                                 |
+| Stale handle after unregister    | Guard in useAction, return last value or throw                                                  |
+| Testing React hooks in roblox-ts | May need `@rbxts/react-test-renderer` or similar; verify in tracer bullet                       |
+| Signal memory leaks              | Auto-cleanup when last subscriber disconnects (same pattern as anime-rush hooks)                |
 
 ## Open Questions
 
 - Testing approach: `react-test-renderer` available in roblox-ts, or mock React?
-- Should `flush()` be public API or internal-only? Wrap mode needs it, standalone doesn't.
-- Should Provider accept optional `autoRegister` prop that calls `core.register()` and passes handle automatically?
+- Should `flush()` be public API or internal-only? Wrap mode needs it,
+  standalone doesn't.
+- Should Provider accept optional `autoRegister` prop that calls
+  `core.register()` and passes handle automatically?
 - Package name: `@rbxts/flux-react` consistent with `@rbxts/flux-core`?

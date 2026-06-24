@@ -1,0 +1,257 @@
+diff --git a/src/index.d.ts b/src/index.d.ts
+index 8d150276d837d8a5da76f29a080d66eb0ee29cf9..5eb90d95e5eb9e351ed657f162d82cbece7c7dfb 100644
+--- a/src/index.d.ts
++++ b/src/index.d.ts
+@@ -171,18 +171,27 @@ export declare namespace jest {
+ 	 */
+ 	function fn(): LuaTuple<[Mock, (...args: any[]) => any]>;
+ 	/**
+-	 * Creates a mock function. Optionally takes a mock implementation.
++	 * Creates a mock function. The single generic is the FUNCTION TYPE being mocked:
++	 * include `this: SpecificType` for methods, omit `this:` for plain callbacks.
+ 	 *
+ 	 * Returns a LuaTuple of [mock, mockFn]. The first value is the mock
+ 	 * object (callable table). The second is a forwarding function for
+ 	 * cases where a real function is required.
+ 	 *
+ 	 * @example
+-	 * const [mock, mockFn] = jest.fn((x: number) => x + 1)
+-	 * mockFn(1)
+-	 * expect(mock).toHaveReturnedWith(2)
++	 * // Callback: no `this:`, so emitted Luau has no implicit self.
++	 * const [increment, incrementFn] = jest.fn<(x: number) => number>((x) => x + 1);
++	 * incrementFn(1);
++	 * expect(increment).toHaveReturnedWith(2);
++	 *
++	 * @example
++	 * // Method: `this: Players` ensures emitted Luau accepts the colon-call self.
++	 * const [getPlayer, getPlayerFn] = jest.fn<Players["GetPlayerByUserId"]>();
++	 * getPlayer.mockReturnValue(undefined);
+ 	 */
+-	function fn<T, Y extends any[]>(implementation?: (...args: Y) => T): LuaTuple<[Mock<T, Y>, (...args: Y) => T]>;
++	function fn<TFunction extends (...args: any[]) => any>(
++		implementation?: TFunction,
++	): LuaTuple<[Mock<TFunction>, TFunction]>;
+ 	/**
+ 	 * Returns whether the given function is a mock function.
+ 	 */
+@@ -325,13 +334,20 @@ export declare namespace jest {
+ 		object: T,
+ 		method: M,
+ 	): Required<T>[M] extends (...args: any[]) => any
+-		? SpyInstance<ReturnType<Required<T>[M]>, ArgsType<Required<T>[M]>>
++		? unknown extends ThisParameterType<Required<T>[M]>
++			? SpyInstance<(...args: ArgsType<Required<T>[M]>) => ReturnType<Required<T>[M]>>
++			: SpyInstance<
++					(
++						this: ThisParameterType<Required<T>[M]>,
++						...args: ArgsType<Required<T>[M]>
++					) => ReturnType<Required<T>[M]>
++				>
+ 		: never;
+ 	function spyOn<T extends {}, M extends ConstructorPropertyNames<Required<T>>>(
+ 		object: T,
+ 		method: M,
+ 	): Required<T>[M] extends new (...args: any[]) => any
+-		? SpyInstance<InstanceType<Required<T>[M]>, ConstructorArgsType<Required<T>[M]>>
++		? SpyInstance<(...args: ConstructorArgsType<Required<T>[M]>) => InstanceType<Required<T>[M]>>
+ 		: never;
+ 	/**
+ 	 * Indicates that the module system should never return a mocked version of
+@@ -364,12 +380,12 @@ export declare namespace jest {
+ 	type ArgumentsOf<T> = T extends (...args: infer A) => any ? A : never;
+ 	type ConstructorArgumentsOf<T> = T extends new (...args: infer A) => any ? A : never;
+ 
+-	interface MockWithArgs<T extends MockableFunction> extends MockInstance<ReturnType<T>, ArgumentsOf<T>> {
++	interface MockWithArgs<T extends MockableFunction> extends MockInstance<T> {
+ 		new (...args: ConstructorArgumentsOf<T>): T;
+ 		(...args: ArgumentsOf<T>): ReturnType<T>;
+ 	}
+-	type MaybeMockedConstructor<T> = T extends new (...args: any[]) => infer R
+-		? MockInstance<R, ConstructorArgumentsOf<T>>
++	type MaybeMockedConstructor<T> = T extends new (...args: infer P) => infer R
++		? MockInstance<(...args: P) => R>
+ 		: T;
+ 	type MockedFn<T extends MockableFunction> = MockWithArgs<T> & { [K in keyof T]: T[K] };
+ 	type MockedFunctionDeep<T extends MockableFunction> = MockWithArgs<T> & MockedObjectDeep<T>;
+@@ -390,6 +406,17 @@ export declare namespace jest {
+ 	type ConstructorArgsType<T> = T extends new (...args: infer A) => any ? A : never;
+ 	type RejectedValue<T> = T extends PromiseLike<any> ? any : never;
+ 	type ResolvedValue<T> = T extends PromiseLike<infer U> ? U | T : never;
++	/**
++	 * Derives the args tuple that a mock records at runtime from a function type.
++	 * - No `this:` declared (default `unknown`) or `this: void`: callback shape, no self.
++	 * - `this: SomeSpecificType`: method shape, self prepended.
++	 * Avoid `this: unknown` in TFunction — it collapses with the unannotated callback case.
++	 */
++	type RuntimeArguments<TFunction extends (...args: any[]) => any> = unknown extends ThisParameterType<TFunction>
++		? Parameters<TFunction>
++		: ThisParameterType<TFunction> extends void
++			? Parameters<TFunction>
++			: [ThisParameterType<TFunction>, ...Parameters<TFunction>];
+ 	// see https://github.com/Microsoft/TypeScript/issues/25215
+ 	type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends (...args: any[]) => any ? never : K }[keyof T] &
+ 		string;
+@@ -1169,17 +1196,20 @@ export declare namespace jest {
+ 		new (...args: any[]): any;
+ 	}
+ 
+-	interface Mock<T = any, Y extends any[] = any> extends Callback, MockInstance<T, Y> {
+-		new (...args: Y): T;
+-		(...args: Y): T;
++	interface Mock<TFunction extends (...args: any[]) => any = (...args: any[]) => any>
++		extends Callback,
++			MockInstance<TFunction> {
++		new (...args: Parameters<TFunction>): ReturnType<TFunction>;
++		(...args: Parameters<TFunction>): ReturnType<TFunction>;
+ 	}
+ 
+-	interface SpyInstance<T = any, Y extends any[] = any> extends MockInstance<T, Y> {}
++	interface SpyInstance<TFunction extends (...args: any[]) => any = (...args: any[]) => any>
++		extends MockInstance<TFunction> {}
+ 
+ 	/**
+ 	 * Represents a function that has been spied on.
+ 	 */
+-	type SpiedFunction<T extends (...args: any[]) => any> = SpyInstance<ReturnType<T>, ArgsType<T>>;
++	type SpiedFunction<TFunction extends (...args: any[]) => any> = SpyInstance<TFunction>;
+ 
+ 	/**
+ 	 * Wrap a function with mock definitions
+@@ -1192,7 +1222,7 @@ export declare namespace jest {
+ 	 *  const mockMyFunction = myFunction as jest.MockedFunction<typeof myFunction>;
+ 	 *  expect(mockMyFunction.mock.calls[0][0]).toBe(42);
+ 	 */
+-	type MockedFunction<T extends (...args: any[]) => any> = MockInstance<ReturnType<T>, ArgsType<T>> & T;
++	type MockedFunction<TFunction extends (...args: any[]) => any> = MockInstance<TFunction> & TFunction;
+ 
+ 	/**
+ 	 * Wrap a class with mock definitions
+@@ -1209,8 +1239,7 @@ export declare namespace jest {
+ 	 */
+ 
+ 	type MockedClass<T extends Constructable> = MockInstance<
+-		InstanceType<T>,
+-		T extends new (...args: infer P) => any ? P : never
++		T extends new (...args: infer P) => infer R ? (...args: P) => R : never
+ 	> & {
+ 		prototype: T extends { prototype: any } ? Mocked<T["prototype"]> : never;
+ 	} & T;
+@@ -1228,17 +1257,17 @@ export declare namespace jest {
+ 	 */
+ 	type Mocked<T> = {
+ 		[P in keyof T]: T[P] extends (...args: any[]) => any
+-			? MockInstance<ReturnType<T[P]>, ArgsType<T[P]>>
++			? MockInstance<T[P]>
+ 			: T[P] extends Constructable
+ 				? MockedClass<T[P]>
+ 				: T[P];
+ 	} & T;
+ 
+-	interface MockInstance<T, Y extends any[]> {
++	interface MockInstance<TFunction extends (...args: any[]) => any> {
+ 		/** Returns the mock name string set by calling `mockFn.mockName(value)`. */
+ 		getMockName(this: void): string;
+ 		/** Provides access to the mock's metadata */
+-		mock: MockContext<T, Y>;
++		mock: MockContext<TFunction>;
+ 		/**
+ 		 * Resets all information stored in the mockFn.mock.calls and mockFn.mock.instances arrays.
+ 		 *
+@@ -1274,7 +1303,7 @@ export declare namespace jest {
+ 		/**
+ 		 * Returns the function that was set as the implementation of the mock (using mockImplementation).
+ 		 */
+-		getMockImplementation(this: void): ((...args: Y) => T) | undefined;
++		getMockImplementation(this: void): TFunction | undefined;
+ 		/**
+ 		 * Accepts a function that should be used as the implementation of the mock. The mock itself will still record
+ 		 * all calls that go into and instances that come from itself – the only difference is that the implementation
+@@ -1282,7 +1311,7 @@ export declare namespace jest {
+ 		 *
+ 		 * Note: `jest.fn(implementation)` is a shorthand for `jest.fn().mockImplementation(implementation)`.
+ 		 */
+-		mockImplementation(this: void, fn?: (...args: Y) => T): this;
++		mockImplementation(this: void, fn?: TFunction): this;
+ 		/**
+ 		 * Accepts a function that will be used as an implementation of the mock for one call to the mocked function.
+ 		 * Can be chained so that multiple function calls produce different results.
+@@ -1298,7 +1327,7 @@ export declare namespace jest {
+ 		 *
+ 		 * myMockFn((err, val) => console.log(val)); // false
+ 		 */
+-		mockImplementationOnce(this: void, fn: (...args: Y) => T): this;
++		mockImplementationOnce(this: void, fn: TFunction): this;
+ 		/** Sets the name of the mock`. */
+ 		mockName(this: void, name: string): this;
+ 		/**
+@@ -1322,7 +1351,7 @@ export declare namespace jest {
+ 		 * mock.mockReturnValue(43);
+ 		 * mock(); // 43
+ 		 */
+-		mockReturnValue(this: void, value: T): this;
++		mockReturnValue(this: void, value: ReturnType<TFunction>): this;
+ 		/**
+ 		 * Accepts a value that will be returned for one call to the mock function. Can be chained so that
+ 		 * successive calls to the mock function return different values. When there are no more
+@@ -1339,11 +1368,11 @@ export declare namespace jest {
+ 		 * console.log(myMockFn(), myMockFn(), myMockFn(), myMockFn());
+ 		 *
+ 		 */
+-		mockReturnValueOnce(this: void, value: T): this;
++		mockReturnValueOnce(this: void, value: ReturnType<TFunction>): this;
+ 		/**
+ 		 * Simple sugar function for: `jest.fn().mockImplementation(() => Promise.resolve(value));`
+ 		 */
+-		mockResolvedValue(this: void, value: ResolvedValue<T>): this;
++		mockResolvedValue(this: void, value: ResolvedValue<ReturnType<TFunction>>): this;
+ 		/**
+ 		 * Simple sugar function for: `jest.fn().mockImplementationOnce(() => Promise.resolve(value));`
+ 		 *
+@@ -1363,7 +1392,7 @@ export declare namespace jest {
+ 		 * });
+ 		 *
+ 		 */
+-		mockResolvedValueOnce(this: void, value: ResolvedValue<T>): this;
++		mockResolvedValueOnce(this: void, value: ResolvedValue<ReturnType<TFunction>>): this;
+ 		/**
+ 		 * Simple sugar function for: `jest.fn().mockImplementation(() => Promise.reject(value));`
+ 		 *
+@@ -1375,7 +1404,7 @@ export declare namespace jest {
+ 		 *   await asyncMock(); // throws "Async error"
+ 		 * });
+ 		 */
+-		mockRejectedValue(this: void, value: RejectedValue<T>): this;
++		mockRejectedValue(this: void, value: RejectedValue<ReturnType<TFunction>>): this;
+ 
+ 		/**
+ 		 * Simple sugar function for: `jest.fn().mockImplementationOnce(() => Promise.reject(value));`
+@@ -1393,7 +1422,7 @@ export declare namespace jest {
+ 		 * });
+ 		 *
+ 		 */
+-		mockRejectedValueOnce(this: void, value: RejectedValue<T>): this;
++		mockRejectedValueOnce(this: void, value: RejectedValue<ReturnType<TFunction>>): this;
+ 	}
+ 
+ 	/**
+@@ -1420,14 +1449,14 @@ export declare namespace jest {
+ 
+ 	type MockResult<T> = MockResultReturn<T> | MockResultThrow | MockResultIncomplete;
+ 
+-	interface MockContext<T, Y extends any[]> {
+-		lastCall: Y;
+-		calls: Y[];
+-		instances: T[];
++	interface MockContext<TFunction extends (...args: any[]) => any> {
++		lastCall: RuntimeArguments<TFunction>;
++		calls: Array<RuntimeArguments<TFunction>>;
++		instances: Array<ReturnType<TFunction>>;
+ 		invocationCallOrder: number[];
+ 		/**
+ 		 * List of results of calls to the mock function.
+ 		 */
+-		results: Array<MockResult<T>>;
++		results: Array<MockResult<ReturnType<TFunction>>>;
+ 	}
+ }

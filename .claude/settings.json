@@ -1,4 +1,5 @@
 {
+	"autoMemoryEnabled": false,
 	"includeCoAuthoredBy": true,
 	"permissions": {
 		"allow": [

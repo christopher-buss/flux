@@ -1,11 +1,11 @@
 ## Package
 
 `@rbxts/flux-react` — thin React wrapper over `@rbxts/flux`. Exports
-`createFluxReact<Actions, Contexts>()` returning `{ flush, FluxProvider,
-useAction, useActiveContext, useBindings, useFluxCore, useInputContext }`. Core is
-injected at render time via `<FluxProvider core={core} handle={handle}>`,
-so the factory can live in a shared module that never touches a world or
-core at import time.
+`createFluxReact<Actions, Contexts>()` returning
+`{ flush, FluxProvider, useAction, useActiveContext, useBindings, useFluxCore, useInputContext }`.
+Core is injected at render time via
+`<FluxProvider core={core} handle={handle}>`, so the factory can live in a
+shared module that never touches a world or core at import time.
 
 ## Module Layout (src/)
 
@@ -20,8 +20,8 @@ core at import time.
 ## Testing Layering
 
 - **Smoke** (`src/create-flux-react.spec.tsx`): factory shape only.
-- **Integration** (`src/*.spec.tsx`): colocated next to each module.
-  Provider lifecycle, selector semantics, handle/rerender resync,
+- **Integration** (`src/*.spec.tsx`): colocated next to each module. Provider
+  lifecycle, selector semantics, handle/rerender resync,
   context/triggers/StrictMode, context hooks. Uses real `createCore` — no mocks.
 - **E2E** (`e2e/react/`): full game with real input devices.
 
@@ -29,12 +29,12 @@ Shared test fixtures + helpers at `test/fixtures.ts` and `test/probes.tsx`.
 
 ## Constraints
 
-**`useAction` bail-out uses a ref, not `setValue(prev)`.** React-Lua's
-internal bail-out does not reliably skip rerenders on the first post-change
-flush when the functional updater returns `previous`. The wrapper compares
-via `lastValueRef.current` and only calls `setValue` on actual change. Do
-not "simplify" back to the naive `setValue((prev) => prev === x ? prev : x)`
-pattern — it reintroduces spurious rerenders.
+**`useAction` bail-out uses a ref, not `setValue(prev)`.** React-Lua's internal
+bail-out does not reliably skip rerenders on the first post-change flush when
+the functional updater returns `previous`. The wrapper compares via
+`lastValueRef.current` and only calls `setValue` on actual change. Do not
+"simplify" back to the naive `setValue((prev) => prev === x ? prev : x)` pattern
+— it reintroduces spurious rerenders.
 
 **`useAction` has delayed-resync on Provider handle/selector changes.** A
 Provider `handle` prop swap or a new selector identity does NOT immediately
@@ -42,18 +42,18 @@ update the rendered value — the next `flush()` catches it via the subscribe
 callback. Locked by the `handle and rerender resync` describe block in
 `src/hooks/use-action.spec.tsx`.
 
-**JSX intrinsic elements exclude `Name` and `Parent`.** `InstanceAttributes`
-in `@rbxts/react` excludes these. Distinguish probes in tests via `Text`
-content + `queryByText`, not `Name` + `FindFirstChild`.
+**JSX intrinsic elements exclude `Name` and `Parent`.** `InstanceAttributes` in
+`@rbxts/react` excludes these. Distinguish probes in tests via `Text` content +
+`queryByText`, not `Name` + `FindFirstChild`.
 
-**Render-counting probes mutate via closure functions, not direct
-assignment.** The `react/no-outside-reassign` lint rule blocks writing to
-outer variables or object properties from inside a component. Use
-`makeRenderCounter()` (returns `{ get, tick }`) from `test/probes.tsx`.
+**Render-counting probes mutate via closure functions, not direct assignment.**
+The `react/no-outside-reassign` lint rule blocks writing to outer variables or
+object properties from inside a component. Use `makeRenderCounter()` (returns
+`{ get, tick }`) from `test/probes.tsx`.
 
-**Hook files are `.tsx`, not `.ts`.** The `max-lines-per-function` lint cap
-(30) is disabled for `.tsx` but enforced on `.ts`. Hook factory functions
-exceed 30 lines by nature of the ref-pattern bail-out — keep them in `.tsx`.
+**Hook files are `.tsx`, not `.ts`.** The `max-lines-per-function` lint cap (30)
+is disabled for `.tsx` but enforced on `.ts`. Hook factory functions exceed 30
+lines by nature of the ref-pattern bail-out — keep them in `.tsx`.
 
 ## Critical Files
 
@@ -61,8 +61,7 @@ exceed 30 lines by nature of the ref-pattern bail-out — keep them in `.tsx`.
 - `src/flux-context.tsx` — shared Provider context + `useFluxContext`.
 - `src/update-signal.ts` — subscribe/fire plumbing used by the wrapper.
 - `test/probes.tsx` — shared probe factories.
-- `test/fixtures.ts` — shared action map, contexts, and
-  trigger thresholds.
+- `test/fixtures.ts` — shared action map, contexts, and trigger thresholds.
 
 ## Commands
 

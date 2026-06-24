@@ -255,31 +255,45 @@ describe("convenience wrappers", () => {
 ```ts
 import type { ActionConfig, ActionType } from "../types/actions";
 
-export function defineActions<T extends Record<string, ActionConfig>>(actions: T): T {
+export function defineActions<T extends Record<string, ActionConfig>>(
+	actions: T,
+): T {
 	return actions;
 }
 
-export function action<T extends ActionType>(config: ActionConfig<T>): ActionConfig<T> {
+export function action<T extends ActionType>(
+	config: ActionConfig<T>,
+): ActionConfig<T> {
 	return config;
 }
 
-export function bool(config?: Omit<ActionConfig, "type">): ActionConfig<"Bool"> {
+export function bool(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"Bool"> {
 	return { ...config, type: "Bool" };
 }
 
-export function direction1d(config?: Omit<ActionConfig, "type">): ActionConfig<"Direction1D"> {
+export function direction1d(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"Direction1D"> {
 	return { ...config, type: "Direction1D" };
 }
 
-export function direction2d(config?: Omit<ActionConfig, "type">): ActionConfig<"Direction2D"> {
+export function direction2d(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"Direction2D"> {
 	return { ...config, type: "Direction2D" };
 }
 
-export function direction3d(config?: Omit<ActionConfig, "type">): ActionConfig<"Direction3D"> {
+export function direction3d(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"Direction3D"> {
 	return { ...config, type: "Direction3D" };
 }
 
-export function position2d(config?: Omit<ActionConfig, "type">): ActionConfig<"ViewportPosition"> {
+export function position2d(
+	config?: Omit<ActionConfig, "type">,
+): ActionConfig<"ViewportPosition"> {
 	return { ...config, type: "ViewportPosition" };
 }
 ```
@@ -318,11 +332,14 @@ Define `ContextConfig` and implement `defineContexts`. **Tests first.**
 
 ```ts
 // A binding-like value: KeyCode, UserInputType, or directional preset object.
-export type BindingLike = Enum.KeyCode | Enum.UserInputType | Record<string, Enum.KeyCode>;
+export type BindingLike =
+	| Enum.KeyCode
+	| Enum.UserInputType
+	| Record<string, Enum.KeyCode>;
 ```
 
-**`packages/core/src/types/contexts.ts`** -- context config lives here, not in
-a monolithic `core.ts`.
+**`packages/core/src/types/contexts.ts`** -- context config lives here, not in a
+monolithic `core.ts`.
 
 ```ts
 import type { BindingLike } from "./bindings";
@@ -396,7 +413,9 @@ import type { ContextConfig } from "../types/contexts";
 
 // Identity function that preserves literal context names.
 // No action validation here -- cross-validation happens at createCore.
-export function defineContexts<T extends Record<string, ContextConfig>>(contexts: T): T {
+export function defineContexts<T extends Record<string, ContextConfig>>(
+	contexts: T,
+): T {
 	return contexts;
 }
 
@@ -500,6 +519,7 @@ implementations:
 
 - `InputHandle` -- Phase 3 (with `createCore`)
 - `ActionState`, `ActionValue` -- Phase 3 (with ActionState implementation)
-- `FluxCore`, `CoreConfig`, `ValidateContextBindings` -- Phase 3 (with `createCore`)
+- `FluxCore`, `CoreConfig`, `ValidateContextBindings` -- Phase 3 (with
+  `createCore`)
 - `BindingState` -- Phase 4 (with rebinding)
 - `ActionDiff` -- Phase 4 (with replication)
