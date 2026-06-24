@@ -41,12 +41,6 @@
 			"sourceType": "github",
 			"computedHash": "24b85c7365abdf5d13b42954eff132095d619e9dbd2d980deb00c368054f4ce6"
 		},
-		"implement": {
-			"source": "mattpocock/skills",
-			"sourceType": "github",
-			"skillPath": "skills/engineering/implement/SKILL.md",
-			"computedHash": "f7b0f3636d20c12d1596336efa6943346f85c97f6419371347ac96c089dca08f"
-		},
 		"improve-codebase-architecture": {
 			"source": "mattpocock/skills",
 			"sourceType": "github",
