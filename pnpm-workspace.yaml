@@ -40,7 +40,7 @@ catalogs:
     confbox: 0.2.2
     std-env: 4.1.0
   lint:
-    "@eslint/config-inspector": 1.5.0
+    "@eslint/config-inspector": 3.0.4
     "@isentinel/eslint-config": 5.2.0
     "@isentinel/hooks": 1.5.2
     eslint: 9.39.4
