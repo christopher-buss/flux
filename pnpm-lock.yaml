@@ -99,8 +99,8 @@ catalogs:
       specifier: 17.3.7-ts.1
       version: 17.3.7-ts.1
     '@rbxts/react-roblox':
-      specifier: 17.3.7-ts.1
-      version: 17.3.7-ts.1
+      specifier: 17.3.7-ts.2
+      version: 17.3.7-ts.2
   prod:
     '@rbxts/services':
       specifier: 1.6.0
@@ -340,7 +340,7 @@ importers:
         version: 17.3.7-ts.1
       '@rbxts/react-roblox':
         specifier: catalog:peer
-        version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
+        version: 17.3.7-ts.2(@rbxts/react@17.3.7-ts.1)
       '@rbxts/services':
         specifier: catalog:prod
         version: 1.6.0
@@ -546,7 +546,7 @@ importers:
         version: 17.3.7-ts.1
       '@rbxts/react-roblox':
         specifier: catalog:peer
-        version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
+        version: 17.3.7-ts.2(@rbxts/react@17.3.7-ts.1)
       '@rbxts/react-roblox-fire':
         specifier: catalog:test
         version: 0.1.4
@@ -1334,6 +1334,7 @@ packages:
 
   '@isentinel/stylua@2.1.0-esm.3':
     resolution: {integrity: sha512-thwx7ptSzSGOZhzhxWD6cLOSYesk+5U3Ia/RzMrFc9djpv7LXe0spGCxJ/tWfYdJfg1ryU89rubdhhYxVlyMQg==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   '@isentinel/tsconfig@1.2.0':
     resolution: {integrity: sha512-MTsDJjte6XV+t3UtbE93UOStGgJ6jw5XG8UoGcyuI8E9mEAOZFhqmdKT8LVXgqncM5Knbe4H/lAUVvRHO+l6tA==}
@@ -2169,6 +2170,11 @@ packages:
     resolution: {integrity: sha512-lsH3lP+X0JUS/6Fg5MJfP8OjMn7bjxapbg3r1ajrpvwZGPGU1WOFcFDS/xMMk/2RK/GNYRmkduNM8pQ9vHw54Q==}
     peerDependencies:
       '@rbxts/react': ^17.3.7-ts.1
+
+  '@rbxts/react-roblox@17.3.7-ts.2':
+    resolution: {integrity: sha512-T5a9noru9M0Ye4+k8Py43z2lLfnsLfxoigssIiDkU7+776BsnG2IlQVRiM7ICZaMFAlckIQj2HxYL5oyNK4HQQ==}
+    peerDependencies:
+      '@rbxts/react': ^17.3.7-ts.2
 
   '@rbxts/react@17.3.7-ts.1':
     resolution: {integrity: sha512-/jqZ2TvyLSAPwC30h95loUmy4XN2PwPhv6fBARJKtZfyozFx2RuxC9FiQSjpEZ2uOOPzr60It0MBUf94D+tsMg==}
@@ -6514,6 +6520,11 @@ snapshots:
       '@rbxts/services': 1.6.0
 
   '@rbxts/react-roblox@17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)':
+    dependencies:
+      '@rbxts-js/react-roblox': 17.3.7-ts.1
+      '@rbxts/react': 17.3.7-ts.1
+
+  '@rbxts/react-roblox@17.3.7-ts.2(@rbxts/react@17.3.7-ts.1)':
     dependencies:
       '@rbxts-js/react-roblox': 17.3.7-ts.1
       '@rbxts/react': 17.3.7-ts.1

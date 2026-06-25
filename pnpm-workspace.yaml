@@ -59,7 +59,7 @@ catalogs:
   peer:
     "@rbxts/jecs": 0.11.0
     "@rbxts/react": 17.3.7-ts.1
-    "@rbxts/react-roblox": 17.3.7-ts.1
+    "@rbxts/react-roblox": 17.3.7-ts.2
   prod:
     "@rbxts/services": 1.6.0
   script:
