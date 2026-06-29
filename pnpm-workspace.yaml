@@ -77,7 +77,7 @@ catalogs:
     rbxts-transformer-jest: 0.0.6
   tsc:
     "@isentinel/tsconfig": 1.2.0
-    "@typescript/native-preview": 7.0.0-dev.20260624.1
+    "@typescript/native-preview": 7.0.0-dev.20260626.1
     typescript: 6.0.3
   types:
     "@rbxts/compiler-types": 3.0.0-types.0
