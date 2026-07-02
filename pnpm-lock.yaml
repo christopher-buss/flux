@@ -114,8 +114,8 @@ catalogs:
       specifier: 0.3.7
       version: 0.3.7
     '@rbxts-js/dom-testing-library-lua':
-      specifier: 8.16.0-ts.2
-      version: 8.16.0-ts.2
+      specifier: 8.16.0-ts.3
+      version: 8.16.0-ts.3
     '@rbxts-js/react-testing-library-lua':
       specifier: 12.3.4-ts.2
       version: 12.3.4-ts.2
@@ -519,7 +519,7 @@ importers:
         version: 1.2.0(typescript@6.0.3)
       '@rbxts-js/dom-testing-library-lua':
         specifier: catalog:test
-        version: 8.16.0-ts.2
+        version: 8.16.0-ts.3
       '@rbxts-js/react-testing-library-lua':
         specifier: catalog:test
         version: 12.3.4-ts.2
@@ -582,7 +582,7 @@ importers:
         version: 1.2.0(typescript@6.0.3)
       '@rbxts-js/dom-testing-library-lua':
         specifier: catalog:test
-        version: 8.16.0-ts.2
+        version: 8.16.0-ts.3
       '@rbxts-js/react-testing-library-lua':
         specifier: catalog:test
         version: 12.3.4-ts.2
@@ -1925,6 +1925,9 @@ packages:
 
   '@rbxts-js/dom-testing-library-lua@8.16.0-ts.2':
     resolution: {integrity: sha512-VS24bvq2HnvliGMD9XEfPx8ba/a1FZux4XwY9mbpzoFYl/UWNQJlFwq0OO/ewrjWAs3QPwY0WuoZuURG9FSxJw==}
+
+  '@rbxts-js/dom-testing-library-lua@8.16.0-ts.3':
+    resolution: {integrity: sha512-g1o7h9XZeDCDYnpL9CMLGt7VvnwCgqKhMkAiugOtVmOE4MMv2UxyCPTSvjJ+6poxJiUQMPJ+X5Q4aMpGtSQP8Q==}
 
   '@rbxts-js/emittery@3.16.0-ts.1':
     resolution: {integrity: sha512-drNizxly/OennxikLBL6kUH9lHNHEqpXc3F/3JVOS9CRuQALeesyrIBCuCVreYzVo1d4jybYmgfiUI8ShyJDtw==}
@@ -5960,6 +5963,17 @@ snapshots:
       '@rbxts-js/pretty-format': 3.13.3-ts.3
       '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
       '@rbxts-js/roblox-shared': 3.13.3-ts.3
+
+  '@rbxts-js/dom-testing-library-lua@8.16.0-ts.3':
+    dependencies:
+      '@rbxts-js/chalk-lua': 0.2.2-ts.2
+      '@rbxts-js/jest-get-type': 3.16.0-ts.1
+      '@rbxts-js/jest-globals': 3.16.0-ts.1
+      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
+      '@rbxts-js/luau-regexp': 0.2.2-ts.1
+      '@rbxts-js/pretty-format': 3.16.0-ts.1
+      '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
+      '@rbxts-js/roblox-shared': 3.16.0-ts.1
 
   '@rbxts-js/emittery@3.16.0-ts.1(patch_hash=497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496)':
     dependencies:
