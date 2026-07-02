@@ -67,7 +67,7 @@ catalogs:
   test:
     "@isentinel/jest-roblox": 0.3.7
     "@rbxts-js/dom-testing-library-lua": 8.16.0-ts.3
-    "@rbxts-js/react-testing-library-lua": 12.3.4-ts.2
+    "@rbxts-js/react-testing-library-lua": 12.3.4-ts.3
     "@rbxts/jest": 3.16.0-ts.1
     "@rbxts/jest-extended": 1.0.1
     "@rbxts/jest-globals": 3.16.0-ts.1
