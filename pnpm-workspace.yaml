@@ -83,7 +83,7 @@ catalogs:
     "@rbxts/compiler-types": 3.0.0-types.0
     "@rbxts/types": latest
     "@types/node": 24.13.2
-    type-fest: 5.7.0
+    type-fest: 5.8.0
 
 allowBuilds:
   esbuild: true
