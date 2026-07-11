@@ -158,8 +158,8 @@ catalogs:
       specifier: latest
       version: 1.0.938
     '@types/node':
-      specifier: 24.13.2
-      version: 24.13.2
+      specifier: 24.13.3
+      version: 24.13.3
     type-fest:
       specifier: 5.8.0
       version: 5.8.0
@@ -200,7 +200,7 @@ importers:
         version: 0.1.3(@rbxts/jest-globals@3.16.0-ts.1(patch_hash=d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0))
       '@types/node':
         specifier: catalog:types
-        version: 24.13.2
+        version: 24.13.3
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -618,7 +618,7 @@ importers:
         version: 1.5.2(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@5.9.3)
       '@types/node':
         specifier: catalog:types
-        version: 24.13.2
+        version: 24.13.3
       confbox:
         specifier: catalog:dev
         version: 0.2.2
@@ -2371,8 +2371,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node@24.13.2':
-    resolution: {integrity: sha512-fRa09kZTgu8o71KFcDjUFuc7F+dEbZYZmkI0mg5YBTRs0yMKjYHsq/c0urDKeDb+D5qVgXOdFcuu+DZPKOITwA==}
+  '@types/node@24.13.3':
+    resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
@@ -6591,7 +6591,7 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@24.13.2':
+  '@types/node@24.13.3':
     dependencies:
       undici-types: 7.18.2
 
