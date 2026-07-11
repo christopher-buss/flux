@@ -42,8 +42,8 @@ catalogs:
       specifier: 0.2.2
       version: 0.2.2
     std-env:
-      specifier: 4.1.0
-      version: 4.1.0
+      specifier: 4.2.0
+      version: 4.2.0
   lint:
     '@eslint/config-inspector':
       specifier: 1.5.0
@@ -624,7 +624,7 @@ importers:
         version: 0.2.2
       std-env:
         specifier: catalog:dev
-        version: 4.1.0
+        version: 4.2.0
 
 packages:
 
@@ -4452,6 +4452,9 @@ packages:
 
   std-env@4.1.0:
     resolution: {integrity: sha512-Rq7ybcX2RuC55r9oaPVEW7/xu3tj8u4GeBYHBWCychFtzMIr86A7e3PPEBPT37sHStKX3+TiX/Fr/ACmJLVlLQ==}
+
+  std-env@4.2.0:
+    resolution: {integrity: sha512-oCUKSupKTHX53EyjDtuZQ64pjLJ6yYCtpmEw0goYxtjG9KpbRe8KAsl2tBUGU9DyMcJ0RwJ8GqJAFzMXcXW1Rw==}
 
   stream-to-array@2.3.0:
     resolution: {integrity: sha512-UsZtOYEn4tWU2RGLOXr/o/xjRBftZRlG3dEWoaHr8j4GuypJ3isitGbVyjQKAuMu+xbiop8q224TjiZWc4XTZA==}
@@ -9229,6 +9232,8 @@ snapshots:
   spdx-license-ids@3.0.22: {}
 
   std-env@4.1.0: {}
+
+  std-env@4.2.0: {}
 
   stream-to-array@2.3.0:
     dependencies:
