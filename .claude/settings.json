@@ -87,6 +87,28 @@
 					}
 				]
 			}
+		],
+		"WorktreeCreate": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node scripts/hooks/worktree-create.ts",
+						"timeout": 600
+					}
+				]
+			}
+		],
+		"WorktreeRemove": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node scripts/hooks/worktree-remove.ts",
+						"timeout": 120
+					}
+				]
+			}
 		]
 	},
 	"outputStyle": "sentinel:XP Programmer"

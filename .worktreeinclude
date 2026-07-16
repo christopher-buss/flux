@@ -1,0 +1,6 @@
+# Gitignored paths Claude Code copies into a new worktree. Only consulted when
+# the desktop creates the worktree itself; the WorktreeCreate hook delegates to
+# worktrunk, which copies all gitignored files minus [step.copy-ignored] in
+# wt.toml.
+.env
+.turbo/

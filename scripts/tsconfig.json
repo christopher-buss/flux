@@ -1,4 +1,8 @@
 {
 	"extends": "../tsconfig.node.json",
-	"include": ["*.ts"]
+	"compilerOptions": {
+		"allowImportingTsExtensions": true,
+		"emitDeclarationOnly": true
+	},
+	"include": ["*.ts", "hooks/*.ts"]
 }

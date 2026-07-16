@@ -1,0 +1,44 @@
+# Project-specific hooks that run automatically during worktree operations.
+# Checked into git so every developer (and Claude) gets the same setup.
+#
+# Claude Code's WorktreeCreate hook (scripts/hooks/worktree-create.ts) runs
+# `wt switch --create` with hooks enabled, so these fire during creation:
+# pre-start blocks, post-start backgrounds. Teardown mirrors this — the
+# WorktreeRemove hook (scripts/hooks/worktree-remove.ts) runs `wt remove --force`.
+#
+# Docs: https://worktrunk.dev/hook/
+
+# Pipeline runs block-by-block in order: mise trust -> mise install -> (ni and
+# copy concurrently). ni and copy share a block because they touch disjoint
+# files -- ni owns node_modules, copy-ignored excludes it (see [step.copy-ignored]
+# below).
+[[pre-start]]
+mise = "mise trust"
+
+# After trust, before deps: front-load the pinned toolchain (node, rojo, lute,
+# hk, pkl) into its own named step so a version bump or fresh clone fails fast
+# here with clear attribution instead of mid-`ni`/build.
+[[pre-start]]
+mise-install = "mise install"
+
+# ni and copy run concurrently (one block, multiple keys): disjoint file sets,
+# so no race on node_modules. `ni` triggers the postinstall rojo-sync.
+[[pre-start]]
+deps = "ni"
+copy = "wt step copy-ignored"
+
+# Post-Start: runs in BACKGROUND after pre-start completes, so worktree creation
+# isn't blocked on the build. MUST use the [[post-start]] table header, not a
+# bare `post-start =` key: a bare key placed after the [[pre-start]] blocks above
+# is absorbed by TOML into the last pre-start block, which would run the build
+# concurrently with ni and race node_modules.
+# Output logged to .git/wt-logs/{branch}-project-post-start-{name}.log
+[[post-start]]
+build = "nr dev:build"
+
+# copy-ignored skips node_modules: ni owns it, and copying it would (a) race ni
+# when the two run concurrently and (b) waste I/O re-walking the thousands of
+# files ni already created. Everything else gitignored (.env, .turbo/, out/,
+# include/) is still copied to warm the worktree.
+[step.copy-ignored]
+exclude = [ "node_modules/" ]

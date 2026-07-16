@@ -9,10 +9,16 @@
 	],
 	"author": "Christopher Buss <christopher.buss@pm.me> (https://github.com/christopher-buss)",
 	"type": "module",
+	"scripts": {
+		"test": "vitest run"
+	},
 	"devDependencies": {
 		"@isentinel/hooks": "catalog:lint",
 		"@types/node": "catalog:types",
+		"@vitest/coverage-v8": "catalog:test",
 		"confbox": "catalog:dev",
-		"std-env": "catalog:dev"
+		"std-env": "catalog:dev",
+		"type-fest": "catalog:types",
+		"vitest": "catalog:test"
 	}
 }
