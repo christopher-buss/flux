@@ -21,6 +21,7 @@
 		"rojo-sync": "node scripts/rojo-sync.ts",
 		"test": "FORCE_COLOR=1 turbo run dev:build && jest-roblox --workspace --packages @rbxts/flux,@rbxts/flux-jecs,@rbxts/flux-react,@flux/test-utils",
 		"test:affected": "FORCE_COLOR=1 turbo run dev:build && jest-roblox --workspace --affected-since=${BASE_REF:-main}",
+		"test:scripts": "pnpm --filter scripts test",
 		"typecheck": "tsgo --build --emitDeclarationOnly"
 	},
 	"devDependencies": {

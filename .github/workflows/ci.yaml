@@ -79,6 +79,9 @@ jobs:
             turbo-${{ runner.os }}-${{ github.job }}-
             turbo-${{ runner.os }}-
 
+      - name: Test Scripts
+        run: pnpm run test:scripts
+
       - env:
           BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
           ROBLOX_OPEN_CLOUD_API_KEY: ${{ secrets.ROBLOX_OPEN_CLOUD_API_KEY }}
