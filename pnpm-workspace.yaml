@@ -75,7 +75,7 @@ catalogs:
     "@rbxts/react-roblox-fire": 0.1.4
     "@rbxts/regexp": 0.2.1-ts.4
     "@vitest/coverage-v8": 4.1.8
-    rbxts-transformer-jest: 0.0.6
+    rbxts-transformer-jest: 0.0.8
     vitest: 4.1.8
   tsc:
     "@isentinel/tsconfig": 1.2.0
