@@ -26,10 +26,10 @@ event, control.
 `pressed`, `justPressed`, `axis2d`, `triggered`, `canceled`, and so on. The read
 side of Flux. _Avoid_: input state, snapshot, result.
 
-**Raw input**: An action's value taken before _trigger_ evaluation
-(`rawPressed`, `rawJustPressed`) — modifiers still apply, but triggers are
-bypassed. Distinct from the trigger-gated value most code reads. _Avoid_: live
-input, direct input, unprocessed input.
+**Raw input**: An action's value bypassing Flux's gating entirely — read before
+_trigger_ evaluation and ignoring _claims_ (`rawPressed`, `rawJustPressed`);
+modifiers still apply. The unarbitrated truth, distinct from the processed
+value most code reads. _Avoid_: live input, direct input, unprocessed input.
 
 ### Bindings & contexts
 
@@ -92,7 +92,10 @@ server-created IAS instances rather than owning them, and cannot serialize
 bindings. The replication side. _Avoid_: remote handle, mirror handle, client
 handle.
 
-**Claim**: Exclusive ownership of an action by a consumer for a frame, so other
-consumers reading the same action see it as unavailable. How Flux arbitrates
-when several consumers contend for one action. _Avoid_: lock, capture, reserve,
-grab.
+**Claim**: Marking an action's input as consumed for the rest of the frame — a
+manual sink. A consumer claims only *after* reading and using the input
+(read-then-claim); once claimed, the action reads as inert (false/neutral) to
+later consumers, and only raw reads see through it. Per-frame: continuous
+consumers re-claim each frame they use the input. "Own this action regardless
+of input" is a context + sink job, not a claim. _Avoid_: lock, capture,
+reserve, grab, exclusive ownership.
