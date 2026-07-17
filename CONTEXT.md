@@ -53,6 +53,15 @@ contexts typically run high priority. _Avoid_: rank, weight, z-index.
 receiving the input it consumes. How a UI context blocks gameplay input
 underneath it. _Avoid_: block, swallow, capture, absorb.
 
+**Resolution**: Choosing which context supplies an action's value each frame
+when several declare it. An action may be declared in any number of contexts;
+reads resolve to the highest-priority active context that declares it, with
+ties going to the most recently activated. Action state survives a change of
+winning context. _Avoid_: arbitration, fallback, merging.
+
+**Winning context**: The context an action resolved to this frame. _Avoid_:
+owner, source context.
+
 ### Triggers & modifiers
 
 **Trigger**: A stateful gate deciding _when_ an action fires from input
