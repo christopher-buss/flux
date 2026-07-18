@@ -28,8 +28,8 @@ side of Flux. _Avoid_: input state, snapshot, result.
 
 **Raw input**: An action's value bypassing Flux's gating entirely — read before
 _trigger_ evaluation and ignoring _claims_ (`rawPressed`, `rawJustPressed`);
-modifiers still apply. The unarbitrated truth, distinct from the processed
-value most code reads. _Avoid_: live input, direct input, unprocessed input.
+modifiers still apply. The unarbitrated truth, distinct from the processed value
+most code reads. _Avoid_: live input, direct input, unprocessed input.
 
 ### Bindings & contexts
 
@@ -55,9 +55,9 @@ underneath it. _Avoid_: block, swallow, capture, absorb.
 
 **Resolution**: Choosing which context supplies an action's value each frame
 when several declare it. An action may be declared in any number of contexts;
-reads resolve to the highest-priority active context that declares it, with
-ties going to the most recently activated. Action state survives a change of
-winning context. _Avoid_: arbitration, fallback, merging.
+reads resolve to the highest-priority active context that declares it, with ties
+going to the most recently activated. Action state survives a change of winning
+context. _Avoid_: arbitration, fallback, merging.
 
 **Winning context**: The context an action resolved to this frame. _Avoid_:
 owner, source context.
@@ -102,9 +102,9 @@ bindings. The replication side. _Avoid_: remote handle, mirror handle, client
 handle.
 
 **Claim**: Marking an action's input as consumed for the rest of the frame — a
-manual sink. A consumer claims only *after* reading and using the input
+manual sink. A consumer claims only _after_ reading and using the input
 (read-then-claim); once claimed, the action reads as inert (false/neutral) to
 later consumers, and only raw reads see through it. Per-frame: continuous
-consumers re-claim each frame they use the input. "Own this action regardless
-of input" is a context + sink job, not a claim. _Avoid_: lock, capture,
-reserve, grab, exclusive ownership.
+consumers re-claim each frame they use the input. "Own this action regardless of
+input" is a context + sink job, not a claim. _Avoid_: lock, capture, reserve,
+grab, exclusive ownership.

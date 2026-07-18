@@ -67,4 +67,11 @@ export default isentinel(
 			"max-lines-per-function": "off",
 		},
 	},
+	{
+		name: "project/github-required-filenames",
+		files: [".github/FUNDING.{yml,yaml}", ".github/ISSUE_TEMPLATE/**"],
+		rules: {
+			"unicorn/filename-case": "off",
+		},
+	},
 );

@@ -7,7 +7,7 @@ return false/neutral for a claimed action. Previously only
 `isAvailable`/`isClaimed` respected claims, making exclusivity an opt-in
 convention (`isAvailable(x) && justPressed(x)`) that consumers silently forgot
 (issue #129). `raw*` reads are the sole bypass: "raw" means pre-arbitration —
-before triggers *and* claims.
+before triggers _and_ claims.
 
 The intended idiom is read-then-claim, with priority coming from system
 ordering:
@@ -18,26 +18,25 @@ if (input.justPressed("interact") && input.claim("interact")) {
 }
 ```
 
-Claim only what you used. "This consumer owns the action regardless of input"
-is a context + sink job, not a claim.
+Claim only what you used. "This consumer owns the action regardless of input" is
+a context + sink job, not a claim.
 
 ## Considered options
 
 - **Claim-aware convenience read** (`justPressedAvailable`, `consume()`):
   rejected — read-then-claim is already one greppable expression, and a
   `consume` variant would have to be replicated across every read kind.
-- **Auto-consume via `exclusive: true` action config** (from the pre-1.0
-  design sketches): rejected — consume-on-first-read makes reads
-  side-effectful (a debug overlay would eat input) and implements
-  first-reader-wins when the model wants first-claimer-wins. The sketch itself
-  recommended manual `claim()` for conditional use ("only claim if target is
-  valid").
+- **Auto-consume via `exclusive: true` action config** (from the pre-1.0 design
+  sketches): rejected — consume-on-first-read makes reads side-effectful (a
+  debug overlay would eat input) and implements first-reader-wins when the model
+  wants first-claimer-wins. The sketch itself recommended manual `claim()` for
+  conditional use ("only claim if target is valid").
 - **Docs-only** (mandate the `isAvailable &&` idiom): rejected — the failure
   mode is silent double-firing; safe-by-default beats convention.
 
 ## Consequences
 
-- Claiming *before* reading suppresses your own reads — the claimed flag is
+- Claiming _before_ reading suppresses your own reads — the claimed flag is
   anonymous, with no owner identity. Read-then-claim is the contract, not a
   style preference.
 - Claims are per-frame (`endFrame` clears them). Consumers of continuous input
