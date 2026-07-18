@@ -60,16 +60,22 @@ const TRIGGER_CONTEXTS = {
 	},
 } satisfies Record<string, ContextConfig>;
 
-const RECENCY_ACTIONS = { jump: { type: "Bool" as const } } satisfies ActionMap;
+const RECENCY_ACTIONS = {
+	jump: { type: "Bool" as const },
+	move: { type: "Direction2D" as const },
+} satisfies ActionMap;
 
+// Both contexts declare `jump` at equal priority, so only activation recency
+// can decide which one processes it. `blocker` sinks, so `move` — declared
+// only by `gameplay` — reports which context won.
 const RECENCY_CONTEXTS = {
 	blocker: {
-		bindings: {},
+		bindings: { jump: [Enum.KeyCode.Space] },
 		priority: 0,
 		sink: true,
 	},
 	gameplay: {
-		bindings: { jump: [Enum.KeyCode.Space] },
+		bindings: { jump: [Enum.KeyCode.Space], move: [Enum.KeyCode.W] },
 		priority: 0,
 	},
 } satisfies Record<string, ContextConfig>;
@@ -411,22 +417,22 @@ describe("createCore", () => {
 			const core = createCore({ actions: RECENCY_ACTIONS, contexts: RECENCY_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "blocker");
 			core.addContext(handle, "gameplay");
-			core.simulateAction(handle, "jump", true);
+			core.simulateAction(handle, "move", new Vector2(1, 0));
 			core.update(0.016);
 
-			expect(core.getState(handle).pressed("jump")).toBeTrue();
+			expect(core.getState(handle).direction2d("move")).toBe(new Vector2(1, 0));
 		});
 
-		it("should let an earlier context sink when it was activated most recently", () => {
+		it("should let the most recently activated context sink the older one", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: RECENCY_ACTIONS, contexts: RECENCY_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
 			core.addContext(handle, "blocker");
-			core.simulateAction(handle, "jump", true);
+			core.simulateAction(handle, "move", new Vector2(1, 0));
 			core.update(0.016);
 
-			expect(core.getState(handle).pressed("jump")).toBeFalse();
+			expect(core.getState(handle).direction2d("move")).toBe(Vector2.zero);
 		});
 
 		it("should make a re-added context the most recently activated", () => {
@@ -436,10 +442,19 @@ describe("createCore", () => {
 			const handle = core.register(new Instance("Folder"), "gameplay", "blocker");
 			core.removeContext(handle, "gameplay");
 			core.addContext(handle, "gameplay");
-			core.simulateAction(handle, "jump", true);
+			core.simulateAction(handle, "move", new Vector2(1, 0));
 			core.update(0.016);
 
-			expect(core.getState(handle).pressed("jump")).toBeTrue();
+			expect(core.getState(handle).direction2d("move")).toBe(new Vector2(1, 0));
+		});
+
+		it("should activate a repeated context name once", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: RECENCY_ACTIONS, contexts: RECENCY_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay", "gameplay");
+
+			expect(core.getContexts(handle)).toStrictEqual(["gameplay"]);
 		});
 	});
 

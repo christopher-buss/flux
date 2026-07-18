@@ -192,7 +192,12 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		},
 		getContexts(handle: InputHandle): ReadonlyArray<Contexts> {
 			const data = getHandleData(handles, handle);
-			return [...data.activeContexts] as Array<Contexts>;
+			const result = new Array<Contexts>();
+			for (const name of data.activeContexts) {
+				result.push(name);
+			}
+
+			return result;
 		},
 		getState(handle: InputHandle): ActionState<T> {
 			return getHandleData(handles, handle).publicState;
