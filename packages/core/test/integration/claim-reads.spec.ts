@@ -21,7 +21,7 @@ function didConsumeJump(state: ActionState<typeof actions>): boolean {
 	return state.justPressed("jump") && state.claim("jump");
 }
 
-describe("claim arbitration", () => {
+describe("claim-aware reads", () => {
 	it("should let the first consumer win and leave the second inert", () => {
 		expect.assertions(3);
 

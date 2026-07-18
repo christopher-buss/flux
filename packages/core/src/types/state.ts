@@ -107,14 +107,14 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * Claim only what you used. "This consumer owns the action regardless of
 	 * input" is a job for a higher-priority context with `sink`, not a claim.
 	 *
+	 * @param action - Any action name.
+	 * @returns True if the claim succeeded (not already claimed this frame).
 	 * @example
 	 * ```ts
 	 * if (input.justPressed("interact") && input.claim("interact")) {
 	 * 	// act — downstream consumers see the action as inert this frame
 	 * }
 	 * ```
-	 * @param action - Any action name.
-	 * @returns True if the claim succeeded (not already claimed this frame).
 	 */
 	claim(action: AllActions<Actions>): boolean;
 

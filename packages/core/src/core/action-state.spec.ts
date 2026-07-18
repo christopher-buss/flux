@@ -689,6 +689,24 @@ describe("createActionState", () => {
 			expect(state.getState("jump")).toBeFalse();
 		});
 
+		it("should return the neutral vector for a claimed Direction2D getState", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(1, 0),
+			});
+
+			expect(state.getState("move")).toBe(new Vector2(1, 0));
+
+			state.claim("move");
+
+			expect(state.getState("move")).toBe(Vector2.zero);
+		});
+
 		it("should return neutral 0 for a claimed axis1d", () => {
 			expect.assertions(2);
 
