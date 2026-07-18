@@ -52,8 +52,8 @@ catalogs:
       specifier: 5.2.0
       version: 5.2.0
     '@isentinel/hooks':
-      specifier: 1.5.2
-      version: 1.5.2
+      specifier: 1.5.3
+      version: 1.5.3
     eslint:
       specifier: 9.39.4
       version: 9.39.4
@@ -191,7 +191,7 @@ importers:
         version: 5.2.0(a83e207b5bf2d335095da8417b18cd9a)
       '@isentinel/hooks':
         specifier: catalog:lint
-        version: 1.5.2(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@6.0.3)
+        version: 1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@6.0.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
         version: 0.3.7(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
@@ -621,7 +621,7 @@ importers:
     devDependencies:
       '@isentinel/hooks':
         specifier: catalog:lint
-        version: 1.5.2(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@5.9.3)
+        version: 1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@5.9.3)
       '@types/node':
         specifier: catalog:types
         version: 24.13.3
@@ -1350,8 +1350,8 @@ packages:
     peerDependencies:
       eslint: '>=8.0.0'
 
-  '@isentinel/hooks@1.5.2':
-    resolution: {integrity: sha512-093mrGkpmLD/VYB8qC1vhdZcJAjsy9zjQqaTs4xGrSrx+qL9FKWiMVe7Uy7WWnZ50n60zcWJ67l+7HTKivEkbQ==}
+  '@isentinel/hooks@1.5.3':
+    resolution: {integrity: sha512-r8Ashi0ZyI8XSd5xhQwueio1nBITckeZ8UjBYtApDwfN0Y9aKKiJInQm2WM3w5sV3GpT1eu7cxpGQ9V6i1PmHw==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       '@typescript/native-preview': '>=7'
@@ -5933,7 +5933,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/hooks@1.5.2(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@5.9.3)':
+  '@isentinel/hooks@1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@5.9.3)':
     dependencies:
       eslint_d: 15.0.2(jiti@2.7.0)
       file-entry-cache: 11.1.5
@@ -5946,7 +5946,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/hooks@1.5.2(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@6.0.3)':
+  '@isentinel/hooks@1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@6.0.3)':
     dependencies:
       eslint_d: 15.0.2(jiti@2.7.0)
       file-entry-cache: 11.1.5
