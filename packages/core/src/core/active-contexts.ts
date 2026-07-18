@@ -1,8 +1,5 @@
-/**
- * Active context names mapped to the activation sequence number that records
- * when each became active. Higher number = more recently activated.
- */
-export type ActiveContexts = Map<string, number>;
+/** Active context names in activation order, oldest first. */
+export type ActiveContexts = Array<string>;
 
 /**
  * Marks a context active as the most recently activated one.
@@ -10,41 +7,29 @@ export type ActiveContexts = Map<string, number>;
  * @param context - The context name to activate.
  */
 export function activateContext(activeContexts: ActiveContexts, context: string): void {
-	let highest = 0;
-	for (const [, sequence] of activeContexts) {
-		highest = math.max(highest, sequence);
-	}
-
-	activeContexts.set(context, highest + 1);
+	activeContexts.push(context);
 }
 
 /**
- * Creates an activation record from the contexts a handle starts with.
- * @param contextNames - Context names in the order they were requested.
- * @returns The activation record.
+ * Marks a context inactive, leaving the order of the rest untouched.
+ * @param activeContexts - The activation record to mutate.
+ * @param context - The context name to deactivate.
  */
-export function createActiveContexts(contextNames: ReadonlyArray<string>): ActiveContexts {
-	const activeContexts: ActiveContexts = new Map<string, number>();
-	for (const name of contextNames) {
-		activateContext(activeContexts, name);
+export function deactivateContext(activeContexts: ActiveContexts, context: string): void {
+	const index = activeContexts.indexOf(context);
+	if (index < 0) {
+		error(`context not active: ${context}`);
 	}
 
-	return activeContexts;
+	activeContexts.remove(index);
 }
 
 /**
- * Lists active contexts oldest activation first.
+ * Reports whether a context is currently active.
  * @param activeContexts - The activation record to read.
- * @returns Context names in activation order.
+ * @param context - The context name to look for.
+ * @returns True when the context is active.
  */
-export function activationOrder(activeContexts: ActiveContexts): Array<string> {
-	const names = new Array<string>();
-	for (const [name] of activeContexts) {
-		names.push(name);
-	}
-
-	names.sort((first, second) => {
-		return (activeContexts.get(first) ?? 0) < (activeContexts.get(second) ?? 0);
-	});
-	return names;
+export function isContextActive(activeContexts: ActiveContexts, context: string): boolean {
+	return activeContexts.includes(context);
 }

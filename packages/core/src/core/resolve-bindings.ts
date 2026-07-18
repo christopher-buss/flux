@@ -1,7 +1,6 @@
 import type { ActionMap } from "../types/actions";
 import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
-import { activationOrder } from "./active-contexts";
 import type { HandleData } from "./handle-lifecycle";
 
 /**
@@ -59,7 +58,7 @@ function mergeBindingsAcrossContexts<T extends ActionMap>(
 ): ReadonlyArray<BindingLike> {
 	const result = new Array<BindingLike>();
 	const seen = new Set<BindingLike>();
-	for (const contextName of activationOrder(handleData.activeContexts)) {
+	for (const contextName of handleData.activeContexts) {
 		for (const binding of getContextBindings(contexts, contextName, action)) {
 			if (!seen.has(binding)) {
 				seen.add(binding);

@@ -12,7 +12,7 @@ import { processPipeline } from "./pipeline";
 
 /** Internal per-handle data used during update processing. */
 export interface CoreHandleData {
-	/** Currently active context names keyed to their activation sequence. */
+	/** Currently active context names, oldest activation first. */
 	readonly activeContexts: ActiveContexts;
 	/** Active per-action binding overrides. Absent key = use original bindings. */
 	readonly bindingOverrides: Map<string, ReadonlyArray<BindingLike>>;
@@ -48,6 +48,18 @@ export interface HandleUpdateOptions {
 	readonly isDebug: boolean;
 	/** Custom timeout callback. Defaults to `warn()`. */
 	readonly onReplicationTimeout?: (message: string) => void;
+}
+
+/** An active context placed in this frame's resolution order. */
+export interface RankedContext {
+	/** The context name. */
+	readonly name: string;
+	/** Position in activation order, oldest first. */
+	readonly activationIndex: number;
+	/** The context's configuration. */
+	readonly config: ContextConfig;
+	/** Effective priority, defaulted when the config omits one. */
+	readonly priority: number;
 }
 
 interface ActionUpdateOptions {
@@ -95,31 +107,36 @@ export function getDefaultValue(actionType: ActionType): ActionValueType {
 /**
  * Sorts active contexts by priority (descending), ties broken by most recent
  * activation.
- * @param activeContexts - Active contexts keyed to activation sequence.
+ * @param activeContexts - Active contexts in activation order.
  * @param contexts - Context configuration record.
- * @returns Sorted array of context name/config pairs.
+ * @returns Contexts in resolution order.
  */
 export function sortActiveContexts(
 	activeContexts: ActiveContexts,
 	contexts: Record<string, ContextConfig>,
-): Array<[string, ContextConfig]> {
-	const sorted = new Array<[string, ContextConfig]>();
-	for (const [name] of activeContexts) {
+): Array<RankedContext> {
+	const ranked = new Array<RankedContext>();
+	let activationIndex = 0;
+	for (const name of activeContexts) {
 		const config = contexts[name];
 		assert(config, `missing context config: ${name}`);
-		sorted.push([name, config]);
+		ranked.push({
+			name,
+			activationIndex,
+			config,
+			priority: config.priority ?? DEFAULT_CONTEXT_PRIORITY,
+		});
+		activationIndex += 1;
 	}
 
-	sorted.sort((first, second) => {
-		const firstPriority = first[1].priority ?? DEFAULT_CONTEXT_PRIORITY;
-		const secondPriority = second[1].priority ?? DEFAULT_CONTEXT_PRIORITY;
-		if (firstPriority !== secondPriority) {
-			return firstPriority > secondPriority;
+	ranked.sort((first, second) => {
+		if (first.priority !== second.priority) {
+			return first.priority > second.priority;
 		}
 
-		return (activeContexts.get(first[0]) ?? 0) > (activeContexts.get(second[0]) ?? 0);
+		return first.activationIndex > second.activationIndex;
 	});
-	return sorted;
+	return ranked;
 }
 
 /**
@@ -132,7 +149,7 @@ export function updateHandle(options: HandleUpdateOptions): void {
 	handleData.internalState.endFrame();
 	const sorted = sortActiveContexts(handleData.activeContexts, contexts);
 	const processedActions = new Set<string>();
-	for (const [, contextConfig] of sorted) {
+	for (const { config: contextConfig } of sorted) {
 		processContextActions({
 			actions,
 			contextConfig,
