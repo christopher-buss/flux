@@ -5,6 +5,7 @@ import type { ContextConfig } from "../types/contexts";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
+import { activateContext, activationOrder } from "./active-contexts";
 import { createHandleFactory } from "./handle-factory";
 import type { HandleData } from "./handle-lifecycle";
 import {
@@ -134,7 +135,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			}
 
 			setContextEnabled(data.instanceData, context, true);
-			data.activeContexts.add(context);
+			activateContext(data.activeContexts, context);
 
 			return noop;
 		},
@@ -191,12 +192,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		},
 		getContexts(handle: InputHandle): ReadonlyArray<Contexts> {
 			const data = getHandleData(handles, handle);
-			const result = new Array<Contexts>();
-			for (const name of data.activeContexts) {
-				result.push(name);
-			}
-
-			return result;
+			return activationOrder(data.activeContexts);
 		},
 		getState(handle: InputHandle): ActionState<T> {
 			return getHandleData(handles, handle).publicState;

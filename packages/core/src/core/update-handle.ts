@@ -6,13 +6,14 @@ import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionValueType, InternalActionState } from "./action-state";
 import { getMagnitude } from "./action-state";
+import type { ActiveContexts } from "./active-contexts";
 import type { InputInstanceData } from "./input-instances";
 import { processPipeline } from "./pipeline";
 
 /** Internal per-handle data used during update processing. */
 export interface CoreHandleData {
-	/** Set of currently active context names. */
-	readonly activeContexts: Set<string>;
+	/** Currently active context names keyed to their activation sequence. */
+	readonly activeContexts: ActiveContexts;
 	/** Active per-action binding overrides. Absent key = use original bindings. */
 	readonly bindingOverrides: Map<string, ReadonlyArray<BindingLike>>;
 	/** Per-action trigger duration accumulators in seconds. */
@@ -92,27 +93,31 @@ export function getDefaultValue(actionType: ActionType): ActionValueType {
 }
 
 /**
- * Sorts active contexts by priority (descending).
- * @param activeContexts - Set of active context names.
+ * Sorts active contexts by priority (descending), ties broken by most recent
+ * activation.
+ * @param activeContexts - Active contexts keyed to activation sequence.
  * @param contexts - Context configuration record.
  * @returns Sorted array of context name/config pairs.
  */
 export function sortActiveContexts(
-	activeContexts: Set<string>,
+	activeContexts: ActiveContexts,
 	contexts: Record<string, ContextConfig>,
 ): Array<[string, ContextConfig]> {
 	const sorted = new Array<[string, ContextConfig]>();
-	for (const name of activeContexts) {
+	for (const [name] of activeContexts) {
 		const config = contexts[name];
 		assert(config, `missing context config: ${name}`);
 		sorted.push([name, config]);
 	}
 
 	sorted.sort((first, second) => {
-		return (
-			(first[1].priority ?? DEFAULT_CONTEXT_PRIORITY) >
-			(second[1].priority ?? DEFAULT_CONTEXT_PRIORITY)
-		);
+		const firstPriority = first[1].priority ?? DEFAULT_CONTEXT_PRIORITY;
+		const secondPriority = second[1].priority ?? DEFAULT_CONTEXT_PRIORITY;
+		if (firstPriority !== secondPriority) {
+			return firstPriority > secondPriority;
+		}
+
+		return (activeContexts.get(first[0]) ?? 0) > (activeContexts.get(second[0]) ?? 0);
 	});
 	return sorted;
 }

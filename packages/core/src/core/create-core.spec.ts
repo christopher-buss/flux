@@ -60,6 +60,20 @@ const TRIGGER_CONTEXTS = {
 	},
 } satisfies Record<string, ContextConfig>;
 
+const RECENCY_ACTIONS = { jump: { type: "Bool" as const } } satisfies ActionMap;
+
+const RECENCY_CONTEXTS = {
+	blocker: {
+		bindings: {},
+		priority: 0,
+		sink: true,
+	},
+	gameplay: {
+		bindings: { jump: [Enum.KeyCode.Space] },
+		priority: 0,
+	},
+} satisfies Record<string, ContextConfig>;
+
 describe("createCore", () => {
 	it("should return object with all FluxCore methods", () => {
 		expect.assertions(1);
@@ -383,6 +397,45 @@ describe("createCore", () => {
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay", "ui");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+	});
+
+	describe("equal priority contexts", () => {
+		it("should let the most recently activated context process a shared action", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: RECENCY_ACTIONS, contexts: RECENCY_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "blocker");
+			core.addContext(handle, "gameplay");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should let an earlier context sink when it was activated most recently", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: RECENCY_ACTIONS, contexts: RECENCY_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			core.addContext(handle, "blocker");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeFalse();
+		});
+
+		it("should make a re-added context the most recently activated", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: RECENCY_ACTIONS, contexts: RECENCY_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay", "blocker");
+			core.removeContext(handle, "gameplay");
+			core.addContext(handle, "gameplay");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
 
