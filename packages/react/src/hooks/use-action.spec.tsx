@@ -526,6 +526,37 @@ describe("useAction", () => {
 			expect(queryByText("dash:true")).toBeDefined();
 		});
 
+		it("should render a claimed action as inert", () => {
+			expect.assertions(2);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const { FluxProvider, useAction } = flux;
+			const Probe = createLabeledJumpProbe(useAction);
+
+			const { queryByText } = render(
+				<FluxProvider core={core} handle={handle}>
+					<Probe label="jump" />
+				</FluxProvider>,
+			);
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+			flux.flush();
+
+			expect(queryByText("jump:true")).toBeDefined();
+
+			core.getState(handle).claim("jump");
+			flux.flush();
+
+			expect(queryByText("jump:false")).toBeDefined();
+		});
+
 		it("should clear gameplay bindings when a sinking ui context is active", () => {
 			expect.assertions(2);
 

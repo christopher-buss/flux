@@ -528,6 +528,299 @@ describe("createActionState", () => {
 		});
 	});
 
+	describe("claim-aware reads", () => {
+		it("should suppress pressed and triggered", () => {
+			expect.assertions(4);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.pressed("jump")).toBeTrue();
+			expect(state.triggered("jump")).toBeTrue();
+
+			state.claim("jump");
+
+			expect(state.pressed("jump")).toBeFalse();
+			expect(state.triggered("jump")).toBeFalse();
+		});
+
+		it("should suppress justPressed", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.justPressed("jump")).toBeTrue();
+
+			state.claim("jump");
+
+			expect(state.justPressed("jump")).toBeFalse();
+		});
+
+		it("should suppress justReleased", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+			internal.endFrame();
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "none",
+				value: false,
+			});
+
+			expect(state.justReleased("jump")).toBeTrue();
+
+			state.claim("jump");
+
+			expect(state.justReleased("jump")).toBeFalse();
+		});
+
+		it("should suppress ongoing", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+
+			expect(state.ongoing("jump")).toBeTrue();
+
+			state.claim("jump");
+
+			expect(state.ongoing("jump")).toBeFalse();
+		});
+
+		it("should suppress canceled", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "canceled",
+				value: false,
+			});
+
+			expect(state.canceled("jump")).toBeTrue();
+
+			state.claim("jump");
+
+			expect(state.canceled("jump")).toBeFalse();
+		});
+
+		it("should suppress axisBecameActive", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(1, 0),
+			});
+
+			expect(state.axisBecameActive("move")).toBeTrue();
+
+			state.claim("move");
+
+			expect(state.axisBecameActive("move")).toBeFalse();
+		});
+
+		it("should suppress axisBecameInactive", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(1, 0),
+			});
+			internal.endFrame();
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "none",
+				value: Vector2.zero,
+			});
+
+			expect(state.axisBecameInactive("move")).toBeTrue();
+
+			state.claim("move");
+
+			expect(state.axisBecameInactive("move")).toBeFalse();
+		});
+
+		it("should return neutral false for a claimed Bool getState", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.getState("jump")).toBeTrue();
+
+			state.claim("jump");
+
+			expect(state.getState("jump")).toBeFalse();
+		});
+
+		it("should return neutral 0 for a claimed axis1d", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "throttle",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: 0.5,
+			});
+
+			expect(state.axis1d("throttle")).toBeCloseTo(0.5);
+
+			state.claim("throttle");
+
+			expect(state.axis1d("throttle")).toBe(0);
+		});
+
+		it("should return neutral zero vector for a claimed direction2d", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(1, 0),
+			});
+
+			expect(state.direction2d("move")).toBe(new Vector2(1, 0));
+
+			state.claim("move");
+
+			expect(state.direction2d("move")).toBe(Vector2.zero);
+		});
+
+		it("should return neutral zero vector for a claimed axis3d", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "look",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector3(1, 0, 0),
+			});
+
+			expect(state.axis3d("look")).toBe(new Vector3(1, 0, 0));
+
+			state.claim("look");
+
+			expect(state.axis3d("look")).toBe(Vector3.zero);
+		});
+
+		it("should return neutral zero vector for a claimed position2d", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState({
+				cursor: { type: "ViewportPosition" as const },
+			});
+			internal.updateAction({
+				action: "cursor",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(100, 200),
+			});
+
+			expect(state.position2d("cursor")).toBe(new Vector2(100, 200));
+
+			state.claim("cursor");
+
+			expect(state.position2d("cursor")).toBe(Vector2.zero);
+		});
+
+		it("should return zero durations while claimed", () => {
+			expect.assertions(4);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.currentDuration("jump")).toBeCloseTo(0.016);
+			expect(state.previousDuration("jump")).toBeCloseTo(0.016);
+
+			state.claim("jump");
+
+			expect(state.currentDuration("jump")).toBe(0);
+			expect(state.previousDuration("jump")).toBe(0);
+		});
+
+		it("should not suppress rawPressed or rawJustPressed", () => {
+			expect.assertions(4);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.rawPressed("jump")).toBeTrue();
+			expect(state.rawJustPressed("jump")).toBeTrue();
+
+			state.claim("jump");
+
+			expect(state.rawPressed("jump")).toBeTrue();
+			expect(state.rawJustPressed("jump")).toBeTrue();
+		});
+
+		it("should not suppress isClaimed or isEnabled", () => {
+			expect.assertions(3);
+
+			const [state] = createActionState(TEST_ACTIONS);
+			state.claim("jump");
+
+			expect(state.isClaimed("jump")).toBeTrue();
+			expect(state.isEnabled("jump")).toBeTrue();
+			expect(state.isAvailable("jump")).toBeFalse();
+		});
+	});
+
 	describe("getMagnitude", () => {
 		it("should return 1 for true and 0 for false", () => {
 			expect.assertions(2);

@@ -31,6 +31,7 @@ interface ActionEntry {
 	claimed: boolean;
 	duration: number;
 	enabled: boolean;
+	neutralValue: ActionValueType;
 	previousDuration: number;
 	previousTriggerState: TriggerState;
 	previousValue: ActionValueType;
@@ -100,6 +101,7 @@ function createEntry(config: ActionConfig): ActionEntry {
 		claimed: false,
 		duration: 0,
 		enabled: config.enabled ?? true,
+		neutralValue: defaultValue,
 		previousDuration: 0,
 		previousTriggerState: "none",
 		previousValue: defaultValue,
@@ -124,68 +126,86 @@ function getEntry(entries: Map<string, ActionEntry>, action: string): ActionEntr
 	return entry;
 }
 
-function isPressed(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).triggerState === "triggered";
-}
-
-function wasJustPressed(entries: Map<string, ActionEntry>, action: string): boolean {
+/**
+ * Reads a boolean predicate, suppressed to false while the action is claimed.
+ * @param entries - The action entry map.
+ * @param action - The action name.
+ * @param predicate - Computes the unclaimed result from the entry.
+ * @returns False if claimed, otherwise the predicate result.
+ */
+function readBoolean(
+	entries: Map<string, ActionEntry>,
+	action: string,
+	predicate: (entry: ActionEntry) => boolean,
+): boolean {
 	const entry = getEntry(entries, action);
 
+	return entry.claimed ? false : predicate(entry);
+}
+
+/**
+ * Reads an action's value, suppressed to its neutral value while claimed.
+ * @param entries - The action entry map.
+ * @param action - The action name.
+ * @returns The neutral value if claimed, otherwise the current value.
+ */
+function readValue(entries: Map<string, ActionEntry>, action: string): ActionValueType {
+	const entry = getEntry(entries, action);
+
+	return entry.claimed ? entry.neutralValue : entry.value;
+}
+
+/**
+ * Reads a duration, suppressed to zero while the action is claimed.
+ * @param entries - The action entry map.
+ * @param action - The action name.
+ * @param pick - Picks the duration field from the entry.
+ * @returns Zero if claimed, otherwise the picked duration.
+ */
+function readDuration(
+	entries: Map<string, ActionEntry>,
+	action: string,
+	pick: (entry: ActionEntry) => number,
+): number {
+	const entry = getEntry(entries, action);
+
+	return entry.claimed ? 0 : pick(entry);
+}
+
+function isTriggered(entry: ActionEntry): boolean {
+	return entry.triggerState === "triggered";
+}
+
+function wasJustPressed(entry: ActionEntry): boolean {
 	return entry.triggerState === "triggered" && entry.previousTriggerState !== "triggered";
 }
 
-function wasJustReleased(entries: Map<string, ActionEntry>, action: string): boolean {
-	const entry = getEntry(entries, action);
-
+function wasJustReleased(entry: ActionEntry): boolean {
 	return entry.previousTriggerState === "triggered" && entry.triggerState !== "triggered";
 }
 
-function getAxis1d(entries: Map<string, ActionEntry>, action: string): number {
-	return getEntry(entries, action).value as number;
-}
-
-function getAxis3d(entries: Map<string, ActionEntry>, action: string): Vector3 {
-	return getEntry(entries, action).value as Vector3;
-}
-
-function getDirection2d(entries: Map<string, ActionEntry>, action: string): Vector2 {
-	return getEntry(entries, action).value as Vector2;
-}
-
-function getPosition2d(entries: Map<string, ActionEntry>, action: string): Vector2 {
-	return getEntry(entries, action).value as Vector2;
-}
-
-function didAxisBecomeActive(entries: Map<string, ActionEntry>, action: string): boolean {
-	const entry = getEntry(entries, action);
-
+function didAxisBecomeActive(entry: ActionEntry): boolean {
 	return getMagnitude(entry.previousValue) === 0 && getMagnitude(entry.value) > 0;
 }
 
-function didAxisBecomeInactive(entries: Map<string, ActionEntry>, action: string): boolean {
-	const entry = getEntry(entries, action);
-
+function didAxisBecomeInactive(entry: ActionEntry): boolean {
 	return getMagnitude(entry.previousValue) > 0 && getMagnitude(entry.value) === 0;
 }
 
-function isTriggered(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).triggerState === "triggered";
+function isOngoing(entry: ActionEntry): boolean {
+	return entry.triggerState === "ongoing";
 }
 
-function isOngoing(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).triggerState === "ongoing";
+function isCanceled(entry: ActionEntry): boolean {
+	return entry.triggerState === "canceled";
 }
 
-function isCanceled(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).triggerState === "canceled";
+function getCurrentDuration(entry: ActionEntry): number {
+	return entry.duration;
 }
 
-function getCurrentDuration(entries: Map<string, ActionEntry>, action: string): number {
-	return getEntry(entries, action).duration;
-}
-
-function getPreviousDuration(entries: Map<string, ActionEntry>, action: string): number {
-	return getEntry(entries, action).previousDuration;
+function getPreviousDuration(entry: ActionEntry): number {
+	return entry.previousDuration;
 }
 
 function claimAction(entries: Map<string, ActionEntry>, action: string): boolean {
@@ -227,31 +247,31 @@ function wasRawJustPressed(entries: Map<string, ActionEntry>, action: string): b
 function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>): ActionState<T> {
 	return {
 		axis1d(action) {
-			return getAxis1d(entries, action);
+			return readValue(entries, action) as number;
 		},
 		axis3d(action) {
-			return getAxis3d(entries, action);
+			return readValue(entries, action) as Vector3;
 		},
 		axisBecameActive(action) {
-			return didAxisBecomeActive(entries, action);
+			return readBoolean(entries, action, didAxisBecomeActive);
 		},
 		axisBecameInactive(action) {
-			return didAxisBecomeInactive(entries, action);
+			return readBoolean(entries, action, didAxisBecomeInactive);
 		},
 		canceled(action) {
-			return isCanceled(entries, action);
+			return readBoolean(entries, action, isCanceled);
 		},
 		claim(action) {
 			return claimAction(entries, action);
 		},
 		currentDuration(action) {
-			return getCurrentDuration(entries, action);
+			return readDuration(entries, action, getCurrentDuration);
 		},
 		direction2d(action) {
-			return getDirection2d(entries, action);
+			return readValue(entries, action) as Vector2;
 		},
 		getState<A extends keyof T & string>(action: A): ActionValue<T, A> {
-			return getEntry(entries, action).value as ActionValue<T, A>;
+			return readValue(entries, action) as ActionValue<T, A>;
 		},
 		isAvailable(action) {
 			return isActionAvailable(entries, action);
@@ -263,22 +283,22 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 			return isActionEnabled(entries, action);
 		},
 		justPressed(action) {
-			return wasJustPressed(entries, action);
+			return readBoolean(entries, action, wasJustPressed);
 		},
 		justReleased(action) {
-			return wasJustReleased(entries, action);
+			return readBoolean(entries, action, wasJustReleased);
 		},
 		ongoing(action) {
-			return isOngoing(entries, action);
+			return readBoolean(entries, action, isOngoing);
 		},
 		position2d(action) {
-			return getPosition2d(entries, action);
+			return readValue(entries, action) as Vector2;
 		},
 		pressed(action) {
-			return isPressed(entries, action);
+			return readBoolean(entries, action, isTriggered);
 		},
 		previousDuration(action) {
-			return getPreviousDuration(entries, action);
+			return readDuration(entries, action, getPreviousDuration);
 		},
 		rawJustPressed(action) {
 			return wasRawJustPressed(entries, action);
@@ -287,7 +307,7 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 			return isRawPressed(entries, action);
 		},
 		triggered(action) {
-			return isTriggered(entries, action);
+			return readBoolean(entries, action, isTriggered);
 		},
 	} as const satisfies ActionState<T>;
 }
