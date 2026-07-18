@@ -5,9 +5,8 @@ gets its own `InputAction` instance (the engine requires per-context instances).
 Reads must therefore resolve which instance supplies the value each frame: the
 highest-priority active context that declares the action wins, with ties broken
 by most recent activation. Accumulated action state (hold duration, trigger
-progress) is keyed by action name and carries across a change of winning
-context — contexts choose the raw-value source; they do not own the action's
-state.
+progress) is keyed by action name and carries across a change of winning context
+— contexts choose the raw-value source; they do not own the action's state.
 
 Decided while triaging issue #128: the previous flat first-write-wins cache of
 `InputAction` instances silently returned zero values once the first-declaring
