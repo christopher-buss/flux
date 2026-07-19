@@ -103,6 +103,31 @@ describe("createFluxJecs", () => {
 		}).toThrow("handle already registered");
 	});
 
+	describe("claims", () => {
+		it("should read a claimed action as inert through the ActionState component", () => {
+			expect.assertions(2);
+
+			const world = Jecs.world();
+			const flux = createFluxJecs(world, {
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+			});
+
+			const entity = world.entity();
+			flux.register(entity, new Instance("Folder"), "gameplay");
+			flux.simulateAction(entity, "jump", true);
+			flux.update(0.016);
+
+			const state = world.get(entity, flux.ActionState)!;
+
+			expect(state.pressed("jump")).toBeTrue();
+
+			state.claim("jump");
+
+			expect(state.pressed("jump")).toBeFalse();
+		});
+	});
+
 	describe("unregister", () => {
 		it("should remove ActionState component and context tags from entity", () => {
 			expect.assertions(3);

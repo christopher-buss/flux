@@ -31,11 +31,27 @@ interface ActionEntry {
 	claimed: boolean;
 	duration: number;
 	enabled: boolean;
+	neutralValue: ActionValueType;
 	previousDuration: number;
 	previousTriggerState: TriggerState;
 	previousValue: ActionValueType;
 	triggerState: TriggerState;
 	value: ActionValueType;
+}
+
+/**
+ * A processed read of one action, gated on the action's claimed flag.
+ * @template V - The value type the read reports.
+ */
+interface ReadOptions<V> {
+	/** The action name. */
+	readonly action: string;
+	/** The action entry map. */
+	readonly entries: Map<string, ActionEntry>;
+	/** Computes the unclaimed result from the entry. */
+	readonly pick: (entry: ActionEntry) => V;
+	/** The value the read reports while the action is claimed. */
+	readonly whenClaimed: V;
 }
 
 /**
@@ -100,6 +116,7 @@ function createEntry(config: ActionConfig): ActionEntry {
 		claimed: false,
 		duration: 0,
 		enabled: config.enabled ?? true,
+		neutralValue: defaultValue,
 		previousDuration: 0,
 		previousTriggerState: "none",
 		previousValue: defaultValue,
@@ -124,68 +141,52 @@ function getEntry(entries: Map<string, ActionEntry>, action: string): ActionEntr
 	return entry;
 }
 
-function isPressed(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).triggerState === "triggered";
-}
-
-function wasJustPressed(entries: Map<string, ActionEntry>, action: string): boolean {
+/**
+ * Reads an action's value, suppressed to its neutral value while claimed.
+ * @param entries - The action entry map.
+ * @param action - The action name.
+ * @returns The neutral value if claimed, otherwise the current value.
+ */
+function readValue(entries: Map<string, ActionEntry>, action: string): ActionValueType {
 	const entry = getEntry(entries, action);
 
+	return entry.claimed ? entry.neutralValue : entry.value;
+}
+
+function isTriggered(entry: ActionEntry): boolean {
+	return entry.triggerState === "triggered";
+}
+
+function wasJustPressed(entry: ActionEntry): boolean {
 	return entry.triggerState === "triggered" && entry.previousTriggerState !== "triggered";
 }
 
-function wasJustReleased(entries: Map<string, ActionEntry>, action: string): boolean {
-	const entry = getEntry(entries, action);
-
+function wasJustReleased(entry: ActionEntry): boolean {
 	return entry.previousTriggerState === "triggered" && entry.triggerState !== "triggered";
 }
 
-function getAxis1d(entries: Map<string, ActionEntry>, action: string): number {
-	return getEntry(entries, action).value as number;
-}
-
-function getAxis3d(entries: Map<string, ActionEntry>, action: string): Vector3 {
-	return getEntry(entries, action).value as Vector3;
-}
-
-function getDirection2d(entries: Map<string, ActionEntry>, action: string): Vector2 {
-	return getEntry(entries, action).value as Vector2;
-}
-
-function getPosition2d(entries: Map<string, ActionEntry>, action: string): Vector2 {
-	return getEntry(entries, action).value as Vector2;
-}
-
-function didAxisBecomeActive(entries: Map<string, ActionEntry>, action: string): boolean {
-	const entry = getEntry(entries, action);
-
+function didAxisBecomeActive(entry: ActionEntry): boolean {
 	return getMagnitude(entry.previousValue) === 0 && getMagnitude(entry.value) > 0;
 }
 
-function didAxisBecomeInactive(entries: Map<string, ActionEntry>, action: string): boolean {
-	const entry = getEntry(entries, action);
-
+function didAxisBecomeInactive(entry: ActionEntry): boolean {
 	return getMagnitude(entry.previousValue) > 0 && getMagnitude(entry.value) === 0;
 }
 
-function isTriggered(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).triggerState === "triggered";
+function isOngoing(entry: ActionEntry): boolean {
+	return entry.triggerState === "ongoing";
 }
 
-function isOngoing(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).triggerState === "ongoing";
+function isCanceled(entry: ActionEntry): boolean {
+	return entry.triggerState === "canceled";
 }
 
-function isCanceled(entries: Map<string, ActionEntry>, action: string): boolean {
-	return getEntry(entries, action).triggerState === "canceled";
+function getCurrentDuration(entry: ActionEntry): number {
+	return entry.duration;
 }
 
-function getCurrentDuration(entries: Map<string, ActionEntry>, action: string): number {
-	return getEntry(entries, action).duration;
-}
-
-function getPreviousDuration(entries: Map<string, ActionEntry>, action: string): number {
-	return getEntry(entries, action).previousDuration;
+function getPreviousDuration(entry: ActionEntry): number {
+	return entry.previousDuration;
 }
 
 function claimAction(entries: Map<string, ActionEntry>, action: string): boolean {
@@ -223,35 +224,47 @@ function wasRawJustPressed(entries: Map<string, ActionEntry>, action: string): b
 	return entry.value === true && entry.previousValue === false;
 }
 
+/**
+ * Performs a processed read, suppressed while the action is claimed.
+ * @template V - The value type the read reports.
+ * @param options - The action to read and how to compute both outcomes.
+ * @returns `whenClaimed` if the action is claimed, otherwise the picked value.
+ */
+function read<V>(options: ReadOptions<V>): V {
+	const entry = getEntry(options.entries, options.action);
+
+	return entry.claimed ? options.whenClaimed : options.pick(entry);
+}
+
 // eslint-disable-next-line max-lines-per-function -- thin delegation methods
 function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>): ActionState<T> {
 	return {
 		axis1d(action) {
-			return getAxis1d(entries, action);
+			return readValue(entries, action) as number;
 		},
 		axis3d(action) {
-			return getAxis3d(entries, action);
+			return readValue(entries, action) as Vector3;
 		},
 		axisBecameActive(action) {
-			return didAxisBecomeActive(entries, action);
+			return read({ action, entries, pick: didAxisBecomeActive, whenClaimed: false });
 		},
 		axisBecameInactive(action) {
-			return didAxisBecomeInactive(entries, action);
+			return read({ action, entries, pick: didAxisBecomeInactive, whenClaimed: false });
 		},
 		canceled(action) {
-			return isCanceled(entries, action);
+			return read({ action, entries, pick: isCanceled, whenClaimed: false });
 		},
 		claim(action) {
 			return claimAction(entries, action);
 		},
 		currentDuration(action) {
-			return getCurrentDuration(entries, action);
+			return read({ action, entries, pick: getCurrentDuration, whenClaimed: 0 });
 		},
 		direction2d(action) {
-			return getDirection2d(entries, action);
+			return readValue(entries, action) as Vector2;
 		},
 		getState<A extends keyof T & string>(action: A): ActionValue<T, A> {
-			return getEntry(entries, action).value as ActionValue<T, A>;
+			return readValue(entries, action) as ActionValue<T, A>;
 		},
 		isAvailable(action) {
 			return isActionAvailable(entries, action);
@@ -263,22 +276,22 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 			return isActionEnabled(entries, action);
 		},
 		justPressed(action) {
-			return wasJustPressed(entries, action);
+			return read({ action, entries, pick: wasJustPressed, whenClaimed: false });
 		},
 		justReleased(action) {
-			return wasJustReleased(entries, action);
+			return read({ action, entries, pick: wasJustReleased, whenClaimed: false });
 		},
 		ongoing(action) {
-			return isOngoing(entries, action);
+			return read({ action, entries, pick: isOngoing, whenClaimed: false });
 		},
 		position2d(action) {
-			return getPosition2d(entries, action);
+			return readValue(entries, action) as Vector2;
 		},
 		pressed(action) {
-			return isPressed(entries, action);
+			return read({ action, entries, pick: isTriggered, whenClaimed: false });
 		},
 		previousDuration(action) {
-			return getPreviousDuration(entries, action);
+			return read({ action, entries, pick: getPreviousDuration, whenClaimed: 0 });
 		},
 		rawJustPressed(action) {
 			return wasRawJustPressed(entries, action);
@@ -287,7 +300,7 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 			return isRawPressed(entries, action);
 		},
 		triggered(action) {
-			return isTriggered(entries, action);
+			return read({ action, entries, pick: isTriggered, whenClaimed: false });
 		},
 	} as const satisfies ActionState<T>;
 }
