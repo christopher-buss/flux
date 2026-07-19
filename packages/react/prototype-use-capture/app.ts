@@ -1,4 +1,4 @@
-/* eslint-disable flawless/naming-convention, jsdoc/require-jsdoc, jsdoc/require-param, jsdoc/require-returns, sonar/no-nested-conditional, ts/strict-boolean-expressions -- PROTOTYPE (#158): throwaway Node code, Roblox repo rules do not apply */
+/* eslint-disable flawless/naming-convention, jsdoc/require-jsdoc, jsdoc/require-param, jsdoc/require-returns -- PROTOTYPE (#158): throwaway Node code, Roblox repo rules do not apply */
 // PROTOTYPE — example components, written the way a Roblox component author
 // would write them against the candidate useCapture. React to THESE.
 
@@ -39,19 +39,15 @@ export function PurchaseModal(props: ModalProps): RenderResult {
 
 	return {
 		onFrame: (api) => {
-			if (confirm?.justPressed()) {
+			if (confirm.justPressed()) {
 				api.log("PurchaseModal: BUY confirmed");
 			}
 
-			if (confirm?.canceled()) {
+			if (confirm.canceled()) {
 				api.log("PurchaseModal: canceled (displaced or released)");
 			}
 		},
-		view: confirm
-			? "holding capture"
-			: props.interactive
-				? "interactive, token pending"
-				: "visible, not interactive",
+		view: props.interactive ? "interactive (reader live)" : "visible, not interactive",
 	};
 }
 
@@ -61,17 +57,17 @@ export function ConfirmToast(props: ToastProps): RenderResult {
 
 	return {
 		onFrame: (api) => {
-			if (confirm?.justPressed()) {
+			if (confirm.justPressed()) {
 				api.log("ConfirmToast: OK");
 				if (props.claimOnDispatch && confirm.claim()) {
 					api.log("ConfirmToast: claimed rest of frame");
 				}
 			}
 
-			if (confirm?.canceled()) {
+			if (confirm.canceled()) {
 				api.log("ConfirmToast: canceled");
 			}
 		},
-		view: confirm ? "holding capture (top)" : "token pending",
+		view: "capturing while mounted (top)",
 	};
 }

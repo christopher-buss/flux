@@ -1,9 +1,9 @@
 /* eslint-disable @cspell/spellchecker, flawless/naming-convention, jsdoc/require-jsdoc, jsdoc/require-param, jsdoc/require-returns -- PROTOTYPE (#158): throwaway Node code, Roblox repo rules do not apply */
-// PROTOTYPE — the candidate hook shape under test. This file is the artifact
-// to react to; everything around it is scaffolding.
+// PROTOTYPE — the candidate hook shape under test (shape B: stable reader,
+// inert until the capture lands). This file is the artifact to react to.
 
 import type { CaptureToken, MiniFlux } from "./mini-flux.ts";
-import { useEffect, useState } from "./mini-react.ts";
+import { useEffect, useRef } from "./mini-react.ts";
 
 export interface UseCaptureOptions {
 	/** Optional dev-mode label surfaced by debugCaptures() (#157). */
@@ -19,31 +19,46 @@ export interface UseCaptureOptions {
  * double-mount capture/release/capture is safe: release is idempotent and the
  * LIFO stack restores with no gap.
  *
- * Returns the scoped reader token (#156), or undefined until the capturing
- * effect has run / while disabled.
+ * Always returns the same stable reader (shape B). Before the capturing effect
+ * runs, while disabled, or after release it reads inert — one rule with
+ * shadowed tokens (#153/#156), so dispatch code never branches on undefined.
+ * The inner core token is kept after release so the one-frame synthesized
+ * canceled() (#155) still reaches the reader. Claim()/release() before any
+ * capture are no-ops.
  */
 export function useCapture(
 	flux: MiniFlux,
 	action: "confirm",
 	options?: UseCaptureOptions,
-): CaptureToken | undefined {
+): CaptureToken {
 	const enabled = options?.enabled ?? true;
 	const debugLabel = options?.debugLabel;
-	const [token, setToken] = useState<CaptureToken | undefined>(undefined);
+	const inner = useRef<CaptureToken | undefined>(undefined);
+	const reader = useRef<CaptureToken | undefined>(undefined);
+
+	reader.current ??= {
+		canceled: () => inner.current?.canceled() ?? false,
+		claim: () => inner.current?.claim() ?? false,
+		justPressed: () => inner.current?.justPressed() ?? false,
+		justReleased: () => inner.current?.justReleased() ?? false,
+		pressed: () => inner.current?.pressed() ?? false,
+		release: () => inner.current?.release(),
+	};
 
 	useEffect(() => {
 		if (!enabled) {
-			setToken(undefined);
 			return;
 		}
 
 		const captured = flux.capture(debugLabel ?? action);
-		setToken(captured);
+		inner.current = captured;
+		/**
+		 * Release but keep inner: released tokens read inert-except-cancel.
+		 */
 		return () => {
 			captured.release();
-			setToken(undefined);
 		};
 	}, [flux, action, enabled]);
 
-	return token;
+	return reader.current;
 }

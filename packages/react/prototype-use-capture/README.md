@@ -11,23 +11,29 @@ how the token reaches dispatch code, per-widget vs per-session usage — plus th
 lifecycle work the hook owns per #153: re-render dedup, StrictMode double-mount,
 condition-driven capture, unmount release, out-of-order unmounts.
 
-## Candidate shape under test
+## Candidate shape under test (B: stable inert-until-captured reader)
 
 ```ts
 const confirm = useCapture("confirm", {
 	debugLabel: "PurchaseModal",
 	enabled: props.interactive, // omit = capture while mounted
 });
-// confirm: CaptureToken | undefined — undefined until captured / while disabled
-if (confirm?.justPressed()) {
+// confirm: CaptureToken — stable identity; reads inert until the capture
+// lands, while disabled, when shadowed, and after release. One rule, no `?.`.
+if (confirm.justPressed()) {
 	buy();
 }
 ```
 
 - Captures in `useEffect([action, enabled])`, releases in cleanup.
-- Token lands via `useState` → reaches dispatch code as a plain value.
+- Reader delivered via `useRef` → stable identity, no extra render.
 - Re-renders don't re-capture (deps); StrictMode double-mount = capture,
   release, capture — safe because release is idempotent and the stack is LIFO.
+- Shape A (`CaptureToken | undefined` via `useState`) was rejected: `undefined`
+  duplicates the inert state shadowing already forces, costs a render, and leaks
+  the `isCaptured` introspection #157 declined to expose.
+- In real flux-react the `flux` argument disappears — core/handle come from
+  `FluxProvider` context, `useAction`-style.
 
 ## Run
 
@@ -40,10 +46,8 @@ mounts/unmounts, watch the stack and what each reader sees.
 
 ## Things to react to
 
-1. **Token-as-value vs always-returned reader**: `undefined` until the effect
-   lands means one extra render and one uncaptured frame after mount. Is the
-   `?.` everywhere acceptable, or should the hook return a never-undefined
-   reader that reads inert until capture lands?
+1. ~~Token-as-value vs always-returned reader~~ — settled: shape B, stable
+   reader, inert until captured.
 2. **`enabled` option vs conditional mounting**: is condition-driven capture a
    real need, or is "mount the widget = capture" enough?
 3. **Dispatch path**: reading the token inside a per-frame effect/loop — does
