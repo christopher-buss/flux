@@ -20,9 +20,16 @@ const confirm = useCapture("confirm", {
 });
 // confirm: CaptureToken — stable identity; reads inert until the capture
 // lands, while disabled, when shadowed, and after release. One rule, no `?.`.
-if (confirm.justPressed()) {
-	buy();
-}
+
+// Selector form: reactive read THROUGH the token (useAction plumbing).
+// Rendering path and — via useEffect on the value — the dispatch path.
+const pressed = useCaptureAction(confirm, (token) => token.pressed());
+const justPressed = useCaptureAction(confirm, (token) => token.justPressed());
+useEffect(() => {
+	if (justPressed) {
+		buy();
+	}
+}, [justPressed]);
 ```
 
 - Captures in `useEffect([action, enabled])`, releases in cleanup.
@@ -48,7 +55,18 @@ mounts/unmounts, watch the stack and what each reader sees.
 
 1. ~~Token-as-value vs always-returned reader~~ — settled: shape B, stable
    reader, inert until captured.
-2. **`enabled` option vs conditional mounting**: is condition-driven capture a
-   real need, or is "mount the widget = capture" enough?
-3. **Dispatch path**: reading the token inside a per-frame effect/loop — does
-   the shape fit how Roblox React code actually dispatches?
+2. ~~`enabled` option vs conditional mounting~~ — settled: keep `enabled`;
+   mounted = captured is the default idiom, `enabled` for conditions that flip
+   while the widget stays up (#150 focus layer).
+3. ~~Dispatch path~~ — settled: selector form required (`useCaptureAction`); the
+   consumer stack has no per-frame hook, so selector + `useEffect` is both the
+   rendering and dispatch path.
+
+## Finding for the ADR: claim-from-effects is one phase late
+
+Subscription selectors all evaluate at signal time, before any dispatch effects
+run. A `token.claim()` made inside an effect therefore cannot suppress
+same-frame subscription reads (e.g. the #155 synthesized cancel a displaced
+widget's selector already picked up this frame). Claim ordering inside React is
+flush-phase-relative, not schedule-slot-relative — a doc point for #159, not a
+hook-shape problem.

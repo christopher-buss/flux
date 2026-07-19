@@ -30,7 +30,13 @@ interface StateSlot {
 	value: unknown;
 }
 
-type HookSlot = EffectSlot | RefSlot | StateSlot;
+interface SubscriptionSlot {
+	compute: () => unknown;
+	kind: "sub";
+	last: unknown;
+}
+
+type HookSlot = EffectSlot | RefSlot | StateSlot | SubscriptionSlot;
 
 interface Instance {
 	dirty: boolean;
@@ -81,6 +87,16 @@ export function useRef<T>(initial: T): { current: T } {
 	return slot<RefSlot>(() => ({ kind: "ref", ref: { current: initial } })).ref as {
 		current: T;
 	};
+}
+
+/**
+ * UseAction-style subscription: re-evaluated on every update signal.
+ * @param compute
+ */
+export function useSubscription<R>(compute: () => R): R {
+	const s = slot<SubscriptionSlot>(() => ({ compute, kind: "sub", last: compute() }));
+	s.compute = compute;
+	return s.last as R;
 }
 
 function depsChanged(a: Array<unknown> | undefined, b: Array<unknown> | undefined): boolean {
@@ -174,6 +190,21 @@ export class Runtime {
 	frame(api: FrameApi): void {
 		for (const instance of this.instances.values()) {
 			instance.result?.onFrame?.(api);
+		}
+	}
+
+	/** The wrapper's update signal: re-run subscriptions, dirty on change. */
+	fireSignal(): void {
+		for (const instance of this.instances.values()) {
+			for (const s of instance.slots) {
+				if (s.kind === "sub") {
+					const next = s.compute();
+					if (next !== s.last) {
+						s.last = next;
+						instance.dirty = true;
+					}
+				}
+			}
 		}
 	}
 

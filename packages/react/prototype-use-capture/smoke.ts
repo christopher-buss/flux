@@ -13,6 +13,7 @@ function tick(note: string): void {
 	frame++;
 	flux.update();
 	runtime.frame({ log: (l) => lines.push(`f${frame} ${l}`) });
+	runtime.fireSignal();
 	runtime.flush();
 	const stack = flux
 		.debugCaptures()
@@ -32,7 +33,11 @@ tick("press, no captures -> gameplay jumps");
 flux.releaseDevice();
 tick("release");
 
-runtime.mount("PurchaseModal", PurchaseModal, { flux, interactive: true });
+runtime.mount("PurchaseModal", PurchaseModal, {
+	flux,
+	interactive: true,
+	log: (l) => lines.push(`f${frame} ${l}`),
+});
 runtime.flush();
 tick("modal mounted -> captured via effect");
 flux.press();
@@ -40,7 +45,11 @@ tick("press -> modal buys, gameplay silent");
 flux.releaseDevice();
 tick("release");
 
-runtime.mount("ConfirmToast", ConfirmToast, { claimOnDispatch: false, flux });
+runtime.mount("ConfirmToast", ConfirmToast, {
+	claimOnDispatch: false,
+	flux,
+	log: (l) => lines.push(`f${frame} ${l}`),
+});
 runtime.flush();
 tick("toast mounted on top -> modal sees canceled");
 flux.press();
@@ -59,7 +68,11 @@ tick("release");
 runtime.strictMode = true;
 runtime.unmount("PurchaseModal");
 runtime.flush();
-runtime.mount("PurchaseModal", PurchaseModal, { flux, interactive: true });
+runtime.mount("PurchaseModal", PurchaseModal, {
+	flux,
+	interactive: true,
+	log: (l) => lines.push(`f${frame} ${l}`),
+});
 runtime.flush();
 tick("StrictMode remount -> exactly one live capture");
 flux.press();

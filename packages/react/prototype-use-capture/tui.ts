@@ -31,6 +31,7 @@ function tickFrame(): void {
 	frameNumber++;
 	flux.update();
 	runtime.frame({ log: pushLog });
+	runtime.fireSignal();
 	runtime.flush();
 }
 
@@ -43,7 +44,11 @@ function toggleModal(): void {
 		runtime.unmount("PurchaseModal");
 		pushLog("~ unmounted PurchaseModal");
 	} else {
-		runtime.mount("PurchaseModal", PurchaseModal, { flux, interactive: modalInteractive });
+		runtime.mount("PurchaseModal", PurchaseModal, {
+			flux,
+			interactive: modalInteractive,
+			log: pushLog,
+		});
 		pushLog("~ mounted PurchaseModal");
 	}
 
@@ -55,7 +60,11 @@ function toggleToast(): void {
 		runtime.unmount("ConfirmToast");
 		pushLog("~ unmounted ConfirmToast");
 	} else {
-		runtime.mount("ConfirmToast", ConfirmToast, { claimOnDispatch: toastClaims, flux });
+		runtime.mount("ConfirmToast", ConfirmToast, {
+			claimOnDispatch: toastClaims,
+			flux,
+			log: pushLog,
+		});
 		pushLog("~ mounted ConfirmToast");
 	}
 
@@ -64,7 +73,7 @@ function toggleToast(): void {
 
 function toggleInteractive(): void {
 	modalInteractive = !modalInteractive;
-	runtime.setProps("PurchaseModal", { flux, interactive: modalInteractive });
+	runtime.setProps("PurchaseModal", { flux, interactive: modalInteractive, log: pushLog });
 	pushLog(`~ PurchaseModal.interactive = ${modalInteractive}`);
 	runtime.flush();
 }
@@ -117,7 +126,7 @@ const actions = new Map<string, () => void>([
 		"c",
 		() => {
 			toastClaims = !toastClaims;
-			runtime.setProps("ConfirmToast", { claimOnDispatch: toastClaims, flux });
+			runtime.setProps("ConfirmToast", { claimOnDispatch: toastClaims, flux, log: pushLog });
 			runtime.flush();
 		},
 	],

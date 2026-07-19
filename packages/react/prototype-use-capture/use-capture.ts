@@ -3,7 +3,7 @@
 // inert until the capture lands). This file is the artifact to react to.
 
 import type { CaptureToken, MiniFlux } from "./mini-flux.ts";
-import { useEffect, useRef } from "./mini-react.ts";
+import { useEffect, useRef, useSubscription } from "./mini-react.ts";
 
 export interface UseCaptureOptions {
 	/** Optional dev-mode label surfaced by debugCaptures() (#157). */
@@ -61,4 +61,14 @@ export function useCapture(
 	}, [flux, action, enabled]);
 
 	return reader.current;
+}
+
+/**
+ * Selector form: reactive value read *through the token*, re-evaluated on the
+ * wrapper's update signal (same plumbing as useAction). This is both the
+ * rendering path (highlight while pressed) and — with useEffect on the value —
+ * the dispatch path in a stack with no per-frame hook.
+ */
+export function useCaptureAction<R>(token: CaptureToken, selector: (token: CaptureToken) => R): R {
+	return useSubscription(() => selector(token));
 }
