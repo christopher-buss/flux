@@ -42,7 +42,9 @@ a context + sink job, not a claim.
 - Claims are per-frame (`endFrame` clears them). Consumers of continuous input
   (holds, axes) must re-claim each frame they consume; an unclaimed release
   frame is visible downstream even if the press frame was claimed
-  (`justReleased` without `justPressed` is by design).
+  (`justReleased` without `justPressed` is by design). This visibility is a
+  per-frame guarantee only — a capture boundary can drop the release frame
+  entirely (ADR 0003).
 - Claims made before `core.update()` are wiped by that update's frame reset.
   Read-then-claim already forces claiming after update, since there is nothing
   to read before it.
