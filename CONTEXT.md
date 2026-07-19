@@ -115,5 +115,5 @@ action's real state; every other consumer reads it as inert until release, and
 only raw reads see through. Where a _claim_ is anonymous and arbitrated by
 schedule position, a capture is owned and arbitrated by acquisition — declared
 at a session boundary, held until released. Mirrors the engine's
-`CaptureFocus`/`ReleaseFocus`. _Avoid_: lease, reservation, hold, lock,
-standing claim.
+`CaptureFocus`/`ReleaseFocus`. _Avoid_: lease, reservation, hold, lock, standing
+claim.

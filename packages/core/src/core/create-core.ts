@@ -16,7 +16,12 @@ import {
 	subscribeHandleAs,
 } from "./handle-lifecycle";
 import type { InputInstanceData } from "./input-instances";
-import { addContextInstances, destroyInputInstances, setContextEnabled } from "./input-instances";
+import {
+	addContextInstances,
+	adoptContextInstances,
+	destroyInputInstances,
+	setContextEnabled,
+} from "./input-instances";
 import {
 	applyRebindAll,
 	applyRebindOne,
@@ -127,7 +132,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			if (!data.instanceData.inputContexts.has(context)) {
 				const existing = findExistingContext(context, data.instanceData);
 				if (existing !== undefined) {
-					data.instanceData.inputContexts.set(context, existing);
+					adoptContextInstances(data.instanceData, context, existing, actions);
 				} else {
 					addContextInstances(context, contexts[context], actions, data.instanceData);
 					replayOverridesIntoContext(data, context);

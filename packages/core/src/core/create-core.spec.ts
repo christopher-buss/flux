@@ -80,6 +80,27 @@ const RECENCY_CONTEXTS = {
 	},
 } satisfies Record<string, ContextConfig>;
 
+// Both contexts declare every action, so removing the higher-priority one
+// must leave the lower-priority context supplying values and state.
+const SHARED_ACTIONS = {
+	charge: {
+		triggers: [implicit(hold({ attempting: 0.1, threshold: 0.5 }))],
+		type: "Bool" as const,
+	},
+	look: { type: "Direction3D" as const },
+} satisfies ActionMap;
+
+const SHARED_CONTEXTS = {
+	primary: {
+		bindings: { charge: [Enum.KeyCode.E], look: [Enum.KeyCode.E] },
+		priority: 10,
+	},
+	secondary: {
+		bindings: { charge: [Enum.KeyCode.Q], look: [Enum.KeyCode.R] },
+		priority: 0,
+	},
+} satisfies Record<string, ContextConfig>;
+
 describe("createCore", () => {
 	it("should return object with all FluxCore methods", () => {
 		expect.assertions(1);
@@ -455,6 +476,88 @@ describe("createCore", () => {
 			const handle = core.register(new Instance("Folder"), "gameplay", "gameplay");
 
 			expect(core.getContexts(handle)).toStrictEqual(["gameplay"]);
+		});
+	});
+
+	describe("multi-context actions", () => {
+		it("should keep processing an action after its first context is removed", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: SHARED_ACTIONS, contexts: SHARED_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "primary", "secondary");
+			core.removeContext(handle, "primary");
+			core.simulateAction(handle, "look", new Vector3(0, 1, 0));
+			core.update(0.016);
+
+			expect(core.getState(handle).axis3d("look")).toBe(new Vector3(0, 1, 0));
+		});
+
+		it("should reset an action once no active context declares it", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: SHARED_ACTIONS, contexts: SHARED_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "primary", "secondary");
+			core.removeContext(handle, "primary");
+			core.removeContext(handle, "secondary");
+			core.simulateAction(handle, "look", new Vector3(0, 1, 0));
+			core.update(0.016);
+
+			expect(core.getState(handle).axis3d("look")).toBe(Vector3.zero);
+		});
+
+		it("should read an adopted context's own instances", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: SHARED_ACTIONS, contexts: SHARED_CONTEXTS });
+			core.register(parent, "primary", "secondary");
+			const second = core.register(parent, "secondary");
+			core.addContext(second, "primary");
+
+			expect(() => {
+				core.update(0.016);
+			}).never.toThrow();
+		});
+
+		it("should not warn when only the losing context replicated", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const [mockWarn, mockWarnFunction] = jest.fn<(message: string) => void>();
+			const serverCore = createCore({
+				actions: SHARED_ACTIONS,
+				contexts: SHARED_CONTEXTS,
+			});
+			serverCore.register(parent, "secondary");
+
+			const core = createCore({
+				actions: SHARED_ACTIONS,
+				contexts: SHARED_CONTEXTS,
+				debug: true,
+				onReplicationTimeout: mockWarnFunction,
+			});
+			core.subscribe(parent, "primary", "secondary");
+
+			for (const _ of $range(1, 313)) {
+				core.update(0.016);
+			}
+
+			expect(mockWarn).never.toHaveBeenCalled();
+		});
+
+		it("should carry hold duration across a change of winning context", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: SHARED_ACTIONS, contexts: SHARED_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "primary", "secondary");
+
+			core.simulateAction(handle, "charge", true);
+			core.update(0.3);
+			core.removeContext(handle, "primary");
+			core.simulateAction(handle, "charge", true);
+			core.update(0.3);
+
+			expect(core.getState(handle).pressed("charge")).toBeTrue();
 		});
 	});
 

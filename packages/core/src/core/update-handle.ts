@@ -1,14 +1,15 @@
 import type { ModifierContext } from "../modifiers/types";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingLike } from "../types/bindings";
-import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionValueType, InternalActionState } from "./action-state";
 import { getMagnitude } from "./action-state";
 import type { ActiveContexts } from "./active-contexts";
+import { resolveContextOrder } from "./active-contexts";
 import type { InputInstanceData } from "./input-instances";
 import { processPipeline } from "./pipeline";
+import { resolveActionInstance } from "./resolve-action";
 
 /** Internal per-handle data used during update processing. */
 export interface CoreHandleData {
@@ -50,24 +51,13 @@ export interface HandleUpdateOptions {
 	readonly onReplicationTimeout?: (message: string) => void;
 }
 
-/** An active context placed in this frame's resolution order. */
-export interface RankedContext {
-	/** The context name. */
-	readonly name: string;
-	/** Position in activation order, oldest first. */
-	readonly activationIndex: number;
-	/** The context's configuration. */
-	readonly config: ContextConfig;
-	/** Effective priority, defaulted when the config omits one. */
-	readonly priority: number;
-}
-
 interface ActionUpdateOptions {
 	readonly actionConfig: ActionConfig;
 	readonly actionName: string;
 	readonly deltaTime: number;
 	readonly handle: InputHandle;
 	readonly handleData: CoreHandleData;
+	readonly inputAction: InputAction | undefined;
 }
 
 interface ContextActionsOptions {
@@ -78,6 +68,7 @@ interface ContextActionsOptions {
 	readonly handleData: CoreHandleData;
 	readonly isDebug: boolean;
 	readonly onReplicationTimeout?: (message: string) => void;
+	readonly orderedContexts: ReadonlyArray<string>;
 	readonly processedActions: Set<string>;
 }
 
@@ -105,41 +96,6 @@ export function getDefaultValue(actionType: ActionType): ActionValueType {
 }
 
 /**
- * Sorts active contexts by priority (descending), ties broken by most recent
- * activation.
- * @param activeContexts - Active contexts in activation order.
- * @param contexts - Context configuration record.
- * @returns Contexts in resolution order.
- */
-export function sortActiveContexts(
-	activeContexts: ActiveContexts,
-	contexts: Record<string, ContextConfig>,
-): Array<RankedContext> {
-	const ranked = new Array<RankedContext>();
-	let activationIndex = 0;
-	for (const name of activeContexts) {
-		const config = contexts[name];
-		assert(config, `missing context config: ${name}`);
-		ranked.push({
-			name,
-			activationIndex,
-			config,
-			priority: config.priority ?? DEFAULT_CONTEXT_PRIORITY,
-		});
-		activationIndex += 1;
-	}
-
-	ranked.sort((first, second) => {
-		if (first.priority !== second.priority) {
-			return first.priority > second.priority;
-		}
-
-		return first.activationIndex > second.activationIndex;
-	});
-	return ranked;
-}
-
-/**
  * Processes all actions for a single handle during an update tick.
  * @param options - The handle, actions, contexts, and delta time.
  */
@@ -147,9 +103,10 @@ export function updateHandle(options: HandleUpdateOptions): void {
 	const { actions, contexts, deltaTime, handle, handleData, isDebug, onReplicationTimeout } =
 		options;
 	handleData.internalState.endFrame();
-	const sorted = sortActiveContexts(handleData.activeContexts, contexts);
+	const eligible = resolveContextOrder(handleData.activeContexts, contexts);
+	const orderedContexts = eligible.map(({ name }) => name);
 	const processedActions = new Set<string>();
-	for (const { config: contextConfig } of sorted) {
+	for (const { config: contextConfig } of eligible) {
 		processContextActions({
 			actions,
 			contextConfig,
@@ -158,24 +115,25 @@ export function updateHandle(options: HandleUpdateOptions): void {
 			handleData,
 			isDebug,
 			...(onReplicationTimeout !== undefined && { onReplicationTimeout }),
+			orderedContexts,
 			processedActions,
 		});
-		if (contextConfig.sink === true) {
-			break;
-		}
 	}
 
 	updateUnprocessedActions(actions, processedActions, handleData, deltaTime);
 	handleData.simulatedValues.clear();
 }
 
-function getRawValue(handleData: CoreHandleData, actionName: string): ActionValueType {
+function getRawValue(
+	handleData: CoreHandleData,
+	actionName: string,
+	inputAction: InputAction | undefined,
+): ActionValueType {
 	const simulated = handleData.simulatedValues.get(actionName);
 	if (simulated !== undefined) {
 		return simulated;
 	}
 
-	const inputAction = handleData.instanceData.inputActions.get(actionName);
 	assert(inputAction, `missing InputAction instance for: ${actionName}`);
 	return inputAction.GetState() as ActionValueType;
 }
@@ -209,8 +167,8 @@ function updateDuration(
 }
 
 function processAction(options: ActionUpdateOptions): void {
-	const { actionConfig, actionName, deltaTime, handle, handleData } = options;
-	const rawValue = getRawValue(handleData, actionName);
+	const { actionConfig, actionName, deltaTime, handle, handleData, inputAction } = options;
+	const rawValue = getRawValue(handleData, actionName, inputAction);
 	const duration = updateDuration(handleData, actionName, rawValue, deltaTime);
 	const modifierContext: ModifierContext = { deltaTime, handle };
 	const result = processPipeline({
@@ -277,7 +235,11 @@ function resetAction(
 	});
 }
 
-function canProcessAction(handleData: CoreHandleData, actionName: string): boolean {
+function canProcessAction(
+	handleData: CoreHandleData,
+	actionName: string,
+	inputAction: InputAction | undefined,
+): boolean {
 	if (handleData.instanceData.owned) {
 		return true;
 	}
@@ -286,7 +248,7 @@ function canProcessAction(handleData: CoreHandleData, actionName: string): boole
 		return true;
 	}
 
-	return handleData.instanceData.inputActions.has(actionName);
+	return inputAction !== undefined;
 }
 
 // eslint-disable-next-line max-lines-per-function -- dev-mode tracking adds guard branches
@@ -299,6 +261,7 @@ function processContextActions(options: ContextActionsOptions): void {
 		handleData,
 		isDebug,
 		onReplicationTimeout,
+		orderedContexts,
 		processedActions,
 	} = options;
 	for (const [actionName] of pairs(contextConfig.bindings)) {
@@ -311,7 +274,12 @@ function processContextActions(options: ContextActionsOptions): void {
 			continue;
 		}
 
-		if (!canProcessAction(handleData, actionName)) {
+		const inputAction = resolveActionInstance(
+			handleData.instanceData.actionsByContext,
+			orderedContexts,
+			actionName,
+		);
+		if (!canProcessAction(handleData, actionName, inputAction)) {
 			if (_G.__DEV__ && isDebug) {
 				trackPendingAction(handleData, actionName, deltaTime, onReplicationTimeout);
 			}
@@ -325,7 +293,14 @@ function processContextActions(options: ContextActionsOptions): void {
 			clearPendingAction(handleData, actionName);
 		}
 
-		processAction({ actionConfig, actionName, deltaTime, handle, handleData });
+		processAction({
+			actionConfig,
+			actionName,
+			deltaTime,
+			handle,
+			handleData,
+			inputAction,
+		});
 		processedActions.add(actionName);
 	}
 }
