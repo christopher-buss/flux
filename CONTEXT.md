@@ -114,6 +114,7 @@ focus-enter to focus-exit) rather than a frame. The holder keeps reading the
 action's real state; every other consumer reads it as inert until release, and
 only raw reads see through. Where a _claim_ is anonymous and arbitrated by
 schedule position, a capture is owned and arbitrated by acquisition — declared
-at a session boundary, held until released. Mirrors the engine's
+at a session boundary, held until released. Captures stack: the newest ownership
+statement wins, and releasing it restores the one beneath. Mirrors the engine's
 `CaptureFocus`/`ReleaseFocus`. _Avoid_: lease, reservation, hold, lock, standing
 claim.
