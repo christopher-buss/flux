@@ -5,6 +5,7 @@ import { fromAny } from "@rbxts/jest-utils";
 import type { ActionMap } from "../types/actions";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
+import type { InputInstanceData } from "./input-instances";
 import {
 	addContextInstances,
 	createInputInstances,
@@ -35,6 +36,12 @@ const TEST_CONTEXTS = {
 	},
 } satisfies Record<string, ContextConfig>;
 
+function contextActions(data: InputInstanceData, contextName: string): Map<string, InputAction> {
+	const actions = data.actionsByContext.get(contextName);
+	assert(actions, `no instances for context: ${contextName}`);
+	return actions;
+}
+
 describe("createInputInstances", () => {
 	it("should create InputContext instances for each context", () => {
 		expect.assertions(2);
@@ -60,11 +67,11 @@ describe("createInputInstances", () => {
 			parent: new Instance("Folder"),
 		});
 
-		expect(data.inputActions.has("jump")).toBeTrue();
+		expect(contextActions(data, "gameplay").has("jump")).toBeTrue();
 	});
 
-	it("should store first InputAction per action name", () => {
-		expect.assertions(1);
+	it("should keep a separate InputAction per declaring context", () => {
+		expect.assertions(3);
 
 		const data = createInputInstances({
 			actions: TEST_ACTIONS,
@@ -73,9 +80,12 @@ describe("createInputInstances", () => {
 			parent: new Instance("Folder"),
 		});
 
-		const jumpAction = data.inputActions.get("jump");
+		const gameplayJump = contextActions(data, "gameplay").get("jump");
+		const uiJump = contextActions(data, "ui").get("jump");
 
-		expect(jumpAction).toBeDefined();
+		expect(gameplayJump).toBeDefined();
+		expect(uiJump).toBeDefined();
+		expect(gameplayJump).never.toBe(uiJump);
 	});
 
 	it("should track all created instances for cleanup", () => {
@@ -111,7 +121,7 @@ describe("createInputInstances", () => {
 			parent: new Instance("Folder"),
 		});
 
-		expect(data.inputActions.has("nonexistent")).toBeFalse();
+		expect(contextActions(data, "gameplay").has("nonexistent")).toBeFalse();
 	});
 
 	it("should configure directional bindings from record presets", () => {
@@ -144,7 +154,7 @@ describe("createInputInstances", () => {
 			parent: new Instance("Folder"),
 		});
 
-		expect(data.inputActions.has("move")).toBeTrue();
+		expect(contextActions(data, "gameplay").has("move")).toBeTrue();
 	});
 
 	it("should map chord modifiers onto the InputBinding", () => {
@@ -176,7 +186,7 @@ describe("createInputInstances", () => {
 			parent: new Instance("Folder"),
 		});
 
-		const abilityAction = data.inputActions.get("ability");
+		const abilityAction = contextActions(data, "gameplay").get("ability");
 		assert(abilityAction);
 		const binding = abilityAction.FindFirstChildOfClass("InputBinding");
 		assert(binding);
@@ -214,7 +224,7 @@ describe("createInputInstances", () => {
 			parent: new Instance("Folder"),
 		});
 
-		const abilityAction = data.inputActions.get("ability");
+		const abilityAction = contextActions(data, "gameplay").get("ability");
 		assert(abilityAction);
 		const binding = abilityAction.FindFirstChildOfClass("InputBinding");
 		assert(binding);
@@ -492,7 +502,7 @@ describe("findInputInstances", () => {
 			parent,
 		});
 
-		expect(found.inputActions.has("jump")).toBeTrue();
+		expect(contextActions(found, "gameplay").has("jump")).toBeTrue();
 	});
 
 	it("should set up ChildAdded for missing contexts", () => {
@@ -585,7 +595,7 @@ describe("findInputInstances", () => {
 		awaitDefer();
 
 		expect(found.inputContexts.has("gameplay")).toBeTrue();
-		expect(found.inputActions.has("jump")).toBeTrue();
+		expect(contextActions(found, "gameplay").has("jump")).toBeTrue();
 	});
 
 	it("should ignore non-InputContext children via ChildAdded", () => {
@@ -612,7 +622,7 @@ describe("findInputInstances", () => {
 		expect(found.inputContexts.has("gameplay")).toBeFalse();
 	});
 
-	it("should not overwrite existing InputAction when shared across contexts", () => {
+	it("should discover an InputAction for every declaring context", () => {
 		expect.assertions(1);
 
 		const parent = new Instance("Folder");
@@ -629,7 +639,9 @@ describe("findInputInstances", () => {
 			parent,
 		});
 
-		expect(found.inputActions.has("jump")).toBeTrue();
+		expect(contextActions(found, "gameplay").get("jump")).never.toBe(
+			contextActions(found, "ui").get("jump"),
+		);
 	});
 
 	it("should skip non-InputAction children when collecting actions", () => {
@@ -658,7 +670,7 @@ describe("findInputInstances", () => {
 			parent,
 		});
 
-		expect(found.inputActions.has("jump")).toBeTrue();
+		expect(contextActions(found, "gameplay").has("jump")).toBeTrue();
 	});
 
 	it("should ignore wrong-named InputContext via ChildAdded", () => {

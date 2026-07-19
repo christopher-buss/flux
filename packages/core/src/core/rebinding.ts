@@ -23,14 +23,13 @@ export function rebuildActionBindings(
 	const destroyed = destroyExistingBindings(data, actionName);
 	pruneInstances(data.instances, destroyed);
 
-	for (const [contextName, inputContext] of data.inputContexts) {
-		const inputAction = inputContext.FindFirstChild(actionName);
-		if (inputAction === undefined || !classIs(inputAction, "InputAction")) {
+	for (const [contextName, actionInstances] of data.actionsByContext) {
+		const inputAction = actionInstances.get(actionName);
+		if (inputAction === undefined) {
 			continue;
 		}
 
-		const bindings = resolve(contextName);
-		for (const bindingLike of bindings) {
+		for (const bindingLike of resolve(contextName)) {
 			createInputBinding(bindingLike, inputAction, data.instances);
 		}
 	}
@@ -101,15 +100,7 @@ export function applyRebindAll<T extends ActionMap>(
 		handledActions.add(action);
 	}
 
-	for (const [actionName] of handleData.instanceData.inputActions) {
-		if (handledActions.has(actionName)) {
-			continue;
-		}
-
-		rebuildActionBindings(handleData.instanceData, actionName, (contextName) => {
-			return getContextOriginalBindings(contexts, contextName, actionName);
-		});
-	}
+	restoreOriginalBindings(handleData.instanceData, contexts, handledActions);
 }
 
 /**
@@ -141,11 +132,7 @@ export function applyResetAll<T extends ActionMap>(
 	contexts: Record<string, ContextConfig>,
 ): void {
 	handleData.bindingOverrides.clear();
-	for (const [actionName] of handleData.instanceData.inputActions) {
-		rebuildActionBindings(handleData.instanceData, actionName, (contextName) => {
-			return getContextOriginalBindings(contexts, contextName, actionName);
-		});
-	}
+	restoreOriginalBindings(handleData.instanceData, contexts);
 }
 
 /**
@@ -184,20 +171,16 @@ export function replayOverridesIntoContext<T extends ActionMap>(
 		return;
 	}
 
-	const inputContext = handleData.instanceData.inputContexts.get(contextName);
-	assert(inputContext, `context not registered: ${contextName}`);
+	const actionInstances = handleData.instanceData.actionsByContext.get(contextName);
+	assert(actionInstances, `context not registered: ${contextName}`);
 	for (const [actionName, bindings] of handleData.bindingOverrides) {
-		const inputAction = inputContext.FindFirstChild(actionName);
-		if (inputAction === undefined || !classIs(inputAction, "InputAction")) {
+		const inputAction = actionInstances.get(actionName);
+		if (inputAction === undefined) {
 			continue;
 		}
 
 		const destroyed = new Set<Instance>();
-		for (const child of inputAction.GetChildren()) {
-			destroyed.add(child);
-			child.Destroy();
-		}
-
+		destroyChildrenInto(inputAction, destroyed);
 		pruneInstances(handleData.instanceData.instances, destroyed);
 		for (const bindingLike of bindings) {
 			createInputBinding(bindingLike, inputAction, handleData.instanceData.instances);
@@ -205,18 +188,22 @@ export function replayOverridesIntoContext<T extends ActionMap>(
 	}
 }
 
+function destroyChildrenInto(inputAction: InputAction, destroyed: Set<Instance>): void {
+	for (const child of inputAction.GetChildren()) {
+		destroyed.add(child);
+		child.Destroy();
+	}
+}
+
 function destroyExistingBindings(data: InputInstanceData, actionName: string): Set<Instance> {
 	const destroyed = new Set<Instance>();
-	for (const [, inputContext] of data.inputContexts) {
-		const inputAction = inputContext.FindFirstChild(actionName);
-		if (inputAction === undefined || !classIs(inputAction, "InputAction")) {
+	for (const [, actionInstances] of data.actionsByContext) {
+		const inputAction = actionInstances.get(actionName);
+		if (inputAction === undefined) {
 			continue;
 		}
 
-		for (const child of inputAction.GetChildren()) {
-			destroyed.add(child);
-			child.Destroy();
-		}
+		destroyChildrenInto(inputAction, destroyed);
 	}
 
 	return destroyed;
@@ -229,6 +216,17 @@ function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): v
 			instances.remove(index);
 		}
 	}
+}
+
+function collectActionNames(data: InputInstanceData): Set<string> {
+	const names = new Set<string>();
+	for (const [, actionInstances] of data.actionsByContext) {
+		for (const [actionName] of actionInstances) {
+			names.add(actionName);
+		}
+	}
+
+	return names;
 }
 
 /**
@@ -253,4 +251,27 @@ function getContextOriginalBindings(
 	)[action];
 	assert(bindings, `action not bound in context: ${contextName}.${action}`);
 	return bindings;
+}
+
+/**
+ * Restores every action the handle has instances for to its per-context
+ * original bindings.
+ * @param data - The handle's input instance data.
+ * @param contexts - Core context config used to resolve originals.
+ * @param skip - Actions to leave untouched, typically those just overridden.
+ */
+function restoreOriginalBindings(
+	data: InputInstanceData,
+	contexts: Record<string, ContextConfig>,
+	skip?: ReadonlySet<string>,
+): void {
+	for (const actionName of collectActionNames(data)) {
+		if (skip?.has(actionName) === true) {
+			continue;
+		}
+
+		rebuildActionBindings(data, actionName, (contextName) => {
+			return getContextOriginalBindings(contexts, contextName, actionName);
+		});
+	}
 }

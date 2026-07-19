@@ -11,10 +11,10 @@ import type { ContextConfig } from "../types/contexts";
  * @see https://create.roblox.com/docs/reference/engine/classes/InputAction
  */
 export interface InputInstanceData {
+	/** Maps context names to that context's own InputAction instances. */
+	readonly actionsByContext: Map<string, Map<string, InputAction>>;
 	/** Active ChildAdded connections for cleanup. */
 	readonly connections: Array<RBXScriptConnection>;
-	/** Maps action names to their InputAction instances. */
-	readonly inputActions: Map<string, InputAction>;
 	/** Maps context names to their InputContext instances. */
 	readonly inputContexts: Map<string, InputContext>;
 	/** All created instances for bulk cleanup. */
@@ -42,9 +42,9 @@ interface CreateActionOptions {
 
 interface CreateContextOptions {
 	readonly actions: ActionMap;
+	readonly actionsByContext: Map<string, Map<string, InputAction>>;
 	readonly contextConfig: ContextConfig;
 	readonly contextName: string;
-	readonly inputActions: Map<string, InputAction>;
 	readonly instances: Array<Instance>;
 }
 
@@ -61,8 +61,8 @@ interface FindInstancesOptions {
 }
 interface SearchState {
 	readonly actions: ActionMap;
+	readonly actionsByContext: Map<string, Map<string, InputAction>>;
 	readonly connections: Array<RBXScriptConnection>;
-	readonly inputActions: Map<string, InputAction>;
 	readonly inputContexts: Map<string, InputContext>;
 }
 
@@ -73,7 +73,7 @@ interface SearchState {
  */
 export function createInputInstances(options: CreateInstancesOptions): InputInstanceData {
 	const { actions, contextNames, contexts, parent } = options;
-	const inputActions = new Map<string, InputAction>();
+	const actionsByContext = new Map<string, Map<string, InputAction>>();
 	const inputContexts = new Map<string, InputContext>();
 	const instances = new Array<Instance>();
 	const inputFolder = getOrCreateInputFolder(parent);
@@ -84,9 +84,9 @@ export function createInputInstances(options: CreateInstancesOptions): InputInst
 
 		const inputContext = createContext({
 			actions,
+			actionsByContext,
 			contextConfig,
 			contextName,
-			inputActions,
 			instances,
 		});
 
@@ -95,8 +95,8 @@ export function createInputInstances(options: CreateInstancesOptions): InputInst
 	}
 
 	return {
+		actionsByContext,
 		connections: [],
-		inputActions,
 		inputContexts,
 		instances,
 		owned: true,
@@ -160,9 +160,9 @@ export function addContextInstances(
 ): void {
 	const inputContext = createContext({
 		actions,
+		actionsByContext: data.actionsByContext,
 		contextConfig,
 		contextName,
-		inputActions: data.inputActions,
 		instances: data.instances,
 	});
 
@@ -208,24 +208,35 @@ function getOrCreateInputFolder(parent: Instance): Folder {
 function createSearchState(actions: ActionMap): SearchState {
 	return {
 		actions,
+		actionsByContext: new Map<string, Map<string, InputAction>>(),
 		connections: new Array<RBXScriptConnection>(),
-		inputActions: new Map<string, InputAction>(),
 		inputContexts: new Map<string, InputContext>(),
 	};
 }
 
-function collectActions(
-	inputContext: InputContext,
-	actions: ActionMap,
-	inputActions: Map<string, InputAction>,
-): void {
+/**
+ * Reads a context's action map, creating it on first use.
+ * @param actionsByContext - Per-context instance storage to read.
+ * @param contextName - The context whose action map to fetch.
+ * @returns The context's own action-name to instance map.
+ */
+function contextActions(
+	actionsByContext: Map<string, Map<string, InputAction>>,
+	contextName: string,
+): Map<string, InputAction> {
+	let actions = actionsByContext.get(contextName);
+	if (actions === undefined) {
+		actions = new Map<string, InputAction>();
+		actionsByContext.set(contextName, actions);
+	}
+
+	return actions;
+}
+
+function collectActions(contextName: string, inputContext: InputContext, state: SearchState): void {
 	for (const child of inputContext.GetChildren()) {
-		if (
-			classIs(child, "InputAction") &&
-			actions[child.Name] !== undefined &&
-			!inputActions.has(child.Name)
-		) {
-			inputActions.set(child.Name, child);
+		if (classIs(child, "InputAction") && state.actions[child.Name] !== undefined) {
+			contextActions(state.actionsByContext, contextName).set(child.Name, child);
 		}
 	}
 }
@@ -239,7 +250,7 @@ function searchForContexts(
 		const existing = folder.FindFirstChild(contextName);
 		if (existing !== undefined && classIs(existing, "InputContext")) {
 			state.inputContexts.set(contextName, existing);
-			collectActions(existing, state.actions, state.inputActions);
+			collectActions(contextName, existing, state);
 			continue;
 		}
 
@@ -249,7 +260,7 @@ function searchForContexts(
 			}
 
 			state.inputContexts.set(contextName, child);
-			collectActions(child, state.actions, state.inputActions);
+			collectActions(contextName, child, state);
 		});
 
 		state.connections.push(connection);
@@ -362,12 +373,13 @@ function createAction(options: CreateActionOptions): InputAction {
 }
 
 function createContext(options: CreateContextOptions): InputContext {
-	const { actions, contextConfig, contextName, inputActions, instances } = options;
+	const { actions, actionsByContext, contextConfig, contextName, instances } = options;
 	const inputContext = new Instance("InputContext");
 	inputContext.Name = contextName;
 	inputContext.Priority = contextConfig.priority ?? DEFAULT_CONTEXT_PRIORITY;
 	inputContext.Sink = contextConfig.sink === true;
 
+	const declared = contextActions(actionsByContext, contextName);
 	for (const [actionName, bindings] of pairs(contextConfig.bindings)) {
 		const actionConfig = actions[actionName];
 		if (actionConfig === undefined) {
@@ -382,9 +394,7 @@ function createContext(options: CreateContextOptions): InputContext {
 			parent: inputContext,
 		});
 
-		if (!inputActions.has(actionName)) {
-			inputActions.set(actionName, inputAction);
-		}
+		declared.set(actionName, inputAction);
 	}
 
 	instances.push(inputContext);
