@@ -105,6 +105,15 @@ handle.
 manual sink. A consumer claims only _after_ reading and using the input
 (read-then-claim); once claimed, the action reads as inert (false/neutral) to
 later consumers, and only raw reads see through it. Per-frame: continuous
-consumers re-claim each frame they use the input. "Own this action regardless of
-input" is a context + sink job, not a claim. _Avoid_: lock, capture, reserve,
-grab, exclusive ownership.
+consumers re-claim each frame they use the input. Session-lived ownership is a
+_capture_, not a long-lived claim. _Avoid_: lock, reserve, grab, exclusive
+ownership.
+
+**Capture**: A standing, owned hold on an action, spanning a session (e.g.
+focus-enter to focus-exit) rather than a frame. The holder keeps reading the
+action's real state; every other consumer reads it as inert until release, and
+only raw reads see through. Where a _claim_ is anonymous and arbitrated by
+schedule position, a capture is owned and arbitrated by acquisition — declared
+at a session boundary, held until released. Mirrors the engine's
+`CaptureFocus`/`ReleaseFocus`. _Avoid_: lease, reservation, hold, lock, standing
+claim.
