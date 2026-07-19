@@ -74,11 +74,13 @@ export function ConfirmToast(props: ToastProps): RenderResult {
 	const canceled = useCaptureAction(confirm, (token) => token.canceled());
 
 	useEffect(() => {
-		if (justPressed) {
-			props.log("ConfirmToast: OK");
-			if (props.claimOnDispatch && confirm.claim()) {
-				props.log("ConfirmToast: claimed rest of frame");
-			}
+		if (!justPressed) {
+			return;
+		}
+
+		props.log("ConfirmToast: OK");
+		if (props.claimOnDispatch && confirm.claim()) {
+			props.log("ConfirmToast: claimed rest of frame");
 		}
 	}, [justPressed]);
 

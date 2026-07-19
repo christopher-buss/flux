@@ -68,6 +68,8 @@ export function useCapture(
  * wrapper's update signal (same plumbing as useAction). This is both the
  * rendering path (highlight while pressed) and — with useEffect on the value —
  * the dispatch path in a stack with no per-frame hook.
+ *
+ * @template R - The selected value type.
  */
 export function useCaptureAction<R>(token: CaptureToken, selector: (token: CaptureToken) => R): R {
 	return useSubscription(() => selector(token));

@@ -91,7 +91,9 @@ export function useRef<T>(initial: T): { current: T } {
 
 /**
  * UseAction-style subscription: re-evaluated on every update signal.
- * @param compute
+ * @template R - The selected value type.
+ * @param compute - Reads the current value; compared by identity on signal.
+ * @returns The last computed value.
  */
 export function useSubscription<R>(compute: () => R): R {
 	const s = slot<SubscriptionSlot>(() => ({ compute, kind: "sub", last: compute() }));
