@@ -8,10 +8,59 @@ if [ -n "$MATCH" ]; then
   exit 2
 fi
 
-# Block pnpm install/i/add in favor of pncat
-if echo "$COMMAND" | grep -qE '(^|\s|&&|\|\||;)pnpm\s+(install|i|add)(\s|$)'; then
-  echo "Blocked: use pncat instead of pnpm install/add" >&2
-  exit 2
-fi
+# Flags that consume the following token as their value.
+VALUE_FLAGS=' --filter -F --filter-prod --dir -C --config-dir --store-dir --virtual-store-dir --lockfile-dir --modules-dir --reporter --resolution-mode --use-node-version --package-import-method --public-hoist-pattern --loglevel --workspace-concurrency '
+
+# Returns 0 if the segment installs a *named* package (pnpm add, or pnpm
+# install/i with package arguments). Bare `pnpm install` (lockfile sync,
+# optionally with flags) is allowed.
+installs_package() {
+  local -a toks
+  read -ra toks <<< "$1"
+  local subcmd="" idx tok
+
+  for ((idx = 0; idx < ${#toks[@]}; idx++)); do
+    tok="${toks[idx]}"
+
+    case "$tok" in
+      -*)
+        # --flag=value carries its own value; bare value-flags eat the next token.
+        if [[ "$tok" != *=* && "$VALUE_FLAGS" == *" $tok "* ]]; then
+          ((idx++))
+        fi
+        continue
+        ;;
+    esac
+
+    if [ -z "$subcmd" ]; then
+      case "$tok" in
+        pnpm) continue ;;
+        add) return 0 ;;
+        install | i) subcmd="install" ;;
+        *) return 1 ;;
+      esac
+      continue
+    fi
+
+    # A non-flag token after install/i is a package specifier.
+    return 0
+  done
+
+  return 1
+}
+
+# Split on shell separators so each command is checked independently.
+while IFS= read -r segment; do
+  case "$segment" in
+    *pnpm*) ;;
+    *) continue ;;
+  esac
+  # Trim to the pnpm invocation itself.
+  segment="pnpm ${segment#*pnpm }"
+  if installs_package "$segment"; then
+    echo "Blocked: use ni instead of pnpm install/add as it uses catalogs by default. Ensure no dependencies are installed in the default catalog: -> all catalog's must be named. (Bare 'pnpm install' is allowed.)" >&2
+    exit 2
+  fi
+done < <(echo "$COMMAND" | tr '\n;' '\n\n' | sed -E 's/(\&\&|\|\|)/\n/g')
 
 exit 0

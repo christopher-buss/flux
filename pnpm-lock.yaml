@@ -116,6 +116,18 @@ catalogs:
     '@rbxts-js/dom-testing-library-lua':
       specifier: 8.16.0-ts.3
       version: 8.16.0-ts.3
+    '@rbxts-js/emittery':
+      specifier: 3.16.0-ts.1
+      version: 3.16.0-ts.1
+    '@rbxts-js/expect':
+      specifier: 3.16.0-ts.1
+      version: 3.16.0-ts.1
+    '@rbxts-js/jest-mock':
+      specifier: 3.16.0-ts.1
+      version: 3.16.0-ts.1
+    '@rbxts-js/jest-runner':
+      specifier: 3.16.0-ts.1
+      version: 3.16.0-ts.1
     '@rbxts-js/react-testing-library-lua':
       specifier: 12.3.4-ts.3
       version: 12.3.4-ts.3
@@ -123,8 +135,8 @@ catalogs:
       specifier: 3.16.0-ts.1
       version: 3.16.0-ts.1
     '@rbxts/jest-extended':
-      specifier: 1.0.1
-      version: 1.0.1
+      specifier: 1.0.2
+      version: 1.0.2
     '@rbxts/jest-globals':
       specifier: 3.16.0-ts.1
       version: 3.16.0-ts.1
@@ -173,7 +185,7 @@ catalogs:
 patchedDependencies:
   '@rbxts-js/emittery@3.16.0-ts.1': 497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496
   '@rbxts-js/expect@3.16.0-ts.1': 0b057609d0c4eabd5a55bc3b84d4ad03d8ad99b10764d0843d17a0f470c90ff3
-  '@rbxts-js/jest-mock@3.13.3-ts.3': 49df61e05541627c7a55ed20d2daad9eb4652b3c8ed28727560d0a8e01fafb7a
+  '@rbxts-js/jest-mock@3.16.0-ts.1': 29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e
   '@rbxts-js/jest-runner@3.16.0-ts.1': 8e9687762b0ea516c5c4ab0f396cb7160d1baabcc3a31cff81ee578112013085
   '@rbxts/compiler-types': 0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def
   '@rbxts/jest-globals@3.16.0-ts.1': d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0
@@ -201,6 +213,18 @@ importers:
       '@isentinel/tsconfig':
         specifier: catalog:tsc
         version: 1.2.0(typescript@6.0.3)
+      '@rbxts-js/emittery':
+        specifier: catalog:test
+        version: 3.16.0-ts.1(patch_hash=497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496)
+      '@rbxts-js/expect':
+        specifier: catalog:test
+        version: 3.16.0-ts.1(patch_hash=0b057609d0c4eabd5a55bc3b84d4ad03d8ad99b10764d0843d17a0f470c90ff3)
+      '@rbxts-js/jest-mock':
+        specifier: catalog:test
+        version: 3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)
+      '@rbxts-js/jest-runner':
+        specifier: catalog:test
+        version: 3.16.0-ts.1(patch_hash=8e9687762b0ea516c5c4ab0f396cb7160d1baabcc3a31cff81ee578112013085)
       '@rbxts/jest-utils':
         specifier: catalog:test
         version: 0.1.3(@rbxts/jest-globals@3.16.0-ts.1(patch_hash=d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0))
@@ -426,7 +450,7 @@ importers:
         version: 3.16.0-ts.1
       '@rbxts/jest-extended':
         specifier: catalog:test
-        version: 1.0.1
+        version: 1.0.2
       '@rbxts/jest-globals':
         specifier: catalog:test
         version: 3.16.0-ts.1(patch_hash=d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0)
@@ -483,7 +507,7 @@ importers:
         version: 3.16.0-ts.1
       '@rbxts/jest-extended':
         specifier: catalog:test
-        version: 1.0.1
+        version: 1.0.2
       '@rbxts/jest-globals':
         specifier: catalog:test
         version: 3.16.0-ts.1(patch_hash=d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0)
@@ -540,7 +564,7 @@ importers:
         version: 3.16.0-ts.1
       '@rbxts/jest-extended':
         specifier: catalog:test
-        version: 1.0.1
+        version: 1.0.2
       '@rbxts/jest-globals':
         specifier: catalog:test
         version: 3.16.0-ts.1(patch_hash=d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0)
@@ -597,7 +621,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/jest-extended':
         specifier: catalog:test
-        version: 1.0.1
+        version: 1.0.2
       '@rbxts/jest-globals':
         specifier: catalog:test
         version: 3.16.0-ts.1(patch_hash=d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0)
@@ -1962,9 +1986,6 @@ packages:
   '@rbxts-js/console@1.2.3-ts.1':
     resolution: {integrity: sha512-qacyJE7bYf4n9448F7mn9e8Y5qljZb7QkSmsmnbQT2HA9Mecvg3gqc9RwCIdVkBV6o1AGVAHbatNQ3a39zPjaw==}
 
-  '@rbxts-js/diff-sequences@3.13.3-ts.3':
-    resolution: {integrity: sha512-rYbBZrtoymMKZcP9qawJ86a1o/VJOvQTLir40Hzjk+l7jsgiLr+bNnn3ryIGqWR61FTLlZFHMcf+DSHU4mQA0Q==}
-
   '@rbxts-js/diff-sequences@3.16.0-ts.1':
     resolution: {integrity: sha512-HodCPVo5ENGQZl1xfWCs6v1KKeq1mP7Cusbif8prssXNxmLbybZ+uzFOI1kCg3LRTtXuhadgErCHbUeS/eo63Q==}
 
@@ -1995,9 +2016,6 @@ packages:
   '@rbxts-js/jest-core@3.16.0-ts.1':
     resolution: {integrity: sha512-TJOS9booXAaShSFMKtG3ZajJeZ6+XwHGm86XrmwFqyke8hb+IK5ub1tN486aPYSaar5bosJUTovGihYLl4oOpg==}
 
-  '@rbxts-js/jest-diff@3.13.3-ts.3':
-    resolution: {integrity: sha512-btqG8C6dUZmGYNWE3v3gzqaoqZuJc2nMQw/rpWNtDpCabhIwypMiz8YOnKSRWpJYdrS2kr0C+MDpVotdg8HKaQ==}
-
   '@rbxts-js/jest-diff@3.16.0-ts.1':
     resolution: {integrity: sha512-DmK5cPRu60nNtCTKo9Q3M2eGlnG3rok1lVpu9KR8Hf7x00TzbZ4BRPvFQv5oQozTflVvH8WNxu6O+buVuVWLIA==}
 
@@ -2013,9 +2031,6 @@ packages:
   '@rbxts-js/jest-fake-timers@3.16.0-ts.1':
     resolution: {integrity: sha512-nLhrl6JiK6K6sxZ7mwbnGWxlhF2OpLNrHDcxnbgJ6HR7LGzf0nSV/22nP7ciiKLDYQZuNl85KYhaHxTw6ljnFw==}
 
-  '@rbxts-js/jest-get-type@3.13.3-ts.3':
-    resolution: {integrity: sha512-Ny3K+6uRW5daj+bZf6xy2gFd6lv38r8q9maDuBClPPbZOD9tqEwvkwv/9Ofgm7eIGg+ap/HHCD5fsMQroXCgcw==}
-
   '@rbxts-js/jest-get-type@3.16.0-ts.1':
     resolution: {integrity: sha512-QSKyrlelo+ni6pIheZw9bWcivxy5t3RM3eRIx/CQorPkkpX+qO1VbFDQW7Lq2m5KpWjEfdSK/bFQFJasV5A/dQ==}
 
@@ -2028,20 +2043,11 @@ packages:
   '@rbxts-js/jest-message-util@3.16.0-ts.1':
     resolution: {integrity: sha512-cDznh0sVhPh68Q9DUpbBzsQte3fbuvL1BBGIEA/tpsM8UJmVKqNb5CNRC+bip9nBAsj+S5pBpGxOxsW/PpgjlQ==}
 
-  '@rbxts-js/jest-mock-genv@3.13.3-ts.3':
-    resolution: {integrity: sha512-bZJpvCE0uoT61xPuanIxcfsaKlGM62Q5RSADeSSZCY/jIrhuQz4DN0DT8MvrWqpQNmHmiHgCUaFDAC8sY19Eng==}
-
   '@rbxts-js/jest-mock-genv@3.16.0-ts.1':
     resolution: {integrity: sha512-Butn5hZT4Lgb/NZQ8Oe4rvpNgaV7TTQM4qHmrlrIj58TUyN1TNRG9w3Zds+uPLwJ5flQuKJguZ3w1+OSgfPwrg==}
 
-  '@rbxts-js/jest-mock-rbx@3.13.3-ts.3':
-    resolution: {integrity: sha512-iG2s3FUQR1PQES2JtI0iffPlJWc/79hLFCpuUhU8dQr58jauMLQfdCA2U58vG2I5HjhMqOD8knTEf2nea/CYBQ==}
-
   '@rbxts-js/jest-mock-rbx@3.16.0-ts.1':
     resolution: {integrity: sha512-d7m2y3t0EJQIIGHtEpS7moZs/i0xfd7tLKrpFHYCGZ1GECD94BZ/2J9E/7kJERmNrVJe5J/xDK425kqb5o4sCw==}
-
-  '@rbxts-js/jest-mock@3.13.3-ts.3':
-    resolution: {integrity: sha512-CfcP5HrHP0xw6Q+hUPaqz0Lfi8lhvNcLAidu/a1f8W5zv2d1fYXfN8eHCK8z3/OMgJud7yI7QptH0/zGex5mKA==}
 
   '@rbxts-js/jest-mock@3.16.0-ts.1':
     resolution: {integrity: sha512-k40+FLW94dg7Ag70qgp0T/MKCR67uciNrJA7LjfGBgkBhrKbOSSmrzFTPwdg2l454EitbVCdc4es4Z30u1n1kg==}
@@ -2060,9 +2066,6 @@ packages:
 
   '@rbxts-js/jest-test-result@3.16.0-ts.1':
     resolution: {integrity: sha512-4g6Cs82BISCODMrSQ2vgzzP5gsKM3hh5wTouJVzwZWdufYD94pqImG3xT0luMBWu/bAFMQb7ltvo6wrzN1xh7w==}
-
-  '@rbxts-js/jest-types@3.13.3-ts.3':
-    resolution: {integrity: sha512-X0I/bKUCa4X79kJF4+DB2RfegDNauVyCDBKPNqPjRl7JJpV75Aqdgcof//93Qq+PytQznXumfVNNf4FiIR8OFA==}
 
   '@rbxts-js/jest-types@3.16.0-ts.1':
     resolution: {integrity: sha512-WS+yUhGMDiiWC/VvYw5NV/Q/z7rTZiwXb0VAY6e20CzkRQHcs4HP1jSEn/gGkKRjUrrj0/iisjrpRIEgxCTFqQ==}
@@ -2094,9 +2097,6 @@ packages:
   '@rbxts-js/picomatch-lua@0.4.0-ts.1':
     resolution: {integrity: sha512-QqALRJ5FPxQTiJgkpElHtxnQOKgtAXlTLxM4vSt3m6Zw7mGQaHyOUSXfLX+A2TZ6jTPFQVmxH+Gax2cRjBZgAw==}
 
-  '@rbxts-js/pretty-format@3.13.3-ts.3':
-    resolution: {integrity: sha512-uH6y4fYf7C4GXWBd3wIlR7GzT/sZgyl2yNBpewrBXp4rdI7J9RMhTuGVN1ZqXrzlqv1E0e9+oA5AYVRiJWLwpA==}
-
   '@rbxts-js/pretty-format@3.16.0-ts.1':
     resolution: {integrity: sha512-/V3PUKzJissbq3A3vZZkdFEMYbtf0cZtPCgL3g23Jhb5GauSbqLK2TylIbi597X5qxjMkhIPKBa/Ih4aV6qEXw==}
 
@@ -2120,9 +2120,6 @@ packages:
 
   '@rbxts-js/roblox-lua-promise@3.5.0-ts.2':
     resolution: {integrity: sha512-H8fxKVJkRnM60yTZ/riO4X43GZD/MViFm+ftCzzAALkAhE4vSaBDNv9E7IUjZZoWi21bG6vZ8mGIiYfavaljvw==}
-
-  '@rbxts-js/roblox-shared@3.13.3-ts.3':
-    resolution: {integrity: sha512-DFI6StnUVQXvVXFrpgUU2DcW5/K61WB9/3waz/zXKLxYSJtGdPc2ghdRRpFdYBde6XmgmDy7X/267RGDcEsu1Q==}
 
   '@rbxts-js/roblox-shared@3.16.0-ts.1':
     resolution: {integrity: sha512-5Z8LngD6hXIWUrGO1xxAdvAlRvHT65lnfYMAfflnOirosXJ7/2RmIa5FHbRYXF7jEvDmU3q+pj3NbgPV/CPmAg==}
@@ -2160,8 +2157,8 @@ packages:
   '@rbxts/jecs@0.11.0':
     resolution: {integrity: sha512-rJPZkqrL8PXVX5YP5a9gMcddm8U7TeXZDYEbBTAXs81r9IKhTWNVxGoFRPTbsDT4BhwM0LMvydvWDAqHvWzHpA==}
 
-  '@rbxts/jest-extended@1.0.1':
-    resolution: {integrity: sha512-1Lul8qzU54Kc1uDbsOfw9TYZoeAmWFQCyrMnIYjfXkNxcmxNCZvgqTDVEju6DKPdFf3YSq+fk7dX8gA4UKMYNA==}
+  '@rbxts/jest-extended@1.0.2':
+    resolution: {integrity: sha512-7gA8EnbV39Wrff/LTUt9ZLiKywh7aTg2LEjAcEPh4oCfhucRJh+cBpMac9TQfNozTDgIAF/PIm4OblqvuoJfZw==}
     engines: {node: '>=v24.12.0'}
 
   '@rbxts/jest-globals@3.16.0-ts.1':
@@ -6363,10 +6360,6 @@ snapshots:
     dependencies:
       '@rbxts-js/collections': 1.2.3-ts.1
 
-  '@rbxts-js/diff-sequences@3.13.3-ts.3':
-    dependencies:
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-
   '@rbxts-js/diff-sequences@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
@@ -6441,7 +6434,7 @@ snapshots:
       '@rbxts-js/chalk-lua': 0.2.2-ts.2
       '@rbxts-js/jest-each': 3.16.0-ts.1
       '@rbxts-js/jest-message-util': 3.16.0-ts.1
-      '@rbxts-js/jest-mock': 3.16.0-ts.1
+      '@rbxts-js/jest-mock': 3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)
       '@rbxts-js/jest-types': 3.16.0-ts.1
       '@rbxts-js/jest-util': 3.16.0-ts.1
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
@@ -6467,15 +6460,6 @@ snapshots:
       '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
       '@rbxts-js/roblox-shared': 3.16.0-ts.1
 
-  '@rbxts-js/jest-diff@3.13.3-ts.3':
-    dependencies:
-      '@rbxts-js/chalk-lua': 0.2.2-ts.2
-      '@rbxts-js/diff-sequences': 3.13.3-ts.3
-      '@rbxts-js/jest-get-type': 3.13.3-ts.3
-      '@rbxts-js/jest-types': 3.13.3-ts.3
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-      '@rbxts-js/pretty-format': 3.13.3-ts.3
-
   '@rbxts-js/jest-diff@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/chalk-lua': 0.2.2-ts.2
@@ -6499,7 +6483,7 @@ snapshots:
     dependencies:
       '@rbxts-js/jest-environment': 3.16.0-ts.1
       '@rbxts-js/jest-fake-timers': 3.16.0-ts.1
-      '@rbxts-js/jest-mock': 3.16.0-ts.1
+      '@rbxts-js/jest-mock': 3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)
       '@rbxts-js/jest-types': 3.16.0-ts.1
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
       '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
@@ -6507,7 +6491,7 @@ snapshots:
   '@rbxts-js/jest-environment@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/jest-fake-timers': 3.16.0-ts.1
-      '@rbxts-js/jest-mock': 3.16.0-ts.1
+      '@rbxts-js/jest-mock': 3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)
       '@rbxts-js/jest-mock-genv': 3.16.0-ts.1
       '@rbxts-js/jest-types': 3.16.0-ts.1
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
@@ -6515,13 +6499,8 @@ snapshots:
   '@rbxts-js/jest-fake-timers@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/jest-get-type': 3.16.0-ts.1
-      '@rbxts-js/jest-mock': 3.16.0-ts.1
+      '@rbxts-js/jest-mock': 3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-
-  '@rbxts-js/jest-get-type@3.13.3-ts.3':
-    dependencies:
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-      '@rbxts-js/luau-regexp': 0.2.2-ts.1
 
   '@rbxts-js/jest-get-type@3.16.0-ts.1':
     dependencies:
@@ -6553,17 +6532,8 @@ snapshots:
       '@rbxts-js/pretty-format': 3.16.0-ts.1
       '@rbxts-js/roblox-shared': 3.16.0-ts.1
 
-  '@rbxts-js/jest-mock-genv@3.13.3-ts.3':
-    dependencies:
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-
   '@rbxts-js/jest-mock-genv@3.16.0-ts.1':
     dependencies:
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-
-  '@rbxts-js/jest-mock-rbx@3.13.3-ts.3':
-    dependencies:
-      '@rbxts-js/jest-types': 3.13.3-ts.3
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
 
   '@rbxts-js/jest-mock-rbx@3.16.0-ts.1':
@@ -6571,14 +6541,7 @@ snapshots:
       '@rbxts-js/jest-types': 3.16.0-ts.1
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
 
-  '@rbxts-js/jest-mock@3.13.3-ts.3(patch_hash=49df61e05541627c7a55ed20d2daad9eb4652b3c8ed28727560d0a8e01fafb7a)':
-    dependencies:
-      '@rbxts-js/jest-mock-genv': 3.13.3-ts.3
-      '@rbxts-js/jest-mock-rbx': 3.13.3-ts.3
-      '@rbxts-js/jest-types': 3.13.3-ts.3
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-
-  '@rbxts-js/jest-mock@3.16.0-ts.1':
+  '@rbxts-js/jest-mock@3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)':
     dependencies:
       '@rbxts-js/jest-mock-genv': 3.16.0-ts.1
       '@rbxts-js/jest-mock-rbx': 3.16.0-ts.1
@@ -6590,7 +6553,7 @@ snapshots:
       '@rbxts-js/chalk-lua': 0.2.2-ts.2
       '@rbxts-js/jest-console': 3.16.0-ts.1
       '@rbxts-js/jest-message-util': 3.16.0-ts.1
-      '@rbxts-js/jest-mock': 3.16.0-ts.1
+      '@rbxts-js/jest-mock': 3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)
       '@rbxts-js/jest-test-result': 3.16.0-ts.1
       '@rbxts-js/jest-types': 3.16.0-ts.1
       '@rbxts-js/jest-util': 3.16.0-ts.1
@@ -6621,7 +6584,7 @@ snapshots:
     dependencies:
       '@rbxts-js/expect': 3.16.0-ts.1(patch_hash=0b057609d0c4eabd5a55bc3b84d4ad03d8ad99b10764d0843d17a0f470c90ff3)
       '@rbxts-js/jest-fake-timers': 3.16.0-ts.1
-      '@rbxts-js/jest-mock': 3.16.0-ts.1
+      '@rbxts-js/jest-mock': 3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)
       '@rbxts-js/jest-mock-genv': 3.16.0-ts.1
       '@rbxts-js/jest-snapshot': 3.16.0-ts.1
       '@rbxts-js/jest-types': 3.16.0-ts.1
@@ -6644,11 +6607,6 @@ snapshots:
     dependencies:
       '@rbxts-js/jest-types': 3.16.0-ts.1
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-
-  '@rbxts-js/jest-types@3.13.3-ts.3':
-    dependencies:
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-      '@rbxts-js/luau-regexp': 0.2.2-ts.1
 
   '@rbxts-js/jest-types@3.16.0-ts.1':
     dependencies:
@@ -6702,15 +6660,6 @@ snapshots:
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
       '@rbxts-js/luau-regexp': 0.2.2-ts.1
       '@rbxts-js/roblox-lua-promise': 3.5.0-ts.2
-
-  '@rbxts-js/pretty-format@3.13.3-ts.3':
-    dependencies:
-      '@rbxts-js/chalk-lua': 0.2.2-ts.2
-      '@rbxts-js/jest-get-type': 3.13.3-ts.3
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-      '@rbxts-js/luau-regexp': 0.2.2-ts.1
-      '@rbxts-js/react-is': 17.3.7-ts.1
-      '@rbxts-js/roblox-shared': 3.13.3-ts.3
 
   '@rbxts-js/pretty-format@3.16.0-ts.1':
     dependencies:
@@ -6769,16 +6718,10 @@ snapshots:
 
   '@rbxts-js/roblox-lua-promise@3.5.0-ts.2': {}
 
-  '@rbxts-js/roblox-shared@3.13.3-ts.3':
-    dependencies:
-      '@rbxts-js/jest-get-type': 3.13.3-ts.3
-      '@rbxts-js/jest-mock': 3.13.3-ts.3(patch_hash=49df61e05541627c7a55ed20d2daad9eb4652b3c8ed28727560d0a8e01fafb7a)
-      '@rbxts-js/luau-polyfill': 1.2.3-ts.1
-
   '@rbxts-js/roblox-shared@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/jest-get-type': 3.16.0-ts.1
-      '@rbxts-js/jest-mock': 3.16.0-ts.1
+      '@rbxts-js/jest-mock': 3.16.0-ts.1(patch_hash=29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e)
       '@rbxts-js/luau-polyfill': 1.2.3-ts.1
 
   '@rbxts-js/safe-flags@17.3.7-ts.1': {}
@@ -6828,9 +6771,9 @@ snapshots:
 
   '@rbxts/jecs@0.11.0': {}
 
-  '@rbxts/jest-extended@1.0.1':
+  '@rbxts/jest-extended@1.0.2':
     dependencies:
-      '@rbxts-js/jest-diff': 3.13.3-ts.3
+      '@rbxts-js/jest-diff': 3.16.0-ts.1
       '@rbxts/luau-polyfill': 1.1.3
       '@rbxts/regexp': 0.2.1-ts.4
 
