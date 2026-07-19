@@ -1,9 +1,8 @@
-import type { KeysOfUnion } from "type-fest";
-
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
-import type { BindingConfig, BindingLike } from "../types/bindings";
+import type { BindingLike } from "../types/bindings";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
+import { createBindingsForAction } from "./input-bindings";
 
 /**
  * Stores all IAS instances for a single handle.
@@ -49,10 +48,6 @@ interface CreateContextOptions {
 }
 
 const INPUT_FOLDER_NAME = "input";
-
-type BindingConfigKey = Extract<KeysOfUnion<BindingConfig>, string>;
-
-type BindingProperty = WritablePropertyNames<InputBinding>;
 
 interface FindInstancesOptions {
 	readonly actions: ActionMap;
@@ -172,6 +167,24 @@ export function addContextInstances(
 }
 
 /**
+ * Adopts an InputContext that already exists under the parent, indexing its
+ * `InputAction` children so reads can resolve to them.
+ * @param data - The existing instance data to append to.
+ * @param contextName - The name of the context being adopted.
+ * @param inputContext - The already-present InputContext instance.
+ * @param actions - The action map for filtering unknown action names.
+ */
+export function adoptContextInstances(
+	data: InputInstanceData,
+	contextName: string,
+	inputContext: InputContext,
+	actions: ActionMap,
+): void {
+	data.inputContexts.set(contextName, inputContext);
+	indexContextActions(data.actionsByContext, contextName, inputContext, actions);
+}
+
+/**
  * Sets the Enabled property on an InputContext instance.
  * @param data - The instance data containing context instances.
  * @param contextName - The context to enable or disable.
@@ -205,22 +218,7 @@ function getOrCreateInputFolder(parent: Instance): Folder {
 	return folder;
 }
 
-function createSearchState(actions: ActionMap): SearchState {
-	return {
-		actions,
-		actionsByContext: new Map<string, Map<string, InputAction>>(),
-		connections: new Array<RBXScriptConnection>(),
-		inputContexts: new Map<string, InputContext>(),
-	};
-}
-
-/**
- * Reads a context's action map, creating it on first use.
- * @param actionsByContext - Per-context instance storage to read.
- * @param contextName - The context whose action map to fetch.
- * @returns The context's own action-name to instance map.
- */
-function contextActions(
+function getOrCreateContextActions(
 	actionsByContext: Map<string, Map<string, InputAction>>,
 	contextName: string,
 ): Map<string, InputAction> {
@@ -231,40 +229,6 @@ function contextActions(
 	}
 
 	return actions;
-}
-
-function collectActions(contextName: string, inputContext: InputContext, state: SearchState): void {
-	for (const child of inputContext.GetChildren()) {
-		if (classIs(child, "InputAction") && state.actions[child.Name] !== undefined) {
-			contextActions(state.actionsByContext, contextName).set(child.Name, child);
-		}
-	}
-}
-
-function searchForContexts(
-	folder: Instance,
-	contextNames: ReadonlyArray<string>,
-	state: SearchState,
-): void {
-	for (const contextName of contextNames) {
-		const existing = folder.FindFirstChild(contextName);
-		if (existing !== undefined && classIs(existing, "InputContext")) {
-			state.inputContexts.set(contextName, existing);
-			collectActions(contextName, existing, state);
-			continue;
-		}
-
-		const connection = folder.ChildAdded.Connect((child) => {
-			if (child.Name !== contextName || !classIs(child, "InputContext")) {
-				return;
-			}
-
-			state.inputContexts.set(contextName, child);
-			collectActions(contextName, child, state);
-		});
-
-		state.connections.push(connection);
-	}
 }
 
 /**
@@ -293,74 +257,6 @@ function toInputActionType(actionType: ActionType): Enum.InputActionType {
 	}
 }
 
-const PROPERTY_MAP = {
-	backward: "Backward",
-	clampMagnitudeToOne: "ClampMagnitudeToOne",
-	down: "Down",
-	forward: "Forward",
-	keyCode: "KeyCode",
-	left: "Left",
-	pointerIndex: "PointerIndex",
-	pressedThreshold: "PressedThreshold",
-	primaryModifier: "PrimaryModifier",
-	releasedThreshold: "ReleasedThreshold",
-	responseCurve: "ResponseCurve",
-	right: "Right",
-	scale: "Scale",
-	secondaryModifier: "SecondaryModifier",
-	uiButton: "UIButton",
-	up: "Up",
-	vector2Scale: "Vector2Scale",
-	vector3Scale: "Vector3Scale",
-} as const satisfies Record<BindingConfigKey, BindingProperty>;
-
-/**
- * Creates a single `InputBinding` child on the given `InputAction`.
- * @param bindingLike - The binding definition (KeyCode or config object).
- * @param parent - The `InputAction` to parent the binding under.
- * @param instances - Bulk cleanup array the new instance is appended to.
- * @throws If a raw `Enum.UserInputType` is passed.
- */
-export function createInputBinding(
-	bindingLike: BindingLike,
-	parent: InputAction,
-	instances: Array<Instance>,
-): void {
-	if (isUserInputType(bindingLike)) {
-		error(`UserInputType bindings are not supported: ${bindingLike}. Use Enum.KeyCode instead`);
-	}
-
-	const binding = new Instance("InputBinding");
-	if (isKeyCode(bindingLike)) {
-		binding.KeyCode = bindingLike;
-	} else {
-		for (const [key, value] of pairs(bindingLike)) {
-			binding[PROPERTY_MAP[key]] = value;
-		}
-	}
-
-	binding.Parent = parent;
-	instances.push(binding);
-}
-
-function isKeyCode(value: BindingLike): value is Enum.KeyCode {
-	return typeIs(value, "EnumItem") && value.EnumType === Enum.KeyCode;
-}
-
-function isUserInputType(value: unknown): boolean {
-	return typeIs(value, "EnumItem") && value.EnumType === Enum.UserInputType;
-}
-
-function createBindingsForAction(
-	bindings: ReadonlyArray<BindingLike>,
-	parent: InputAction,
-	instances: Array<Instance>,
-): void {
-	for (const bindingLike of bindings) {
-		createInputBinding(bindingLike, parent, instances);
-	}
-}
-
 function createAction(options: CreateActionOptions): InputAction {
 	const { actionConfig, actionName, bindings, instances, parent } = options;
 	const inputAction = new Instance("InputAction");
@@ -379,7 +275,7 @@ function createContext(options: CreateContextOptions): InputContext {
 	inputContext.Priority = contextConfig.priority ?? DEFAULT_CONTEXT_PRIORITY;
 	inputContext.Sink = contextConfig.sink === true;
 
-	const declared = contextActions(actionsByContext, contextName);
+	const declared = getOrCreateContextActions(actionsByContext, contextName);
 	for (const [actionName, bindings] of pairs(contextConfig.bindings)) {
 		const actionConfig = actions[actionName];
 		if (actionConfig === undefined) {
@@ -399,4 +295,53 @@ function createContext(options: CreateContextOptions): InputContext {
 
 	instances.push(inputContext);
 	return inputContext;
+}
+
+function createSearchState(actions: ActionMap): SearchState {
+	return {
+		actions,
+		actionsByContext: new Map<string, Map<string, InputAction>>(),
+		connections: new Array<RBXScriptConnection>(),
+		inputContexts: new Map<string, InputContext>(),
+	};
+}
+
+function indexContextActions(
+	actionsByContext: Map<string, Map<string, InputAction>>,
+	contextName: string,
+	inputContext: InputContext,
+	actions: ActionMap,
+): void {
+	const declared = getOrCreateContextActions(actionsByContext, contextName);
+	for (const child of inputContext.GetChildren()) {
+		if (classIs(child, "InputAction") && actions[child.Name] !== undefined) {
+			declared.set(child.Name, child);
+		}
+	}
+}
+
+function searchForContexts(
+	folder: Instance,
+	contextNames: ReadonlyArray<string>,
+	state: SearchState,
+): void {
+	for (const contextName of contextNames) {
+		const existing = folder.FindFirstChild(contextName);
+		if (existing !== undefined && classIs(existing, "InputContext")) {
+			state.inputContexts.set(contextName, existing);
+			indexContextActions(state.actionsByContext, contextName, existing, state.actions);
+			continue;
+		}
+
+		const connection = folder.ChildAdded.Connect((child) => {
+			if (child.Name !== contextName || !classIs(child, "InputContext")) {
+				return;
+			}
+
+			state.inputContexts.set(contextName, child);
+			indexContextActions(state.actionsByContext, contextName, child, state.actions);
+		});
+
+		state.connections.push(connection);
+	}
 }

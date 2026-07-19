@@ -505,6 +505,46 @@ describe("createCore", () => {
 			expect(core.getState(handle).axis3d("look")).toBe(Vector3.zero);
 		});
 
+		it("should read an adopted context's own instances", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: SHARED_ACTIONS, contexts: SHARED_CONTEXTS });
+			core.register(parent, "primary", "secondary");
+			const second = core.register(parent, "secondary");
+			core.addContext(second, "primary");
+
+			expect(() => {
+				core.update(0.016);
+			}).never.toThrow();
+		});
+
+		it("should not warn when only the losing context replicated", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const [mockWarn, mockWarnFunction] = jest.fn<(message: string) => void>();
+			const serverCore = createCore({
+				actions: SHARED_ACTIONS,
+				contexts: SHARED_CONTEXTS,
+			});
+			serverCore.register(parent, "secondary");
+
+			const core = createCore({
+				actions: SHARED_ACTIONS,
+				contexts: SHARED_CONTEXTS,
+				debug: true,
+				onReplicationTimeout: mockWarnFunction,
+			});
+			core.subscribe(parent, "primary", "secondary");
+
+			for (const _ of $range(1, 313)) {
+				core.update(0.016);
+			}
+
+			expect(mockWarn).never.toHaveBeenCalled();
+		});
+
 		it("should carry hold duration across a change of winning context", () => {
 			expect.assertions(1);
 

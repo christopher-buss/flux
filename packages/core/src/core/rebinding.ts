@@ -2,8 +2,8 @@ import type { ActionMap } from "../types/actions";
 import type { BindingLike, BindingState } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { HandleData } from "./handle-lifecycle";
+import { createInputBinding } from "./input-bindings";
 import type { InputInstanceData } from "./input-instances";
-import { createInputBinding } from "./input-instances";
 
 /**
  * Replaces every `InputBinding` child on all `InputAction` instances that

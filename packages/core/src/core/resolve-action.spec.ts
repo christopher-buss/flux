@@ -51,9 +51,11 @@ describe("resolveActionInstance", () => {
 		expect(resolveActionInstance(instances, ["gameplay"], "look")).toBe(gameplayLook);
 	});
 
-	it("should follow activation recency between equal-priority contexts", () => {
+	it("should obey resolution order over storage order", () => {
 		expect.assertions(1);
 
+		// Equal-priority contexts reach here already ordered by recency, so the
+		// caller's order must beat the order the instances were stored in.
 		const first = makeAction("jump");
 		const second = makeAction("jump");
 		const instances = makeInstances([
