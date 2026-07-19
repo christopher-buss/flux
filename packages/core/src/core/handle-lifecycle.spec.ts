@@ -71,7 +71,7 @@ describe("registerHandle", () => {
 		const handle = registerHandle(factory, options);
 		const data = options.handles.get(handle)!;
 
-		expect(data.activeContexts.has("gameplay")).toBeTrue();
+		expect(data.activeContexts).toContain("gameplay");
 	});
 });
 

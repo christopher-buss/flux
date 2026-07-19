@@ -5,6 +5,7 @@ import type { ContextConfig } from "../types/contexts";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
+import { activateContext, deactivateContext, isContextActive } from "./active-contexts";
 import { createHandleFactory } from "./handle-factory";
 import type { HandleData } from "./handle-lifecycle";
 import {
@@ -114,7 +115,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		addContext(handle: InputHandle, context: Contexts): () => void {
 			validateContextName(contexts, context);
 			const data = getHandleData(handles, handle);
-			if (data.activeContexts.has(context)) {
+			if (isContextActive(data.activeContexts, context)) {
 				error(`context already active: ${context}`);
 			}
 
@@ -134,7 +135,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			}
 
 			setContextEnabled(data.instanceData, context, true);
-			data.activeContexts.add(context);
+			activateContext(data.activeContexts, context);
 
 			return noop;
 		},
@@ -184,7 +185,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			const config = contexts[context];
 			return {
 				actions: collectContextActions(actions, config.bindings),
-				active: data.activeContexts.has(context),
+				active: isContextActive(data.activeContexts, context),
 				priority: config.priority ?? DEFAULT_CONTEXT_PRIORITY,
 				sink: config.sink ?? false,
 			};
@@ -202,7 +203,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			return getHandleData(handles, handle).publicState;
 		},
 		hasContext(handle: InputHandle, context: Contexts): boolean {
-			return getHandleData(handles, handle).activeContexts.has(context);
+			return isContextActive(getHandleData(handles, handle).activeContexts, context);
 		},
 		loadBindings(handle: InputHandle, data: BindingState<T>): void {
 			const handleData = getHandleData(handles, handle);
@@ -262,12 +263,8 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		},
 		removeContext(handle: InputHandle, context: Contexts): void {
 			const data = getHandleData(handles, handle);
-			if (!data.activeContexts.has(context)) {
-				error(`context not active: ${context}`);
-			}
-
+			deactivateContext(data.activeContexts, context);
 			setContextEnabled(data.instanceData, context, false);
-			data.activeContexts.delete(context);
 		},
 		resetAllBindings(handle: InputHandle): void {
 			const handleData = getHandleData(handles, handle);
