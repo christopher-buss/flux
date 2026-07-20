@@ -22,10 +22,26 @@ type TestFlux = FluxReact<typeof TEST_ACTIONS, TestContexts>;
 /** A capture token for the fixture's plain Bool action. */
 type JumpToken = CaptureToken<typeof TEST_ACTIONS, "jump">;
 
-/** Props naming the action a surface should capture. */
+/** Props naming the Bool action a surface should capture. */
 interface ActionProps {
 	/** The action the surface captures on this render. */
-	readonly action: "interact" | "jump";
+	readonly action: "charge" | "interact" | "jump";
+}
+
+/** What a surface read through its token during one render. */
+interface ActionReads {
+	/** Whether the token reported a cancel. */
+	readonly canceled: boolean;
+	/** The token's typed value. */
+	readonly getState: boolean;
+	/** Whether the token reported the action as pressed. */
+	readonly pressed: boolean;
+}
+
+/** Props naming the action a kind-changing surface should capture. */
+interface KindProps {
+	/** The action the surface captures on this render. */
+	readonly action: "jump" | "move";
 }
 
 /** Props naming the sibling surfaces that are currently mounted. */
@@ -65,24 +81,61 @@ function createTokenLoggingSurface(
  * @param flux - The FluxReact instance supplying the Provider and hook.
  * @param core - The core the Provider hands to hooks.
  * @param handle - The default handle the Provider hands to hooks.
- * @param reads - Log receiving one `pressed()` read per render.
+ * @param reads - Log receiving one set of token reads per render.
  * @returns The host component.
  */
 function createActionHost(
 	flux: TestFlux,
 	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
 	handle: InputHandle,
-	reads: Log<boolean>,
+	reads: Log<ActionReads>,
 ): (props: ActionProps) => React.ReactNode {
 	const { FluxProvider, useCapture } = flux;
 
 	function Surface({ action }: ActionProps): React.ReactNode {
 		const token = useCapture(action);
-		reads.push(token.pressed());
+		reads.push({
+			canceled: token.canceled(),
+			getState: token.getState(),
+			pressed: token.pressed(),
+		});
 		return <frame />;
 	}
 
 	return ({ action }: ActionProps): React.ReactNode => {
+		return (
+			<FluxProvider core={core} handle={handle}>
+				<Surface action={action} />
+			</FluxProvider>
+		);
+	};
+}
+
+/**
+ * Wraps a surface whose captured action changes kind, recording the token's
+ * `getState()` on every render.
+ *
+ * @param flux - The FluxReact instance supplying the Provider and hook.
+ * @param core - The core the Provider hands to hooks.
+ * @param handle - The default handle the Provider hands to hooks.
+ * @param reads - Log receiving one `getState()` read per render.
+ * @returns The host component.
+ */
+function createKindHost(
+	flux: TestFlux,
+	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
+	handle: InputHandle,
+	reads: Log<boolean | Vector2>,
+): (props: KindProps) => React.ReactNode {
+	const { FluxProvider, useCapture } = flux;
+
+	function Surface({ action }: KindProps): React.ReactNode {
+		const token = useCapture(action);
+		reads.push(token.getState());
+		return <frame />;
+	}
+
+	return ({ action }: KindProps): React.ReactNode => {
 		return (
 			<FluxProvider core={core} handle={handle}>
 				<Surface action={action} />
@@ -368,7 +421,7 @@ describe("useCapture", () => {
 			const handle = core.register(new Instance("Folder"), "gameplay");
 			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const state = core.getState(handle);
-			const Host = createActionHost(flux, core, handle, makeLog<boolean>());
+			const Host = createActionHost(flux, core, handle, makeLog<ActionReads>());
 
 			function readOutside(): Record<string, boolean> {
 				return { interact: state.pressed("interact"), jump: state.pressed("jump") };
@@ -646,7 +699,7 @@ describe("useCapture", () => {
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
 			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
-			const reads = makeLog<boolean>();
+			const reads = makeLog<ActionReads>();
 			const Host = createActionHost(flux, core, handle, reads);
 
 			const { rerender } = render(<Host action="jump" />);
@@ -654,13 +707,102 @@ describe("useCapture", () => {
 			core.simulateAction(handle, "jump", true);
 			core.update(FRAME_TIME);
 
+			// A render that still asks for "jump" sees the live press.
+			rerender(<Host action="jump" />);
+
+			expect(reads.entries()[1]).toStrictEqual({
+				canceled: false,
+				getState: true,
+				pressed: true,
+			});
+
+			// The render that asks for "interact" must report nothing of it.
 			rerender(<Host action="interact" />);
 
-			// The render that asks for "interact" must not report "jump".
-			expect(reads.entries()[1]).toBeFalse();
+			expect(reads.entries()[2]).toStrictEqual({
+				canceled: false,
+				getState: false,
+				pressed: false,
+			});
+		});
 
+		it("should deliver a cancel raised while the action is unchanged", () => {
+			expect.assertions(1);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const reads = makeLog<ActionReads>();
+			const Host = createActionHost(flux, core, handle, reads);
+
+			const { rerender } = render(<Host action="jump" />);
+
+			core.simulateAction(handle, "jump", true);
 			core.update(FRAME_TIME);
+
+			// A newer capture displaces the surface's token mid-press, which
+			// is what raises the one-frame boundary cancel.
+			core.getState(handle).capture("jump");
+			rerender(<Host action="jump" />);
+
+			expect(reads.entries()[1]!.canceled).toBeTrue();
+		});
+
+		it("should not report the previous action's cancel when the action changes", () => {
+			expect.assertions(1);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const reads = makeLog<ActionReads>();
+			const Host = createActionHost(flux, core, handle, reads);
+
+			const { rerender } = render(<Host action="jump" />);
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+			core.getState(handle).capture("jump");
+
+			// Same pending cancel as the test above, but this render asks for
+			// a different action and must not be handed "jump"'s cancel.
 			rerender(<Host action="interact" />);
+
+			expect(reads.entries()[1]!.canceled).toBeFalse();
+		});
+
+		it("should report the new action's neutral value when the kind changes", () => {
+			expect.assertions(2);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const reads = makeLog<boolean | Vector2>();
+			const Host = createKindHost(flux, core, handle, reads);
+
+			const { rerender } = render(<Host action="jump" />);
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+
+			// The commit that switches to a Direction2D action must report
+			// that kind's neutral value, not the Bool action's.
+			rerender(<Host action="move" />);
+
+			expect(reads.entries()[1]).toBe(Vector2.zero);
+
+			rerender(<Host action="jump" />);
 
 			expect(reads.entries()[2]).toBeFalse();
 		});

@@ -125,6 +125,14 @@ interface CaptureRequest<T extends ActionMap, Contexts extends string> {
 	readonly core: FluxCore<T, Contexts>;
 	/** The handle the capture is scoped to. */
 	readonly handle: InputHandle;
+	/**
+	 * The neutral value an uncaptured `getState()` reports for this action.
+	 *
+	 * Resolved with the rest of the request, so a changed action reports its
+	 * own kind's neutral in the commit before the capture lands rather than
+	 * the previous action's.
+	 */
+	readonly inert: CaptureValue;
 }
 
 /**
@@ -133,11 +141,15 @@ interface CaptureRequest<T extends ActionMap, Contexts extends string> {
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
  */
-interface CaptureHold<T extends ActionMap, Contexts extends string> extends CaptureRequest<
-	T,
-	Contexts
-> {
-	/** The core token acquired for this request. */
+interface CaptureHold<T extends ActionMap, Contexts extends string> {
+	/**
+	 * The request this capture was acquired for.
+	 *
+	 * A request object is only rebuilt when what the hook captures actually
+	 * changes, so identity alone answers "is this hold still current?".
+	 */
+	readonly request: CaptureRequest<T, Contexts>;
+	/** The core token acquired for that request. */
 	readonly token: CaptureTokenSurface;
 }
 
@@ -150,8 +162,6 @@ interface CaptureHold<T extends ActionMap, Contexts extends string> extends Capt
 interface CaptureReader<T extends ActionMap, Contexts extends string> {
 	/** Ref holding the acquired capture, absent until the effect runs. */
 	readonly holdRef: { current: CaptureHold<T, Contexts> | undefined };
-	/** Ref holding the captured action's neutral value. */
-	readonly inertRef: { current: CaptureValue };
 	/** Ref recording whether the held capture has been released. */
 	readonly releasedRef: { current: boolean };
 	/** Ref holding what the latest render asks to capture. */
@@ -164,6 +174,12 @@ interface CaptureReader<T extends ActionMap, Contexts extends string> {
  *   in its cleanup, so ownership tracks the component with no schedule slot.
  * - The returned token is the same object for the component's lifetime and
  *   reads inert until the capture lands, so no call site needs `token?.x()`.
+ *
+ * @remarks `canceled()` is the one read that keeps delegating after release,
+ * so the one-frame boundary cancel reaches a reader that is tearing down. A
+ * consumer that keeps the token past unmount therefore keeps seeing that
+ * action's trigger cancels; every other read is inert. Do not retain a token
+ * beyond the component that captured it.
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
@@ -190,28 +206,36 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 
 		const holdRef = useRef<CaptureHold<T, Contexts> | undefined>(undefined);
 		const releasedRef = useRef(true);
-		const requestRef = useRef<CaptureRequest<T, Contexts>>({ action, core, handle });
-		const [initialInert] = useState(() => inertStateFor(core, handle, action));
-		const inertRef = useRef(initialInert);
+		const [initialRequest] = useState(() => makeRequest(core, handle, action));
+		const requestRef = useRef(initialRequest);
 		function buildFacade(): CaptureTokenSurface {
-			return createCaptureFacade({ holdRef, inertRef, releasedRef, requestRef });
+			return createCaptureFacade({ holdRef, releasedRef, requestRef });
 		}
 
 		const [facade] = useState(buildFacade);
 
 		// The reader is only live while the held token matches what this
 		// render asks for, so the commit between an action change and its
-		// effect reads inert rather than reporting the previous action.
+		// effect reads inert rather than reporting the previous action. The
+		// request is resolved during render because the facade is read during
+		// render, before any effect has run.
+		//
+		// Writing a ref during render is the pattern React's docs warn about,
+		// and `eslint-plugin-react-hooks` v7 is the ruleset that polices it.
+		// It is sound here for two reasons: the write is idempotent for a
+		// given render (StrictMode's double render produces the same request),
+		// and react-lua 17.3.7 renders legacy roots synchronously, so a
+		// discarded render is always followed by an unmount or a re-render
+		// that rewrites this. A concurrent renderer would invalidate the
+		// second reason.
 		const request = requestRef.current;
 		if (request.action !== action || request.core !== core || request.handle !== handle) {
-			requestRef.current = { action, core, handle };
+			requestRef.current = makeRequest(core, handle, action);
 		}
 
 		useEffect(() => {
-			inertRef.current = inertStateFor(core, handle, action);
-
 			const token = core.getState(handle).capture(action) as unknown as CaptureTokenSurface;
-			holdRef.current = { action, core, handle, token };
+			holdRef.current = { request: requestRef.current, token };
 			releasedRef.current = false;
 
 			return () => {
@@ -278,8 +302,7 @@ export function createUseCaptureAction<T extends ActionMap, Contexts extends str
 /**
  * - Resolves the neutral value an uncaptured `getState()` reports.
  * - The action's kind is not carried by the hook's arguments, so the neutral
- *   value is derived from the shape of the action's current value. Resolved
- *   once per captured action rather than per read.
+ *   value is derived from the shape of the action's current value.
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
@@ -310,42 +333,61 @@ function inertStateFor<T extends ActionMap, Contexts extends string>(
 }
 
 /**
+ * - Resolves what a render asks the hook to capture, neutral value included.
+ * - Built only when the request changes, so the `getState()` lookup behind the
+ *   neutral value costs nothing per render or per read.
+ *
+ * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
+ * @param core - The core owning the action.
+ * @param handle - The handle the capture is scoped to.
+ * @param action - The action to capture.
+ * @returns The request, ready to compare against the current hold.
+ */
+function makeRequest<T extends ActionMap, Contexts extends string>(
+	core: FluxCore<T, Contexts>,
+	handle: InputHandle,
+	action: AllActions<T>,
+): CaptureRequest<T, Contexts> {
+	return { action, core, handle, inert: inertStateFor(core, handle, action) };
+}
+
+/**
  * - Builds the stable facade returned by `useCapture`.
  * - Every read delegates to the held token while the capture is live, and
  *   reports the suppressed result otherwise — before the capture lands, after
  *   it is released, and during the commit where a changed action has not been
  *   captured yet.
- * - `canceled()` is the one exception: it delegates to the held token even
- *   after release, so core's one-frame boundary cancel still reaches a reader
- *   that is tearing down.
+ * - `canceled()` makes one exception: it still delegates after release, so
+ *   core's one-frame boundary cancel reaches a reader that is tearing down.
+ *   It is staleness-checked like every other read, so a changed action never
+ *   reports the previous action's cancel.
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
  * @param reader - The refs the facade reads the current capture through.
  * @returns A token-shaped reader that outlives any single capture.
  */
-
 function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 	reader: CaptureReader<T, Contexts>,
 ): CaptureTokenSurface {
-	const { holdRef, inertRef, releasedRef, requestRef } = reader;
+	const { holdRef, releasedRef, requestRef } = reader;
+
+	function current(): CaptureHold<T, Contexts> | undefined {
+		const hold = holdRef.current;
+		if (hold?.request !== requestRef.current) {
+			return undefined;
+		}
+
+		return hold;
+	}
 
 	function live(): CaptureTokenSurface | undefined {
-		const hold = holdRef.current;
-		if (hold === undefined || releasedRef.current) {
+		if (releasedRef.current) {
 			return undefined;
 		}
 
-		const request = requestRef.current;
-		if (
-			hold.action !== request.action ||
-			hold.core !== request.core ||
-			hold.handle !== request.handle
-		) {
-			return undefined;
-		}
-
-		return hold.token;
+		return current()?.token;
 	}
 
 	return {
@@ -366,7 +408,11 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 			return inner === undefined ? false : inner.axisBecameInactive();
 		},
 		canceled(): boolean {
-			const hold = holdRef.current;
+			// Deliberately not gated on release: core synthesizes the boundary
+			// cancel as the capture drops, and the reader tearing down has to
+			// see it. Staleness still applies — a changed action reports its
+			// own cancels, never the previous action's.
+			const hold = current();
 			return hold === undefined ? false : hold.token.canceled();
 		},
 		claim(): boolean {
@@ -383,7 +429,7 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 		},
 		getState(): CaptureValue {
 			const inner = live();
-			return inner === undefined ? inertRef.current : inner.getState();
+			return inner === undefined ? requestRef.current.inert : inner.getState();
 		},
 		justPressed(): boolean {
 			const inner = live();

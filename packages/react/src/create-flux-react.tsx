@@ -65,7 +65,9 @@ export interface FluxReact<T extends ActionMap, Contexts extends string = string
 	 *
 	 * Returns the same token object for the component's lifetime. The token
 	 * reads inert until the capture lands and after it is released, so call
-	 * sites never branch on ownership.
+	 * sites never branch on ownership — except `canceled()`, which keeps
+	 * delegating after release so the one-frame boundary cancel still lands
+	 * during teardown.
 	 */
 	readonly useCapture: FluxUseCapture<T>;
 
