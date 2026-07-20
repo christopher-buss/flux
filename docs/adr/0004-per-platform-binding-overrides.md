@@ -100,17 +100,50 @@ composition this API exists to remove.
 Present bucket means `"override"`, including an empty one: an empty bucket is a
 deliberate unbind, which is a customization rather than a default. An absent
 bucket is `"default"` when the context declares the action and `"undeclared"`
-when it does not, so declaredness is a property of the action in a context, not
-of the platform — a context declaring only keyboard bindings still reports
-`"default"` for gamepad.
+when it does not. Whether a context declares an action is a property of the
+action in that context, not of the platform — a context declaring only keyboard
+bindings still reports `"default"` for gamepad.
+
+The two rules collide when an action carries an override but the queried context
+never declared it, because overrides are keyed by action while the query is
+keyed by context. A context-scoped query answers `"undeclared"`: that context
+has no `InputAction` for the action, since `createContext` builds one only where
+the context's bindings and the core's action map agree, so the override does not
+reach it and a row for it would be a row for something the context does not
+have. Without a named context the gate does not apply and the override wins.
+`getBindings` composes the override into its result in the same situation; that
+is the pre-existing whole-action read and is left alone here.
+
+"Declared" therefore means the same thing to `getBindingOrigin` and to
+`getContextInfo().actions` — both defer to one predicate — because the former is
+documented as removing the need to cross-reference the latter, and two APIs sold
+as substitutes must not disagree.
+
+`FluxCore`'s per-platform reads take four positional parameters, against the
+repo's max-two rule. This is deliberate: every neighbouring method on the
+interface (`rebindForPlatform`, `resetBindingsForPlatform`) is positional in the
+same shape, and an options object for two of them would make the surface
+inconsistent with itself. The rule still binds everything behind the interface,
+where the resolvers all take options objects.
 
 `getBindingsForPlatform(handle, action, platform, context?)` lands alongside it,
 reading one platform's effective bindings from the same buckets. It is not
-`getBindings` filtered by `classifyBinding`: a bucket holds whatever the player
-put in it, so a gamepad key deliberately bound on the keyboard row is returned
-for `"keyboard"`. `useBindings(action, platform?)` in the React wrapper reads
+`getBindings` filtered by classification: a bucket holds whatever the player put
+in it, so a gamepad key deliberately bound on the keyboard row is returned for
+`"keyboard"`. `useBindings(action, platform?)` in the React wrapper reads
 through it instead of filtering core's composed list caller-side, which is what
 makes the hook reflect per-platform overrides rather than re-deriving them.
+
+The free classification helper is therefore renamed `filterBindingsByPlatform`.
+Two public exports named `getBindingsForPlatform` with deliberately different
+answers is a trap that autocomplete springs: one asks what a binding _is_, the
+other what the player _stored_. The names now say which.
+
+Both rules — bucket wins, else the declared bindings classifying to that
+platform — have one definition, `resolvePlatformBucket`, which whole-action
+composition loops over and the single-platform read calls once. The bucket
+lookup behind it is likewise shared, so `"override"` is reported exactly when a
+bucket read returns something.
 
 ## Considered options
 

@@ -8,7 +8,9 @@ import type {
 	RebindPlatform,
 } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
+import type { InputHandle } from "../types/core";
 import type { HandleData } from "./handle-lifecycle";
+import { getHandleData } from "./handle-lifecycle";
 import { createBindingsForAction, createInputBinding } from "./input-bindings";
 import type { InputInstanceData } from "./input-instances";
 import type { PlatformOverrides } from "./platform-overrides";
@@ -163,6 +165,28 @@ export function rebuildActionBindings(
  */
 export function assertOwnedForRebind<T extends ActionMap>(handleData: HandleData<T>): void {
 	assert(handleData.instanceData.owned, "cannot rebind a subscribed handle");
+}
+
+/**
+ * Finds a handle's state for a write, refusing one that does not own its
+ * instances.
+ *
+ * Every mutating binding API goes through here, so the ownership guard is
+ * enforceable by reading imports rather than by checking that each entry point
+ * remembered to call {@link assertOwnedForRebind}.
+ * @template T - The action map type.
+ * @param handles - Every registered handle's state.
+ * @param handle - The handle to write for.
+ * @returns The handle's state.
+ * @throws If the handle is not registered, or does not own its instances.
+ */
+export function ownedHandleData<T extends ActionMap>(
+	handles: Map<InputHandle, HandleData<T>>,
+	handle: InputHandle,
+): HandleData<T> {
+	const handleData = getHandleData(handles, handle);
+	assertOwnedForRebind(handleData);
+	return handleData;
 }
 
 /**
@@ -408,7 +432,7 @@ function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): v
  */
 function contextDefaults(options: ContextDefaultsOptions): () => ReadonlyArray<BindingLike> {
 	const { action, contextName, contexts } = options;
-	return () => getContextBindings(contexts, contextName, action);
+	return () => getContextBindings({ action, context: contextName, contexts });
 }
 
 /**

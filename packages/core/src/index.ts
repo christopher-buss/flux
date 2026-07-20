@@ -7,7 +7,7 @@ export {
 	direction3d,
 	position2d,
 } from "./actions/define";
-export { classifyBinding, getBindingsForPlatform } from "./bindings/classify";
+export { classifyBinding, filterBindingsByPlatform } from "./bindings/classify";
 export type { InputPlatform } from "./bindings/classify";
 export { defineContexts } from "./contexts/define";
 

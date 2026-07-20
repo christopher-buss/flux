@@ -1,9 +1,12 @@
 import type { InputPlatform } from "../bindings/classify";
+import { filterBindingsByPlatform } from "../bindings/classify";
+import { isContextAction } from "../contexts/collect-actions";
 import type { ActionMap } from "../types/actions";
 import type { BindingLike, BindingOrigin } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { HandleData } from "./handle-lifecycle";
-import { bucketByPlatform, composeBindings } from "./platform-overrides";
+import type { PlatformOverrides } from "./platform-overrides";
+import { composeBindings, findPlatformBucket, resolvePlatformBucket } from "./platform-overrides";
 
 /**
  * The handle, contexts and action every binding read is scoped by.
@@ -30,40 +33,48 @@ export interface PlatformQueryOptions<T extends ActionMap> extends BindingQueryO
 }
 
 /**
+ * A read that has to decide whether the action is declared at all, which
+ * needs the action map as well as the context bindings.
+ * @template T - The action map type.
+ */
+export interface OriginQueryOptions<T extends ActionMap> extends PlatformQueryOptions<T> {
+	/** The core's full action map. */
+	readonly actions: ActionMap;
+}
+
+/**
+ * One context's bindings for one action.
+ */
+interface ContextBindingOptions {
+	/** The action name to look up. */
+	readonly action: string;
+	/** The context name to read from. */
+	readonly context: string;
+	/** Core context config record. */
+	readonly contexts: Record<string, ContextConfig>;
+}
+
+/**
  * Returns the default bindings for an action in a single context.
- * @param contexts - Core context config record.
- * @param context - The context name to read from.
- * @param action - The action name to look up.
+ * @param options - The context config, context name and action to read.
  * @returns The declared bindings or an empty array.
  */
-export function getContextBindings(
-	contexts: Record<string, ContextConfig>,
-	context: string,
-	action: string,
-): ReadonlyArray<BindingLike> {
-	return findContextBindings(contexts, context, action) ?? [];
+export function getContextBindings(options: ContextBindingOptions): ReadonlyArray<BindingLike> {
+	return contextConfigFor(options).bindings[options.action] ?? [];
 }
 
 /**
  * Resolves effective bindings by composing each platform's override bucket,
  * where one exists, over the bindings the code declares for that platform.
  * @template T - The action map type.
- * @param handleData - Handle state to read.
- * @param contexts - Core context config record.
- * @param action - The action name to resolve.
- * @param context - Optional context to scope the query.
+ * @param options - The action, handle state and context config, plus an
+ * optional context to scope the read to.
  * @returns The effective bindings for the action.
  */
 export function resolveBindings<T extends ActionMap>(
-	handleData: HandleData<T>,
-	contexts: Record<string, ContextConfig>,
-	action: string,
-	context?: string,
+	options: BindingQueryOptions<T>,
 ): ReadonlyArray<BindingLike> {
-	const overrides = handleData.bindingOverrides.get(action);
-	return composeBindings(overrides, () =>
-		declaredBindings({ action, context, contexts, handleData }),
-	);
+	return composeBindings(actionOverrides(options), () => declaredBindings(options));
 }
 
 /**
@@ -82,64 +93,81 @@ export function resolveBindings<T extends ActionMap>(
 export function resolveBindingsForPlatform<T extends ActionMap>(
 	options: PlatformQueryOptions<T>,
 ): ReadonlyArray<BindingLike> {
-	const { action, handleData, platform } = options;
-	const bucket = handleData.bindingOverrides.get(action)?.get(platform);
-	if (bucket !== undefined) {
-		return bucket;
-	}
-
-	return bucketByPlatform(declaredBindings(options)).get(platform) ?? [];
+	return resolvePlatformBucket({
+		declaredFor: (target) => filterBindingsByPlatform(declaredBindings(options), target),
+		overrides: actionOverrides(options),
+		platform: options.platform,
+	});
 }
 
 /**
  * Reports where one platform's bindings for an action come from.
+ *
+ * Whether the context declares the action is checked first when the read
+ * names one, and only then the override bucket. Overrides are stored per action rather than per
+ * context, so an action can carry one while a given context never declared
+ * it — and that context has no `InputAction` for the action, so the override
+ * does not reach it. Answering `"override"` there would put a row on a
+ * settings screen for something the context does not have. Without a named
+ * context there is no such gate, so an override wins and the action counts as
+ * declared if any active context declares it.
  * @template T - The action map type.
- * @param options - The action, platform, handle state and context config,
- * plus an optional context to scope the read to.
- * @returns `"override"` when that platform has an override bucket — including
- * an empty one, which is a deliberate unbind — `"default"` when it has none
- * but the action is declared, and `"undeclared"` when it is not.
+ * @param options - The action, platform, action map, handle state and context
+ * config, plus an optional context to scope the read to.
+ * @returns `"undeclared"` when the scoped context does not declare the action,
+ * `"override"` when that platform has an override bucket — including an empty
+ * one, which is a deliberate unbind — and `"default"` otherwise.
  */
 export function resolveBindingOrigin<T extends ActionMap>(
-	options: PlatformQueryOptions<T>,
+	options: OriginQueryOptions<T>,
 ): BindingOrigin {
-	const { action, handleData, platform } = options;
-	if (handleData.bindingOverrides.get(action)?.get(platform) !== undefined) {
-		return "override";
+	if (!isActionDeclared(options)) {
+		return "undeclared";
 	}
 
-	return isActionDeclared(options) ? "default" : "undeclared";
+	const bucket = findPlatformBucket(actionOverrides(options), options.platform);
+	return bucket !== undefined ? "override" : "default";
 }
 
 /**
- * Reads a context's bindings for an action without flattening "undeclared"
- * into "declared with nothing".
- * @param contexts - Core context config record.
- * @param context - The context name to read from.
- * @param action - The action name to look up.
- * @returns The declared bindings, or `undefined` when the context does not
- * declare the action.
+ * Finds a context's config, failing loudly on a name that does not exist.
+ * @param options - The context config record and the context name to find.
+ * @returns That context's config.
+ * @throws If the context name is unknown.
  */
-function findContextBindings(
-	contexts: Record<string, ContextConfig>,
-	context: string,
-	action: string,
-): ReadonlyArray<BindingLike> | undefined {
-	const contextConfig = contexts[context];
-	assert(contextConfig, `missing context config: ${context}`);
-
-	return contextConfig.bindings[action];
+function contextConfigFor(options: ContextBindingOptions): ContextConfig {
+	const contextConfig = options.contexts[options.context];
+	assert(contextConfig, `missing context config: ${options.context}`);
+	return contextConfig;
 }
 
+/**
+ * Reads an action's per-platform override buckets.
+ * @template T - The action map type.
+ * @param options - The action and the handle state holding its overrides.
+ * @returns The buckets, or `undefined` when the action has no override.
+ */
+function actionOverrides<T extends ActionMap>(
+	options: BindingQueryOptions<T>,
+): PlatformOverrides | undefined {
+	return options.handleData.bindingOverrides.get(options.action);
+}
+
+/**
+ * Merges an action's declared bindings across every active context, keeping
+ * first-seen order.
+ * @template T - The action map type.
+ * @param options - The action, handle state and context config.
+ * @returns The merged bindings.
+ */
 function mergeBindingsAcrossContexts<T extends ActionMap>(
-	handleData: HandleData<T>,
-	contexts: Record<string, ContextConfig>,
-	action: string,
+	options: BindingQueryOptions<T>,
 ): ReadonlyArray<BindingLike> {
+	const { action, contexts, handleData } = options;
 	const result = new Array<BindingLike>();
 	const seen = new Set<BindingLike>();
-	for (const contextName of handleData.activeContexts) {
-		for (const binding of getContextBindings(contexts, contextName, action)) {
+	for (const context of handleData.activeContexts) {
+		for (const binding of getContextBindings({ action, context, contexts })) {
 			if (!seen.has(binding)) {
 				seen.add(binding);
 				result.push(binding);
@@ -162,28 +190,36 @@ function mergeBindingsAcrossContexts<T extends ActionMap>(
 function declaredBindings<T extends ActionMap>(
 	options: BindingQueryOptions<T>,
 ): ReadonlyArray<BindingLike> {
-	const { action, context, contexts, handleData } = options;
+	const { action, context, contexts } = options;
 	return context !== undefined
-		? getContextBindings(contexts, context, action)
-		: mergeBindingsAcrossContexts(handleData, contexts, action);
+		? getContextBindings({ action, context, contexts })
+		: mergeBindingsAcrossContexts(options);
 }
 
 /**
  * Reports whether the code declares the action at all in the queried scope.
+ *
+ * Defers to {@link isContextAction}, so this agrees with
+ * `getContextInfo().actions` by construction.
  * @template T - The action map type.
- * @param options - The action, handle state and context config, plus an
- * optional context to scope the check to.
+ * @param options - The action, action map, handle state and context config,
+ * plus an optional context to scope the check to.
  * @returns `true` when the scoped context declares the action, or when any
  * active context does if no context was named.
  */
-function isActionDeclared<T extends ActionMap>(options: BindingQueryOptions<T>): boolean {
-	const { action, context, contexts, handleData } = options;
+function isActionDeclared<T extends ActionMap>(options: OriginQueryOptions<T>): boolean {
+	const { action, actions, context, contexts, handleData } = options;
 	if (context !== undefined) {
-		return findContextBindings(contexts, context, action) !== undefined;
+		return isContextAction({
+			action,
+			actions,
+			bindings: contextConfigFor({ action, context, contexts }).bindings,
+		});
 	}
 
 	for (const contextName of handleData.activeContexts) {
-		if (findContextBindings(contexts, contextName, action) !== undefined) {
+		const { bindings } = contextConfigFor({ action, context: contextName, contexts });
+		if (isContextAction({ action, actions, bindings })) {
 			return true;
 		}
 	}

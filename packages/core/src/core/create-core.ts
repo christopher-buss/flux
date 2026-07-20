@@ -13,20 +13,7 @@ import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
 import { activateContext, deactivateContext, isContextActive } from "./active-contexts";
-import {
-	readAllBindings,
-	readBindingOrigin,
-	readBindings,
-	readBindingsForPlatform,
-} from "./binding-reads";
-import {
-	clearAllBindings,
-	clearBindings,
-	clearBindingsForPlatform,
-	writeAllBindings,
-	writeBindings,
-	writeBindingsForPlatform,
-} from "./binding-writes";
+import { readAllBindings, scopedHandleData } from "./binding-reads";
 import { findExistingContext, validateContextName, validateContextNames } from "./context-lookup";
 import type { CreateCoreOptions } from "./create-core-options";
 import { createHandleFactory } from "./handle-factory";
@@ -45,10 +32,21 @@ import {
 	setContextEnabled,
 } from "./input-instances";
 import {
-	assertOwnedForRebind,
+	applyRebindAll,
+	applyRebindForPlatform,
+	applyRebindOne,
+	applyResetAll,
+	applyResetForPlatform,
+	applyResetOne,
+	ownedHandleData,
 	replayOverridesIntoContext,
 	serializeFullBindings,
 } from "./rebinding";
+import {
+	resolveBindingOrigin,
+	resolveBindings,
+	resolveBindingsForPlatform,
+} from "./resolve-bindings";
 import { updateHandle } from "./update-handle";
 
 export type {
@@ -129,14 +127,23 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			platform: InputPlatform,
 			context?: Contexts,
 		): BindingOrigin {
-			return readBindingOrigin({ action, context, contexts, handle, handles, platform });
+			const handleData = scopedHandleData({ context, contexts, handle, handles });
+			return resolveBindingOrigin({
+				action,
+				actions,
+				context,
+				contexts,
+				handleData,
+				platform,
+			});
 		},
 		getBindings(
 			handle: InputHandle,
 			action: keyof T & string,
 			context?: Contexts,
 		): ReadonlyArray<BindingLike> {
-			return readBindings({ action, context, contexts, handle, handles });
+			const handleData = scopedHandleData({ context, contexts, handle, handles });
+			return resolveBindings({ action, context, contexts, handleData });
 		},
 		getBindingsForPlatform(
 			handle: InputHandle,
@@ -144,14 +151,8 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			platform: InputPlatform,
 			context?: Contexts,
 		): ReadonlyArray<BindingLike> {
-			return readBindingsForPlatform({
-				action,
-				context,
-				contexts,
-				handle,
-				handles,
-				platform,
-			});
+			const handleData = scopedHandleData({ context, contexts, handle, handles });
+			return resolveBindingsForPlatform({ action, context, contexts, handleData, platform });
 		},
 		getContextInfo(handle: InputHandle, context: Contexts) {
 			validateContextName(contexts, context);
@@ -180,17 +181,20 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			return isContextActive(getHandleData(handles, handle).activeContexts, context);
 		},
 		loadBindings(handle: InputHandle, data: BindingState<T>): void {
-			writeAllBindings({ actions, bindings: data, contexts, handle, handles });
+			const handleData = ownedHandleData(handles, handle);
+			applyRebindAll({ actions, bindings: data, contexts, handleData });
 		},
 		rebind<A extends keyof T & string>(
 			handle: InputHandle,
 			action: A,
 			bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
 		): void {
-			writeBindings({ action, bindings, contexts, handle, handles });
+			const handleData = ownedHandleData(handles, handle);
+			applyRebindOne({ action, bindings, contexts, handleData });
 		},
 		rebindAll(handle: InputHandle, bindings: BindingState<T>): void {
-			writeAllBindings({ actions, bindings, contexts, handle, handles });
+			const handleData = ownedHandleData(handles, handle);
+			applyRebindAll({ actions, bindings, contexts, handleData });
 		},
 		rebindForPlatform<A extends keyof T & string>(
 			handle: InputHandle,
@@ -198,7 +202,8 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			platform: RebindPlatform,
 			bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
 		): void {
-			writeBindingsForPlatform({ action, bindings, contexts, handle, handles, platform });
+			const handleData = ownedHandleData(handles, handle);
+			applyRebindForPlatform({ action, bindings, contexts, handleData, platform });
 		},
 		register(
 			parent: Instance,
@@ -239,22 +244,21 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			setContextEnabled(data.instanceData, context, false);
 		},
 		resetAllBindings(handle: InputHandle): void {
-			clearAllBindings({ contexts, handle, handles });
+			applyResetAll(ownedHandleData(handles, handle), contexts);
 		},
 		resetBindings(handle: InputHandle, action: keyof T & string): void {
-			clearBindings({ action, contexts, handle, handles });
+			applyResetOne({ action, contexts, handleData: ownedHandleData(handles, handle) });
 		},
 		resetBindingsForPlatform(
 			handle: InputHandle,
 			action: keyof T & string,
 			platform: RebindPlatform,
 		): void {
-			clearBindingsForPlatform({ action, contexts, handle, handles, platform });
+			const handleData = ownedHandleData(handles, handle);
+			applyResetForPlatform({ action, contexts, handleData, platform });
 		},
 		serializeBindings(handle: InputHandle): BindingState<T> {
-			const handleData = getHandleData(handles, handle);
-			assertOwnedForRebind(handleData);
-			return serializeFullBindings(handleData) as BindingState<T>;
+			return serializeFullBindings(ownedHandleData(handles, handle)) as BindingState<T>;
 		},
 		simulateAction<A extends keyof T & string>(
 			handle: InputHandle,

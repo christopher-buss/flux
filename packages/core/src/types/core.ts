@@ -74,19 +74,34 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * `rebindForPlatform` this accepts `"touch"` — touch is not writable per
 	 * platform, but a whole-action `rebind` does write a touch bucket, so a
 	 * touch row still has an origin worth asking about.
+	 *
+	 * **Precedence.** Naming a context makes that context's declaration
+	 * outrank everything:
+	 * an action that context does not declare reads `"undeclared"` even when
+	 * the handle carries an override for it. Overrides are keyed by action
+	 * rather than by context, so an action can hold one while a given context
+	 * never declared it — and that context has no `InputAction` for the
+	 * action, so the override does not reach it. Naming no context drops the
+	 * gate: an override wins, and the action counts as declared when any
+	 * active context declares it.
+	 *
+	 * An action is declared when the context binds it *and* the core's action
+	 * map knows it, which is the same test behind `getContextInfo().actions`.
 	 * @param handle - The input consumer handle.
 	 * @param action - The action name to query.
 	 * @param platform - The platform whose row is being rendered.
-	 * @param context - Optional context to scope the query. Without one, the
-	 * action counts as declared when any active context declares it.
-	 * @returns `"override"` when the player customized this platform, counting
+	 * @param context - Optional context to scope the query.
+	 * @returns `"undeclared"` when the scoped context does not declare the
+	 * action; `"override"` when the player customized this platform, counting
 	 * a deliberate unbind; `"default"` when it tracks the code-defined
-	 * bindings; `"undeclared"` when the context does not declare the action.
+	 * bindings.
 	 * @throws If the context name is unknown.
 	 * @example
 	 * core.rebindForPlatform(handle, "jump", "gamepad", []);
 	 * core.getBindingOrigin(handle, "jump", "gamepad"); // → "override"
 	 * core.getBindingOrigin(handle, "jump", "keyboard"); // → "default"
+	 * core.getBindingOrigin(handle, "jump", "keyboard", "vehicle");
+	 * // → "undeclared", if "vehicle" does not bind "jump"
 	 */
 	getBindingOrigin(
 		handle: InputHandle,
@@ -117,10 +132,10 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * Returns the effective bindings for a single action on one platform.
 	 *
 	 * Reads that platform's override bucket when it has one, and the declared
-	 * bindings classifying to it otherwise. This is not the same as filtering
-	 * `getBindings` by `classifyBinding`: a bucket holds whatever the player
-	 * put in it, so a gamepad key deliberately bound on the keyboard row is
-	 * returned for `"keyboard"`.
+	 * bindings classifying to it otherwise. Not the same as `getBindings`
+	 * filtered by `filterBindingsByPlatform`: a bucket holds whatever the
+	 * player put in it, so a gamepad key deliberately bound on the keyboard
+	 * row is returned for `"keyboard"`.
 	 * @param handle - The input consumer handle.
 	 * @param action - The action name to query.
 	 * @param platform - The platform to read.

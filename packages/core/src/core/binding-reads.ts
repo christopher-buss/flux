@@ -1,24 +1,14 @@
-import type { InputPlatform } from "../bindings/classify";
 import type { ActionMap } from "../types/actions";
-import type { BindingLike, BindingOrigin } from "../types/bindings";
+import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import { validateContextName } from "./context-lookup";
 import type { HandleData } from "./handle-lifecycle";
 import { getHandleData } from "./handle-lifecycle";
-import type { PlatformQueryOptions } from "./resolve-bindings";
-import {
-	resolveBindingOrigin,
-	resolveBindings,
-	resolveBindingsForPlatform,
-} from "./resolve-bindings";
+import { resolveBindings } from "./resolve-bindings";
 
 /**
- * What every binding read needs from the core it was called on.
- *
- * The read side of the binding API shares one prologue — reject an unknown
- * context name, then find the handle's state — which lives here rather than
- * being restated by each `FluxCore` method.
+ * What a binding read needs to find the state it reads from.
  * @template T - The action map type.
  */
 export interface CoreScopeOptions<T extends ActionMap> {
@@ -33,15 +23,6 @@ export interface CoreScopeOptions<T extends ActionMap> {
 }
 
 /**
- * A read of one named action.
- * @template T - The action map type.
- */
-export interface CoreReadOptions<T extends ActionMap> extends CoreScopeOptions<T> {
-	/** The action to read. */
-	readonly action: string;
-}
-
-/**
  * A read of every action the core declares.
  * @template T - The action map type.
  */
@@ -51,12 +32,33 @@ export interface CoreActionMapReadOptions<T extends ActionMap> extends CoreScope
 }
 
 /**
- * A read of one action narrowed to one platform.
- * @template T - The action map type.
+ * An action map read name-by-name rather than through the action names its
+ * type parameter declares.
+ *
+ * Every {@link ActionMap} satisfies this structurally, which lets the
+ * all-actions read iterate a map whose key type is only known to the caller,
+ * without asserting its type.
  */
-export interface CorePlatformReadOptions<T extends ActionMap> extends CoreReadOptions<T> {
-	/** The platform to read. */
-	readonly platform: InputPlatform;
+type ActionNames = Readonly<Record<string, unknown>>;
+
+/**
+ * Validates the queried context and finds the handle's state.
+ *
+ * Every read entry point rejects an unknown context name before touching
+ * handle state, so a typo fails on the argument rather than on whatever the
+ * lookup happens to return.
+ * @template T - The action map type.
+ * @param options - The handle, context config and optional context scope.
+ * @returns The handle's state.
+ * @throws If the context name is unknown, or the handle is not registered.
+ */
+export function scopedHandleData<T extends ActionMap>(options: CoreScopeOptions<T>): HandleData<T> {
+	const { context, contexts, handle, handles } = options;
+	if (context !== undefined) {
+		validateContextName(contexts, context);
+	}
+
+	return getHandleData(handles, handle);
 }
 
 /**
@@ -75,87 +77,11 @@ export function readAllBindings<T extends ActionMap>(
 ): Record<keyof T & string, ReadonlyArray<BindingLike>> {
 	const { actions, context, contexts } = options;
 	const handleData = scopedHandleData(options);
-	const result = {} as Record<keyof T & string, ReadonlyArray<BindingLike>>;
-	for (const [actionName] of pairs(actions as Record<string, unknown>)) {
-		result[actionName as keyof T & string] = resolveBindings(
-			handleData,
-			contexts,
-			actionName,
-			context,
-		);
+	const declared: ActionNames = actions;
+	const result: Record<string, ReadonlyArray<BindingLike>> = {};
+	for (const [action] of pairs(declared)) {
+		result[action] = resolveBindings({ action, context, contexts, handleData });
 	}
 
 	return result;
-}
-
-/**
- * Reads an action's effective bindings for one handle.
- * @template T - The action map type.
- * @param options - The action, handle and context config, plus an optional
- * context to scope the read to.
- * @returns The effective bindings for the action.
- * @throws If the context name is unknown, or the handle is not registered.
- */
-export function readBindings<T extends ActionMap>(
-	options: CoreReadOptions<T>,
-): ReadonlyArray<BindingLike> {
-	const { action, context, contexts } = options;
-	return resolveBindings(scopedHandleData(options), contexts, action, context);
-}
-
-/**
- * Reads one platform's effective bindings for one handle.
- * @template T - The action map type.
- * @param options - The action, platform, handle and context config, plus an
- * optional context to scope the read to.
- * @returns That platform's effective bindings.
- * @throws If the context name is unknown, or the handle is not registered.
- */
-export function readBindingsForPlatform<T extends ActionMap>(
-	options: CorePlatformReadOptions<T>,
-): ReadonlyArray<BindingLike> {
-	return resolveBindingsForPlatform(platformQuery(options));
-}
-
-/**
- * Reads where one platform's bindings for an action come from.
- * @template T - The action map type.
- * @param options - The action, platform, handle and context config, plus an
- * optional context to scope the read to.
- * @returns The origin of that platform's bindings.
- * @throws If the context name is unknown, or the handle is not registered.
- */
-export function readBindingOrigin<T extends ActionMap>(
-	options: CorePlatformReadOptions<T>,
-): BindingOrigin {
-	return resolveBindingOrigin(platformQuery(options));
-}
-
-/**
- * Validates the queried context and finds the handle's state.
- * @template T - The action map type.
- * @param options - The handle, context config and optional context scope.
- * @returns The handle's state.
- * @throws If the context name is unknown, or the handle is not registered.
- */
-function scopedHandleData<T extends ActionMap>(options: CoreScopeOptions<T>): HandleData<T> {
-	const { context, contexts, handle, handles } = options;
-	if (context !== undefined) {
-		validateContextName(contexts, context);
-	}
-
-	return getHandleData(handles, handle);
-}
-
-/**
- * Rewrites a core-level read into the resolver's platform-scoped form.
- * @template T - The action map type.
- * @param options - The core-level read.
- * @returns The same read against resolved handle state.
- */
-function platformQuery<T extends ActionMap>(
-	options: CorePlatformReadOptions<T>,
-): PlatformQueryOptions<T> {
-	const { action, context, contexts, platform } = options;
-	return { action, context, contexts, handleData: scopedHandleData(options), platform };
 }

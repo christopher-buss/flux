@@ -6,7 +6,7 @@ import type {
 	Direction2dBindingConfig,
 	ViewportPositionBindingConfig,
 } from "../types/bindings";
-import { classifyBinding, getBindingsForPlatform, hasInputSource } from "./classify";
+import { classifyBinding, filterBindingsByPlatform, hasInputSource } from "./classify";
 
 describe("classifyBinding", () => {
 	it("should classify a keyboard KeyCode as keyboard", () => {
@@ -199,7 +199,7 @@ describe("hasInputSource", () => {
 	});
 });
 
-describe("getBindingsForPlatform", () => {
+describe("filterBindingsByPlatform", () => {
 	it("should filter bindings to only those matching the platform", () => {
 		expect.assertions(2);
 
@@ -210,7 +210,7 @@ describe("getBindingsForPlatform", () => {
 			Enum.KeyCode.DPadUp,
 		];
 
-		const result = getBindingsForPlatform(bindings, "gamepad");
+		const result = filterBindingsByPlatform(bindings, "gamepad");
 
 		expect(result.size()).toBe(2);
 		expect(result[0]).toBe(Enum.KeyCode.ButtonA);
@@ -221,7 +221,7 @@ describe("getBindingsForPlatform", () => {
 
 		const bindings = [Enum.KeyCode.Space, Enum.KeyCode.W];
 
-		const result = getBindingsForPlatform(bindings, "gamepad");
+		const result = filterBindingsByPlatform(bindings, "gamepad");
 
 		expect(result.size()).toBe(0);
 	});

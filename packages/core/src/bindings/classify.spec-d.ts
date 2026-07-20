@@ -3,7 +3,7 @@ import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import type { BindingLike } from "../types/bindings";
 import type { InputPlatform } from "./classify";
-import { classifyBinding, getBindingsForPlatform } from "./classify";
+import { classifyBinding, filterBindingsByPlatform } from "./classify";
 
 describe("classifyBinding", () => {
 	it("should accept Enum.KeyCode", () => {
@@ -23,15 +23,15 @@ describe("classifyBinding", () => {
 	});
 });
 
-describe("getBindingsForPlatform", () => {
+describe("filterBindingsByPlatform", () => {
 	it("should accept ReadonlyArray<BindingLike> and InputPlatform", () => {
-		expectTypeOf(getBindingsForPlatform).toBeCallableWith(
+		expectTypeOf(filterBindingsByPlatform).toBeCallableWith(
 			[] as ReadonlyArray<BindingLike>,
 			"keyboard",
 		);
 	});
 
 	it("should return ReadonlyArray<BindingLike>", () => {
-		expectTypeOf(getBindingsForPlatform).returns.toEqualTypeOf<ReadonlyArray<BindingLike>>();
+		expectTypeOf(filterBindingsByPlatform).returns.toEqualTypeOf<ReadonlyArray<BindingLike>>();
 	});
 });

@@ -75,14 +75,42 @@ describe("getBindingOrigin", () => {
 		expect(core.getBindingOrigin(handle, "move", "keyboard", "ui")).toBe("undeclared");
 	});
 
-	it("should report an override even where the context declares nothing", () => {
+	it("should let a context declaration outrank an override when scoped", () => {
 		expect.assertions(1);
 
 		const core = createCore({ actions: ORIGIN_ACTIONS, contexts: ORIGIN_CONTEXTS });
 		const handle = core.register(new Instance("Folder"), "gameplay", "ui");
 		core.rebindForPlatform(handle, "move", "keyboard", [Enum.KeyCode.Up]);
 
-		expect(core.getBindingOrigin(handle, "move", "keyboard", "ui")).toBe("override");
+		// "ui" has no InputAction for "move", so the override never reaches it.
+		expect(core.getBindingOrigin(handle, "move", "keyboard", "ui")).toBe("undeclared");
+	});
+
+	it("should let an override win when the read names no context", () => {
+		expect.assertions(1);
+
+		const core = createCore({ actions: ORIGIN_ACTIONS, contexts: ORIGIN_CONTEXTS });
+		const handle = core.register(new Instance("Folder"), "gameplay", "ui");
+		core.rebindForPlatform(handle, "move", "keyboard", [Enum.KeyCode.Up]);
+
+		expect(core.getBindingOrigin(handle, "move", "keyboard")).toBe("override");
+	});
+
+	it("should report an action missing from the action map as undeclared", () => {
+		expect.assertions(1);
+
+		const contexts = {
+			gameplay: {
+				bindings: { jump: [Enum.KeyCode.Space], removed: [Enum.KeyCode.F] },
+				priority: 0,
+			},
+		} satisfies Record<string, ContextConfig>;
+		const core = createCore({ actions: ORIGIN_ACTIONS, contexts });
+		const handle = core.register(new Instance("Folder"), "gameplay");
+
+		expect(core.getBindingOrigin(handle, fromAny("removed"), "keyboard", "gameplay")).toBe(
+			"undeclared",
+		);
 	});
 
 	it("should report a declared touch binding as a default", () => {

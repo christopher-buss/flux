@@ -110,18 +110,24 @@ export function hasInputSource(binding: BindingLike): boolean {
 }
 
 /**
- * Filters bindings to only those targeting the given platform.
+ * Filters bindings to only those classifying to the given platform.
+ *
+ * Classification, not storage: this asks what each binding *is*, so it answers
+ * for any list — a context's declared bindings, a deserialized save. Reading
+ * what a player bound on one platform's row is `FluxCore.getBindingsForPlatform`
+ * instead, which reads the stored bucket and so keeps a binding on the row the
+ * player put it on.
  * @param bindings - Array of bindings to filter.
  * @param platform - The target platform to match.
  * @returns A new array containing only bindings that match the platform.
  * @example
- * getBindingsForPlatform(
+ * filterBindingsByPlatform(
  *   [Enum.KeyCode.Space, Enum.KeyCode.ButtonA],
  *   "gamepad",
  * )
  * // → [Enum.KeyCode.ButtonA]
  */
-export function getBindingsForPlatform(
+export function filterBindingsByPlatform(
 	bindings: ReadonlyArray<BindingLike>,
 	platform: InputPlatform,
 ): ReadonlyArray<BindingLike> {
