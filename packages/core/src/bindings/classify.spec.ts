@@ -108,6 +108,28 @@ describe("classifyBinding", () => {
 		expect(classifyBinding(config)).toBe("touch");
 	});
 
+	it("should prefer a directional key over keyCode", () => {
+		expect.assertions(1);
+
+		const config: Direction2dBindingConfig = {
+			keyCode: Enum.KeyCode.Space,
+			up: Enum.KeyCode.DPadUp,
+		};
+
+		expect(classifyBinding(config)).toBe("gamepad");
+	});
+
+	it("should prefer keyCode over a touch field", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = {
+			keyCode: Enum.KeyCode.Space,
+			uiButton: new Instance("TextButton"),
+		};
+
+		expect(classifyBinding(config)).toBe("keyboard");
+	});
+
 	it("should classify a config with no input source as keyboard", () => {
 		expect.assertions(1);
 

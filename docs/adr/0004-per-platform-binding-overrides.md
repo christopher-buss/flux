@@ -117,6 +117,14 @@ the device whose row it is rendering.
   binding still classifies `"touch"`, but a config that reached `"touch"` by
   having no input source now throws at bind time. The break is loud and at
   construction, which is the intent.
+- The sourceless fallback is dead for constructed bindings but live at the API
+  boundary. `classifyBinding` is public and takes a raw `BindingLike`, and
+  `getBindingsForPlatform` — which `use-bindings.tsx` calls — can be handed a
+  list from a deserialized save that never passed through `createInputBinding`.
+  Since the function must stay total and `InputPlatform` must stay three values,
+  a sourceless config there returns `"keyboard"`. That relocates the #199 hazard
+  rather than removing it: a keyboard-scoped `rebindForPlatform` would sweep
+  such a config up. Whoever validates loaded bindings on the way in closes it.
 - `rebindForPlatform` accepts `"keyboard" | "gamepad"` only. `uiButton` holds a
   live `GuiButton` reference that cannot serialize, so a touch bucket containing
   one would not round-trip. Touch bindings are always preserved and never

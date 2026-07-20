@@ -1,4 +1,4 @@
-import { hasInputSource } from "../bindings/classify";
+import { hasInputSource, isKeyCode } from "../bindings/classify";
 import type { BindingConfigKey, BindingLike } from "../types/bindings";
 
 type BindingProperty = WritablePropertyNames<InputBinding>;
@@ -75,10 +75,6 @@ export function createBindingsForAction(
 	for (const bindingLike of bindings) {
 		createInputBinding(bindingLike, parent, instances);
 	}
-}
-
-function isKeyCode(value: BindingLike): value is Enum.KeyCode {
-	return typeIs(value, "EnumItem") && value.EnumType === Enum.KeyCode;
 }
 
 function isUserInputType(value: unknown): boolean {

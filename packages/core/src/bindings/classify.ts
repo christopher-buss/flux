@@ -3,6 +3,15 @@ import type { BindingConfigKey, BindingLike } from "../types/bindings";
 /** The input platform a binding targets. */
 export type InputPlatform = "gamepad" | "keyboard" | "touch";
 
+/**
+ * A binding config read field-by-field rather than as one of its union members.
+ *
+ * Every `BindingConfig` shape satisfies this structurally, which lets the
+ * classification loops index a key that only some members declare without
+ * asserting the config's type.
+ */
+type BindingFields = Readonly<Partial<Record<BindingConfigKey, unknown>>>;
+
 const GAMEPAD_KEYCODES = new Set<Enum.KeyCode>([
 	Enum.KeyCode.ButtonA,
 	Enum.KeyCode.ButtonB,
@@ -53,6 +62,21 @@ const INPUT_SOURCE_KEYS = [
 ] as const satisfies ReadonlyArray<BindingConfigKey>;
 
 /**
+ * Narrows an unknown value to a `KeyCode`.
+ *
+ * Checks `EnumType` rather than trusting that any `EnumItem` is a `KeyCode`,
+ * so a `UserInputType` or a value from a deserialized save is rejected.
+ * @param value - The value to test.
+ * @returns `true` when the value is an `Enum.KeyCode`.
+ * @example
+ * isKeyCode(Enum.KeyCode.Space) // → true
+ * isKeyCode(Enum.UserInputType.MouseButton1) // → false
+ */
+export function isKeyCode(value: unknown): value is Enum.KeyCode {
+	return typeIs(value, "EnumItem") && value.EnumType === Enum.KeyCode;
+}
+
+/**
  * Determines which input platform a binding targets.
  *
  * Touch is a positive determination made from `pointerIndex` or `uiButton`,
@@ -75,11 +99,11 @@ export function classifyBinding(binding: BindingLike): InputPlatform {
 		return classifyKeyCode(binding);
 	}
 
-	const config = binding as Record<string, unknown>;
+	const config: BindingFields = binding;
 
 	for (const key of KEYCODE_KEYS) {
-		const keyCode = config[key] as Enum.KeyCode | undefined;
-		if (keyCode !== undefined) {
+		const keyCode = config[key];
+		if (isKeyCode(keyCode)) {
 			return classifyKeyCode(keyCode);
 		}
 	}
@@ -109,7 +133,7 @@ export function hasInputSource(binding: BindingLike): boolean {
 		return true;
 	}
 
-	const config = binding as Record<string, unknown>;
+	const config: BindingFields = binding;
 	for (const key of INPUT_SOURCE_KEYS) {
 		if (config[key] !== undefined) {
 			return true;
