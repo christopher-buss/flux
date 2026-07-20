@@ -39,18 +39,60 @@ export type ActionValue<
 > = ActionValueMap[Actions[A]["type"]];
 
 /**
+ * Options accepted by {@link ActionState.capture}.
+ * @remarks Reserved extension point — no options are defined yet. Future
+ * fields (such as a debug label) land here without changing the signature.
+ */
+export interface CaptureOptions {}
+
+/**
+ * A standing, exclusive, reader-side hold on one action, returned by
+ * {@link ActionState.capture}.
+ *
+ * The token *is* the scoped reader: it carries every processed read with the
+ * action pre-bound, narrowed to the action's kind — `axis1d()` on a Bool
+ * action does not compile. While held, the token reads the action's real
+ * state and every other consumer reads it as inert. `raw*` reads are absent:
+ * raw bypasses captures by definition, so they stay on
+ * {@link ActionState.rawPressed} and never route through a token.
+ *
+ * @example
+ * ```ts
+ * const confirm = state.capture("confirm");
+ * // ...frames pass; only this token sees the real action state...
+ * if (confirm.justPressed()) {
+ * 	acceptDialog();
+ * }
+ * confirm.release();
+ * ```
+ * @template Actions - The action map containing the captured action.
+ * @template A - The captured action name, used to narrow the read surface.
+ */
+export type CaptureToken<
+	Actions extends ActionMap,
+	A extends AllActions<Actions>,
+> = (A extends AxisActions<Actions> ? CaptureTokenAxisReads : unknown) &
+	(A extends BoolActions<Actions> ? CaptureTokenBoolReads : unknown) &
+	(A extends Direction1dActions<Actions> ? CaptureTokenDirection1dReads : unknown) &
+	(A extends Direction2dActions<Actions> ? CaptureTokenDirection2dReads : unknown) &
+	(A extends Direction3dActions<Actions> ? CaptureTokenDirection3dReads : unknown) &
+	(A extends ViewportPositionActions<Actions> ? CaptureTokenViewportPositionReads : unknown) &
+	CaptureTokenBase<Actions, A>;
+
+/**
  * Query interface for input state per handle.
  *
  * Methods are constrained by action type so that only valid queries compile.
  * Bool-only methods like `pressed` reject axis actions at compile time.
  *
- * @remarks Every processed read is claim-aware: once a consumer calls
- * {@link ActionState.claim}, boolean and edge reads return false, value reads
- * return the action type's neutral value, and durations return 0 for the rest
- * of the frame. Claims clear at the start of the next `core.update`, so a claim
- * made before an update is wiped by that update. Only
- * {@link ActionState.rawPressed} and {@link ActionState.rawJustPressed} bypass
- * claims.
+ * @remarks Every processed read is suppression-aware: a read reports its
+ * suppressed result while the action is claimed, or while it is captured and
+ * the reader is not the capture holder. Suppressed boolean and edge reads
+ * return false, value reads return the action type's neutral value, and
+ * durations return 0. Claims clear at the start of the next `core.update`, so
+ * a claim made before an update is wiped by that update; captures persist
+ * until released. Only {@link ActionState.rawPressed} and
+ * {@link ActionState.rawJustPressed} bypass claims and captures.
  * @template Actions - The action map constraining available queries.
  * @see https://create.roblox.com/docs/reference/engine/classes/InputAction
  */
@@ -94,6 +136,34 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * @returns True if the action was canceled.
 	 */
 	canceled(action: AllActions<Actions>): boolean;
+
+	/**
+	 * Acquires a standing, exclusive, reader-side hold on one action.
+	 *
+	 * The returned {@link CaptureToken} is a scoped reader for the action:
+	 * `token.pressed()`, no action argument. While the capture is held, the
+	 * token reads the action's real state and every other consumer reads it
+	 * as inert — for every processed read kind. Unlike a claim, the hold
+	 * survives `core.update`; it lasts until {@link CaptureToken.release} or
+	 * until the handle is unregistered. Only {@link ActionState.rawPressed}
+	 * and {@link ActionState.rawJustPressed} see through a capture.
+	 *
+	 * @example
+	 * ```ts
+	 * // A modal owns "confirm" for its whole lifetime.
+	 * const confirm = state.capture("confirm");
+	 * // ...only `confirm` sees the real action state...
+	 * confirm.release();
+	 * ```
+	 * @template A - The action name, used to narrow the token's read surface.
+	 * @param action - Any action name.
+	 * @param options - Reserved options bag; no options are defined yet.
+	 * @returns A capture token scoped to the action.
+	 */
+	capture<A extends AllActions<Actions>>(
+		action: A,
+		options?: CaptureOptions,
+	): CaptureToken<Actions, A>;
 
 	/**
 	 * Marks the action as consumed for the rest of the frame, so every processed
@@ -246,4 +316,145 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * @returns True if the action was triggered.
 	 */
 	triggered(action: AllActions<Actions>): boolean;
+}
+
+/**
+ * Reads available on every capture token regardless of action kind.
+ *
+ * Mirrors the corresponding {@link ActionState} reads with the action
+ * pre-bound, so no action argument is taken.
+ *
+ * @template Actions - The action map containing the captured action.
+ * @template A - The captured action name.
+ */
+interface CaptureTokenBase<Actions extends ActionMap, A extends AllActions<Actions>> {
+	/**
+	 * Whether the captured action's trigger was canceled this frame.
+	 * @returns True if the action was canceled.
+	 */
+	canceled(): boolean;
+
+	/**
+	 * Marks the captured action as consumed for the rest of the frame.
+	 *
+	 * Behaves exactly like {@link ActionState.claim}: the claim carries no
+	 * owner identity, so it suppresses the holder's own reads too — read
+	 * first, then claim. Claims clear at the start of the next `core.update`.
+	 *
+	 * @returns True if the claim succeeded (not already claimed this frame).
+	 */
+	claim(): boolean;
+
+	/**
+	 * Returns how long the current trigger state has been active in seconds.
+	 * @returns Duration in seconds.
+	 */
+	currentDuration(): number;
+
+	/**
+	 * Returns the captured action's typed runtime value.
+	 * @returns The action's current value with its correct type.
+	 */
+	getState(): ActionValue<Actions, A>;
+
+	/**
+	 * Whether the captured action's trigger is currently ongoing.
+	 * @returns True if the action's trigger is ongoing.
+	 */
+	ongoing(): boolean;
+
+	/**
+	 * Returns how long the previous trigger state lasted in seconds.
+	 * @returns Duration in seconds.
+	 */
+	previousDuration(): number;
+
+	/**
+	 * Releases the capture, restoring normal reads for every consumer.
+	 * @remarks Releasing an already-released token is a silent no-op, so
+	 * defensive cleanup code is harmless.
+	 */
+	release(): void;
+
+	/**
+	 * Whether the captured action's trigger conditions were met this frame.
+	 * @returns True if the action was triggered.
+	 */
+	triggered(): boolean;
+}
+
+/** Direction1D reads available on a capture token. */
+interface CaptureTokenDirection1dReads {
+	/**
+	 * Returns the captured action's current scalar value.
+	 * @returns The current axis value.
+	 */
+	axis1d(): number;
+}
+
+/** Direction3D reads available on a capture token. */
+interface CaptureTokenDirection3dReads {
+	/**
+	 * Returns the captured action's current vector value.
+	 * @returns The current 3D axis value.
+	 */
+	axis3d(): Vector3;
+}
+
+/** Axis edge reads available on a capture token for directional actions. */
+interface CaptureTokenAxisReads {
+	/**
+	 * Whether the captured axis transitioned from inactive to active this
+	 * frame.
+	 * @returns True if the axis just became active.
+	 */
+	axisBecameActive(): boolean;
+
+	/**
+	 * Whether the captured axis transitioned from active to inactive this
+	 * frame.
+	 * @returns True if the axis just became inactive.
+	 */
+	axisBecameInactive(): boolean;
+}
+
+/** Bool reads available on a capture token. */
+interface CaptureTokenBoolReads {
+	/**
+	 * Whether the captured action's trigger transitioned to "triggered" this
+	 * frame.
+	 * @returns True if the trigger just fired.
+	 */
+	justPressed(): boolean;
+
+	/**
+	 * Whether the captured action's trigger transitioned from "triggered"
+	 * this frame.
+	 * @returns True if the trigger just stopped firing.
+	 */
+	justReleased(): boolean;
+
+	/**
+	 * Whether the captured action's trigger is currently "triggered".
+	 * @returns True if the trigger is active.
+	 */
+	pressed(): boolean;
+}
+
+/** Direction2D reads available on a capture token. */
+interface CaptureTokenDirection2dReads {
+	/**
+	 * Returns the captured action's current 2D directional vector.
+	 * @returns The current 2D direction value.
+	 */
+	direction2d(): Vector2;
+}
+
+/** ViewportPosition reads available on a capture token. */
+interface CaptureTokenViewportPositionReads {
+	/**
+	 * Returns the captured action's screen-space position.
+	 * @returns The current viewport position.
+	 */
+	position2d(): Vector2;
 }
