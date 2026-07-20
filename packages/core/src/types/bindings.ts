@@ -1,5 +1,6 @@
 import type { KeysOfUnion } from "type-fest";
 
+import type { InputPlatform } from "../bindings/classify";
 import type { ActionMap, ActionType, AllActions } from "./actions";
 
 /** Binding config for `"Bool"` actions. */
@@ -151,11 +152,32 @@ export type TypedBindings<Actions extends ActionMap> = {
 };
 
 /**
- * Maps action names to their bound inputs. Used for serialization and rebinding.
+ * Platforms a binding override may be written for.
+ *
+ * Touch is excluded: a touch binding can carry a `uiButton`, which is a live
+ * `GuiButton` reference that cannot survive serialization, so a touch bucket
+ * holding one would not round-trip. Touch bindings are preserved by every
+ * operation but are not writable per platform.
+ */
+export type RebindPlatform = Exclude<InputPlatform, "touch">;
+
+/**
+ * One action's binding overrides, bucketed by platform.
+ *
+ * Within a platform an **empty array** is a deliberate unbind, and an
+ * **absent key** means "use the code-defined default". That distinction is
+ * what lets a player who only ever rebound their gamepad keep receiving
+ * updated keyboard defaults.
+ */
+export type PlatformBindings = Readonly<Partial<Record<InputPlatform, ReadonlyArray<BindingLike>>>>;
+
+/**
+ * Maps action names to their per-platform bound inputs. Used for
+ * serialization and rebinding.
  * @template Actions - The action map defining available action names.
  */
 export type BindingState<Actions extends ActionMap = ActionMap> = Partial<
-	Record<AllActions<Actions>, ReadonlyArray<BindingLike>>
+	Record<AllActions<Actions>, PlatformBindings>
 >;
 
 /** Shared properties available on every binding config. */

@@ -1,11 +1,18 @@
 import { collectContextActions } from "../contexts/collect-actions";
 import type { ActionMap } from "../types/actions";
-import type { BindingForAction, BindingLike, BindingState, TypedBindings } from "../types/bindings";
+import type {
+	BindingForAction,
+	BindingLike,
+	BindingState,
+	RebindPlatform,
+} from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
 import { activateContext, deactivateContext, isContextActive } from "./active-contexts";
+import { findExistingContext, validateContextName, validateContextNames } from "./context-lookup";
+import type { CreateCoreOptions } from "./create-core-options";
 import { createHandleFactory } from "./handle-factory";
 import type { HandleData } from "./handle-lifecycle";
 import {
@@ -15,7 +22,6 @@ import {
 	subscribeHandle,
 	subscribeHandleAs,
 } from "./handle-lifecycle";
-import type { InputInstanceData } from "./input-instances";
 import {
 	addContextInstances,
 	adoptContextInstances,
@@ -24,8 +30,10 @@ import {
 } from "./input-instances";
 import {
 	applyRebindAll,
+	applyRebindForPlatform,
 	applyRebindOne,
 	applyResetAll,
+	applyResetForPlatform,
 	applyResetOne,
 	assertOwnedForRebind,
 	replayOverridesIntoContext,
@@ -34,66 +42,11 @@ import {
 import { resolveBindings } from "./resolve-bindings";
 import { updateHandle } from "./update-handle";
 
-/**
- * Replication transport mode.
- *
- * - `"remote"` — replicate via RemoteEvents.
- * - `"native"` — server reads client input natively (server authority).
- */
-export type ReplicationTransport = "native" | "remote";
-
-/** Configuration for how input state is replicated between client and server. */
-export interface ReplicationConfig {
-	/** The transport mechanism for replication. */
-	readonly transport: ReplicationTransport;
-}
-
-/**
- * Options for creating a Flux core instance.
- * @template T - The action map type.
- * @template C - The context configuration record type.
- */
-export interface CreateCoreOptions<T extends ActionMap, C extends Record<string, ContextConfig>> {
-	/** The action map defining available actions and their types. */
-	readonly actions: T;
-	/** Context configurations with validated bindings per action type. */
-	readonly contexts: C & ValidatedContexts<T, C>;
-	/**
-	 * Enable debug warnings. Requires `_G.__DEV__` to also be `true` — when
-	 * `_G.__DEV__` is `false`, debug code paths become dead code eligible
-	 * for removal by code transformation tools.
-	 * @default false
-	 */
-	readonly debug?: boolean;
-	/**
-	 * Called when a subscribed InputAction has not replicated within the
-	 * timeout threshold. Only invoked when `debug` is `true`.
-	 * Defaults to `warn()`.
-	 * @internal
-	 */
-	readonly onReplicationTimeout?: (message: string) => void;
-	/**
-	 * Replication configuration. Currently a noop — will be used for
-	 * server-client context synchronization in a future release.
-	 *
-	 * - `"remote"` — replicate via RemoteEvents (default).
-	 * - `"native"` — server reads client input natively (server authority).
-	 */
-	readonly replication?: ReplicationConfig;
-}
-
-/**
- * Validates that each context's bindings use the correct binding shape for each action type.
- * @template T - The action map type.
- * @template C - The context configuration record type.
- */
-type ValidatedContexts<T extends ActionMap, C extends Record<string, ContextConfig>> = {
-	readonly [K in keyof C]: {
-		readonly bindings: TypedBindings<T>;
-		readonly priority?: number;
-		readonly sink?: boolean;
-	};
-};
+export type {
+	CreateCoreOptions,
+	ReplicationConfig,
+	ReplicationTransport,
+} from "./create-core-options";
 
 /**
  * Creates a Flux core instance for managing input actions and contexts.
@@ -135,7 +88,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 					adoptContextInstances(data.instanceData, context, existing, actions);
 				} else {
 					addContextInstances(context, contexts[context], actions, data.instanceData);
-					replayOverridesIntoContext(data, context);
+					replayOverridesIntoContext(data, contexts, context);
 				}
 			}
 
@@ -222,12 +175,28 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		): void {
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
-			applyRebindOne(handleData, action, bindings as ReadonlyArray<BindingLike>);
+			applyRebindOne(handleData, contexts, action, bindings as ReadonlyArray<BindingLike>);
 		},
 		rebindAll(handle: InputHandle, bindings: BindingState<T>): void {
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
 			applyRebindAll(handleData, actions, contexts, bindings);
+		},
+		rebindForPlatform<A extends keyof T & string>(
+			handle: InputHandle,
+			action: A,
+			platform: RebindPlatform,
+			bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
+		): void {
+			const handleData = getHandleData(handles, handle);
+			assertOwnedForRebind(handleData);
+			applyRebindForPlatform({
+				action,
+				bindings,
+				contexts,
+				handleData,
+				platform,
+			});
 		},
 		register(
 			parent: Instance,
@@ -276,6 +245,15 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
 			applyResetOne(handleData, contexts, action);
+		},
+		resetBindingsForPlatform(
+			handle: InputHandle,
+			action: keyof T & string,
+			platform: RebindPlatform,
+		): void {
+			const handleData = getHandleData(handles, handle);
+			assertOwnedForRebind(handleData);
+			applyResetForPlatform({ action, contexts, handleData, platform });
 		},
 		serializeBindings(handle: InputHandle): BindingState<T> {
 			const handleData = getHandleData(handles, handle);
@@ -335,38 +313,4 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			}
 		},
 	};
-}
-
-function validateContextName(contexts: Record<string, ContextConfig>, name: string): void {
-	if (contexts[name] === undefined) {
-		error(`unknown context: ${name}`);
-	}
-}
-
-function validateContextNames<Name extends string>(
-	contexts: Record<string, ContextConfig>,
-	names: ReadonlyArray<Name>,
-): ReadonlyArray<Name> {
-	for (const name of names) {
-		validateContextName(contexts, name);
-	}
-
-	return names;
-}
-
-function findExistingContext(
-	contextName: string,
-	data: InputInstanceData,
-): InputContext | undefined {
-	const folder = data.parent.FindFirstChild("input");
-	if (folder === undefined || !classIs(folder, "Folder")) {
-		return undefined;
-	}
-
-	const existing = folder.FindFirstChild(contextName);
-	if (existing !== undefined && classIs(existing, "InputContext")) {
-		return existing;
-	}
-
-	return undefined;
 }

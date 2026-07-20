@@ -1,6 +1,5 @@
 import type { ModifierContext } from "../modifiers/types";
 import type { ActionConfig, ActionMap } from "../types/actions";
-import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionValueType } from "./action-entry";
@@ -10,14 +9,19 @@ import type { ActiveContexts } from "./active-contexts";
 import { resolveContextOrder } from "./active-contexts";
 import type { InputInstanceData } from "./input-instances";
 import { processPipeline } from "./pipeline";
+import type { PlatformOverrides } from "./platform-overrides";
 import { resolveActionInstance } from "./resolve-action";
 
 /** Internal per-handle data used during update processing. */
 export interface CoreHandleData {
 	/** Currently active context names, oldest activation first. */
 	readonly activeContexts: ActiveContexts;
-	/** Active per-action binding overrides. Absent key = use original bindings. */
-	readonly bindingOverrides: Map<string, ReadonlyArray<BindingLike>>;
+	/**
+	 * Active binding overrides, keyed by action and then by platform. An
+	 * absent platform bucket means that platform tracks its code-defined
+	 * default; a present but empty bucket is a deliberate unbind.
+	 */
+	readonly bindingOverrides: Map<string, PlatformOverrides>;
 	/** Per-action trigger duration accumulators in seconds. */
 	readonly durations: Map<string, number>;
 	/** Roblox InputContext instance references. */

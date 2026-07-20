@@ -17,6 +17,7 @@ import type {
 	BindingState,
 	BoolBindingConfig,
 	Direction2dBindingConfig,
+	PlatformBindings,
 } from "./bindings";
 import type { FluxCore, InputHandle } from "./core";
 import type { ActionState, ActionValue, ActionValueMap } from "./state";
@@ -206,24 +207,22 @@ describe("BindingForAction", () => {
 });
 
 describe("BindingState", () => {
-	it("should be a partial record of action names to binding arrays", () => {
+	it("should be a partial record of action names to per-platform buckets", () => {
 		type State = BindingState<typeof actions>;
 		expectTypeOf<State>().toEqualTypeOf<
-			Partial<Record<AllActions<typeof actions>, ReadonlyArray<BindingLike>>>
+			Partial<Record<AllActions<typeof actions>, PlatformBindings>>
 		>();
 	});
 
 	it("should allow partial binding maps", () => {
 		const partial: BindingState<typeof actions> = {
-			jump: [Enum.KeyCode.Space],
+			jump: { keyboard: [Enum.KeyCode.Space] },
 		};
 		expectTypeOf(partial).toExtend<BindingState<typeof actions>>();
 	});
 
 	it("should default to string keys without type parameter", () => {
 		type Default = BindingState;
-		expectTypeOf<Default>().toEqualTypeOf<
-			Partial<Record<string, ReadonlyArray<BindingLike>>>
-		>();
+		expectTypeOf<Default>().toEqualTypeOf<Partial<Record<string, PlatformBindings>>>();
 	});
 });

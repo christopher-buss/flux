@@ -1,7 +1,9 @@
 import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { afterThis, fromAny } from "@rbxts/jest-utils";
 
+import type { InputPlatform } from "../bindings/classify";
 import type { ActionMap } from "../types/actions";
+import type { BindingLike, BindingState } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import { createCore } from "./create-core";
 
@@ -52,6 +54,15 @@ function getKeyCodes(
 	}
 
 	return keyCodes;
+}
+
+function getPlatformBucket(
+	state: BindingState<typeof REBIND_ACTIONS>,
+	action: keyof typeof REBIND_ACTIONS,
+	platform: InputPlatform,
+): ReadonlyArray<BindingLike> | undefined {
+	const entry = state[action];
+	return entry === undefined ? undefined : entry[platform];
 }
 
 describe("rebind", () => {
@@ -152,15 +163,17 @@ describe("rebindAll", () => {
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
 		core.rebindAll(handle, {
-			jump: [Enum.KeyCode.F],
-			move: [
-				{
-					down: Enum.KeyCode.K,
-					left: Enum.KeyCode.J,
-					right: Enum.KeyCode.L,
-					up: Enum.KeyCode.I,
-				},
-			],
+			jump: { keyboard: [Enum.KeyCode.F] },
+			move: {
+				keyboard: [
+					{
+						down: Enum.KeyCode.K,
+						left: Enum.KeyCode.J,
+						right: Enum.KeyCode.L,
+						up: Enum.KeyCode.I,
+					},
+				],
+			},
 		});
 
 		expect(getKeyCodes(parent, "gameplay", "jump")).toContain(Enum.KeyCode.F);
@@ -175,14 +188,16 @@ describe("rebindAll", () => {
 		const handle = core.register(parent, "gameplay");
 		core.rebind(handle, "jump", [Enum.KeyCode.F]);
 		core.rebindAll(handle, {
-			move: [
-				{
-					down: Enum.KeyCode.K,
-					left: Enum.KeyCode.J,
-					right: Enum.KeyCode.L,
-					up: Enum.KeyCode.I,
-				},
-			],
+			move: {
+				keyboard: [
+					{
+						down: Enum.KeyCode.K,
+						left: Enum.KeyCode.J,
+						right: Enum.KeyCode.L,
+						up: Enum.KeyCode.I,
+					},
+				],
+			},
 		});
 
 		expect(getKeyCodes(parent, "gameplay", "jump")).toContain(Enum.KeyCode.Space);
@@ -228,7 +243,7 @@ describe("serializeBindings", () => {
 		core.rebind(handle, "jump", [Enum.KeyCode.F]);
 		const state = core.serializeBindings(handle);
 
-		expect(state.jump).toContain(Enum.KeyCode.F);
+		expect(getPlatformBucket(state, "jump", "keyboard")).toContain(Enum.KeyCode.F);
 		expect(state.move).toBeUndefined();
 	});
 
@@ -273,7 +288,7 @@ describe("loadBindings", () => {
 		const parent = new Instance("Folder");
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
-		core.loadBindings(handle, { jump: [Enum.KeyCode.F] });
+		core.loadBindings(handle, { jump: { keyboard: [Enum.KeyCode.F] } });
 
 		expect(getKeyCodes(parent, "gameplay", "jump")).toContain(Enum.KeyCode.F);
 	});
@@ -349,7 +364,7 @@ describe("loadBindings unknown action", () => {
 		const parent = new Instance("Folder");
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
-		core.loadBindings(handle, fromAny({ unknownAction: [Enum.KeyCode.F] }));
+		core.loadBindings(handle, fromAny({ unknownAction: { keyboard: [Enum.KeyCode.F] } }));
 
 		const state = core.serializeBindings(handle) as Record<string, unknown>;
 
@@ -369,11 +384,342 @@ describe("loadBindings unknown action", () => {
 		const parent = new Instance("Folder");
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
-		core.loadBindings(handle, fromAny({ unknownAction: [Enum.KeyCode.F] }));
+		core.loadBindings(handle, fromAny({ unknownAction: { keyboard: [Enum.KeyCode.F] } }));
 
 		const state = core.serializeBindings(handle) as Record<string, unknown>;
 
 		expect(state["unknownAction"]).toBeUndefined();
 		expect(spy).never.toHaveBeenCalled();
+	});
+});
+
+const PLATFORM_CONTEXTS = {
+	gameplay: {
+		bindings: {
+			jump: [Enum.KeyCode.Space, Enum.KeyCode.ButtonA],
+			move: [
+				{
+					down: Enum.KeyCode.S,
+					left: Enum.KeyCode.A,
+					right: Enum.KeyCode.D,
+					up: Enum.KeyCode.W,
+				},
+			],
+		},
+		priority: 0,
+	},
+} satisfies Record<string, ContextConfig>;
+
+/** The same contexts after a patch changed the keyboard default for `jump`. */
+const PATCHED_PLATFORM_CONTEXTS = {
+	gameplay: {
+		bindings: {
+			jump: [Enum.KeyCode.E, Enum.KeyCode.ButtonA],
+			move: PLATFORM_CONTEXTS.gameplay.bindings.move,
+		},
+		priority: 0,
+	},
+} satisfies Record<string, ContextConfig>;
+
+const LATE_CONTEXTS = {
+	gameplay: PLATFORM_CONTEXTS.gameplay,
+	ui: {
+		bindings: {
+			jump: [Enum.KeyCode.Return, Enum.KeyCode.ButtonStart],
+		},
+		priority: 10,
+	},
+} satisfies Record<string, ContextConfig>;
+
+describe("rebindForPlatform", () => {
+	it("should leave the other platform's bindings intact", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+
+		const keys = getKeyCodes(parent, "gameplay", "jump");
+
+		expect(keys).toContain(Enum.KeyCode.Space);
+		expect(keys).toContain(Enum.KeyCode.ButtonY);
+	});
+
+	it("should place bindings in a deterministic order", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", [
+			Enum.KeyCode.ButtonY,
+			Enum.KeyCode.ButtonX,
+		]);
+
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.Space,
+			Enum.KeyCode.ButtonY,
+			Enum.KeyCode.ButtonX,
+		]);
+	});
+
+	it("should keep several bindings for the same platform in source order", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebind(handle, "jump", [Enum.KeyCode.G, Enum.KeyCode.F, Enum.KeyCode.ButtonY]);
+
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.G,
+			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonY,
+		]);
+	});
+
+	it("should report the composed bindings through getBindings", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+
+		expect(core.getBindings(handle, "jump")).toStrictEqual([
+			Enum.KeyCode.Space,
+			Enum.KeyCode.ButtonY,
+		]);
+	});
+
+	it("should unbind a platform when given an empty list", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", []);
+
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([Enum.KeyCode.Space]);
+	});
+
+	it("should preserve per-platform state in a context activated afterwards", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: LATE_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		core.addContext(handle, "ui");
+
+		const keys = getKeyCodes(parent, "ui", "jump");
+
+		expect(keys).toContain(Enum.KeyCode.Return);
+		expect(keys).toContain(Enum.KeyCode.ButtonY);
+	});
+
+	it("should throw for subscribed handles", () => {
+		expect.assertions(1);
+
+		const serverParent = new Instance("Folder");
+		const serverCore = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		serverCore.register(serverParent, "gameplay");
+
+		const clientCore = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const [clientHandle] = clientCore.subscribe(serverParent, "gameplay");
+
+		const rebind = (): void => {
+			clientCore.rebindForPlatform(clientHandle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		};
+
+		expect(rebind).toThrow("subscribed handle");
+	});
+});
+
+describe("resetBindingsForPlatform", () => {
+	it("should restore that platform's defaults and keep the other's override", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		core.resetBindingsForPlatform(handle, "jump", "gamepad");
+
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should drop the action entirely once its last bucket is reset", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		core.resetBindingsForPlatform(handle, "jump", "gamepad");
+
+		expect(core.serializeBindings(handle).jump).toBeUndefined();
+	});
+
+	it("should be a no-op for a platform that was never overridden", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
+		core.resetBindingsForPlatform(handle, "jump", "gamepad");
+
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should clear every platform when the whole action is reset", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		core.resetBindings(handle, "jump");
+
+		expect(core.serializeBindings(handle).jump).toBeUndefined();
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.Space,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+});
+
+describe("per-platform persistence", () => {
+	it("should serialize only the platform that was rebound", () => {
+		expect.assertions(3);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+
+		const saved = core.serializeBindings(handle);
+
+		expect(getPlatformBucket(saved, "jump", "gamepad")).toStrictEqual([Enum.KeyCode.ButtonY]);
+		expect(getPlatformBucket(saved, "jump", "keyboard")).toBeUndefined();
+		expect(getPlatformBucket(saved, "jump", "touch")).toBeUndefined();
+	});
+
+	it("should round-trip an explicitly emptied platform as unbound", () => {
+		expect.assertions(2);
+
+		const firstParent = new Instance("Folder");
+		const first = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const firstHandle = first.register(firstParent, "gameplay");
+		first.rebindForPlatform(firstHandle, "jump", "gamepad", []);
+		const saved = first.serializeBindings(firstHandle);
+
+		expect(getPlatformBucket(saved, "jump", "gamepad")).toStrictEqual([]);
+
+		const secondParent = new Instance("Folder");
+		const second = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const secondHandle = second.register(secondParent, "gameplay");
+		second.loadBindings(secondHandle, saved);
+
+		expect(getKeyCodes(secondParent, "gameplay", "jump")).toStrictEqual([Enum.KeyCode.Space]);
+	});
+
+	it("should round-trip an absent platform as tracking defaults", () => {
+		expect.assertions(2);
+
+		const firstParent = new Instance("Folder");
+		const first = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const firstHandle = first.register(firstParent, "gameplay");
+		first.rebindForPlatform(firstHandle, "jump", "keyboard", [Enum.KeyCode.F]);
+		const saved = first.serializeBindings(firstHandle);
+
+		expect(getPlatformBucket(saved, "jump", "gamepad")).toBeUndefined();
+
+		const secondParent = new Instance("Folder");
+		const second = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const secondHandle = second.register(secondParent, "gameplay");
+		second.loadBindings(secondHandle, saved);
+
+		expect(getKeyCodes(secondParent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should let an untouched platform inherit a patched code default", () => {
+		expect.assertions(1);
+
+		const firstParent = new Instance("Folder");
+		const first = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const firstHandle = first.register(firstParent, "gameplay");
+		first.rebindForPlatform(firstHandle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		const saved = first.serializeBindings(firstHandle);
+
+		const patchedParent = new Instance("Folder");
+		const patched = createCore({
+			actions: REBIND_ACTIONS,
+			contexts: PATCHED_PLATFORM_CONTEXTS,
+		});
+		const patchedHandle = patched.register(patchedParent, "gameplay");
+		patched.loadBindings(patchedHandle, saved);
+
+		expect(getKeyCodes(patchedParent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.E,
+			Enum.KeyCode.ButtonY,
+		]);
+	});
+
+	it("should freeze a platform the player did customize against a patch", () => {
+		expect.assertions(1);
+
+		const firstParent = new Instance("Folder");
+		const first = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const firstHandle = first.register(firstParent, "gameplay");
+		first.rebindForPlatform(firstHandle, "jump", "keyboard", [Enum.KeyCode.F]);
+		const saved = first.serializeBindings(firstHandle);
+
+		const patchedParent = new Instance("Folder");
+		const patched = createCore({
+			actions: REBIND_ACTIONS,
+			contexts: PATCHED_PLATFORM_CONTEXTS,
+		});
+		const patchedHandle = patched.register(patchedParent, "gameplay");
+		patched.loadBindings(patchedHandle, saved);
+
+		expect(getKeyCodes(patchedParent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should keep binding order stable across a save and reload", () => {
+		expect.assertions(1);
+
+		const firstParent = new Instance("Folder");
+		const first = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const firstHandle = first.register(firstParent, "gameplay");
+		first.rebindForPlatform(firstHandle, "jump", "keyboard", [Enum.KeyCode.F, Enum.KeyCode.G]);
+		first.rebindForPlatform(firstHandle, "jump", "gamepad", [
+			Enum.KeyCode.ButtonY,
+			Enum.KeyCode.ButtonX,
+		]);
+		const before = getKeyCodes(firstParent, "gameplay", "jump");
+
+		const secondParent = new Instance("Folder");
+		const second = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const secondHandle = second.register(secondParent, "gameplay");
+		second.loadBindings(secondHandle, first.serializeBindings(firstHandle));
+
+		expect(getKeyCodes(secondParent, "gameplay", "jump")).toStrictEqual(before);
 	});
 });

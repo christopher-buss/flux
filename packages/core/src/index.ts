@@ -62,6 +62,8 @@ export type {
 	Direction1dBindingConfig,
 	Direction2dBindingConfig,
 	Direction3dBindingConfig,
+	PlatformBindings,
+	RebindPlatform,
 	TypedBindings,
 	ViewportPositionBindingConfig,
 } from "./types/bindings";
