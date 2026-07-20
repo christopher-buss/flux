@@ -177,6 +177,9 @@ export function listDebugCaptures(
 	return getEntry(entries, action).captures.map((holder) => {
 		return {
 			...(holder.debugLabel !== undefined && { label: holder.debugLabel }),
+			// A holder only lacks a traceback if it was acquired while the dev
+			// gate was off — impossible in real builds, where `_G.__DEV__` is a
+			// compile-time constant. The stack must still report every holder.
 			traceback: holder.traceback ?? "",
 		};
 	});

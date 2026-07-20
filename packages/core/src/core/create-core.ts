@@ -234,11 +234,11 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			context: Contexts,
 			...rest: ReadonlyArray<Contexts>
 		): InputHandle {
-			validateContextNames(contexts, [context, ...rest]);
+			const contextNames = validateContextNames(contexts, [context, ...rest]);
 
 			return registerHandle(factory, {
 				actions,
-				contextNames: [context, ...rest],
+				contextNames,
 				contexts,
 				debug: isDevelopmentMode,
 				handles,
@@ -251,11 +251,11 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			context: Contexts,
 			...rest: ReadonlyArray<Contexts>
 		): void {
-			validateContextNames(contexts, [context, ...rest]);
+			const contextNames = validateContextNames(contexts, [context, ...rest]);
 
 			registerHandleAs(handle, {
 				actions,
-				contextNames: [context, ...rest],
+				contextNames,
 				contexts,
 				debug: isDevelopmentMode,
 				handles,
@@ -290,11 +290,11 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			getHandleData(handles, handle).simulatedValues.set(action, value);
 		},
 		subscribe(parent: Instance, context: Contexts, ...rest: ReadonlyArray<Contexts>) {
-			validateContextNames(contexts, [context, ...rest]);
+			const contextNames = validateContextNames(contexts, [context, ...rest]);
 
 			return subscribeHandle(factory, {
 				actions,
-				contextNames: [context, ...rest],
+				contextNames,
 				debug: isDevelopmentMode,
 				handles,
 				parent,
@@ -306,11 +306,11 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			context: Contexts,
 			...rest: ReadonlyArray<Contexts>
 		): () => void {
-			validateContextNames(contexts, [context, ...rest]);
+			const contextNames = validateContextNames(contexts, [context, ...rest]);
 
 			return subscribeHandleAs(handle, {
 				actions,
-				contextNames: [context, ...rest],
+				contextNames,
 				debug: isDevelopmentMode,
 				handles,
 				parent,
@@ -343,13 +343,15 @@ function validateContextName(contexts: Record<string, ContextConfig>, name: stri
 	}
 }
 
-function validateContextNames(
+function validateContextNames<Name extends string>(
 	contexts: Record<string, ContextConfig>,
-	names: ReadonlyArray<string>,
-): void {
+	names: ReadonlyArray<Name>,
+): ReadonlyArray<Name> {
 	for (const name of names) {
 		validateContextName(contexts, name);
 	}
+
+	return names;
 }
 
 function findExistingContext(

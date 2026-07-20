@@ -1,6 +1,12 @@
 import type { TriggerState } from "../triggers/types";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
-import type { ActionState, ActionValue, CaptureOptions, CaptureToken } from "../types/state";
+import type {
+	ActionState,
+	ActionValue,
+	CaptureOptions,
+	CaptureToken,
+	DebugCapture,
+} from "../types/state";
 import type { ActionEntry, ActionValueType } from "./action-entry";
 import {
 	claimAction,
@@ -21,6 +27,9 @@ import {
 	wasJustReleased,
 } from "./action-entry";
 import { createCaptureToken, listDebugCaptures } from "./capture";
+
+/** Shared result for `debugCaptures` outside development mode. */
+const NO_DEBUG_CAPTURES: ReadonlyArray<DebugCapture> = [];
 
 /** Options for updating an action's state in the pipeline. */
 export interface UpdateActionOptions {
@@ -198,7 +207,7 @@ function buildPublicState<T extends ActionMap>(
 				return listDebugCaptures(entries, action);
 			}
 
-			return [];
+			return NO_DEBUG_CAPTURES;
 		},
 		direction2d(action) {
 			return readValue(entries, action) as Vector2;

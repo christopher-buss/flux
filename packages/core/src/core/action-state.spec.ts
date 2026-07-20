@@ -1374,13 +1374,41 @@ describe("createActionState", () => {
 				expect(state.pressed("jump")).toBeTrue();
 			});
 
-			it("should return the stack bottom-to-top from debugCaptures, top being the active holder", () => {
-				expect.assertions(5);
+			it("should return an independent token from each capture call", () => {
+				expect.assertions(3);
 
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(tappedJumpFrame());
+
+				expect(first).never.toBe(second);
+
+				// Each token holds its own stack slot; both must release before
+				// the action is restored.
+				first.release();
+
+				expect(state.pressed("jump")).toBeFalse();
+
+				second.release();
+
+				expect(state.pressed("jump")).toBeTrue();
+			});
+		});
+
+		describe("debugCaptures", () => {
+			/** Turns the dev gate on for this test and restores it afterward. */
+			function enableDevelopmentMode(): void {
 				_G.__DEV__ = true;
 				afterThis(() => {
 					_G.__DEV__ = false;
 				});
+			}
+
+			it("should return the stack bottom-to-top, top being the active holder", () => {
+				expect.assertions(5);
+
+				enableDevelopmentMode();
 
 				const [state] = createActionState(TEST_ACTIONS, { debug: true });
 				state.capture("jump", { debugLabel: "bottom" });
@@ -1405,13 +1433,10 @@ describe("createActionState", () => {
 				expect(restoredEntry.label).toBe("bottom");
 			});
 
-			it("should record an automatic traceback on each debugCaptures entry", () => {
+			it("should record an automatic traceback on each entry", () => {
 				expect.assertions(3);
 
-				_G.__DEV__ = true;
-				afterThis(() => {
-					_G.__DEV__ = false;
-				});
+				enableDevelopmentMode();
 
 				const [state] = createActionState(TEST_ACTIONS, { debug: true });
 				state.capture("jump");
@@ -1427,26 +1452,20 @@ describe("createActionState", () => {
 				expect(entry.label).toBeUndefined();
 			});
 
-			it("should return an empty stack from debugCaptures when nothing is captured", () => {
+			it("should return an empty stack when nothing is captured", () => {
 				expect.assertions(1);
 
-				_G.__DEV__ = true;
-				afterThis(() => {
-					_G.__DEV__ = false;
-				});
+				enableDevelopmentMode();
 
 				const [state] = createActionState(TEST_ACTIONS, { debug: true });
 
 				expect(state.debugCaptures("jump").size()).toBe(0);
 			});
 
-			it("should return an empty stack from debugCaptures without the debug flag", () => {
+			it("should return an empty stack without the debug flag", () => {
 				expect.assertions(1);
 
-				_G.__DEV__ = true;
-				afterThis(() => {
-					_G.__DEV__ = false;
-				});
+				enableDevelopmentMode();
 
 				const [state] = createActionState(TEST_ACTIONS);
 				state.capture("jump", { debugLabel: "modal" });
@@ -1454,36 +1473,17 @@ describe("createActionState", () => {
 				expect(state.debugCaptures("jump").size()).toBe(0);
 			});
 
-			it("should return an empty stack from debugCaptures when _G.__DEV__ is false", () => {
+			it("should return an empty stack when _G.__DEV__ is false", () => {
 				expect.assertions(1);
 
+				// Dev gate deliberately off: `debug: true` alone is not enough
+				// to surface capture metadata.
 				_G.__DEV__ = false;
 
 				const [state] = createActionState(TEST_ACTIONS, { debug: true });
 				state.capture("jump", { debugLabel: "modal" });
 
 				expect(state.debugCaptures("jump").size()).toBe(0);
-			});
-
-			it("should return an independent token from each capture call", () => {
-				expect.assertions(3);
-
-				const [state, internal] = createActionState(TEST_ACTIONS);
-				const first = state.capture("jump");
-				const second = state.capture("jump");
-				internal.updateAction(tappedJumpFrame());
-
-				expect(first).never.toBe(second);
-
-				// Each token holds its own stack slot; both must release before
-				// the action is restored.
-				first.release();
-
-				expect(state.pressed("jump")).toBeFalse();
-
-				second.release();
-
-				expect(state.pressed("jump")).toBeTrue();
 			});
 		});
 

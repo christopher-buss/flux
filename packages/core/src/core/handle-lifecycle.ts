@@ -19,21 +19,16 @@ export interface HandleData<T extends ActionMap> extends CoreHandleData {
 	readonly publicState: ActionState<T>;
 }
 
-interface RegisterOptions<T extends ActionMap> {
-	readonly actions: T;
-	readonly contextNames: ReadonlyArray<string>;
-	readonly contexts: Record<string, ContextConfig>;
-	readonly debug?: boolean;
-	readonly handles: Map<InputHandle, HandleData<T>>;
-	readonly parent: Instance;
-}
-
 interface SubscribeOptions<T extends ActionMap> {
 	readonly actions: T;
 	readonly contextNames: ReadonlyArray<string>;
 	readonly debug?: boolean;
 	readonly handles: Map<InputHandle, HandleData<T>>;
 	readonly parent: Instance;
+}
+
+interface RegisterOptions<T extends ActionMap> extends SubscribeOptions<T> {
+	readonly contexts: Record<string, ContextConfig>;
 }
 
 /**
@@ -143,7 +138,7 @@ function buildHandleData<T extends ActionMap>(
 	actions: T,
 	contextNames: ReadonlyArray<string>,
 	instanceData: HandleData<T>["instanceData"],
-	isDebug = false,
+	isDebug: boolean,
 ): HandleData<T> {
 	const [publicState, internalState] = createActionState(actions, { debug: isDebug });
 	return {
@@ -163,7 +158,7 @@ function buildHandleData<T extends ActionMap>(
 function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): HandleData<T> {
 	const { actions, contextNames, contexts, debug: isDebug, parent } = options;
 	const instanceData = createInputInstances({ actions, contextNames, contexts, parent });
-	return buildHandleData(actions, contextNames, instanceData, isDebug);
+	return buildHandleData(actions, contextNames, instanceData, isDebug === true);
 }
 
 function validateHandleUnique<T extends ActionMap>(
@@ -180,7 +175,7 @@ function createSubscribeData<T extends ActionMap>(
 ): [HandleData<T>, () => void] {
 	const { actions, contextNames, debug: isDebug, parent } = options;
 	const instanceData = findInputInstances({ actions, contextNames, parent });
-	const data = buildHandleData(actions, contextNames, instanceData, isDebug);
+	const data = buildHandleData(actions, contextNames, instanceData, isDebug === true);
 	const cancel = (): void => {
 		for (const connection of instanceData.connections) {
 			connection.Disconnect();
