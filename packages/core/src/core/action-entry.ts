@@ -59,6 +59,38 @@ export interface ReadOptions<V> extends ReadEntryOptions<V> {
 }
 
 /**
+ * The holder identity of a draining capture — a capture held by nobody.
+ *
+ * Pushed when the top holder releases mid-press. No token carries this
+ * identity, so the standard `viewer !== topHolder` gate keeps every
+ * capture-aware read suppressed while `raw*` bypasses as always. The drain
+ * settles at the frame boundary once magnitude reaches zero.
+ *
+ * Never leaves this module: all stack mutation funnels through
+ * {@link acquireCapture}, {@link releaseCapture} and {@link settleDrain}, so
+ * any future stack enumerator (for example dev-mode introspection) must skip
+ * this entry — it is not a real holder.
+ */
+const DRAIN_HOLDER: CaptureViewer = {};
+
+/**
+ * Pushes a viewer onto an action's capture stack as the new top holder.
+ *
+ * A capture acquired mid-drain supersedes the drain: the new holder reads
+ * the in-flight state through, and protecting whoever is underneath is now
+ * its job. Keeps at most one drain holder on the stack, always on top.
+ * @param entry - The action entry being captured.
+ * @param viewer - The acquiring token's identity.
+ */
+export function acquireCapture(entry: ActionEntry, viewer: CaptureViewer): void {
+	if (getTopHolder(entry) === DRAIN_HOLDER) {
+		entry.captures.pop();
+	}
+
+	entry.captures.push(viewer);
+}
+
+/**
  * Computes scalar magnitude from any action value type.
  * @param value - The action value to compute magnitude for.
  * @returns Scalar magnitude: boolean→0/1, number→abs, vector→Magnitude.
@@ -77,6 +109,45 @@ export function getMagnitude(value: ActionValueType): number {
 	}
 
 	return value.Magnitude;
+}
+
+/**
+ * Removes a viewer from an action's capture stack, draining if needed.
+ *
+ * Releasing the top mid-press starts a drain — the in-flight press must not
+ * leak to whoever is underneath. Shadowed holders never saw the press, so
+ * their release is clean. Releasing a viewer that is not on the stack is a
+ * no-op.
+ * @param entry - The action entry being released.
+ * @param viewer - The releasing token's identity.
+ */
+export function releaseCapture(entry: ActionEntry, viewer: CaptureViewer): void {
+	const index = entry.captures.indexOf(viewer);
+	if (index === -1) {
+		return;
+	}
+
+	const didHoldTop = index === entry.captures.size() - 1;
+	entry.captures.remove(index);
+
+	if (didHoldTop && getMagnitude(entry.value) > 0) {
+		entry.captures.push(DRAIN_HOLDER);
+	}
+}
+
+/**
+ * Ends an action's drain once the in-flight press has settled.
+ *
+ * Runs at the frame boundary, so the frame where magnitude reaches zero is
+ * still suppressed — not even the trailing release edge leaks to whoever is
+ * underneath. Terminates on magnitude, not trigger state: a custom trigger
+ * can leave "triggered" while the button is still physically down.
+ * @param entry - The action entry to settle.
+ */
+export function settleDrain(entry: ActionEntry): void {
+	if (getTopHolder(entry) === DRAIN_HOLDER && getMagnitude(entry.value) === 0) {
+		entry.captures.pop();
+	}
 }
 
 /**
@@ -258,6 +329,10 @@ export function getPreviousDuration(entry: ActionEntry): number {
 	return entry.previousDuration;
 }
 
+function getTopHolder(entry: ActionEntry): CaptureViewer | undefined {
+	return entry.captures[entry.captures.size() - 1];
+}
+
 /**
  * Whether a processed read is suppressed for the given viewer.
  *
@@ -273,7 +348,7 @@ function isSuppressedFor(entry: ActionEntry, viewer: CaptureViewer | undefined):
 		return true;
 	}
 
-	const topHolder = entry.captures[entry.captures.size() - 1];
+	const topHolder = getTopHolder(entry);
 
 	return topHolder !== undefined && topHolder !== viewer;
 }

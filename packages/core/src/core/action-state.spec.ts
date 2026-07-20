@@ -842,6 +842,46 @@ describe("createActionState", () => {
 	});
 
 	describe("capture", () => {
+		/**
+		 * A frame with the button physically held and the trigger firing.
+		 * @returns Update options for a held, triggered frame.
+		 */
+		function pressedJumpFrame(): UpdateActionOptions {
+			return {
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			};
+		}
+
+		/**
+		 * A tap-style frame: the trigger fires on the frame the value returns
+		 * to zero, so a release during it is clean — no in-flight press.
+		 * @returns Update options for a triggered, zero-magnitude frame.
+		 */
+		function tappedJumpFrame(): UpdateActionOptions {
+			return {
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: false,
+			};
+		}
+
+		/**
+		 * A frame with the button fully released and the trigger idle.
+		 * @returns Update options for an idle, zero-magnitude frame.
+		 */
+		function releasedJumpFrame(): UpdateActionOptions {
+			return {
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "none",
+				value: false,
+			};
+		}
+
 		it("should let the holder read pressed and triggered while others read false", () => {
 			expect.assertions(4);
 
@@ -1115,16 +1155,19 @@ describe("createActionState", () => {
 			expect(state.pressed("jump")).toBeFalse();
 		});
 
-		it("should restore normal reads on release", () => {
+		it("should restore normal reads on a clean release", () => {
 			expect.assertions(2);
 
 			const [state, internal] = createActionState(TEST_ACTIONS);
 			const token = state.capture("jump");
+			// A tap-style trigger fires on the frame the value returns to
+			// zero, so the release below is clean — no in-flight press to
+			// drain.
 			internal.updateAction({
 				action: "jump",
 				deltaTime: 0.016,
 				triggerState: "triggered",
-				value: true,
+				value: false,
 			});
 
 			expect(state.pressed("jump")).toBeFalse();
@@ -1191,20 +1234,10 @@ describe("createActionState", () => {
 			expect(state.pressed("jump")).toBeFalse();
 		});
 
-		// Release-mid-press cases assert the in-flight press reads through
-		// immediately on restore. Drain (#174) revises that: suppression will
-		// persist until magnitude reaches zero, so those assertions are
-		// provisional, not the final ADR 0003 contract.
+		// Restore-on-release reads here use clean releases (magnitude already
+		// zero). Releasing mid-press starts a drain instead — see the
+		// "release drain" suite for that contract.
 		describe("lifo stacking", () => {
-			function pressedJumpFrame(): UpdateActionOptions {
-				return {
-					action: "jump",
-					deltaTime: 0.016,
-					triggerState: "triggered",
-					value: true,
-				};
-			}
-
 			it("should let a second capture succeed and shadow the first", () => {
 				expect.assertions(2);
 
@@ -1267,13 +1300,13 @@ describe("createActionState", () => {
 				expect(state.pressed("jump")).toBeFalse();
 			});
 
-			it("should restore the next holder in the same frame when the top releases", () => {
-				expect.assertions(4);
+			it("should restore the next holder in the same frame when the top releases cleanly", () => {
+				expect.assertions(3);
 
 				const [state, internal] = createActionState(TEST_ACTIONS);
 				const first = state.capture("jump");
 				const second = state.capture("jump");
-				internal.updateAction(pressedJumpFrame());
+				internal.updateAction(tappedJumpFrame());
 
 				expect(first.pressed()).toBeFalse();
 
@@ -1281,7 +1314,6 @@ describe("createActionState", () => {
 
 				// No endFrame or update between release and read: same frame.
 				expect(first.pressed()).toBeTrue();
-				expect(first.getState()).toBeTrue();
 
 				// The action stays owned throughout — no unowned frame.
 				expect(state.pressed("jump")).toBeFalse();
@@ -1293,7 +1325,7 @@ describe("createActionState", () => {
 				const [state, internal] = createActionState(TEST_ACTIONS);
 				const first = state.capture("jump");
 				const second = state.capture("jump");
-				internal.updateAction(pressedJumpFrame());
+				internal.updateAction(tappedJumpFrame());
 				second.release();
 				internal.endFrame();
 				internal.updateAction(pressedJumpFrame());
@@ -1315,9 +1347,11 @@ describe("createActionState", () => {
 				expect(second.pressed()).toBeTrue();
 				expect(state.pressed("jump")).toBeFalse();
 
+				// The top's own mid-press release drains instead of reading
+				// through.
 				second.release();
 
-				expect(state.pressed("jump")).toBeTrue();
+				expect(state.pressed("jump")).toBeFalse();
 			});
 
 			it("should treat double release of the top as a no-op that spares the holder beneath", () => {
@@ -1326,7 +1360,7 @@ describe("createActionState", () => {
 				const [state, internal] = createActionState(TEST_ACTIONS);
 				const first = state.capture("jump");
 				const second = state.capture("jump");
-				internal.updateAction(pressedJumpFrame());
+				internal.updateAction(tappedJumpFrame());
 
 				second.release();
 				second.release();
@@ -1345,7 +1379,7 @@ describe("createActionState", () => {
 				const [state, internal] = createActionState(TEST_ACTIONS);
 				const first = state.capture("jump");
 				const second = state.capture("jump");
-				internal.updateAction(pressedJumpFrame());
+				internal.updateAction(tappedJumpFrame());
 
 				expect(first).never.toBe(second);
 
@@ -1358,6 +1392,245 @@ describe("createActionState", () => {
 				second.release();
 
 				expect(state.pressed("jump")).toBeTrue();
+			});
+		});
+
+		describe("release drain", () => {
+			it("should suppress capture-aware reads after a mid-press release until magnitude reaches zero", () => {
+				expect.assertions(5);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				token.release();
+
+				// Same frame: the in-flight press stays suppressed — for the
+				// released token too.
+				expect(state.pressed("jump")).toBeFalse();
+				expect(state.justPressed("jump")).toBeFalse();
+				expect(token.pressed()).toBeFalse();
+
+				// Next frame, still physically held: still suppressed.
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.pressed("jump")).toBeFalse();
+
+				// The drain covers the frame magnitude reaches zero, so the
+				// trailing release edge never leaks either.
+				internal.endFrame();
+				internal.updateAction(releasedJumpFrame());
+
+				expect(state.justReleased("jump")).toBeFalse();
+			});
+
+			it("should restore normal reads once the drain settles", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+				token.release();
+				internal.endFrame();
+				internal.updateAction(releasedJumpFrame());
+
+				// The drain settles at the zero-magnitude frame boundary; a
+				// fresh press reads normally.
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.pressed("jump")).toBeTrue();
+				expect(state.justPressed("jump")).toBeTrue();
+			});
+
+			it("should keep draining while a custom trigger leaves triggered but the value is non-zero", () => {
+				expect.assertions(4);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				token.release();
+				internal.endFrame();
+
+				// A custom hold/tap/combo trigger can drop out of
+				// "triggered" while the button is still physically down; the
+				// drain terminates on magnitude, not trigger state.
+				internal.updateAction({
+					action: "jump",
+					deltaTime: 0.016,
+					triggerState: "none",
+					value: true,
+				});
+
+				expect(state.pressed("jump")).toBeFalse();
+
+				// The trigger re-fires while the button is still down: the
+				// press must not re-leak.
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.pressed("jump")).toBeFalse();
+				expect(state.justPressed("jump")).toBeFalse();
+
+				// Only the value reaching zero ends the drain.
+				internal.endFrame();
+				internal.updateAction(releasedJumpFrame());
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.pressed("jump")).toBeTrue();
+			});
+
+			it("should let raw reads see through the drain", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				token.release();
+
+				expect(state.rawPressed("jump")).toBeTrue();
+				expect(state.rawJustPressed("jump")).toBeTrue();
+
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.rawPressed("jump")).toBeTrue();
+			});
+
+			it("should let a capture acquired mid-drain read through immediately", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				token.release();
+
+				// The entity taking ownership at the boundary is precisely
+				// who should see in-flight state.
+				const successor = state.capture("jump");
+
+				expect(successor.pressed()).toBeTrue();
+				expect(successor.getState()).toBeTrue();
+				expect(state.pressed("jump")).toBeFalse();
+			});
+
+			it("should start a fresh drain when a mid-drain capture releases while the press is live", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				token.release();
+
+				const successor = state.capture("jump");
+				successor.release();
+
+				expect(state.pressed("jump")).toBeFalse();
+
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.pressed("jump")).toBeFalse();
+
+				// One zero-magnitude frame boundary settles the whole drain.
+				internal.endFrame();
+				internal.updateAction(releasedJumpFrame());
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.pressed("jump")).toBeTrue();
+			});
+
+			it("should drain for a holder restored by a stack pop rather than synthesizing a press", () => {
+				expect.assertions(4);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				second.release();
+
+				// The restored holder sits beneath the drain — it never sees
+				// the in-flight press.
+				expect(first.pressed()).toBeFalse();
+				expect(first.justPressed()).toBeFalse();
+
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.pressed()).toBeFalse();
+
+				internal.endFrame();
+				internal.updateAction(releasedJumpFrame());
+
+				expect(first.justReleased()).toBeFalse();
+			});
+
+			it("should hand the restored holder fresh input once the drain settles", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+				second.release();
+				internal.endFrame();
+				internal.updateAction(releasedJumpFrame());
+
+				// A fresh press after the drain reads normally, still owned
+				// by the restored holder.
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.justPressed()).toBeTrue();
+				expect(state.pressed("jump")).toBeFalse();
+			});
+
+			it("should terminate the drain for axis actions when the dead zone zeroes the value", () => {
+				expect.assertions(4);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("move");
+				internal.updateAction({
+					action: "move",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: new Vector2(1, 0),
+				});
+
+				token.release();
+
+				expect(state.direction2d("move")).toBe(Vector2.zero);
+
+				// The dead zone zeroes sub-threshold values before the
+				// pipeline, so the drain sees an exact zero magnitude.
+				internal.endFrame();
+				internal.updateAction({
+					action: "move",
+					deltaTime: 0.016,
+					triggerState: "none",
+					value: Vector2.zero,
+				});
+
+				expect(state.axisBecameInactive("move")).toBeFalse();
+
+				internal.endFrame();
+				internal.updateAction({
+					action: "move",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: new Vector2(0, 1),
+				});
+
+				expect(state.direction2d("move")).toBe(new Vector2(0, 1));
+				expect(state.axisBecameActive("move")).toBeTrue();
 			});
 		});
 	});
