@@ -163,6 +163,14 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * boundary cancel like any other processed read.
 	 * @param action - Any action name.
 	 * @returns True if the action was canceled.
+	 * @example
+	 * ```ts
+	 * // Abandon a charge-up when the press is interrupted — by the
+	 * // trigger, or by a menu capturing "fire" mid-charge.
+	 * if (input.canceled("fire")) {
+	 * 	abandonCharge();
+	 * }
+	 * ```
 	 */
 	canceled(action: AllActions<Actions>): boolean;
 
@@ -311,6 +319,15 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * one-frame {@link ActionState.canceled}, never a synthesized release.
 	 * @param action - A Bool action name.
 	 * @returns True if the trigger just stopped firing.
+	 * @example
+	 * ```ts
+	 * // Fire on a completed release; treat an interrupted one separately.
+	 * if (input.justReleased("fire")) {
+	 * 	releaseChargedShot();
+	 * } else if (input.canceled("fire")) {
+	 * 	abandonCharge();
+	 * }
+	 * ```
 	 */
 	justReleased(action: BoolActions<Actions>): boolean;
 
@@ -398,6 +415,14 @@ interface CaptureTokenBase<Actions extends ActionMap, A extends AllActions<Actio
 	 * @remarks Returns false while the action is claimed — a claim eats the
 	 * boundary cancel like any other processed read.
 	 * @returns True if the action was canceled.
+	 * @example
+	 * ```ts
+	 * // A drag started inside this surface is abandoned when another
+	 * // surface captures over it, or when the token releases mid-drag.
+	 * if (drag.canceled()) {
+	 * 	abandonDrag();
+	 * }
+	 * ```
 	 */
 	canceled(): boolean;
 

@@ -137,7 +137,7 @@ export function acquireCapture(entry: ActionEntry, viewer: CaptureViewer): void 
 	const displaced = getTopHolder(entry);
 	if (displaced === DRAIN_HOLDER) {
 		entry.captures.pop();
-	} else {
+	} else if (hasLiveInteraction(entry)) {
 		recordBoundaryCancel(entry, displaced ?? GAMEPLAY_READER);
 	}
 
@@ -164,7 +164,8 @@ export function releaseCapture(entry: ActionEntry, viewer: CaptureViewer): void 
 	const didHoldTop = index === entry.captures.size() - 1;
 	entry.captures.remove(index);
 
-	if (didHoldTop && recordBoundaryCancel(entry, viewer)) {
+	if (didHoldTop && hasLiveInteraction(entry)) {
+		recordBoundaryCancel(entry, viewer);
 		entry.captures.push(DRAIN_HOLDER);
 	}
 }
@@ -401,25 +402,29 @@ function getTopHolder(entry: ActionEntry): CaptureViewer | undefined {
 }
 
 /**
- * Records a capture boundary in the entry's cancel slot if the displaced
- * viewer's view was live.
+ * Whether the entry currently shows a visible in-flight interaction.
  *
- * The single owner of what counts as a boundary worth canceling: the
- * displaced view must have a visible in-flight interaction — magnitude above
- * zero — or there is nothing to cancel. Overwrites any earlier boundary this
- * frame: last wins.
+ * The condition both capture boundaries turn on: a boundary over a flat
+ * action drops no view, so it cancels nothing and starts no drain.
+ * @param entry - The action entry to test.
+ * @returns True if the action's value has non-zero magnitude.
+ */
+function hasLiveInteraction(entry: ActionEntry): boolean {
+	return getMagnitude(entry.value) > 0;
+}
+
+/**
+ * Records a capture boundary in the entry's cancel slot.
+ *
+ * The single owner of the slot's write rule: only the displaced viewer is
+ * named, and an earlier boundary this frame is overwritten — last wins,
+ * documented rather than queued. Callers gate on
+ * {@link hasLiveInteraction}.
  * @param entry - The action entry at the boundary.
  * @param displaced - The viewer whose view the boundary force-drops.
- * @returns True if the boundary dropped a visible in-flight view.
  */
-function recordBoundaryCancel(entry: ActionEntry, displaced: CaptureViewer): boolean {
-	if (getMagnitude(entry.value) === 0) {
-		return false;
-	}
-
+function recordBoundaryCancel(entry: ActionEntry, displaced: CaptureViewer): void {
 	entry.canceledFor = displaced;
-
-	return true;
 }
 
 /**
