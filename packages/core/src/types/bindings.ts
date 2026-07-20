@@ -1,3 +1,5 @@
+import type { KeysOfUnion } from "type-fest";
+
 import type { ActionMap, ActionType, AllActions } from "./actions";
 
 /** Binding config for `"Bool"` actions. */
@@ -133,6 +135,9 @@ export type BindingForAction<T extends ActionType> = T extends "Bool"
 				: T extends "ViewportPosition"
 					? Enum.KeyCode | ViewportPositionBindingConfig
 					: never;
+
+/** Every field name a binding config can carry. */
+export type BindingConfigKey = Extract<KeysOfUnion<BindingConfig>, string>;
 
 /** A binding-like value: KeyCode or typed binding config. */
 export type BindingLike = BindingConfig | Enum.KeyCode;

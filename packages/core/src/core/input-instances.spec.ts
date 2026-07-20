@@ -1,6 +1,6 @@
 import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it } from "@rbxts/jest-globals";
-import { fromAny } from "@rbxts/jest-utils";
+import { afterThis, fromAny } from "@rbxts/jest-utils";
 
 import type { ActionMap } from "../types/actions";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
@@ -35,6 +35,21 @@ const TEST_CONTEXTS = {
 		sink: true,
 	},
 } satisfies Record<string, ContextConfig>;
+
+/** Registers a context whose only binding names no input source. */
+function createSourcelessBinding(): void {
+	createInputInstances({
+		actions: { aim: { type: "Bool" } } satisfies ActionMap,
+		contextNames: ["gameplay"],
+		contexts: {
+			gameplay: {
+				bindings: { aim: [{ pressedThreshold: 0.5 }] },
+				priority: 0,
+			},
+		} satisfies Record<string, ContextConfig>,
+		parent: new Instance("Folder"),
+	});
+}
 
 function contextActions(data: InputInstanceData, contextName: string): Map<string, InputAction> {
 	const actions = data.actionsByContext.get(contextName);
@@ -257,6 +272,28 @@ describe("createInputInstances", () => {
 				parent: new Instance("Folder"),
 			});
 		}).toThrow("UserInputType");
+	});
+
+	it("should throw naming the action when a binding has no input source", () => {
+		expect.assertions(1);
+
+		expect(() => {
+			createSourcelessBinding();
+		}).toThrow("aim");
+	});
+
+	it("should throw on a binding with no input source outside dev mode", () => {
+		expect.assertions(1);
+
+		const isDevelopmentMode = _G.__DEV__;
+		_G.__DEV__ = false;
+		afterThis(() => {
+			_G.__DEV__ = isDevelopmentMode;
+		});
+
+		expect(() => {
+			createSourcelessBinding();
+		}).toThrow("aim");
 	});
 
 	it("should set priority and sink on InputContext", () => {

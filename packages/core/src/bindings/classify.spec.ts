@@ -88,7 +88,7 @@ describe("classifyBinding", () => {
 		expect(classifyBinding(config)).toBe("gamepad");
 	});
 
-	it("should classify a config with no keyCode or directional keys as touch", () => {
+	it("should classify a config with only pointerIndex as touch", () => {
 		expect.assertions(1);
 
 		const config: ViewportPositionBindingConfig = {
@@ -96,6 +96,26 @@ describe("classifyBinding", () => {
 		};
 
 		expect(classifyBinding(config)).toBe("touch");
+	});
+
+	it("should classify a config with only uiButton as touch", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = {
+			uiButton: new Instance("TextButton"),
+		};
+
+		expect(classifyBinding(config)).toBe("touch");
+	});
+
+	it("should answer without throwing, and not touch, for a config with no input source", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = {
+			pressedThreshold: 0.5,
+		};
+
+		expect(classifyBinding(config)).toBe("keyboard");
 	});
 });
 

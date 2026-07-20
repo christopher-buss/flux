@@ -17,6 +17,10 @@ describe("classifyBinding", () => {
 	it("should return InputPlatform", () => {
 		expectTypeOf(classifyBinding).returns.toEqualTypeOf<InputPlatform>();
 	});
+
+	it("should have exactly three platform members", () => {
+		expectTypeOf<InputPlatform>().toEqualTypeOf<"gamepad" | "keyboard" | "touch">();
+	});
 });
 
 describe("getBindingsForPlatform", () => {
