@@ -14,6 +14,7 @@ import {
 	isTriggered,
 	read,
 	readValue,
+	settleDrain,
 	suppressedFalse,
 	suppressedZero,
 	wasJustPressed,
@@ -233,6 +234,7 @@ function endFrame(entries: Map<string, ActionEntry>): void {
 		entry.previousValue = entry.value;
 		entry.previousTriggerState = entry.triggerState;
 		entry.claimed = false;
+		settleDrain(entry);
 	}
 }
 

@@ -1,5 +1,6 @@
 import type { ActionEntry, ActionValueType, CaptureViewer } from "./action-entry";
 import {
+	acquireCapture,
 	claimAction,
 	didAxisBecomeActive,
 	didAxisBecomeInactive,
@@ -11,6 +12,7 @@ import {
 	isTriggered,
 	readEntry,
 	readEntryValue,
+	releaseCapture,
 	suppressedFalse,
 	suppressedZero,
 	wasJustPressed,
@@ -86,7 +88,7 @@ export function createCaptureToken(
 		return readEntry(entry, { pick, viewer, whenSuppressed: suppressedZero });
 	}
 
-	entry.captures.push(viewer);
+	acquireCapture(entry, viewer);
 
 	return {
 		axis1d(): number {
@@ -135,10 +137,7 @@ export function createCaptureToken(
 			return durationRead(getPreviousDuration);
 		},
 		release(): void {
-			const index = entry.captures.indexOf(viewer);
-			if (index !== -1) {
-				entry.captures.remove(index);
-			}
+			releaseCapture(entry, viewer);
 		},
 		triggered(): boolean {
 			return flagRead(isTriggered);
