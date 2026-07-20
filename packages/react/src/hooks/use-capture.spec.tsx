@@ -12,6 +12,7 @@ import type { Log, RenderCounter } from "#test/probes";
 import { makeLog, makeRenderCounter } from "#test/probes";
 import type { FluxReact } from "../create-flux-react";
 import { createFluxReact } from "../create-flux-react";
+import type { CaptureTokenLike } from "./use-capture";
 
 _G.__DEV__ = true;
 
@@ -20,6 +21,12 @@ type TestFlux = FluxReact<typeof TEST_ACTIONS, TestContexts>;
 
 /** A capture token for the fixture's plain Bool action. */
 type JumpToken = CaptureToken<typeof TEST_ACTIONS, "jump">;
+
+/** Props naming the sibling surfaces that are currently mounted. */
+interface LiveProps {
+	/** One id per mounted sibling; dropping an id unmounts that sibling. */
+	readonly live: ReadonlyArray<string>;
+}
 
 /** Props for surfaces that render a caller-supplied tag. */
 interface TaggedProps {
@@ -66,6 +73,68 @@ function createTaggedHost(
 		return (
 			<FluxProvider core={core} handle={handle}>
 				<Surface tag={tag} />
+			</FluxProvider>
+		);
+	};
+}
+
+/**
+ * Builds an inert stand-in for a capture token, for the cases that need a
+ * token-shaped argument without a Provider to capture through.
+ *
+ * @returns A token whose reads are all inert.
+ */
+function makeTokenStub(): CaptureTokenLike {
+	return {
+		canceled(): boolean {
+			return false;
+		},
+		claim(): boolean {
+			return false;
+		},
+		currentDuration(): number {
+			return 0;
+		},
+		ongoing(): boolean {
+			return false;
+		},
+		previousDuration(): number {
+			return 0;
+		},
+		release(): void {},
+		triggered(): boolean {
+			return false;
+		},
+	};
+}
+
+/**
+ * Wraps one `jump`-capturing surface per entry of `live` in a FluxProvider, so
+ * siblings can be unmounted in any order by dropping ids.
+ *
+ * @param flux - The FluxReact instance supplying the Provider and hook.
+ * @param core - The core the Provider hands to hooks.
+ * @param handle - The default handle the Provider hands to hooks.
+ * @returns The host component.
+ */
+function createSiblingHost(
+	flux: TestFlux,
+	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
+	handle: InputHandle,
+): (props: LiveProps) => React.ReactNode {
+	const { FluxProvider, useCapture } = flux;
+
+	function Surface(): React.ReactNode {
+		useCapture("jump");
+		return <frame />;
+	}
+
+	return ({ live }: LiveProps): React.ReactNode => {
+		return (
+			<FluxProvider core={core} handle={handle}>
+				{live.map((id) => {
+					return <Surface key={id} />;
+				})}
 			</FluxProvider>
 		);
 	};
@@ -304,7 +373,7 @@ describe("useCapture", () => {
 			expect(readOutside()).toStrictEqual({ interact: false, jump: true });
 		});
 
-		it("should leave the surviving sibling owning the action whichever unmounts first", () => {
+		it("should leave the newer sibling owning the action when the older unmounts", () => {
 			expect.assertions(4);
 
 			afterThis(() => {
@@ -318,29 +387,13 @@ describe("useCapture", () => {
 			});
 			const handle = core.register(new Instance("Folder"), "gameplay");
 			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
-			const { FluxProvider, useCapture } = flux;
 			const state = core.getState(handle);
-
-			function Surface(): React.ReactNode {
-				useCapture("jump");
-				return <frame />;
-			}
-
-			function Host({ live }: { readonly live: ReadonlyArray<string> }): React.ReactNode {
-				return (
-					<FluxProvider core={core} handle={handle}>
-						{live.map((id) => {
-							return <Surface key={id} />;
-						})}
-					</FluxProvider>
-				);
-			}
+			const Host = createSiblingHost(flux, core, handle);
 
 			const { rerender } = render(<Host live={["first", "second"]} />);
 
 			expect(state.debugCaptures("jump").size()).toBe(2);
 
-			// Unmount the older sibling; the newer one keeps the action.
 			rerender(<Host live={["second"]} />);
 
 			expect(state.debugCaptures("jump").size()).toBe(1);
@@ -348,11 +401,44 @@ describe("useCapture", () => {
 			core.simulateAction(handle, "jump", true);
 			core.update(FRAME_TIME);
 
+			// The survivor still owns the action, so outsiders read inert.
 			expect(state.pressed("jump")).toBeFalse();
 
 			rerender(<Host live={[]} />);
 
 			expect(state.debugCaptures("jump").size()).toBe(0);
+		});
+
+		it("should leave the older sibling owning the action when the newer unmounts", () => {
+			expect.assertions(3);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				debug: true,
+			});
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const state = core.getState(handle);
+			const Host = createSiblingHost(flux, core, handle);
+
+			const { rerender } = render(<Host live={["first", "second"]} />);
+
+			// Dropping the newest holder is the out-of-order release: the
+			// older sibling underneath is restored as the owner.
+			rerender(<Host live={["first"]} />);
+
+			expect(state.debugCaptures("jump").size()).toBe(1);
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+
+			expect(state.pressed("jump")).toBeFalse();
+			expect(state.rawPressed("jump")).toBeTrue();
 		});
 
 		it("should net exactly one live capture under StrictMode", () => {
@@ -893,7 +979,7 @@ describe("useCapture", () => {
 			const { useCaptureAction } = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 
 			function Surface(): React.ReactNode {
-				const value = useCaptureAction({ pressed: false }, (token) => token.pressed);
+				const value = useCaptureAction(makeTokenStub(), (token) => token.triggered());
 				return <textlabel Text={tostring(value)} />;
 			}
 

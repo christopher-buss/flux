@@ -130,6 +130,11 @@ describe("FluxUseCaptureAction", () => {
 		).toEqualTypeOf<JumpToken>();
 	});
 
+	it("should reject a value that is not a capture token", () => {
+		// @ts-expect-error a plain object is not a capture token
+		flux.useCaptureAction({ pressed: false }, (owned) => owned.pressed);
+	});
+
 	it("should reject a missing selector", () => {
 		// @ts-expect-error missing selector
 		flux.useCaptureAction(flux.useCapture("jump"));

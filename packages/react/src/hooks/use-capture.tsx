@@ -30,16 +30,42 @@ export interface FluxUseCapture<T extends ActionMap> {
 }
 
 /**
+ * The reads every capture token carries regardless of the action's kind.
+ *
+ * Used to constrain `useCaptureAction` to real tokens while letting the
+ * token's kind-narrowed reads flow through the selector untouched.
+ */
+export interface CaptureTokenLike {
+	/** Whether the captured action was canceled this frame. */
+	canceled(): boolean;
+	/** Marks the captured action as consumed for the rest of the frame. */
+	claim(): boolean;
+	/** How long the current trigger state has been active, in seconds. */
+	currentDuration(): number;
+	/** Whether the captured action's trigger is ongoing. */
+	ongoing(): boolean;
+	/** How long the previous trigger state lasted, in seconds. */
+	previousDuration(): number;
+	/** Releases the capture. */
+	release(): void;
+	/** Whether the captured action's trigger conditions were met this frame. */
+	triggered(): boolean;
+}
+
+/**
  * The `useCaptureAction` hook type: reads through a capture token and
  * re-renders when the selected value changes.
  *
- * @template Token - The token type, usually a `CaptureToken`.
+ * @template Token - The capture token type, narrowed to its action's kind.
  * @template R - The selected value type.
  * @param token - The token returned by `useCapture`.
  * @param selector - Function that extracts a value from the token.
  * @returns The selected value.
  */
-export type FluxUseCaptureAction = <Token, R>(token: Token, selector: (token: Token) => R) => R;
+export type FluxUseCaptureAction = <Token extends CaptureTokenLike, R>(
+	token: Token,
+	selector: (token: Token) => R,
+) => R;
 
 /** Any value an action can hold. */
 type CaptureValue = boolean | number | Vector2 | Vector3;
@@ -139,7 +165,10 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 export function createUseCaptureAction<T extends ActionMap, Contexts extends string = string>(
 	useFluxContext: () => FluxContextValue<T, Contexts>,
 ): FluxUseCaptureAction {
-	function useCaptureAction<Token, R>(token: Token, selector: (token: Token) => R): R {
+	function useCaptureAction<Token extends CaptureTokenLike, R>(
+		token: Token,
+		selector: (token: Token) => R,
+	): R {
 		const { subscribe } = useFluxContext();
 
 		const [value, setValue] = useState(() => selector(token));
