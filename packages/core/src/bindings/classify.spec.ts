@@ -88,7 +88,7 @@ describe("classifyBinding", () => {
 		expect(classifyBinding(config)).toBe("gamepad");
 	});
 
-	it("should classify a config with no keyCode or directional keys as touch", () => {
+	it("should classify a config carrying only pointerIndex as touch", () => {
 		expect.assertions(1);
 
 		const config: ViewportPositionBindingConfig = {
@@ -96,6 +96,50 @@ describe("classifyBinding", () => {
 		};
 
 		expect(classifyBinding(config)).toBe("touch");
+	});
+
+	it("should classify a config carrying only uiButton as touch", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = {
+			uiButton: new Instance("TextButton"),
+		};
+
+		expect(classifyBinding(config)).toBe("touch");
+	});
+
+	it("should classify a config with both a directional key and a keyCode by the directional key", () => {
+		expect.assertions(1);
+
+		const config: Direction2dBindingConfig = {
+			keyCode: Enum.KeyCode.ButtonA,
+			up: Enum.KeyCode.W,
+		};
+
+		expect(classifyBinding(config)).toBe("keyboard");
+	});
+
+	it("should classify a config with both keyCode and uiButton by its keyCode", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = {
+			keyCode: Enum.KeyCode.ButtonA,
+			uiButton: new Instance("TextButton"),
+		};
+
+		expect(classifyBinding(config)).toBe("gamepad");
+	});
+
+	it("should not throw on a config with no input source", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = {
+			pressedThreshold: 0.5,
+		};
+
+		expect(() => {
+			classifyBinding(config);
+		}).never.toThrow();
 	});
 });
 

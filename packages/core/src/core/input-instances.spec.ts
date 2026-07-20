@@ -259,6 +259,32 @@ describe("createInputInstances", () => {
 		}).toThrow("UserInputType");
 	});
 
+	it("should throw on a binding with no input source, naming the action", () => {
+		expect.assertions(1);
+
+		const actions = {
+			aim: { type: "Bool" as const },
+		} satisfies ActionMap;
+
+		const contexts = {
+			gameplay: {
+				bindings: {
+					aim: [{ pressedThreshold: 0.5 }],
+				},
+				priority: 0,
+			},
+		} satisfies Record<string, ContextConfig>;
+
+		expect(() => {
+			createInputInstances({
+				actions,
+				contextNames: ["gameplay"],
+				contexts,
+				parent: new Instance("Folder"),
+			});
+		}).toThrow("aim");
+	});
+
 	it("should set priority and sink on InputContext", () => {
 		expect.assertions(2);
 
