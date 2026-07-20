@@ -159,6 +159,10 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * boundary cancel reads true for exactly one frame and only for the
 	 * displaced reader; consumers already reading flat get nothing. Two
 	 * boundaries in one frame keep only the last displaced viewer.
+	 *
+	 * "In flight" means non-zero magnitude, matching the release drain. A
+	 * trigger that fires at magnitude zero — a tap firing on the release
+	 * edge, say — is not in flight, so a boundary over it cancels nothing.
 	 * @remarks Returns false while the action is claimed — a claim eats the
 	 * boundary cancel like any other processed read.
 	 * @param action - Any action name.
@@ -412,6 +416,9 @@ interface CaptureTokenBase<Actions extends ActionMap, A extends AllActions<Actio
 	 * the token was shadowed by a newer capture, or released mid-press
 	 * itself. The boundary cancel reads true for exactly one frame; a token
 	 * already reading flat gets nothing.
+	 *
+	 * "In flight" means non-zero magnitude, matching the release drain, so a
+	 * trigger firing at magnitude zero is not in flight and cancels nothing.
 	 * @remarks Returns false while the action is claimed — a claim eats the
 	 * boundary cancel like any other processed read.
 	 * @returns True if the action was canceled.

@@ -12,6 +12,7 @@ import {
 	claimAction,
 	didAxisBecomeActive,
 	didAxisBecomeInactive,
+	expireBoundaryCancel,
 	getCurrentDuration,
 	getEntry,
 	getPreviousDuration,
@@ -104,6 +105,7 @@ function createEntry(config: ActionConfig): ActionEntry {
 	const defaultValue = defaultValueForType(config.type);
 
 	return {
+		canceledDelivery: "pending",
 		canceledFor: undefined,
 		captures: [],
 		claimed: false,
@@ -271,8 +273,10 @@ function endFrame(entries: Map<string, ActionEntry>): void {
 	for (const [, entry] of entries) {
 		entry.previousValue = entry.value;
 		entry.previousTriggerState = entry.triggerState;
+		// Ages the boundary cancel while this frame's claim is still set — a
+		// claimed frame consumes the cancel.
+		expireBoundaryCancel(entry);
 		entry.claimed = false;
-		entry.canceledFor = undefined;
 		settleDrain(entry);
 	}
 }

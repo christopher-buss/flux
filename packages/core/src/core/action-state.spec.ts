@@ -1984,6 +1984,64 @@ describe("createActionState", () => {
 				expect(state.justReleased("jump")).toBeFalse();
 			});
 
+			it("should survive a frame reset when the boundary lands before the next update", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(pressedJumpFrame());
+
+				// A capture acquired from outside the update window — a React
+				// effect, say — lands before `core.update` runs its
+				// `endFrame`. The cancel must reach the displaced reader
+				// rather than being wiped unseen.
+				state.capture("jump");
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.canceled("jump")).toBeTrue();
+
+				// Still exactly one frame, never two.
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.canceled("jump")).toBeFalse();
+				expect(state.pressed("jump")).toBeFalse();
+			});
+
+			it("should drop an unobserved boundary rather than holding it indefinitely", () => {
+				expect.assertions(1);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(pressedJumpFrame());
+				state.capture("jump");
+
+				// Nobody reads the cancel. It is carried across one reset so
+				// the read phase can see it, then expires — a stale cancel
+				// must never surface frames later.
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.canceled("jump")).toBeFalse();
+			});
+
+			it("should let a holder boundary overwrite the gameplay reader's cancel in one frame", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(pressedJumpFrame());
+
+				// First boundary displaces gameplay, second displaces the
+				// holder that just acquired. One slot, so gameplay's cancel
+				// evaporates — spec-sanctioned last-wins.
+				const first = state.capture("jump");
+				state.capture("jump");
+
+				expect(first.canceled()).toBeTrue();
+				expect(state.canceled("jump")).toBeFalse();
+			});
+
 			it("should cancel the gameplay reader when a capture acquires over a deflected axis", () => {
 				expect.assertions(2);
 

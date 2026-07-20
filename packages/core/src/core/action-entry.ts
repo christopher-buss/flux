@@ -22,11 +22,17 @@ export interface CaptureViewer {
 /** Per-action mutable state driven by the pipeline and read by consumers. */
 export interface ActionEntry {
 	/**
-	 * The viewer whose in-flight view a capture boundary force-dropped this
-	 * frame; undefined outside a boundary frame. The gameplay (viewer-less)
-	 * reader is represented by an internal sentinel so an empty slot and a
-	 * canceled gameplay reader stay distinct. Cleared at the frame reset; two
-	 * boundaries in one frame overwrite it — last wins.
+	 * How far the pending boundary cancel has got towards its reader. Drives
+	 * expiry in {@link expireBoundaryCancel}; meaningless while
+	 * {@link ActionEntry.canceledFor} is undefined.
+	 */
+	canceledDelivery: CancelDelivery;
+	/**
+	 * The viewer whose in-flight view a capture boundary force-dropped;
+	 * undefined outside a boundary frame. The gameplay (viewer-less) reader is
+	 * represented by an internal sentinel so an empty slot and a canceled
+	 * gameplay reader stay distinct. Two boundaries in one frame overwrite it —
+	 * last wins.
 	 */
 	canceledFor: CaptureViewer | undefined;
 	/** Stack of capture holders; the last element is the active holder. */
@@ -74,6 +80,18 @@ export interface ReadOptions<V> extends ReadEntryOptions<V> {
 	/** The action entry map. */
 	readonly entries: Map<string, ActionEntry>;
 }
+
+/**
+ * How far a pending boundary cancel has got towards the displaced reader.
+ *
+ * A boundary can be recorded at any point relative to `core.update`, because
+ * a capture is acquired from consumer code and `endFrame` runs first inside
+ * the update. Expiring purely on the frame reset would therefore lose every
+ * cancel recorded before the next update — so the slot expires on delivery
+ * instead, and only carries across one reset so a stale cancel cannot
+ * surface frames later.
+ */
+type CancelDelivery = "carried" | "delivered" | "pending";
 
 /**
  * The holder identity of a draining capture — a capture held by nobody.
@@ -180,7 +198,7 @@ export function releaseCapture(entry: ActionEntry, viewer: CaptureViewer): void 
  * @param entry - The action entry to settle.
  */
 export function settleDrain(entry: ActionEntry): void {
-	if (getTopHolder(entry) === DRAIN_HOLDER && getMagnitude(entry.value) === 0) {
+	if (getTopHolder(entry) === DRAIN_HOLDER && !hasLiveInteraction(entry)) {
 		entry.captures.pop();
 	}
 }
@@ -270,12 +288,40 @@ export function readEntryCanceled(entry: ActionEntry, viewer?: CaptureViewer): b
 	}
 
 	if (entry.canceledFor === (viewer ?? GAMEPLAY_READER)) {
+		entry.canceledDelivery = "delivered";
 		return true;
 	}
 
-	// Inlined gate: this runs per frame, and both outcomes are constants
-	// here, so the readEntry options table would be pure allocation.
+	// The gate is inlined rather than routed through `readEntry` because the
+	// slot check above must bypass capture suppression while the
+	// trigger-phase check below must respect it — one options table cannot
+	// express both halves.
 	return !isCaptureSuppressedFor(entry, viewer) && isCanceled(entry);
+}
+
+/**
+ * Ages the pending boundary cancel at the frame reset, expiring it once it
+ * has been seen.
+ *
+ * A delivered cancel is done, and so is one the claim ate — a claimed frame
+ * consumes the cancel like any other processed read, so it must not resurface
+ * next frame. Anything still unseen is carried across exactly one reset, which
+ * is what makes the signal survive a boundary recorded before `core.update`
+ * without ever showing up twice.
+ * @param entry - The action entry to age. Must still carry this frame's claim.
+ */
+export function expireBoundaryCancel(entry: ActionEntry): void {
+	if (entry.canceledFor === undefined) {
+		return;
+	}
+
+	if (entry.canceledDelivery === "pending" && !entry.claimed) {
+		entry.canceledDelivery = "carried";
+		return;
+	}
+
+	entry.canceledFor = undefined;
+	entry.canceledDelivery = "pending";
 }
 
 /**
@@ -425,6 +471,7 @@ function hasLiveInteraction(entry: ActionEntry): boolean {
  */
 function recordBoundaryCancel(entry: ActionEntry, displaced: CaptureViewer): void {
 	entry.canceledFor = displaced;
+	entry.canceledDelivery = "pending";
 }
 
 /**
