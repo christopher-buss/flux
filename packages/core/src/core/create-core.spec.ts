@@ -1,6 +1,6 @@
 import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it, jest } from "@rbxts/jest-globals";
-import { fromAny, fromPartial } from "@rbxts/jest-utils";
+import { afterThis, fromAny, fromPartial } from "@rbxts/jest-utils";
 
 import { hold, implicit, tap } from "../triggers";
 import type { ActionMap } from "../types/actions";
@@ -194,6 +194,68 @@ describe("createCore", () => {
 			};
 
 			expect(getState).toThrow("handle not registered");
+		});
+	});
+
+	describe("debugCaptures", () => {
+		it("should list capture holders when debug is enabled", () => {
+			expect.assertions(3);
+
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				debug: true,
+			});
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const state = core.getState(handle);
+			state.capture("jump", { debugLabel: "pause-menu" });
+
+			const captures = state.debugCaptures("jump");
+			const entry = captures[0];
+			assert(entry);
+
+			expect(captures.size()).toBe(1);
+			expect(entry.label).toBe("pause-menu");
+			expect(entry.traceback === "").toBeFalse();
+		});
+
+		it("should return an empty stack when debug is false", () => {
+			expect.assertions(1);
+
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				debug: false,
+			});
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const state = core.getState(handle);
+			state.capture("jump", { debugLabel: "pause-menu" });
+
+			expect(state.debugCaptures("jump").size()).toBe(0);
+		});
+
+		it("should not warn for a long-held capture", () => {
+			expect.assertions(1);
+
+			const spy = jest.spyOn(jest.globalEnv, "warn");
+			spy.mockImplementation(() => {});
+			afterThis(() => {
+				spy.mockRestore();
+			});
+
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				debug: true,
+			});
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			core.getState(handle).capture("jump", { debugLabel: "settings-menu" });
+
+			for (const _ of $range(1, 625)) {
+				core.update(0.016);
+			}
+
+			expect(spy).never.toHaveBeenCalled();
 		});
 	});
 

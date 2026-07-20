@@ -19,19 +19,27 @@ export interface HandleData<T extends ActionMap> extends CoreHandleData {
 	readonly publicState: ActionState<T>;
 }
 
-interface RegisterOptions<T extends ActionMap> {
+/**
+ * Options shared by every handle-creation path.
+ * @template T - The action map type.
+ */
+interface HandleOptions<T extends ActionMap> {
 	readonly actions: T;
 	readonly contextNames: ReadonlyArray<string>;
-	readonly contexts: Record<string, ContextConfig>;
+	readonly debug?: boolean;
 	readonly handles: Map<InputHandle, HandleData<T>>;
 	readonly parent: Instance;
 }
 
-interface SubscribeOptions<T extends ActionMap> {
+interface RegisterOptions<T extends ActionMap> extends HandleOptions<T> {
+	readonly contexts: Record<string, ContextConfig>;
+}
+
+interface BuildHandleDataOptions<T extends ActionMap> {
 	readonly actions: T;
 	readonly contextNames: ReadonlyArray<string>;
-	readonly handles: Map<InputHandle, HandleData<T>>;
-	readonly parent: Instance;
+	readonly instanceData: HandleData<T>["instanceData"];
+	readonly isDebug: boolean;
 }
 
 /**
@@ -75,7 +83,7 @@ export function registerHandleAs<T extends ActionMap>(
  */
 export function subscribeHandle<T extends ActionMap>(
 	factory: HandleFactory,
-	options: SubscribeOptions<T>,
+	options: HandleOptions<T>,
 ): [InputHandle, () => void] {
 	const handle = factory.allocate();
 	const [data, cancel] = createSubscribeData(options);
@@ -92,7 +100,7 @@ export function subscribeHandle<T extends ActionMap>(
  */
 export function subscribeHandleAs<T extends ActionMap>(
 	handle: InputHandle,
-	options: SubscribeOptions<T>,
+	options: HandleOptions<T>,
 ): () => void {
 	validateHandleUnique(options.handles, handle);
 	const [data, cancel] = createSubscribeData(options);
@@ -137,12 +145,9 @@ function createPreviousMagnitudes(actions: ActionMap): Map<string, number> {
 	return previousMagnitudes;
 }
 
-function buildHandleData<T extends ActionMap>(
-	actions: T,
-	contextNames: ReadonlyArray<string>,
-	instanceData: HandleData<T>["instanceData"],
-): HandleData<T> {
-	const [publicState, internalState] = createActionState(actions);
+function buildHandleData<T extends ActionMap>(options: BuildHandleDataOptions<T>): HandleData<T> {
+	const { actions, contextNames, instanceData, isDebug } = options;
+	const [publicState, internalState] = createActionState(actions, { debug: isDebug });
 	return {
 		activeContexts: createActiveContexts(contextNames),
 		bindingOverrides: new Map<string, ReadonlyArray<BindingLike>>(),
@@ -158,9 +163,9 @@ function buildHandleData<T extends ActionMap>(
 }
 
 function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): HandleData<T> {
-	const { actions, contextNames, contexts, parent } = options;
+	const { actions, contextNames, contexts, debug: isDebug, parent } = options;
 	const instanceData = createInputInstances({ actions, contextNames, contexts, parent });
-	return buildHandleData(actions, contextNames, instanceData);
+	return buildHandleData({ actions, contextNames, instanceData, isDebug: isDebug === true });
 }
 
 function validateHandleUnique<T extends ActionMap>(
@@ -173,11 +178,16 @@ function validateHandleUnique<T extends ActionMap>(
 }
 
 function createSubscribeData<T extends ActionMap>(
-	options: SubscribeOptions<T>,
+	options: HandleOptions<T>,
 ): [HandleData<T>, () => void] {
-	const { actions, contextNames, parent } = options;
+	const { actions, contextNames, debug: isDebug, parent } = options;
 	const instanceData = findInputInstances({ actions, contextNames, parent });
-	const data = buildHandleData(actions, contextNames, instanceData);
+	const data = buildHandleData({
+		actions,
+		contextNames,
+		instanceData,
+		isDebug: isDebug === true,
+	});
 	const cancel = (): void => {
 		for (const connection of instanceData.connections) {
 			connection.Disconnect();

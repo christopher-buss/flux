@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { afterThis } from "@rbxts/jest-utils";
 
 import type { ActionMap } from "../types/actions";
 import { getMagnitude } from "./action-entry";
@@ -1392,6 +1393,113 @@ describe("createActionState", () => {
 				second.release();
 
 				expect(state.pressed("jump")).toBeTrue();
+			});
+		});
+
+		describe("debugCaptures", () => {
+			/** Turns the dev gate on for this test and restores it afterward. */
+			function enableDevelopmentMode(): void {
+				_G.__DEV__ = true;
+				afterThis(() => {
+					_G.__DEV__ = false;
+				});
+			}
+
+			it("should return the stack bottom-to-top, top being the active holder", () => {
+				expect.assertions(5);
+
+				enableDevelopmentMode();
+
+				const [state] = createActionState(TEST_ACTIONS, { debug: true });
+				state.capture("jump", { debugLabel: "bottom" });
+				const top = state.capture("jump", { debugLabel: "top" });
+
+				const captures = state.debugCaptures("jump");
+				const [bottomEntry, topEntry] = captures;
+				assert(bottomEntry);
+				assert(topEntry);
+
+				expect(captures.size()).toBe(2);
+				expect(bottomEntry.label).toBe("bottom");
+				expect(topEntry.label).toBe("top");
+
+				top.release();
+
+				const remaining = state.debugCaptures("jump");
+				const restoredEntry = remaining[0];
+				assert(restoredEntry);
+
+				expect(remaining.size()).toBe(1);
+				expect(restoredEntry.label).toBe("bottom");
+			});
+
+			it("should record an automatic traceback on each entry", () => {
+				expect.assertions(3);
+
+				enableDevelopmentMode();
+
+				const [state] = createActionState(TEST_ACTIONS, { debug: true });
+				state.capture("jump");
+
+				const captures = state.debugCaptures("jump");
+				const entry = captures[0];
+				assert(entry);
+
+				expect(captures.size()).toBe(1);
+				expect(entry.traceback === "").toBeFalse();
+
+				// No label was supplied, so the entry carries none.
+				expect(entry.label).toBeUndefined();
+			});
+
+			it("should return an empty stack when nothing is captured", () => {
+				expect.assertions(1);
+
+				enableDevelopmentMode();
+
+				const [state] = createActionState(TEST_ACTIONS, { debug: true });
+
+				expect(state.debugCaptures("jump").size()).toBe(0);
+			});
+
+			it("should return an empty stack without the debug flag", () => {
+				expect.assertions(1);
+
+				enableDevelopmentMode();
+
+				const [state] = createActionState(TEST_ACTIONS);
+				state.capture("jump", { debugLabel: "modal" });
+
+				expect(state.debugCaptures("jump").size()).toBe(0);
+			});
+
+			it("should not report the drain as a holder", () => {
+				expect.assertions(2);
+
+				enableDevelopmentMode();
+
+				const [state, internal] = createActionState(TEST_ACTIONS, { debug: true });
+				const token = state.capture("jump", { debugLabel: "modal" });
+				internal.updateAction(pressedJumpFrame());
+				token.release();
+
+				// The mid-press release starts a drain: reads stay suppressed,
+				// but nobody holds the action.
+				expect(state.pressed("jump")).toBeFalse();
+				expect(state.debugCaptures("jump").size()).toBe(0);
+			});
+
+			it("should return an empty stack when _G.__DEV__ is false", () => {
+				expect.assertions(1);
+
+				// Dev gate deliberately off: `debug: true` alone is not enough
+				// to surface capture metadata.
+				_G.__DEV__ = false;
+
+				const [state] = createActionState(TEST_ACTIONS, { debug: true });
+				state.capture("jump", { debugLabel: "modal" });
+
+				expect(state.debugCaptures("jump").size()).toBe(0);
 			});
 		});
 

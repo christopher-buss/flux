@@ -1,3 +1,4 @@
+import type { CaptureOptions, DebugCapture } from "../types/state";
 import type { ActionEntry, ActionValueType, CaptureViewer } from "./action-entry";
 import {
 	acquireCapture,
@@ -9,6 +10,7 @@ import {
 	getPreviousDuration,
 	isCanceled,
 	isOngoing,
+	isRealHolder,
 	isTriggered,
 	readEntry,
 	readEntryValue,
@@ -61,6 +63,18 @@ export interface CaptureTokenRuntime {
 	triggered(): boolean;
 }
 
+/** Options for acquiring a capture and building its token. */
+export interface CreateCaptureTokenOptions {
+	/** The action name. */
+	readonly action: string;
+	/** The capture options supplied at acquisition. */
+	readonly captureOptions?: CaptureOptions | undefined;
+	/** The action entry map. */
+	readonly entries: Map<string, ActionEntry>;
+	/** Whether the owning state was created in debug mode. */
+	readonly isDebug: boolean;
+}
+
 /**
  * Acquires a capture on an action and builds its scoped reader token.
  *
@@ -68,17 +82,20 @@ export interface CaptureTokenRuntime {
  * every read routed through the token carries that identity past the holder
  * check. The public `CaptureToken` type narrows the returned surface to the
  * action's kind.
- * @param entries - The action entry map.
- * @param action - The action name.
+ * In dev mode the viewer additionally records holder metadata — an automatic
+ * `debug.traceback()` and the optional `debugLabel` — surfaced later by
+ * `debugCaptures`. Outside dev mode nothing is recorded.
+ * @param options - The action, entry map, capture options, and debug flag.
  * @returns The capture token, already installed as the active holder.
  */
 // eslint-disable-next-line max-lines-per-function -- thin pre-bound read delegations
-export function createCaptureToken(
-	entries: Map<string, ActionEntry>,
-	action: string,
-): CaptureTokenRuntime {
+export function createCaptureToken(options: CreateCaptureTokenOptions): CaptureTokenRuntime {
+	const { action, captureOptions, entries, isDebug } = options;
 	const entry = getEntry(entries, action);
-	const viewer: CaptureViewer = {};
+	const viewer: CaptureViewer =
+		_G.__DEV__ && isDebug
+			? { debugLabel: captureOptions?.debugLabel, traceback: debug.traceback() }
+			: {};
 
 	function flagRead(pick: (entry: ActionEntry) => boolean): boolean {
 		return readEntry(entry, { pick, viewer, whenSuppressed: suppressedFalse });
@@ -143,4 +160,32 @@ export function createCaptureToken(
 			return flagRead(isTriggered);
 		},
 	};
+}
+
+/**
+ * Lists an action's capture stack as debug entries, bottom-to-top.
+ *
+ * Callers gate on dev mode; this helper reports whatever metadata the holders
+ * recorded at acquisition. The drain sentinel — a capture held by nobody — is
+ * not a holder and is skipped.
+ * @param entries - The action entry map.
+ * @param action - The action name.
+ * @returns One entry per real holder, the last being the active holder.
+ */
+export function listDebugCaptures(
+	entries: Map<string, ActionEntry>,
+	action: string,
+): Array<DebugCapture> {
+	return getEntry(entries, action)
+		.captures.filter(isRealHolder)
+		.map((holder) => {
+			return {
+				...(holder.debugLabel !== undefined && { label: holder.debugLabel }),
+				// A holder only lacks a traceback if it was acquired while the
+				// dev gate was off — impossible in real builds, where
+				// `_G.__DEV__` is a compile-time constant. The stack must still
+				// report every real holder.
+				traceback: holder.traceback ?? "",
+			};
+		});
 }

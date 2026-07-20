@@ -7,8 +7,17 @@ export type ActionValueType = boolean | number | Vector2 | Vector3;
 /**
  * The identity a processed read is performed as. Capture tokens read as their
  * viewer; plain {@link ActionState} reads carry no viewer.
+ *
+ * Suppression compares viewers by identity only. The optional fields are
+ * dev-mode metadata recorded at acquisition and surfaced by
+ * `debugCaptures`; they play no part in arbitration.
  */
-export type CaptureViewer = object;
+export interface CaptureViewer {
+	/** The `debugLabel` supplied at acquisition; dev mode only. */
+	readonly debugLabel?: string | undefined;
+	/** The acquisition-site traceback; recorded in dev mode only. */
+	readonly traceback?: string | undefined;
+}
 
 /** Per-action mutable state driven by the pipeline and read by consumers. */
 export interface ActionEntry {
@@ -148,6 +157,19 @@ export function settleDrain(entry: ActionEntry): void {
 	if (getTopHolder(entry) === DRAIN_HOLDER && getMagnitude(entry.value) === 0) {
 		entry.captures.pop();
 	}
+}
+
+/**
+ * Whether a capture-stack entry is a real holder rather than the drain
+ * sentinel.
+ *
+ * Stack enumerators (dev-mode introspection) must skip the drain — it is a
+ * capture held by nobody, not a holder to report.
+ * @param viewer - The stack entry to test.
+ * @returns True for a real holder's viewer.
+ */
+export function isRealHolder(viewer: CaptureViewer): boolean {
+	return viewer !== DRAIN_HOLDER;
 }
 
 /**

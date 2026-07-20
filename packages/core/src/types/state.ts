@@ -40,10 +40,30 @@ export type ActionValue<
 
 /**
  * Options accepted by {@link ActionState.capture}.
- * @remarks Reserved extension point — no options are defined yet. Future
- * fields (such as a debug label) land here without changing the signature.
+ * @remarks Reserved extension point — future fields (such as a priority tier)
+ * land here without changing the signature.
  */
-export interface CaptureOptions {}
+export interface CaptureOptions {
+	/**
+	 * Optional label recorded on the capture's {@link DebugCapture} entry, to
+	 * disambiguate holders when every acquisition routes through one shared
+	 * helper and the tracebacks look identical.
+	 * @remarks Dev-mode only: outside development mode the label is not
+	 * recorded, and {@link ActionState.debugCaptures} never surfaces it.
+	 */
+	readonly debugLabel?: string;
+}
+
+/**
+ * One holder on an action's capture stack, as reported by
+ * {@link ActionState.debugCaptures}.
+ */
+export interface DebugCapture {
+	/** The `debugLabel` supplied at acquisition, if any. */
+	readonly label?: string;
+	/** The traceback recorded automatically at the `capture()` call site. */
+	readonly traceback: string;
+}
 
 /**
  * A standing, exclusive, reader-side hold on one action, returned by
@@ -201,6 +221,29 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * @returns Duration in seconds.
 	 */
 	currentDuration(action: AllActions<Actions>): number;
+
+	/**
+	 * Returns the action's capture stack for debugging, bottom-to-top — the
+	 * last entry is the active holder.
+	 *
+	 * Dev-mode introspection for finding which surface is holding a dead
+	 * action: each entry carries the traceback recorded automatically at its
+	 * `capture()` call site, plus the optional
+	 * {@link CaptureOptions.debugLabel} supplied at acquisition.
+	 *
+	 * @remarks Strictly dev-mode: returns an empty array unless `_G.__DEV__`
+	 * is true and the core was created with `debug: true`, so shipped game
+	 * code cannot branch on capture status.
+	 * @example
+	 * ```ts
+	 * for (const { label, traceback } of state.debugCaptures("confirm")) {
+	 * 	print(label ?? "<unlabeled>", traceback);
+	 * }
+	 * ```
+	 * @param action - Any action name.
+	 * @returns The capture stack bottom-to-top; empty outside dev mode.
+	 */
+	debugCaptures(action: AllActions<Actions>): ReadonlyArray<DebugCapture>;
 
 	/**
 	 * Returns the current 2D directional vector of a Direction2D action.

@@ -2,7 +2,7 @@ import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { bool, defineActions, direction1d, direction2d } from "../actions/define";
-import type { ActionState, CaptureToken } from "../types/state";
+import type { ActionState, CaptureToken, DebugCapture } from "../types/state";
 import type { InternalActionState, UpdateActionOptions } from "./action-state";
 import { createActionState } from "./action-state";
 
@@ -84,6 +84,7 @@ describe("capture", () => {
 
 	it("should expose no introspection members on the token", () => {
 		expectTypeOf<JumpToken>().not.toHaveProperty("isActive");
+		expectTypeOf<JumpToken>().not.toHaveProperty("isCaptured");
 		expectTypeOf<JumpToken>().not.toHaveProperty("isClaimed");
 		expectTypeOf<JumpToken>().not.toHaveProperty("isEnabled");
 		expectTypeOf<JumpToken>().not.toHaveProperty("isAvailable");
@@ -91,6 +92,31 @@ describe("capture", () => {
 
 	it("should accept an options bag", () => {
 		expectTypeOf<ActionState<typeof actions>["capture"]>().toBeCallableWith("jump", {});
+	});
+
+	it("should accept a debugLabel in the options bag", () => {
+		expectTypeOf<ActionState<typeof actions>["capture"]>().toBeCallableWith("jump", {
+			debugLabel: "pause-menu",
+		});
+	});
+});
+
+describe("debugCaptures", () => {
+	it("should accept any action name and return a readonly stack", () => {
+		expectTypeOf<ActionState<typeof actions>["debugCaptures"]>().toBeCallableWith("jump");
+		expectTypeOf<ActionState<typeof actions>["debugCaptures"]>().toBeCallableWith("move");
+		expectTypeOf<ActionState<typeof actions>["debugCaptures"]>().returns.toEqualTypeOf<
+			ReadonlyArray<DebugCapture>
+		>();
+	});
+
+	it("should carry an optional label and a required traceback per entry", () => {
+		expectTypeOf<DebugCapture["label"]>().toEqualTypeOf<string | undefined>();
+		expectTypeOf<DebugCapture["traceback"]>().toEqualTypeOf<string>();
+	});
+
+	it("should expose no public isCaptured on the state", () => {
+		expectTypeOf<ActionState<typeof actions>>().not.toHaveProperty("isCaptured");
 	});
 });
 
