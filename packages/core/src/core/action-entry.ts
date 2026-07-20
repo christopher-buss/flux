@@ -273,9 +273,9 @@ function isSuppressedFor(entry: ActionEntry, viewer: CaptureViewer | undefined):
 		return true;
 	}
 
-	const holder = entry.captures[entry.captures.size() - 1];
+	const topHolder = entry.captures[entry.captures.size() - 1];
 
-	return holder !== undefined && holder !== viewer;
+	return topHolder !== undefined && topHolder !== viewer;
 }
 
 function getValue(entry: ActionEntry): ActionValueType {
