@@ -1,10 +1,10 @@
 import type { ModifierContext } from "../modifiers/types";
-import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
+import type { ActionConfig, ActionMap } from "../types/actions";
 import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionValueType } from "./action-entry";
-import { getMagnitude } from "./action-entry";
+import { getDefaultValue, getMagnitude } from "./action-entry";
 import type { InternalActionState } from "./action-state";
 import type { ActiveContexts } from "./active-contexts";
 import { resolveContextOrder } from "./active-contexts";
@@ -71,29 +71,6 @@ interface ContextActionsOptions {
 	readonly onReplicationTimeout?: (message: string) => void;
 	readonly orderedContexts: ReadonlyArray<string>;
 	readonly processedActions: Set<string>;
-}
-
-/**
- * Returns the default zero value for an action type.
- * @param actionType - Bool, Direction1D, Direction2D, Direction3D, or ViewportPosition.
- * @returns The corresponding zero/false value.
- */
-export function getDefaultValue(actionType: ActionType): ActionValueType {
-	switch (actionType) {
-		case "Bool": {
-			return false;
-		}
-		case "Direction1D": {
-			return 0;
-		}
-		case "Direction2D":
-		case "ViewportPosition": {
-			return Vector2.zero;
-		}
-		case "Direction3D": {
-			return Vector3.zero;
-		}
-	}
 }
 
 /**
