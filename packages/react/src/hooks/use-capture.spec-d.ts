@@ -4,18 +4,23 @@ import {
 	createCore,
 	defineActions,
 	defineContexts,
+	direction1d,
 	direction2d,
+	direction3d,
 	position2d,
 } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { createFluxReact } from "../create-flux-react";
+import type { CaptureTokenSurface } from "./use-capture";
 
 const actions = defineActions({
+	fly: direction3d(),
 	jump: bool(),
 	look: position2d(),
 	move: direction2d(),
+	throttle: direction1d(),
 });
 
 const contexts = defineContexts({
@@ -40,6 +45,44 @@ type MoveToken = CaptureToken<typeof actions, "move">;
  * @template Read - The read name to look for.
  */
 type Has<Token, Read extends string> = Read extends keyof Token ? true : false;
+
+/**
+ * Every read core puts on a capture token, gathered by intersecting one token
+ * per action kind. The facade `useCapture` returns has to implement all of
+ * them, so this is what pins the two surfaces together.
+ */
+type CoreTokenReads = CaptureToken<typeof actions, "fly"> &
+	CaptureToken<typeof actions, "jump"> &
+	CaptureToken<typeof actions, "look"> &
+	CaptureToken<typeof actions, "move"> &
+	CaptureToken<typeof actions, "throttle">;
+
+/**
+ * Whether the facade's surface covers a kind-narrowed token's reads.
+ *
+ * `getState` is compared by name only: the facade widens its return to every
+ * value an action can hold, which the narrowed token deliberately does not.
+ *
+ * @template A - The action whose narrowed token is compared.
+ */
+type Implements<A extends keyof typeof actions> =
+	Omit<CaptureTokenSurface, "getState"> extends Omit<CaptureToken<typeof actions, A>, "getState">
+		? true
+		: false;
+
+describe("CaptureTokenSurface", () => {
+	it("should carry exactly the reads core puts on a capture token", () => {
+		expectTypeOf<keyof CaptureTokenSurface>().toEqualTypeOf<keyof CoreTokenReads>();
+	});
+
+	it("should implement every read of each kind-narrowed token", () => {
+		expectTypeOf<Implements<"jump">>().toEqualTypeOf<true>();
+		expectTypeOf<Implements<"move">>().toEqualTypeOf<true>();
+		expectTypeOf<Implements<"fly">>().toEqualTypeOf<true>();
+		expectTypeOf<Implements<"look">>().toEqualTypeOf<true>();
+		expectTypeOf<Implements<"throttle">>().toEqualTypeOf<true>();
+	});
+});
 
 describe("FluxUseCapture", () => {
 	const handle = {} as InputHandle;

@@ -67,32 +67,95 @@ export type FluxUseCaptureAction = <Token extends CaptureTokenLike, R>(
 	selector: (token: Token) => R,
 ) => R;
 
-/** Any value an action can hold. */
-type CaptureValue = boolean | number | Vector2 | Vector3;
-
 /**
  * The full runtime shape of a capture token — every processed read with the
  * action pre-bound. The public `CaptureToken` type narrows this to the
  * action's kind; the facade implements all of it and is cast on the way out.
  */
-interface CaptureTokenSurface {
+export interface CaptureTokenSurface {
+	/** The captured action's current scalar value. */
 	axis1d(): number;
+	/** The captured action's current 3D vector value. */
 	axis3d(): Vector3;
+	/** Whether the captured axis just became active. */
 	axisBecameActive(): boolean;
+	/** Whether the captured axis just became inactive. */
 	axisBecameInactive(): boolean;
+	/** Whether the action was canceled this frame, by trigger or boundary. */
 	canceled(): boolean;
+	/** Claims the captured action for the rest of the frame. */
 	claim(): boolean;
+	/** The captured action's current trigger state duration. */
 	currentDuration(): number;
+	/** The captured action's current 2D directional vector. */
 	direction2d(): Vector2;
+	/** The captured action's typed runtime value. */
 	getState(): CaptureValue;
+	/** Whether the captured action's trigger just fired. */
 	justPressed(): boolean;
+	/** Whether the captured action's trigger just stopped firing. */
 	justReleased(): boolean;
+	/** Whether the captured action's trigger is ongoing. */
 	ongoing(): boolean;
+	/** The captured action's screen-space position. */
 	position2d(): Vector2;
+	/** Whether the captured action's trigger is currently "triggered". */
 	pressed(): boolean;
+	/** The captured action's previous trigger state duration. */
 	previousDuration(): number;
+	/** Releases the capture, restoring the holder beneath or normal reads. */
 	release(): void;
+	/** Whether the captured action's trigger conditions were met this frame. */
 	triggered(): boolean;
+}
+
+/** Any value an action can hold. */
+type CaptureValue = boolean | number | Vector2 | Vector3;
+
+/**
+ * What a render asks the hook to capture.
+ *
+ * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
+ */
+interface CaptureRequest<T extends ActionMap, Contexts extends string> {
+	/** The action to capture. */
+	readonly action: AllActions<T>;
+	/** The core owning the action. */
+	readonly core: FluxCore<T, Contexts>;
+	/** The handle the capture is scoped to. */
+	readonly handle: InputHandle;
+}
+
+/**
+ * A capture the hook acquired, and what it was acquired for.
+ *
+ * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
+ */
+interface CaptureHold<T extends ActionMap, Contexts extends string> extends CaptureRequest<
+	T,
+	Contexts
+> {
+	/** The core token acquired for this request. */
+	readonly token: CaptureTokenSurface;
+}
+
+/**
+ * Everything the stable facade reads through.
+ *
+ * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
+ */
+interface CaptureReader<T extends ActionMap, Contexts extends string> {
+	/** Ref holding the acquired capture, absent until the effect runs. */
+	readonly holdRef: { current: CaptureHold<T, Contexts> | undefined };
+	/** Ref holding the captured action's neutral value. */
+	readonly inertRef: { current: CaptureValue };
+	/** Ref recording whether the held capture has been released. */
+	readonly releasedRef: { current: boolean };
+	/** Ref holding what the latest render asks to capture. */
+	readonly requestRef: { current: CaptureRequest<T, Contexts> };
 }
 
 /**
@@ -125,23 +188,39 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 		const handle = hasStringFirst ? defaultHandle : handleOrAction;
 		const action = hasStringFirst ? handleOrAction : (maybeAction as AllActions<T>);
 
-		const innerRef = useRef<CaptureTokenSurface | undefined>(undefined);
+		const holdRef = useRef<CaptureHold<T, Contexts> | undefined>(undefined);
+		const releasedRef = useRef(true);
+		const requestRef = useRef<CaptureRequest<T, Contexts>>({ action, core, handle });
 		const [initialInert] = useState(() => inertStateFor(core, handle, action));
 		const inertRef = useRef(initialInert);
-		const [facade] = useState(() => createCaptureFacade(innerRef, inertRef));
+		function buildFacade(): CaptureTokenSurface {
+			return createCaptureFacade({ holdRef, inertRef, releasedRef, requestRef });
+		}
+
+		const [facade] = useState(buildFacade);
+
+		// The reader is only live while the held token matches what this
+		// render asks for, so the commit between an action change and its
+		// effect reads inert rather than reporting the previous action.
+		const request = requestRef.current;
+		if (request.action !== action || request.core !== core || request.handle !== handle) {
+			requestRef.current = { action, core, handle };
+		}
 
 		useEffect(() => {
 			inertRef.current = inertStateFor(core, handle, action);
 
 			const token = core.getState(handle).capture(action) as unknown as CaptureTokenSurface;
-			innerRef.current = token;
+			holdRef.current = { action, core, handle, token };
+			releasedRef.current = false;
 
 			return () => {
+				releasedRef.current = true;
 				token.release();
-				// `innerRef` is deliberately left pointing at the released
-				// token: core synthesizes a one-frame `canceled()` at the
-				// capture boundary, and the reader must still see it while
-				// tearing down.
+				// `holdRef` deliberately keeps the released token: core
+				// synthesizes a one-frame `canceled()` at the capture
+				// boundary, and the reader must still see it while tearing
+				// down. Every other read reports inert once released.
 			};
 		}, [core, handle, action]);
 
@@ -232,83 +311,115 @@ function inertStateFor<T extends ActionMap, Contexts extends string>(
 
 /**
  * - Builds the stable facade returned by `useCapture`.
- * - Every read delegates to the captured token when one is held, and reports
- *   the suppressed result otherwise, matching what any non-holder reads.
+ * - Every read delegates to the held token while the capture is live, and
+ *   reports the suppressed result otherwise — before the capture lands, after
+ *   it is released, and during the commit where a changed action has not been
+ *   captured yet.
+ * - `canceled()` is the one exception: it delegates to the held token even
+ *   after release, so core's one-frame boundary cancel still reaches a reader
+ *   that is tearing down.
  *
- * @param innerRef - Ref holding the live core token, absent until captured.
- * @param inertRef - Ref holding the captured action's neutral value.
+ * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
+ * @param reader - The refs the facade reads the current capture through.
  * @returns A token-shaped reader that outlives any single capture.
  */
-function createCaptureFacade(
-	innerRef: { current: CaptureTokenSurface | undefined },
-	inertRef: { current: CaptureValue },
+
+function createCaptureFacade<T extends ActionMap, Contexts extends string>(
+	reader: CaptureReader<T, Contexts>,
 ): CaptureTokenSurface {
+	const { holdRef, inertRef, releasedRef, requestRef } = reader;
+
+	function live(): CaptureTokenSurface | undefined {
+		const hold = holdRef.current;
+		if (hold === undefined || releasedRef.current) {
+			return undefined;
+		}
+
+		const request = requestRef.current;
+		if (
+			hold.action !== request.action ||
+			hold.core !== request.core ||
+			hold.handle !== request.handle
+		) {
+			return undefined;
+		}
+
+		return hold.token;
+	}
+
 	return {
 		axis1d(): number {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? 0 : inner.axis1d();
 		},
 		axis3d(): Vector3 {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? Vector3.zero : inner.axis3d();
 		},
 		axisBecameActive(): boolean {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? false : inner.axisBecameActive();
 		},
 		axisBecameInactive(): boolean {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? false : inner.axisBecameInactive();
 		},
 		canceled(): boolean {
-			const inner = innerRef.current;
-			return inner === undefined ? false : inner.canceled();
+			const hold = holdRef.current;
+			return hold === undefined ? false : hold.token.canceled();
 		},
 		claim(): boolean {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? false : inner.claim();
 		},
 		currentDuration(): number {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? 0 : inner.currentDuration();
 		},
 		direction2d(): Vector2 {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? Vector2.zero : inner.direction2d();
 		},
 		getState(): CaptureValue {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? inertRef.current : inner.getState();
 		},
 		justPressed(): boolean {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? false : inner.justPressed();
 		},
 		justReleased(): boolean {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? false : inner.justReleased();
 		},
 		ongoing(): boolean {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? false : inner.ongoing();
 		},
 		position2d(): Vector2 {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? Vector2.zero : inner.position2d();
 		},
 		pressed(): boolean {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? false : inner.pressed();
 		},
 		previousDuration(): number {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? 0 : inner.previousDuration();
 		},
 		release(): void {
-			innerRef.current?.release();
+			const inner = live();
+			if (inner === undefined) {
+				return;
+			}
+
+			releasedRef.current = true;
+			inner.release();
 		},
 		triggered(): boolean {
-			const inner = innerRef.current;
+			const inner = live();
 			return inner === undefined ? false : inner.triggered();
 		},
 	};

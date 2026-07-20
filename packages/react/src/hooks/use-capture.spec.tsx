@@ -22,6 +22,12 @@ type TestFlux = FluxReact<typeof TEST_ACTIONS, TestContexts>;
 /** A capture token for the fixture's plain Bool action. */
 type JumpToken = CaptureToken<typeof TEST_ACTIONS, "jump">;
 
+/** Props naming the action a surface should capture. */
+interface ActionProps {
+	/** The action the surface captures on this render. */
+	readonly action: "interact" | "jump";
+}
+
 /** Props naming the sibling surfaces that are currently mounted. */
 interface LiveProps {
 	/** One id per mounted sibling; dropping an id unmounts that sibling. */
@@ -49,6 +55,39 @@ function createTokenLoggingSurface(
 	return ({ tag }: TaggedProps): React.ReactNode => {
 		log.push(useCapture("jump"));
 		return <textlabel Text={tag} />;
+	};
+}
+
+/**
+ * Wraps a surface that captures whichever action its props name, recording
+ * what the token reads during every render.
+ *
+ * @param flux - The FluxReact instance supplying the Provider and hook.
+ * @param core - The core the Provider hands to hooks.
+ * @param handle - The default handle the Provider hands to hooks.
+ * @param reads - Log receiving one `pressed()` read per render.
+ * @returns The host component.
+ */
+function createActionHost(
+	flux: TestFlux,
+	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
+	handle: InputHandle,
+	reads: Log<boolean>,
+): (props: ActionProps) => React.ReactNode {
+	const { FluxProvider, useCapture } = flux;
+
+	function Surface({ action }: ActionProps): React.ReactNode {
+		const token = useCapture(action);
+		reads.push(token.pressed());
+		return <frame />;
+	}
+
+	return ({ action }: ActionProps): React.ReactNode => {
+		return (
+			<FluxProvider core={core} handle={handle}>
+				<Surface action={action} />
+			</FluxProvider>
+		);
 	};
 }
 
@@ -328,25 +367,8 @@ describe("useCapture", () => {
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			const handle = core.register(new Instance("Folder"), "gameplay");
 			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
-			const { FluxProvider, useCapture } = flux;
 			const state = core.getState(handle);
-
-			function Surface({
-				action,
-			}: {
-				readonly action: "interact" | "jump";
-			}): React.ReactNode {
-				useCapture(action);
-				return <frame />;
-			}
-
-			function Host({ action }: { readonly action: "interact" | "jump" }): React.ReactNode {
-				return (
-					<FluxProvider core={core} handle={handle}>
-						<Surface action={action} />
-					</FluxProvider>
-				);
-			}
+			const Host = createActionHost(flux, core, handle, makeLog<boolean>());
 
 			function readOutside(): Record<string, boolean> {
 				return { interact: state.pressed("interact"), jump: state.pressed("jump") };
@@ -460,6 +482,15 @@ describe("useCapture", () => {
 			const log = makeLog<JumpToken>();
 			const Surface = createTokenLoggingSurface(useCapture, log);
 
+			// `debugRenderPhaseSideEffectsForStrictMode` is on under `__DEV__`
+			// (react-lua `@rbxts-js/shared/src/ReactFeatureFlags.lua:43`), so
+			// the render phase really is double-invoked here: the hook's
+			// `useState` initializers run twice and must still net one
+			// capture. Effects are not double-invoked —
+			// `enableDoubleInvokingEffects = false` (same file, line 140), and
+			// react-lua 17.3.7 is a React 17 fork with no `StrictEffects` — so
+			// the mount/cleanup/mount ordering is covered by the key-remount
+			// test below.
 			const { unmount } = render(
 				<StrictMode>
 					<FluxProvider core={core} handle={handle}>
@@ -524,10 +555,14 @@ describe("useCapture", () => {
 				);
 			}
 
-			// React-Lua's StrictMode does not double-invoke effects, so the
+			// React-Lua does not double-invoke effects
+			// (`enableDoubleInvokingEffects = false`, react-lua
+			// `@rbxts-js/shared/src/ReactFeatureFlags.lua:140`), so the
 			// double-mount ordering is driven here with a key remount: the old
 			// instance's cleanup and the new instance's setup land in the same
-			// commit, exactly as a React 18 StrictMode double-mount would.
+			// commit. Unlike a React 18 StrictMode replay this mounts a fresh
+			// fiber, so it pins the ordering and the net, not the refs being
+			// reused; a react-lua bump that flips that flag should replace it.
 			const { rerender } = render(<Host generation="first" />);
 
 			rerender(<Host generation="second" />);
@@ -537,8 +572,8 @@ describe("useCapture", () => {
 			expect(state.debugCaptures("jump").size()).toBe(1);
 		});
 
-		it("should read harmlessly after unmount rather than erroring", () => {
-			expect.assertions(2);
+		it("should read inert after unmount rather than erroring", () => {
+			expect.assertions(3);
 
 			afterThis(() => {
 				cleanup();
@@ -564,10 +599,109 @@ describe("useCapture", () => {
 
 			const token = log.entries()[0]!;
 
-			// The capture is gone, so the reader has no privileged view left:
-			// a late read during teardown is harmless, never an error.
+			// A late read during teardown is inert, never an error and never
+			// a live view of an action this surface no longer owns.
 			expect(() => token.pressed()).never.toThrow();
+			expect(token.pressed()).toBeFalse();
 			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should not let a released token claim the action after unmount", () => {
+			expect.assertions(2);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const log = makeLog<JumpToken>();
+			const Surface = createTokenLoggingSurface(flux.useCapture, log);
+
+			const { unmount } = render(
+				<flux.FluxProvider core={core} handle={handle}>
+					<Surface tag="surface" />
+				</flux.FluxProvider>,
+			);
+
+			unmount();
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+
+			expect(log.entries()[0]!.claim()).toBeFalse();
+
+			// The stale claim must not suppress the readers that are still up.
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should read inert during the commit where the action changes", () => {
+			expect.assertions(2);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const reads = makeLog<boolean>();
+			const Host = createActionHost(flux, core, handle, reads);
+
+			const { rerender } = render(<Host action="jump" />);
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+
+			rerender(<Host action="interact" />);
+
+			// The render that asks for "interact" must not report "jump".
+			expect(reads.entries()[1]).toBeFalse();
+
+			core.update(FRAME_TIME);
+			rerender(<Host action="interact" />);
+
+			expect(reads.entries()[2]).toBeFalse();
+		});
+
+		it("should treat a second release as a no-op", () => {
+			expect.assertions(3);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({
+				actions: TEST_ACTIONS,
+				contexts: TEST_CONTEXTS,
+				debug: true,
+			});
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const state = core.getState(handle);
+			const log = makeLog<JumpToken>();
+			const Host = createSiblingHost(flux, core, handle);
+			const Surface = createTokenLoggingSurface(flux.useCapture, log);
+
+			render(
+				<flux.FluxProvider core={core} handle={handle}>
+					<Surface tag="surface" />
+				</flux.FluxProvider>,
+			);
+
+			const token = log.entries()[0]!;
+			token.release();
+
+			expect(state.debugCaptures("jump").size()).toBe(0);
+
+			// A second release must not pop a stack slot it no longer owns.
+			render(<Host live={["other"]} />);
+
+			expect(() => {
+				token.release();
+			}).never.toThrow();
+			expect(state.debugCaptures("jump").size()).toBe(1);
 		});
 
 		it("should still deliver the one-frame canceled() after release", () => {
