@@ -258,7 +258,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			applyResetForPlatform({ action, contexts, handleData, platform });
 		},
 		serializeBindings(handle: InputHandle): BindingState<T> {
-			return serializeFullBindings(ownedHandleData(handles, handle)) as BindingState<T>;
+			return serializeFullBindings(ownedHandleData(handles, handle));
 		},
 		simulateAction<A extends keyof T & string>(
 			handle: InputHandle,
