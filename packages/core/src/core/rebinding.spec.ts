@@ -155,6 +155,75 @@ describe("rebind", () => {
 	});
 });
 
+describe("rebind validation", () => {
+	it("should leave existing bindings intact when a rebind is rejected", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+
+		const rebind = (): void => {
+			core.rebind(handle, "jump", [{ pressedThreshold: 0.5 }]);
+		};
+
+		expect(rebind).toThrow("no input source");
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([Enum.KeyCode.Space]);
+	});
+
+	it("should record no override when a rebind is rejected", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+
+		const rebind = (): void => {
+			core.rebind(handle, "jump", [{ pressedThreshold: 0.5 }]);
+		};
+
+		expect(rebind).toThrow("no input source");
+		expect(core.serializeBindings(handle).jump).toBeUndefined();
+	});
+
+	it("should leave bindings intact when a per-platform rebind is rejected", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+
+		const rebind = (): void => {
+			core.rebindForPlatform(handle, "jump", "keyboard", [{ pressedThreshold: 0.5 }]);
+		};
+
+		expect(rebind).toThrow("no input source");
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.Space,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should apply no overrides when any action in a full rebind is rejected", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebind(handle, "jump", [Enum.KeyCode.F]);
+
+		const rebindAll = (): void => {
+			core.rebindAll(handle, {
+				jump: { keyboard: [Enum.KeyCode.G] },
+				move: { keyboard: [{ scale: 2 }] },
+			});
+		};
+
+		expect(rebindAll).toThrow("no input source");
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([Enum.KeyCode.F]);
+	});
+});
+
 describe("rebindAll", () => {
 	it("should replace all bindings", () => {
 		expect.assertions(2);

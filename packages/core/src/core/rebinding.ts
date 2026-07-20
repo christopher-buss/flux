@@ -11,7 +11,7 @@ import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { HandleData } from "./handle-lifecycle";
 import { getHandleData } from "./handle-lifecycle";
-import { createBindingsForAction, createInputBinding } from "./input-bindings";
+import { assertValidBindings, createBindingsForAction, createInputBinding } from "./input-bindings";
 import type { InputInstanceData } from "./input-instances";
 import type { PlatformOverrides } from "./platform-overrides";
 import { bucketByPlatform, composeBindings, PLATFORM_ORDER } from "./platform-overrides";
@@ -197,6 +197,7 @@ export function ownedHandleData<T extends ActionMap>(
  */
 export function applyRebindOne<T extends ActionMap>(options: ActionRebindOptions<T>): void {
 	const { action, bindings, contexts, handleData } = options;
+	assertValidBindings(bindings, action);
 	const byPlatform = bucketByPlatform(bindings);
 	const overrides: PlatformOverrides = new Map();
 	for (const platform of PLATFORM_ORDER) {
@@ -220,6 +221,7 @@ export function applyRebindForPlatform<T extends ActionMap>(
 	options: PlatformRebindOptions<T>,
 ): void {
 	const { action, bindings, contexts, handleData, platform } = options;
+	assertValidBindings(bindings, action);
 	let overrides = handleData.bindingOverrides.get(action);
 	if (overrides === undefined) {
 		overrides = new Map();
@@ -242,6 +244,7 @@ export function applyRebindForPlatform<T extends ActionMap>(
  */
 export function applyRebindAll<T extends ActionMap>(options: RebindAllOptions<T>): void {
 	const { actions, bindings, contexts, handleData } = options;
+	assertRebindAllValid(actions, bindings);
 	handleData.bindingOverrides.clear();
 	const handledActions = new Set<string>();
 	for (const [action, platformBindings] of pairs(bindings)) {
@@ -445,6 +448,49 @@ function rebuildFromOverrides<T extends ActionMap>(options: ActionScopedOptions<
 }
 
 /**
+ * Narrows a loaded key to a declared action name.
+ *
+ * The override map is keyed by {@link AllActions}, so a payload key — a bare
+ * `string` a save may carry for an action this build no longer has — has to be
+ * proven declared before it can key the store. The runtime membership check is
+ * what the predicate rests on, so the load path drops unknown keys rather than
+ * asserting them into the typed store.
+ * @template T - The action map type.
+ * @param actions - The core action map to check against.
+ * @param action - The loaded key to classify.
+ * @returns `true` when the action map declares the key.
+ */
+function isKnownAction<T extends ActionMap>(actions: T, action: string): action is AllActions<T> {
+	return actions[action] !== undefined;
+}
+
+/**
+ * Validates every known action's incoming bindings before a full rebind
+ * mutates anything.
+ *
+ * `applyRebindAll` clears the override map and rebuilds action by action, so a
+ * binding a later action rejects would otherwise leave the earlier ones already
+ * torn down. Unknown keys are dropped rather than built, so they need no check.
+ * @param actions - The core action map used to filter unknown keys.
+ * @param bindings - The full binding state about to be applied.
+ * @throws If any known action carries a binding that names no input source.
+ */
+function assertRebindAllValid(actions: ActionMap, bindings: SerializedBindings): void {
+	for (const [action, platformBindings] of pairs(bindings)) {
+		if (!isKnownAction(actions, action)) {
+			continue;
+		}
+
+		for (const platform of PLATFORM_ORDER) {
+			const bucket = platformBindings[platform];
+			if (bucket !== undefined) {
+				assertValidBindings(bucket, action);
+			}
+		}
+	}
+}
+
+/**
  * Reads a serialized action entry into override buckets, keeping only the
  * platforms the payload actually carries so absent ones resume tracking
  * defaults.
@@ -493,21 +539,4 @@ function restoreOriginalBindings<T extends ActionMap>(options: RestoreOptions<T>
 
 		rebuildFromOverrides({ action, contexts, handleData });
 	}
-}
-
-/**
- * Narrows a loaded key to a declared action name.
- *
- * The override map is keyed by {@link AllActions}, so a payload key — a bare
- * `string` a save may carry for an action this build no longer has — has to be
- * proven declared before it can key the store. The runtime membership check is
- * what the predicate rests on, so the load path drops unknown keys rather than
- * asserting them into the typed store.
- * @template T - The action map type.
- * @param actions - The core action map to check against.
- * @param action - The loaded key to classify.
- * @returns `true` when the action map declares the key.
- */
-function isKnownAction<T extends ActionMap>(actions: T, action: string): action is AllActions<T> {
-	return actions[action] !== undefined;
 }

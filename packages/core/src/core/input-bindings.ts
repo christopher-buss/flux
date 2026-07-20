@@ -25,6 +25,32 @@ const PROPERTY_MAP = {
 } as const satisfies Record<BindingConfigKey, BindingProperty>;
 
 /**
+ * Throws if a binding cannot be built into an `InputBinding`, without creating
+ * one.
+ *
+ * The same guards {@link createInputBinding} applies, split out so a rebind can
+ * validate a whole incoming array before it destroys the action's existing
+ * instances — a rejected binding must leave state untouched rather than tear
+ * down the old bindings and then fail to build their replacements.
+ * @param bindingLike - The binding definition to check.
+ * @param actionName - The action the binding targets, named in the error.
+ * @throws If a raw `Enum.UserInputType` is passed, or if the binding names no
+ * input source at all.
+ */
+export function assertValidBinding(bindingLike: BindingLike, actionName: string): void {
+	if (isUserInputType(bindingLike)) {
+		error(`UserInputType bindings are not supported: ${bindingLike}. Use Enum.KeyCode instead`);
+	}
+
+	if (!hasInputSource(bindingLike)) {
+		error(
+			`Binding for action "${actionName}" has no input source. Set a keyCode, ` +
+				"a directional key, a modifier, pointerIndex or uiButton",
+		);
+	}
+}
+
+/**
  * Creates a single `InputBinding` child on the given `InputAction`.
  * @param bindingLike - The binding definition (KeyCode or config object).
  * @param parent - The `InputAction` to parent the binding under.
@@ -37,16 +63,7 @@ export function createInputBinding(
 	parent: InputAction,
 	instances: Array<Instance>,
 ): void {
-	if (isUserInputType(bindingLike)) {
-		error(`UserInputType bindings are not supported: ${bindingLike}. Use Enum.KeyCode instead`);
-	}
-
-	if (!hasInputSource(bindingLike)) {
-		error(
-			`Binding for action "${parent.Name}" has no input source. Set a keyCode, ` +
-				"a directional key, a modifier, pointerIndex or uiButton",
-		);
-	}
+	assertValidBinding(bindingLike, parent.Name);
 
 	const binding = new Instance("InputBinding");
 	if (isKeyCode(bindingLike)) {
@@ -59,6 +76,21 @@ export function createInputBinding(
 
 	binding.Parent = parent;
 	instances.push(binding);
+}
+
+/**
+ * Throws if any binding in the array cannot be built, without creating any.
+ * @param bindings - The binding definitions to check.
+ * @param actionName - The action the bindings target, named in the error.
+ * @throws If any binding is a raw `Enum.UserInputType` or names no input source.
+ */
+export function assertValidBindings(
+	bindings: ReadonlyArray<BindingLike>,
+	actionName: string,
+): void {
+	for (const bindingLike of bindings) {
+		assertValidBinding(bindingLike, actionName);
+	}
 }
 
 /**
