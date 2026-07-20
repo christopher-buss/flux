@@ -50,6 +50,13 @@ deliberately _not_ part of that identity — dev-only metadata must not churn th
 capture stack — so it is read at acquisition and a changed label applies to the
 next one.
 
+**`canceled()` compares the captured triple, not request identity.** Every other
+read goes inert the moment `enabled` flips false, but disabling mid-press is a
+capture boundary and core records the cancel against that very viewer. A child
+handed the token never sees `enabled`, so swallowing it would leave a falling
+edge with no verb — the charge-fired-because-a-menu-opened failure. A changed
+action still swallows, because that cancel belongs to a different action.
+
 **JSX intrinsics exclude `Name` and `Parent`.** `InstanceAttributes` in
 `@rbxts/react` omits them. Distinguish test probes by `Text` + `queryByText`,
 not `Name` + `FindFirstChild`.

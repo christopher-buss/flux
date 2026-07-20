@@ -33,7 +33,10 @@ export interface UseCaptureOptions {
 	 *
 	 * Toggling is symmetric: `false` releases, `true` re-captures. While
 	 * disabled the token reads inert, exactly as it does before the capture
-	 * lands and after it is released, so no call site branches on it.
+	 * lands and after it is released, so no call site branches on it. The one
+	 * exception is `canceled()`: disabling mid-press is a capture boundary, and
+	 * the resulting one-frame cancel is reported so a reader is never left with
+	 * an unexplained falling edge.
 	 */
 	readonly enabled?: boolean;
 }
@@ -234,12 +237,14 @@ interface CaptureReader<T extends ActionMap, Contexts extends string> {
  * const confirm = useCapture("confirm", { debugLabel: "hud", enabled: focused });
  * ```
  *
- * @remarks Disabling is a render-level withdrawal rather than teardown: the
- * render that sets `enabled` to false stops asking for the capture, so the
- * token reads inert from that render on and is handed none of the released
- * capture's state — including the one-frame boundary `canceled()`, exactly as
- * a render that changes the action is handed none of the previous action's.
- * Unmount is the exception, because no further render withdraws the request.
+ * @remarks Setting `enabled` to false makes every read inert from that render
+ * on — except `canceled()`. Dropping a capture mid-press is a capture boundary
+ * like any other, and core records the one-frame cancel against this very
+ * viewer, so the hook reports it. A child handed the token never sees
+ * `enabled`; swallowing the cancel would leave it watching `pressed()` fall
+ * with no verb explaining why, indistinguishable from the user letting go. A
+ * changed action is different and still swallows: that cancel belongs to a
+ * different action.
  *
  * @remarks `canceled()` is the one read that keeps delegating after release,
  * so the one-frame boundary cancel reaches a reader that is tearing down. A
@@ -310,29 +315,36 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 		// discarded render is always followed by an unmount or a re-render
 		// that rewrites this. A concurrent renderer would invalidate the
 		// second reason.
-		const request = requestRef.current;
-		if (request.action !== action || request.core !== core || request.handle !== handle) {
+		const previous = requestRef.current;
+		if (previous.action !== action || previous.core !== core || previous.handle !== handle) {
 			requestRef.current = makeRequest(core, handle, action, isEnabled);
-		} else if (request.enabled !== isEnabled) {
+		} else if (previous.enabled !== isEnabled) {
 			// The captured triple is unchanged, so the neutral value is too:
 			// carry it forward rather than re-deriving it, since a surface
 			// whose `enabled` tracks focus can toggle at frame rate.
-			requestRef.current = { ...request, enabled: isEnabled };
+			requestRef.current = { ...previous, enabled: isEnabled };
 		}
 
+		// The effect closes over the request this render resolved rather than
+		// reading the ref when it runs, so the hold it stores is structurally
+		// the one its own render asked for instead of whatever the ref happens
+		// to hold. Request identity changes exactly when the captured triple or
+		// `enabled` does, so this is also the whole dependency list.
+		const request = requestRef.current;
+
 		useEffect(() => {
-			if (!isEnabled) {
+			if (!request.enabled) {
 				// Nothing to acquire, and nothing to leave behind: the render
 				// that disabled the capture already rebuilt the request, so
-				// any hold from the enabled run reads stale and inert.
+				// every read but `canceled()` reads stale and inert.
 				return;
 			}
 
 			const label = debugLabelRef.current;
-			const token = core.getState(handle).capture(action, {
+			const token = request.core.getState(request.handle).capture(request.action, {
 				...(label !== undefined && { debugLabel: label }),
 			}) as unknown as CaptureTokenSurface;
-			holdRef.current = { request: requestRef.current, token };
+			holdRef.current = { request, token };
 			releasedRef.current = false;
 
 			return () => {
@@ -343,7 +355,7 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 				// boundary, and the reader must still see it while tearing
 				// down. Every other read reports inert once released.
 			};
-		}, [core, handle, action, isEnabled]);
+		}, [request]);
 
 		return facade as unknown as CaptureToken<T, A>;
 	}
@@ -481,6 +493,28 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 		return hold;
 	}
 
+	function currentForCancel(): CaptureHold<T, Contexts> | undefined {
+		const hold = holdRef.current;
+		if (hold === undefined) {
+			return undefined;
+		}
+
+		const request = requestRef.current;
+		if (hold.request === request) {
+			return hold;
+		}
+
+		// Same action on the same core and handle, so only `enabled` withdrew:
+		// core recorded the boundary cancel against this very viewer, and it is
+		// still ours to report. A changed action fails this and stays swallowed,
+		// because that cancel belongs to a different action entirely.
+		return hold.request.action === request.action &&
+			hold.request.core === request.core &&
+			hold.request.handle === request.handle
+			? hold
+			: undefined;
+	}
+
 	function live(): CaptureTokenSurface | undefined {
 		if (releasedRef.current) {
 			return undefined;
@@ -509,9 +543,12 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 		canceled(): boolean {
 			// Deliberately not gated on release: core synthesizes the boundary
 			// cancel as the capture drops, and the reader tearing down has to
-			// see it. Staleness still applies — a changed action reports its
-			// own cancels, never the previous action's.
-			const hold = current();
+			// see it. Nor on `enabled` — a mid-press disable is a boundary like
+			// any other, and a child handed this token never sees `enabled`, so
+			// swallowing it would leave a bare falling edge with no verb.
+			// Staleness still applies to the action: a changed action reports
+			// its own cancels, never the previous action's.
+			const hold = currentForCancel();
 			return hold === undefined ? false : hold.token.canceled();
 		},
 		claim(): boolean {

@@ -176,6 +176,8 @@ describe("FluxUseCapture", () => {
 		it("should reject unknown options", () => {
 			// @ts-expect-error `quiet` is not an option this hook accepts
 			flux.useCapture("jump", { quiet: true });
+			// @ts-expect-error the explicit-handle overload rejects it too
+			flux.useCapture(handle, "jump", { quiet: true });
 		});
 
 		it("should reject mistyped options", () => {

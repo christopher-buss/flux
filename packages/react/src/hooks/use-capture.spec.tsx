@@ -276,6 +276,38 @@ function createToggleHost(
 }
 
 /**
+ * Wraps an `enabled`-gated surface that records the token it was handed on
+ * every render, so reads can be driven from outside the tree after a commit.
+ *
+ * @param flux - The FluxReact instance supplying the Provider and hook.
+ * @param core - The core the Provider hands to hooks.
+ * @param handle - The default handle the Provider hands to hooks.
+ * @param log - Log receiving one token per render.
+ * @returns The host component.
+ */
+function createTogglingTokenHost(
+	flux: TestFlux,
+	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
+	handle: InputHandle,
+	log: Log<JumpToken>,
+): (props: EnabledProps) => React.ReactNode {
+	const { FluxProvider, useCapture } = flux;
+
+	function Surface({ enabled }: EnabledProps): React.ReactNode {
+		log.push(useCapture("jump", { enabled }));
+		return <frame />;
+	}
+
+	return ({ enabled }: EnabledProps): React.ReactNode => {
+		return (
+			<FluxProvider core={core} handle={handle}>
+				<Surface enabled={enabled} />
+			</FluxProvider>
+		);
+	};
+}
+
+/**
  * Builds a surface that captures `jump` and renders it through
  * `useCaptureAction`, tracking how many times it has rendered.
  *
@@ -1145,7 +1177,39 @@ describe("useCapture", () => {
 			expect(state.debugCaptures("jump").size()).toBe(0);
 		});
 
-		it("should not report a cancel on the render that disables the capture", () => {
+		it("should deliver the one-frame cancel when disabled mid-press", () => {
+			expect.assertions(2);
+
+			afterThis(() => {
+				cleanup();
+			});
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+			const log = makeLog<JumpToken>();
+			const Host = createTogglingTokenHost(flux, core, handle, log);
+
+			const { rerender } = render(<Host enabled={true} />);
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+
+			// Dropping a live press is a capture boundary, so core records the
+			// cancel against this very viewer. A child handed this token never
+			// sees `enabled`; without the cancel it would watch `pressed()`
+			// fall with no verb, indistinguishable from the user letting go.
+			rerender(<Host enabled={false} />);
+
+			const token = log.entries()[0]!;
+
+			expect(token.canceled()).toBeTrue();
+
+			// Every other read is still inert while disabled.
+			expect(token.pressed()).toBeFalse();
+		});
+
+		it("should not report the previous action's cancel when disabled after an action change", () => {
 			expect.assertions(1);
 
 			afterThis(() => {
@@ -1156,18 +1220,18 @@ describe("useCapture", () => {
 			const handle = core.register(new Instance("Folder"), "gameplay");
 			const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 			const reads = makeLog<ActionReads>();
-			const Host = createToggleHost(flux, core, handle, reads);
+			const Host = createActionHost(flux, core, handle, reads);
 
-			const { rerender } = render(<Host enabled={true} />);
+			const { rerender } = render(<Host action="jump" />);
 
 			core.simulateAction(handle, "jump", true);
 			core.update(FRAME_TIME);
+			core.getState(handle).capture("jump");
 
-			// Disabling is a render-level withdrawal, not teardown: the render
-			// stopped asking for the capture, so it is handed nothing of it —
-			// the same rule a changed action follows. The unmount cancel is
-			// the exception, because no further render withdraws the request.
-			rerender(<Host enabled={false} />);
+			// The cancel-on-disable exception is scoped to the captured triple:
+			// a render asking for a different action must still be handed none
+			// of the previous action's cancel.
+			rerender(<Host action="interact" />);
 
 			expect(reads.entries()[1]!.canceled).toBeFalse();
 		});
