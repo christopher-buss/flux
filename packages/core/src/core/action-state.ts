@@ -12,13 +12,14 @@ import {
 	claimAction,
 	didAxisBecomeActive,
 	didAxisBecomeInactive,
+	expireBoundaryCancel,
 	getCurrentDuration,
 	getEntry,
 	getPreviousDuration,
-	isCanceled,
 	isOngoing,
 	isTriggered,
 	read,
+	readEntryCanceled,
 	readValue,
 	settleDrain,
 	suppressedFalse,
@@ -56,7 +57,10 @@ export interface ActionStateOptions {
 
 /** Internal mutators for the action state, used by the core runtime. */
 export interface InternalActionState {
-	/** Shifts current values to previous and resets claimed flags. */
+	/**
+	 * Closes the frame: shifts current values to previous, resets claimed
+	 * flags, ages any pending boundary cancel, and settles a finished drain.
+	 */
 	endFrame(): void;
 	/** Sets whether an action is enabled. */
 	setEnabled(action: string, enabled: boolean): void;
@@ -104,6 +108,8 @@ function createEntry(config: ActionConfig): ActionEntry {
 	const defaultValue = defaultValueForType(config.type);
 
 	return {
+		canceledConsumed: false,
+		canceledFor: undefined,
 		captures: [],
 		claimed: false,
 		duration: 0,
@@ -180,7 +186,7 @@ function buildPublicState<T extends ActionMap>(
 			});
 		},
 		canceled(action) {
-			return read({ action, entries, pick: isCanceled, whenSuppressed: suppressedFalse });
+			return readEntryCanceled(getEntry(entries, action));
 		},
 		capture<A extends keyof T & string>(action: A, options?: CaptureOptions) {
 			// The runtime token carries the full read surface; the public type
@@ -270,6 +276,9 @@ function endFrame(entries: Map<string, ActionEntry>): void {
 	for (const [, entry] of entries) {
 		entry.previousValue = entry.value;
 		entry.previousTriggerState = entry.triggerState;
+		// Ages the boundary cancel while this frame's claim is still set — a
+		// claimed frame consumes the cancel.
+		expireBoundaryCancel(entry);
 		entry.claimed = false;
 		settleDrain(entry);
 	}

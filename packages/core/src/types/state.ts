@@ -151,10 +151,30 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	axisBecameInactive(action: AxisActions<Actions>): boolean;
 
 	/**
-	 * Whether the action's trigger was canceled this frame.
-	 * @remarks Returns false while the action is claimed.
+	 * Whether the action was canceled this frame.
+	 *
+	 * Two composing sources: the action's trigger reported "canceled", or a
+	 * capture boundary force-dropped this reader's visible in-flight view —
+	 * for example a capture acquired while a press was in flight. The
+	 * boundary cancel reads true for exactly one frame and only for the
+	 * displaced reader; consumers already reading flat get nothing. Two
+	 * boundaries in one frame keep only the last displaced viewer.
+	 *
+	 * "In flight" means non-zero magnitude, matching the release drain. A
+	 * trigger that fires at magnitude zero — a tap firing on the release
+	 * edge, say — is not in flight, so a boundary over it cancels nothing.
+	 * @remarks Returns false while the action is claimed — a claim eats the
+	 * boundary cancel like any other processed read.
 	 * @param action - Any action name.
 	 * @returns True if the action was canceled.
+	 * @example
+	 * ```ts
+	 * // Abandon a charge-up when the press is interrupted — by the
+	 * // trigger, or by a menu capturing "fire" mid-charge.
+	 * if (input.canceled("fire")) {
+	 * 	abandonCharge();
+	 * }
+	 * ```
 	 */
 	canceled(action: AllActions<Actions>): boolean;
 
@@ -298,9 +318,20 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * Whether a boolean action's trigger transitioned from "triggered" this frame.
 	 * @remarks Returns false while the action is claimed. A claimed press frame
 	 * is still followed by a visible release frame unless that frame is claimed
-	 * too.
+	 * too — a per-frame guarantee only: `justReleased` is lossy by contract
+	 * across a capture boundary. A press force-dropped by a capture produces a
+	 * one-frame {@link ActionState.canceled}, never a synthesized release.
 	 * @param action - A Bool action name.
 	 * @returns True if the trigger just stopped firing.
+	 * @example
+	 * ```ts
+	 * // Fire on a completed release; treat an interrupted one separately.
+	 * if (input.justReleased("fire")) {
+	 * 	releaseChargedShot();
+	 * } else if (input.canceled("fire")) {
+	 * 	abandonCharge();
+	 * }
+	 * ```
 	 */
 	justReleased(action: BoolActions<Actions>): boolean;
 
@@ -378,8 +409,27 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
  */
 interface CaptureTokenBase<Actions extends ActionMap, A extends AllActions<Actions>> {
 	/**
-	 * Whether the captured action's trigger was canceled this frame.
+	 * Whether the captured action was canceled this frame.
+	 *
+	 * Two composing sources: the action's trigger reported "canceled", or a
+	 * capture boundary force-dropped this token's visible in-flight view —
+	 * the token was shadowed by a newer capture, or released mid-press
+	 * itself. The boundary cancel reads true for exactly one frame; a token
+	 * already reading flat gets nothing.
+	 *
+	 * "In flight" means non-zero magnitude, matching the release drain, so a
+	 * trigger firing at magnitude zero is not in flight and cancels nothing.
+	 * @remarks Returns false while the action is claimed — a claim eats the
+	 * boundary cancel like any other processed read.
 	 * @returns True if the action was canceled.
+	 * @example
+	 * ```ts
+	 * // A drag started inside this surface is abandoned when another
+	 * // surface captures over it, or when the token releases mid-drag.
+	 * if (drag.canceled()) {
+	 * 	abandonDrag();
+	 * }
+	 * ```
 	 */
 	canceled(): boolean;
 
@@ -482,6 +532,8 @@ interface CaptureTokenBoolReads {
 	/**
 	 * Whether the captured action's trigger transitioned from "triggered"
 	 * this frame.
+	 * @remarks Lossy by contract across a capture boundary: a force-dropped
+	 * press produces a one-frame cancel, never a synthesized release.
 	 * @returns True if the trigger just stopped firing.
 	 */
 	justReleased(): boolean;

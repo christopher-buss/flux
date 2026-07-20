@@ -21,6 +21,21 @@ export interface CaptureViewer {
 
 /** Per-action mutable state driven by the pipeline and read by consumers. */
 export interface ActionEntry {
+	/**
+	 * Whether the pending boundary cancel has had its one exposure — either
+	 * read by the displaced viewer or carried across one frame reset. The next
+	 * reset drops it. Meaningless while {@link ActionEntry.canceledFor} is
+	 * undefined.
+	 */
+	canceledConsumed: boolean;
+	/**
+	 * The viewer whose in-flight view a capture boundary force-dropped;
+	 * undefined outside a boundary frame. The gameplay (viewer-less) reader is
+	 * represented by an internal sentinel so an empty slot and a canceled
+	 * gameplay reader stay distinct. Two boundaries in one frame overwrite it —
+	 * last wins.
+	 */
+	canceledFor: CaptureViewer | undefined;
 	/** Stack of capture holders; the last element is the active holder. */
 	captures: Array<CaptureViewer>;
 	/** Whether the action is claimed for the rest of the frame. */
@@ -83,21 +98,12 @@ export interface ReadOptions<V> extends ReadEntryOptions<V> {
 const DRAIN_HOLDER: CaptureViewer = {};
 
 /**
- * Pushes a viewer onto an action's capture stack as the new top holder.
- *
- * A capture acquired mid-drain supersedes the drain: the new holder reads
- * the in-flight state through, and protecting whoever is underneath is now
- * its job. Keeps at most one drain holder on the stack, always on top.
- * @param entry - The action entry being captured.
- * @param viewer - The acquiring token's identity.
+ * The identity {@link ActionEntry.canceledFor} stores for the gameplay
+ * (viewer-less) reader — plain `ActionState` reads carry `viewer: undefined`,
+ * so a sentinel keeps "slot empty" and "slot = gameplay" distinct. Never
+ * leaves this module: reads normalize their viewer through it.
  */
-export function acquireCapture(entry: ActionEntry, viewer: CaptureViewer): void {
-	if (getTopHolder(entry) === DRAIN_HOLDER) {
-		entry.captures.pop();
-	}
-
-	entry.captures.push(viewer);
-}
+const GAMEPLAY_READER: CaptureViewer = {};
 
 /**
  * Computes scalar magnitude from any action value type.
@@ -121,12 +127,38 @@ export function getMagnitude(value: ActionValueType): number {
 }
 
 /**
+ * Pushes a viewer onto an action's capture stack as the new top holder.
+ *
+ * A capture acquired mid-drain supersedes the drain: the new holder reads
+ * the in-flight state through, and protecting whoever is underneath is now
+ * its job. Keeps at most one drain holder on the stack, always on top.
+ *
+ * Acquiring over a visible in-flight interaction is a capture boundary: the
+ * displaced viewer — the previous top holder, or the gameplay reader if the
+ * stack was empty — gets the one-frame boundary cancel. Acquiring mid-drain
+ * or over a flat action cancels nothing; every viewer already read flat.
+ * @param entry - The action entry being captured.
+ * @param viewer - The acquiring token's identity.
+ */
+export function acquireCapture(entry: ActionEntry, viewer: CaptureViewer): void {
+	const displaced = getTopHolder(entry);
+	if (displaced === DRAIN_HOLDER) {
+		entry.captures.pop();
+	} else if (hasLiveInteraction(entry)) {
+		recordBoundaryCancel(entry, displaced ?? GAMEPLAY_READER);
+	}
+
+	entry.captures.push(viewer);
+}
+
+/**
  * Removes a viewer from an action's capture stack, draining if needed.
  *
  * Releasing the top mid-press starts a drain — the in-flight press must not
- * leak to whoever is underneath. Shadowed holders never saw the press, so
- * their release is clean. Releasing a viewer that is not on the stack is a
- * no-op.
+ * leak to whoever is underneath. The drain start is a capture boundary: the
+ * releaser's own in-flight view is force-dropped, so it gets the one-frame
+ * boundary cancel. Shadowed holders never saw the press, so their release is
+ * clean. Releasing a viewer that is not on the stack is a no-op.
  * @param entry - The action entry being released.
  * @param viewer - The releasing token's identity.
  */
@@ -139,7 +171,8 @@ export function releaseCapture(entry: ActionEntry, viewer: CaptureViewer): void 
 	const didHoldTop = index === entry.captures.size() - 1;
 	entry.captures.remove(index);
 
-	if (didHoldTop && getMagnitude(entry.value) > 0) {
+	if (didHoldTop && hasLiveInteraction(entry)) {
+		recordBoundaryCancel(entry, viewer);
 		entry.captures.push(DRAIN_HOLDER);
 	}
 }
@@ -154,7 +187,7 @@ export function releaseCapture(entry: ActionEntry, viewer: CaptureViewer): void 
  * @param entry - The action entry to settle.
  */
 export function settleDrain(entry: ActionEntry): void {
-	if (getTopHolder(entry) === DRAIN_HOLDER && getMagnitude(entry.value) === 0) {
+	if (getTopHolder(entry) === DRAIN_HOLDER && !hasLiveInteraction(entry)) {
 		entry.captures.pop();
 	}
 }
@@ -216,6 +249,78 @@ export function read<V>(options: ReadOptions<V>): V {
 }
 
 /**
+ * The suppressed result for boolean and edge reads.
+ * @returns Always false.
+ */
+export function suppressedFalse(): boolean {
+	return false;
+}
+
+/**
+ * Reads whether an entry is canceled for the given viewer.
+ *
+ * Two cancel sources compose: a capture boundary force-dropping the viewer's
+ * in-flight view this frame, or the trigger itself reporting "canceled". The
+ * boundary cancel targets the displaced viewer directly — the boundary is
+ * exactly what suppressed them, so it bypasses the capture gate — while the
+ * trigger-phase cancel goes through the standard processed-read gate. A claim
+ * eats both, keeping "every processed read returns false while claimed"
+ * exception-free.
+ * @param entry - The action entry to read.
+ * @param viewer - The identity reading; undefined for plain state reads.
+ * @returns True if the viewer was boundary-canceled this frame or reads an
+ * unsuppressed trigger-phase cancel.
+ */
+export function readEntryCanceled(entry: ActionEntry, viewer?: CaptureViewer): boolean {
+	if (entry.claimed) {
+		return false;
+	}
+
+	// Only the displaced viewer's own read consumes the slot. A bystander's
+	// read must leave it alone, or one consumer's read would mutate what
+	// another sees — the shape ADR 0001 rejects auto-consume to avoid.
+	if (entry.canceledFor === (viewer ?? GAMEPLAY_READER)) {
+		entry.canceledConsumed = true;
+		return true;
+	}
+
+	// The gate is inlined rather than routed through `readEntry` because the
+	// slot check above must bypass capture suppression while the
+	// trigger-phase check below must respect it — one options table cannot
+	// express both halves.
+	return !isCaptureSuppressedFor(entry, viewer) && isCanceled(entry);
+}
+
+/**
+ * Ages the pending boundary cancel at the frame reset, expiring it once it
+ * has had its one exposure.
+ *
+ * A boundary can be recorded at any point relative to `core.update`, since a
+ * capture is acquired from consumer code and `endFrame` runs first inside the
+ * update. Expiring purely on the frame reset would therefore lose every cancel
+ * recorded before the next update, so an unseen cancel is carried across
+ * exactly one reset instead — enough for the read phase to see it, and bounded
+ * so a stale cancel cannot surface frames later.
+ *
+ * A cancel the claim ate counts as exposed: a claimed frame consumes it like
+ * any other processed read, so it must not resurface next frame.
+ * @param entry - The action entry to age. Must still carry this frame's claim.
+ */
+export function expireBoundaryCancel(entry: ActionEntry): void {
+	if (entry.canceledFor === undefined) {
+		return;
+	}
+
+	if (!entry.canceledConsumed && !entry.claimed) {
+		entry.canceledConsumed = true;
+		return;
+	}
+
+	entry.canceledFor = undefined;
+	entry.canceledConsumed = false;
+}
+
+/**
  * Reads an entry's value, suppressed to its neutral value while claimed or
  * captured by another viewer.
  * @param entry - The action entry to read.
@@ -252,14 +357,6 @@ export function claimAction(entries: Map<string, ActionEntry>, action: string): 
 	entry.claimed = true;
 
 	return true;
-}
-
-/**
- * The suppressed result for boolean and edge reads.
- * @returns Always false.
- */
-export function suppressedFalse(): boolean {
-	return false;
 }
 
 /**
@@ -325,15 +422,6 @@ export function isOngoing(entry: ActionEntry): boolean {
 }
 
 /**
- * Whether the entry's trigger was canceled this frame.
- * @param entry - The action entry to read.
- * @returns True if the trigger was canceled.
- */
-export function isCanceled(entry: ActionEntry): boolean {
-	return entry.triggerState === "canceled";
-}
-
-/**
  * Reads how long the entry's current trigger state has been active.
  * @param entry - The action entry to read.
  * @returns Duration in seconds.
@@ -356,23 +444,71 @@ function getTopHolder(entry: ActionEntry): CaptureViewer | undefined {
 }
 
 /**
+ * Whether the entry currently shows a visible in-flight interaction.
+ *
+ * The condition both capture boundaries turn on: a boundary over a flat
+ * action drops no view, so it cancels nothing and starts no drain.
+ * @param entry - The action entry to test.
+ * @returns True if the action's value has non-zero magnitude.
+ */
+function hasLiveInteraction(entry: ActionEntry): boolean {
+	return getMagnitude(entry.value) > 0;
+}
+
+/**
+ * Records a capture boundary in the entry's cancel slot.
+ *
+ * The single owner of the slot's write rule: only the displaced viewer is
+ * named, and an earlier boundary this frame is overwritten — last wins,
+ * documented rather than queued. Callers gate on
+ * {@link hasLiveInteraction}.
+ * @param entry - The action entry at the boundary.
+ * @param displaced - The viewer whose view the boundary force-drops.
+ */
+function recordBoundaryCancel(entry: ActionEntry, displaced: CaptureViewer): void {
+	entry.canceledFor = displaced;
+	entry.canceledConsumed = false;
+}
+
+/**
+ * The capture half of the suppression rule: whether a capture hides the
+ * entry from the given viewer.
+ * @param entry - The action entry being read.
+ * @param viewer - The identity reading; undefined for plain state reads.
+ * @returns True if a capture suppresses this viewer.
+ */
+function isCaptureSuppressedFor(entry: ActionEntry, viewer: CaptureViewer | undefined): boolean {
+	const topHolder = getTopHolder(entry);
+
+	return topHolder !== undefined && topHolder !== viewer;
+}
+
+/**
  * Whether a processed read is suppressed for the given viewer.
  *
  * The rule is `claimed || (captured && viewer !== topHolder)`: a claim
  * suppresses every viewer, and a capture suppresses everyone except the
- * token on top of the stack — shadowed holders read inert too.
+ * token on top of the stack — shadowed holders read inert too. The two
+ * reasons stay separable because the boundary cancel bypasses exactly one of
+ * them: {@link readEntryCanceled} respects the claim but not the capture.
  * @param entry - The action entry being read.
  * @param viewer - The identity reading; undefined for plain state reads.
  * @returns True if the read reports its suppressed result.
  */
 function isSuppressedFor(entry: ActionEntry, viewer: CaptureViewer | undefined): boolean {
-	if (entry.claimed) {
-		return true;
-	}
+	return entry.claimed || isCaptureSuppressedFor(entry, viewer);
+}
 
-	const topHolder = getTopHolder(entry);
-
-	return topHolder !== undefined && topHolder !== viewer;
+/**
+ * Whether the entry's trigger was canceled this frame.
+ *
+ * Trigger-phase only — the boundary cancel composes with it in
+ * {@link readEntryCanceled}.
+ * @param entry - The action entry to read.
+ * @returns True if the trigger was canceled.
+ */
+function isCanceled(entry: ActionEntry): boolean {
+	return entry.triggerState === "canceled";
 }
 
 function getValue(entry: ActionEntry): ActionValueType {

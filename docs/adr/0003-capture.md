@@ -91,9 +91,21 @@ held in a closure or the consumer's own component.
   unclaimed release frame is visible downstream" holds per-frame only;
   state-driven readers degrade gracefully and `canceled()` is the interruption
   hook.
-- One `canceledFor` slot per action, set at the boundary and cleared at
-  `endFrame`. Two boundaries in one frame overwrite it — last wins, documented
-  rather than queued.
+- One `canceledFor` slot per action, set at the boundary. Two boundaries in one
+  frame overwrite it — last wins, documented rather than queued. The slot
+  expires on delivery, not on the frame reset: a capture is acquired from
+  consumer code, and `endFrame` runs first inside `core.update`, so clearing at
+  the reset would silently drop every boundary recorded before the next update.
+  An unread cancel is instead carried across exactly one reset — enough for the
+  read phase to see it, bounded so a stale cancel cannot surface frames later. A
+  claimed frame counts as delivered.
+- That gives the displaced viewer's own `canceled()` read a side effect, the
+  shape ADR 0001 rejected for claims because a debug overlay would eat input. It
+  is reintroduced deliberately and bounded: only the displaced viewer's read
+  consumes the slot, and a stray read merely shortens the window from two resets
+  to one, with the earliest clear still a full frame boundary away — so a
+  per-frame poller cannot be starved, though a sub-frame-rate poller can miss a
+  cancel.
 - The drain terminates on magnitude, not trigger state: custom triggers can
   leave `triggered` while the button is still physically down.
 - Capture ownership is ordering-free, so `useCapture` needs no schedule slot.
