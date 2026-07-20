@@ -8,11 +8,11 @@ import {
 	getCurrentDuration,
 	getEntry,
 	getPreviousDuration,
-	isCanceled,
 	isOngoing,
 	isRealHolder,
 	isTriggered,
 	readEntry,
+	readEntryCanceled,
 	readEntryValue,
 	releaseCapture,
 	suppressedFalse,
@@ -35,7 +35,7 @@ export interface CaptureTokenRuntime {
 	axisBecameActive(): boolean;
 	/** Whether the captured axis just became inactive. */
 	axisBecameInactive(): boolean;
-	/** Whether the captured action's trigger was canceled this frame. */
+	/** Whether the action was canceled this frame, by trigger or boundary. */
 	canceled(): boolean;
 	/** Claims the captured action for the rest of the frame. */
 	claim(): boolean;
@@ -121,7 +121,7 @@ export function createCaptureToken(options: CreateCaptureTokenOptions): CaptureT
 			return flagRead(didAxisBecomeInactive);
 		},
 		canceled(): boolean {
-			return flagRead(isCanceled);
+			return readEntryCanceled(entry, viewer);
 		},
 		claim(): boolean {
 			return claimAction(entries, action);

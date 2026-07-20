@@ -151,8 +151,16 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	axisBecameInactive(action: AxisActions<Actions>): boolean;
 
 	/**
-	 * Whether the action's trigger was canceled this frame.
-	 * @remarks Returns false while the action is claimed.
+	 * Whether the action was canceled this frame.
+	 *
+	 * Two composing sources: the action's trigger reported "canceled", or a
+	 * capture boundary force-dropped this reader's visible in-flight view —
+	 * for example a capture acquired while a press was in flight. The
+	 * boundary cancel reads true for exactly one frame and only for the
+	 * displaced reader; consumers already reading flat get nothing. Two
+	 * boundaries in one frame keep only the last displaced viewer.
+	 * @remarks Returns false while the action is claimed — a claim eats the
+	 * boundary cancel like any other processed read.
 	 * @param action - Any action name.
 	 * @returns True if the action was canceled.
 	 */
@@ -298,7 +306,9 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * Whether a boolean action's trigger transitioned from "triggered" this frame.
 	 * @remarks Returns false while the action is claimed. A claimed press frame
 	 * is still followed by a visible release frame unless that frame is claimed
-	 * too.
+	 * too — a per-frame guarantee only: `justReleased` is lossy by contract
+	 * across a capture boundary. A press force-dropped by a capture produces a
+	 * one-frame {@link ActionState.canceled}, never a synthesized release.
 	 * @param action - A Bool action name.
 	 * @returns True if the trigger just stopped firing.
 	 */
@@ -378,7 +388,15 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
  */
 interface CaptureTokenBase<Actions extends ActionMap, A extends AllActions<Actions>> {
 	/**
-	 * Whether the captured action's trigger was canceled this frame.
+	 * Whether the captured action was canceled this frame.
+	 *
+	 * Two composing sources: the action's trigger reported "canceled", or a
+	 * capture boundary force-dropped this token's visible in-flight view —
+	 * the token was shadowed by a newer capture, or released mid-press
+	 * itself. The boundary cancel reads true for exactly one frame; a token
+	 * already reading flat gets nothing.
+	 * @remarks Returns false while the action is claimed — a claim eats the
+	 * boundary cancel like any other processed read.
 	 * @returns True if the action was canceled.
 	 */
 	canceled(): boolean;
@@ -482,6 +500,8 @@ interface CaptureTokenBoolReads {
 	/**
 	 * Whether the captured action's trigger transitioned from "triggered"
 	 * this frame.
+	 * @remarks Lossy by contract across a capture boundary: a force-dropped
+	 * press produces a one-frame cancel, never a synthesized release.
 	 * @returns True if the trigger just stopped firing.
 	 */
 	justReleased(): boolean;

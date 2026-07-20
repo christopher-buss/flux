@@ -1741,6 +1741,266 @@ describe("createActionState", () => {
 				expect(state.axisBecameActive("move")).toBeTrue();
 			});
 		});
+
+		describe("boundary cancel", () => {
+			it("should cancel the gameplay reader for exactly one frame when a capture acquires mid-press", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.canceled("jump")).toBeFalse();
+
+				state.capture("jump");
+
+				expect(state.canceled("jump")).toBeTrue();
+
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.canceled("jump")).toBeFalse();
+			});
+
+			it("should cancel the displaced holder for exactly one frame when a stacked capture shadows it", () => {
+				expect.assertions(4);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.canceled()).toBeFalse();
+
+				state.capture("jump");
+
+				expect(first.canceled()).toBeTrue();
+
+				// The cancel targets the displaced holder, not the gameplay
+				// reader — gameplay was already reading flat.
+				expect(state.canceled("jump")).toBeFalse();
+
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.canceled()).toBeFalse();
+			});
+
+			it("should cancel a holder that releases mid-press for exactly one frame", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				expect(token.canceled()).toBeFalse();
+
+				token.release();
+
+				// The boundary rule is uniform: the releaser's own state
+				// machine need not care who caused the boundary.
+				expect(token.canceled()).toBeTrue();
+
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(token.canceled()).toBeFalse();
+			});
+
+			it("should cancel nothing when a capture acquires over a flat action", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(releasedJumpFrame());
+
+				const token = state.capture("jump");
+
+				expect(state.canceled("jump")).toBeFalse();
+				expect(token.canceled()).toBeFalse();
+			});
+
+			it("should not cancel a shadowed token when a third capture stacks on top", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				state.capture("jump");
+
+				// Only the displaced viewer had a visible in-flight view.
+				expect(second.canceled()).toBeTrue();
+				expect(first.canceled()).toBeFalse();
+			});
+
+			it("should not cancel the gameplay reader when a capture acquires mid-drain", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+				token.release();
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				// Gameplay reads flat mid-drain, so the acquisition drops no
+				// visible view.
+				state.capture("jump");
+
+				expect(state.canceled("jump")).toBeFalse();
+				expect(state.pressed("jump")).toBeFalse();
+			});
+
+			it("should not cancel a holder that releases cleanly", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("jump");
+				internal.updateAction(tappedJumpFrame());
+
+				token.release();
+
+				// No in-flight press was dropped — nothing to cancel.
+				expect(token.canceled()).toBeFalse();
+				expect(state.canceled("jump")).toBeFalse();
+			});
+
+			it("should not cancel a shadowed token that releases out of order mid-press", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				first.release();
+
+				expect(first.canceled()).toBeFalse();
+				expect(second.canceled()).toBeFalse();
+			});
+
+			it("should not cancel the holder restored beneath a mid-press release", () => {
+				expect.assertions(1);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				second.release();
+
+				// The restored holder never saw the press; it drains instead.
+				expect(first.canceled()).toBeFalse();
+			});
+
+			it("should let a claim eat the cancel like any other processed read", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(pressedJumpFrame());
+				state.capture("jump");
+
+				expect(state.canceled("jump")).toBeTrue();
+
+				state.claim("jump");
+
+				// Every processed read returns false while claimed — the
+				// boundary cancel is no exception.
+				expect(state.canceled("jump")).toBeFalse();
+			});
+
+			it("should suppress a displaced holder's cancel when the action was already claimed", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+				first.claim();
+				state.capture("jump");
+
+				expect(first.canceled()).toBeFalse();
+
+				// The claim clears at endFrame, and so does the slot — the
+				// eaten cancel does not resurface.
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.canceled()).toBeFalse();
+			});
+
+			it("should clear the slot at the frame reset even with no new input", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(pressedJumpFrame());
+				state.capture("jump");
+
+				expect(state.canceled("jump")).toBeTrue();
+
+				internal.endFrame();
+
+				expect(state.canceled("jump")).toBeFalse();
+			});
+
+			it("should let the last boundary win when two land in one frame", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				// Boundary one: acquisition displaces the first holder.
+				const second = state.capture("jump");
+
+				expect(first.canceled()).toBeTrue();
+
+				// Boundary two: the new top releases mid-press. One slot,
+				// last wins — documented, not queued.
+				second.release();
+
+				expect(second.canceled()).toBeTrue();
+				expect(first.canceled()).toBeFalse();
+			});
+
+			it("should never synthesize justReleased at a boundary", () => {
+				expect.assertions(4);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(pressedJumpFrame());
+				const token = state.capture("jump");
+
+				// The displaced gameplay reader gets the cancel, not a
+				// fabricated release edge.
+				expect(state.justReleased("jump")).toBeFalse();
+
+				token.release();
+
+				expect(token.justReleased()).toBeFalse();
+				expect(token.canceled()).toBeTrue();
+
+				// The physical release edge is eaten by the drain too.
+				internal.endFrame();
+				internal.updateAction(releasedJumpFrame());
+
+				expect(state.justReleased("jump")).toBeFalse();
+			});
+
+			it("should cancel the gameplay reader when a capture acquires over a deflected axis", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction({
+					action: "move",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: new Vector2(0, 1),
+				});
+
+				state.capture("move");
+
+				expect(state.canceled("move")).toBeTrue();
+				expect(state.axisBecameInactive("move")).toBeFalse();
+			});
+		});
 	});
 
 	describe("getMagnitude", () => {

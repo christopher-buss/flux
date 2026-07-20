@@ -15,10 +15,10 @@ import {
 	getCurrentDuration,
 	getEntry,
 	getPreviousDuration,
-	isCanceled,
 	isOngoing,
 	isTriggered,
 	read,
+	readEntryCanceled,
 	readValue,
 	settleDrain,
 	suppressedFalse,
@@ -104,6 +104,7 @@ function createEntry(config: ActionConfig): ActionEntry {
 	const defaultValue = defaultValueForType(config.type);
 
 	return {
+		canceledFor: undefined,
 		captures: [],
 		claimed: false,
 		duration: 0,
@@ -180,7 +181,7 @@ function buildPublicState<T extends ActionMap>(
 			});
 		},
 		canceled(action) {
-			return read({ action, entries, pick: isCanceled, whenSuppressed: suppressedFalse });
+			return readEntryCanceled(getEntry(entries, action));
 		},
 		capture<A extends keyof T & string>(action: A, options?: CaptureOptions) {
 			// The runtime token carries the full read surface; the public type
@@ -271,6 +272,7 @@ function endFrame(entries: Map<string, ActionEntry>): void {
 		entry.previousValue = entry.value;
 		entry.previousTriggerState = entry.triggerState;
 		entry.claimed = false;
+		entry.canceledFor = undefined;
 		settleDrain(entry);
 	}
 }
