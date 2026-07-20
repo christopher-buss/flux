@@ -14,9 +14,9 @@ export type ActionValueType = boolean | number | Vector2 | Vector3;
  */
 export interface CaptureViewer {
 	/** The `debugLabel` supplied at acquisition; dev mode only. */
-	debugLabel?: string;
+	readonly debugLabel?: string | undefined;
 	/** The acquisition-site traceback; recorded in dev mode only. */
-	traceback?: string;
+	readonly traceback?: string | undefined;
 }
 
 /** Per-action mutable state driven by the pipeline and read by consumers. */

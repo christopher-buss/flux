@@ -62,6 +62,18 @@ export interface CaptureTokenRuntime {
 	triggered(): boolean;
 }
 
+/** Options for acquiring a capture and building its token. */
+export interface CreateCaptureTokenOptions {
+	/** The action name. */
+	readonly action: string;
+	/** The capture options supplied at acquisition. */
+	readonly captureOptions?: CaptureOptions | undefined;
+	/** The action entry map. */
+	readonly entries: Map<string, ActionEntry>;
+	/** Whether the owning state was created in debug mode. */
+	readonly isDebug: boolean;
+}
+
 /**
  * Acquires a capture on an action and builds its scoped reader token.
  *
@@ -72,29 +84,17 @@ export interface CaptureTokenRuntime {
  * In dev mode the viewer additionally records holder metadata — an automatic
  * `debug.traceback()` and the optional `debugLabel` — surfaced later by
  * `debugCaptures`. Outside dev mode nothing is recorded.
- * @param entries - The action entry map.
- * @param action - The action name.
- * @param options - The capture options supplied at acquisition.
- * @param isDebug - Whether the owning state was created in debug mode.
+ * @param options - The action, entry map, capture options, and debug flag.
  * @returns The capture token, already installed as the active holder.
  */
 // eslint-disable-next-line max-lines-per-function -- thin pre-bound read delegations
-export function createCaptureToken(
-	entries: Map<string, ActionEntry>,
-	action: string,
-	options: CaptureOptions | undefined,
-	isDebug: boolean,
-): CaptureTokenRuntime {
+export function createCaptureToken(options: CreateCaptureTokenOptions): CaptureTokenRuntime {
+	const { action, captureOptions, entries, isDebug } = options;
 	const entry = getEntry(entries, action);
-	const viewer: CaptureViewer = {};
-
-	if (_G.__DEV__ && isDebug) {
-		if (options?.debugLabel !== undefined) {
-			viewer.debugLabel = options.debugLabel;
-		}
-
-		viewer.traceback = debug.traceback();
-	}
+	const viewer: CaptureViewer =
+		_G.__DEV__ && isDebug
+			? { debugLabel: captureOptions?.debugLabel, traceback: debug.traceback() }
+			: {};
 
 	function flagRead(pick: (entry: ActionEntry) => boolean): boolean {
 		return readEntry(entry, { pick, viewer, whenSuppressed: suppressedFalse });

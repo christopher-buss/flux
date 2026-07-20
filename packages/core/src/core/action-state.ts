@@ -186,10 +186,12 @@ function buildPublicState<T extends ActionMap>(
 			// The runtime token carries the full read surface; the public type
 			// narrows it to the action's kind, which only resolves once `A` is
 			// a concrete action name.
-			return createCaptureToken(entries, action, options, isDebug) as unknown as CaptureToken<
-				T,
-				A
-			>;
+			return createCaptureToken({
+				action,
+				captureOptions: options,
+				entries,
+				isDebug,
+			}) as unknown as CaptureToken<T, A>;
 		},
 		claim(action) {
 			return claimAction(entries, action);
