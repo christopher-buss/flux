@@ -1,8 +1,8 @@
 import type { ModifierContext, ModifierValue } from "../modifiers/types";
 import type { TriggerState, TypedTrigger } from "../triggers/types";
 import type { ActionConfig } from "../types/actions";
-import { getMagnitude } from "./action-state";
-import type { ActionValueType } from "./action-state";
+import { getMagnitude } from "./action-entry";
+import type { ActionValueType } from "./action-entry";
 
 /** Result of processing a single action through the modifier/trigger pipeline. */
 export interface PipelineResult {

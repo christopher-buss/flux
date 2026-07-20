@@ -169,6 +169,20 @@ describe("createCore", () => {
 	});
 
 	describe("unregister", () => {
+		it("should release captures held on the handle", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			core.getState(handle).capture("jump");
+			core.unregister(handle);
+			core.registerAs(handle, new Instance("Folder"), "gameplay");
+			core.simulateAction(handle, "jump", true);
+			core.update(0.016);
+
+			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
 		it("should clean up handle", () => {
 			expect.assertions(1);
 

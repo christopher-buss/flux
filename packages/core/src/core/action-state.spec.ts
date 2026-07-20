@@ -1,7 +1,8 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
 import type { ActionMap } from "../types/actions";
-import { createActionState, getMagnitude } from "./action-state";
+import { getMagnitude } from "./action-entry";
+import { createActionState } from "./action-state";
 
 const TEST_ACTIONS = {
 	jump: { type: "Bool" as const },
@@ -836,6 +837,357 @@ describe("createActionState", () => {
 			expect(state.isClaimed("jump")).toBeTrue();
 			expect(state.isEnabled("jump")).toBeTrue();
 			expect(state.isAvailable("jump")).toBeFalse();
+		});
+	});
+
+	describe("capture", () => {
+		it("should let the holder read pressed and triggered while others read false", () => {
+			expect.assertions(4);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(token.pressed()).toBeTrue();
+			expect(token.triggered()).toBeTrue();
+			expect(state.pressed("jump")).toBeFalse();
+			expect(state.triggered("jump")).toBeFalse();
+		});
+
+		it("should let the holder read justPressed while others read false", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(token.justPressed()).toBeTrue();
+			expect(state.justPressed("jump")).toBeFalse();
+		});
+
+		it("should let the holder read justReleased while others read false", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+			internal.endFrame();
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "none",
+				value: false,
+			});
+
+			expect(token.justReleased()).toBeTrue();
+			expect(state.justReleased("jump")).toBeFalse();
+		});
+
+		it("should let the holder read ongoing while others read false", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+
+			expect(token.ongoing()).toBeTrue();
+			expect(state.ongoing("jump")).toBeFalse();
+		});
+
+		it("should let the holder read canceled while others read false", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "canceled",
+				value: false,
+			});
+
+			expect(token.canceled()).toBeTrue();
+			expect(state.canceled("jump")).toBeFalse();
+		});
+
+		it("should let the holder read axisBecameActive while others read false", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("move");
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(1, 0),
+			});
+
+			expect(token.axisBecameActive()).toBeTrue();
+			expect(state.axisBecameActive("move")).toBeFalse();
+		});
+
+		it("should let the holder read axisBecameInactive while others read false", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("move");
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(1, 0),
+			});
+			internal.endFrame();
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "none",
+				value: Vector2.zero,
+			});
+
+			expect(token.axisBecameInactive()).toBeTrue();
+			expect(state.axisBecameInactive("move")).toBeFalse();
+		});
+
+		it("should let the holder read axis1d while others read neutral 0", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("throttle");
+			internal.updateAction({
+				action: "throttle",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: 0.75,
+			});
+
+			expect(token.axis1d()).toBeCloseTo(0.75);
+			expect(state.axis1d("throttle")).toBe(0);
+		});
+
+		it("should let the holder read direction2d while others read the neutral vector", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("move");
+			internal.updateAction({
+				action: "move",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(1, 0),
+			});
+
+			expect(token.direction2d()).toBe(new Vector2(1, 0));
+			expect(state.direction2d("move")).toBe(Vector2.zero);
+		});
+
+		it("should let the holder read axis3d while others read the neutral vector", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("look");
+			internal.updateAction({
+				action: "look",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector3(1, 2, 3),
+			});
+
+			expect(token.axis3d()).toBe(new Vector3(1, 2, 3));
+			expect(state.axis3d("look")).toBe(Vector3.zero);
+		});
+
+		it("should let the holder read position2d while others read the neutral vector", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState({
+				cursor: { type: "ViewportPosition" as const },
+			});
+			const token = state.capture("cursor");
+			internal.updateAction({
+				action: "cursor",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: new Vector2(100, 200),
+			});
+
+			expect(token.position2d()).toBe(new Vector2(100, 200));
+			expect(state.position2d("cursor")).toBe(Vector2.zero);
+		});
+
+		it("should let the holder read getState while others read neutral", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(token.getState()).toBeTrue();
+			expect(state.getState("jump")).toBeFalse();
+		});
+
+		it("should let the holder read durations while others read 0", () => {
+			expect.assertions(4);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "ongoing",
+				value: true,
+			});
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(token.currentDuration()).toBeCloseTo(0.016);
+			expect(token.previousDuration()).toBeCloseTo(0.016);
+			expect(state.currentDuration("jump")).toBe(0);
+			expect(state.previousDuration("jump")).toBe(0);
+		});
+
+		it("should not suppress rawPressed or rawJustPressed while captured", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.rawPressed("jump")).toBeTrue();
+			expect(state.rawJustPressed("jump")).toBeTrue();
+		});
+
+		it("should keep the hold across endFrame until released", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+			internal.endFrame();
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(token.pressed()).toBeTrue();
+			expect(state.pressed("jump")).toBeFalse();
+		});
+
+		it("should restore normal reads on release", () => {
+			expect.assertions(2);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.pressed("jump")).toBeFalse();
+
+			token.release();
+
+			expect(state.pressed("jump")).toBeTrue();
+		});
+
+		it("should treat double release as a no-op", () => {
+			expect.assertions(1);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			token.release();
+			token.release();
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.pressed("jump")).toBeTrue();
+		});
+
+		it("should let the holder claim within the session", () => {
+			expect.assertions(4);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(token.claim()).toBeTrue();
+			expect(state.isClaimed("jump")).toBeTrue();
+
+			// The claim carries no owner identity, so it blinds the holder too.
+			expect(token.pressed()).toBeFalse();
+
+			expect(token.claim()).toBeFalse();
+		});
+
+		it("should keep the capture after a claim clears at endFrame", () => {
+			expect.assertions(3);
+
+			const [state, internal] = createActionState(TEST_ACTIONS);
+			const token = state.capture("jump");
+			token.claim();
+			internal.endFrame();
+			internal.updateAction({
+				action: "jump",
+				deltaTime: 0.016,
+				triggerState: "triggered",
+				value: true,
+			});
+
+			expect(state.isClaimed("jump")).toBeFalse();
+			expect(token.pressed()).toBeTrue();
+			expect(state.pressed("jump")).toBeFalse();
 		});
 	});
 

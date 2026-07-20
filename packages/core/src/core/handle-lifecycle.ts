@@ -3,7 +3,7 @@ import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionState } from "../types/state";
-import type { ActionValueType } from "./action-state";
+import type { ActionValueType } from "./action-entry";
 import { createActionState } from "./action-state";
 import { createActiveContexts } from "./active-contexts";
 import type { HandleFactory } from "./handle-factory";

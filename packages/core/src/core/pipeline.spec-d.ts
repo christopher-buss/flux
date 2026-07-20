@@ -4,7 +4,7 @@ import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 import type { ModifierContext } from "../modifiers/types";
 import type { TriggerState } from "../triggers/types";
 import type { ActionConfig } from "../types/actions";
-import type { ActionValueType } from "./action-state";
+import type { ActionValueType } from "./action-entry";
 import type { PipelineOptions, PipelineResult } from "./pipeline";
 import { processPipeline } from "./pipeline";
 

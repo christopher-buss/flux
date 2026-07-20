@@ -63,4 +63,10 @@ export type {
 } from "./types/bindings";
 export type { ContextConfig } from "./types/contexts";
 export type { FluxCore, InputHandle } from "./types/core";
-export type { ActionState, ActionValue, ActionValueMap } from "./types/state";
+export type {
+	ActionState,
+	ActionValue,
+	ActionValueMap,
+	CaptureOptions,
+	CaptureToken,
+} from "./types/state";
