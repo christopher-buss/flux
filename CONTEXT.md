@@ -39,7 +39,22 @@ different context. _Avoid_: keybind, mapping, control, hotkey.
 
 **Rebind**: Replacing an action's bindings at runtime. The customized result is
 a **binding override**, which is serialized sparsely for persistence and merged
-back over the code-defined defaults on load. _Avoid_: remap, reassign.
+back over the code-defined defaults on load. Overrides are keyed by action _and_
+platform, so rebinding one device leaves the others alone. _Avoid_: remap,
+reassign.
+
+**Platform**: The class of device a binding targets — `keyboard`, `gamepad`, or
+`touch`. A property of the binding, derived from it rather than declared: a
+`ButtonA` binding is a gamepad binding wherever it appears. Distinct from a
+_context_, which groups bindings by situation rather than by hardware; an action
+can be bound on several platforms in the same context. _Avoid_: device, scheme,
+input type, input method.
+
+**Unbound**: An action a player deliberately cleared, per platform — distinct
+from one that merely has no override and so uses its code-defined default, and
+from one a context never declared. All three read back differently: unbound
+renders as an empty slot the player can refill, an undeclared action renders as
+nothing at all. _Avoid_: empty, cleared, disabled, unassigned.
 
 **Context**: A named set of bindings with a **priority** and a **sink** flag.
 Only active contexts feed input to a handle; activating a context is how Flux
