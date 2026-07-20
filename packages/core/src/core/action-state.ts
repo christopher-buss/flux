@@ -25,6 +25,7 @@ import {
 	settleDrain,
 	suppressedFalse,
 	suppressedZero,
+	valueRestsAtZero,
 	wasJustPressed,
 	wasJustReleased,
 } from "./action-entry";
@@ -101,6 +102,7 @@ function createEntry(config: ActionConfig): ActionEntry {
 		previousValue: defaultValue,
 		triggerState: "none",
 		value: defaultValue,
+		valueRestsAtZero: valueRestsAtZero(config.type),
 	};
 }
 

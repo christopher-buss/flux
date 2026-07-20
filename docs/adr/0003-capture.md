@@ -37,7 +37,9 @@ Edges across a capture boundary:
 - `release()` **drains** the in-flight press — suppression persists until
   magnitude 0, so the press never leaks to whoever is underneath. Modeled as a
   capture held by nobody, so a new `capture()` mid-drain reads through: handoff
-  happens by capturing, never by leaky release.
+  happens by capturing, never by leaky release. Only kinds whose value rests at
+  zero can be in flight, so a `ViewportPosition` boundary neither drains nor
+  cancels.
 - No synthesized `justReleased` — a completed release and an interrupted press
   are different events. Instead `canceled()` reads true for exactly one frame
   for the viewer whose in-flight view was force-dropped (gameplay at
@@ -81,6 +83,11 @@ held in a closure or the consumer's own component.
   already threads a viewer through one helper, so the full surface is near-free,
   and a reader-object token makes "forgot to thread the viewer" and action/token
   mismatch unrepresentable.
+- **A movement-delta or instant-settle drain terminator for `ViewportPosition`**
+  — rejected: both dress up "never drains" as a threshold. Delta needs a
+  rest-detection window nothing else in the pipeline has, and instant-settle is
+  a no-drain release that still pays a frame of suppression. Neither buys
+  anything, because there is no in-flight press to withhold.
 - **`release({ immediate: true })`** — rejected for now: no consumer evidence
   for mid-press handoff, and the flag re-enables the exact leak the drain plugs.
   `release(options?)` reserved.
@@ -108,6 +115,13 @@ held in a closure or the consumer's own component.
   cancel.
 - The drain terminates on magnitude, not trigger state: custom triggers can
   leave `triggered` while the button is still physically down.
+- "In flight" is per action kind, not universal. Magnitude answers it only for
+  values that rest at zero; a `ViewportPosition` rests wherever the pointer
+  sits, so its magnitude is distance from pixel (0, 0) and a drain on one would
+  suppress the action forever. Position kinds are therefore never in flight,
+  which settles both boundaries at once: releasing one neither drains nor
+  cancels, and capturing one cancels nobody. There is no interaction to
+  withhold, only a coordinate whoever reads next should already see.
 - Capture ownership is ordering-free, so `useCapture` needs no schedule slot.
   Per-frame `claim()` stays positional — but `token.claim()` from a React effect
   cannot suppress same-frame subscription reads (selectors evaluate before

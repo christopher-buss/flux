@@ -57,6 +57,14 @@ export interface ActionEntry {
 	triggerState: TriggerState;
 	/** The current post-pipeline value. */
 	value: ActionValueType;
+	/**
+	 * Whether this action's value rests at zero when nobody is interacting.
+	 *
+	 * True for presses and deflections, false for positions: a cursor
+	 * coordinate is non-zero at rest, so magnitude cannot tell an interaction
+	 * from a resting pointer. See {@link ActionEntry.value}.
+	 */
+	readonly valueRestsAtZero: boolean;
 }
 
 /**
@@ -130,6 +138,28 @@ export function getDefaultValue(actionType: ActionType): ActionValueType {
 }
 
 /**
+ * Whether an action type's value rests at zero when nobody is interacting.
+ *
+ * Presses and deflections spring back; a position does not, so magnitude
+ * cannot tell a live interaction from a resting pointer.
+ * @param actionType - Bool, Direction1D, Direction2D, Direction3D, or ViewportPosition.
+ * @returns True for kinds whose value rests at zero.
+ */
+export function valueRestsAtZero(actionType: ActionType): boolean {
+	switch (actionType) {
+		case "Bool":
+		case "Direction1D":
+		case "Direction2D":
+		case "Direction3D": {
+			return true;
+		}
+		case "ViewportPosition": {
+			return false;
+		}
+	}
+}
+
+/**
  * Computes scalar magnitude from any action value type.
  * @param value - The action value to compute magnitude for.
  * @returns Scalar magnitude: boolean→0/1, number→abs, vector→Magnitude.
@@ -182,7 +212,8 @@ export function acquireCapture(entry: ActionEntry, viewer: CaptureViewer): void 
  * leak to whoever is underneath. The drain start is a capture boundary: the
  * releaser's own in-flight view is force-dropped, so it gets the one-frame
  * boundary cancel. Shadowed holders never saw the press, so their release is
- * clean. Releasing a viewer that is not on the stack is a no-op.
+ * clean, as is every release of an action that holds no live interaction.
+ * Releasing a viewer that is not on the stack is a no-op.
  * @param entry - The action entry being released.
  * @param viewer - The releasing token's identity.
  */
@@ -208,6 +239,9 @@ export function releaseCapture(entry: ActionEntry, viewer: CaptureViewer): void 
  * still suppressed — not even the trailing release edge leaks to whoever is
  * underneath. Terminates on magnitude, not trigger state: a custom trigger
  * can leave "triggered" while the button is still physically down.
+ *
+ * Shares {@link hasLiveInteraction} with the two boundaries that start a
+ * drain, so a kind that can never be in flight can never be left draining.
  * @param entry - The action entry to settle.
  */
 export function settleDrain(entry: ActionEntry): void {
@@ -472,11 +506,17 @@ function getTopHolder(entry: ActionEntry): CaptureViewer | undefined {
  *
  * The condition both capture boundaries turn on: a boundary over a flat
  * action drops no view, so it cancels nothing and starts no drain.
+ *
+ * Magnitude only answers this for values that rest at zero. A position rests
+ * wherever the pointer sits, so it is never in flight — there is no
+ * interaction to withhold, only a coordinate the next reader should see. A
+ * drain on one would also never settle.
  * @param entry - The action entry to test.
- * @returns True if the action's value has non-zero magnitude.
+ * @returns True if the action's value has non-zero magnitude and its kind
+ * rests at zero.
  */
 function hasLiveInteraction(entry: ActionEntry): boolean {
-	return getMagnitude(entry.value) > 0;
+	return entry.valueRestsAtZero && getMagnitude(entry.value) > 0;
 }
 
 /**
