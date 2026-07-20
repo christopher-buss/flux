@@ -1,5 +1,5 @@
 import type { TriggerState } from "../triggers/types";
-import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
+import type { ActionConfig, ActionMap } from "../types/actions";
 import type {
 	ActionState,
 	ActionValue,
@@ -14,6 +14,7 @@ import {
 	didAxisBecomeInactive,
 	expireBoundaryCancel,
 	getCurrentDuration,
+	getDefaultValue,
 	getEntry,
 	getPreviousDuration,
 	isOngoing,
@@ -84,28 +85,8 @@ export function createActionState<T extends ActionMap>(
 	return [buildPublicState<T>(entries, options?.debug === true), buildInternalState(entries)];
 }
 
-function defaultValueForType(actionType: ActionType): ActionValueType {
-	switch (actionType) {
-		case "Bool": {
-			return false;
-		}
-		case "Direction1D": {
-			return 0;
-		}
-		case "Direction2D": {
-			return Vector2.zero;
-		}
-		case "Direction3D": {
-			return Vector3.zero;
-		}
-		case "ViewportPosition": {
-			return Vector2.zero;
-		}
-	}
-}
-
 function createEntry(config: ActionConfig): ActionEntry {
-	const defaultValue = defaultValueForType(config.type);
+	const defaultValue = getDefaultValue(config.type);
 
 	return {
 		canceledConsumed: false,
