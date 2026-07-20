@@ -4,6 +4,44 @@ import { useEffect, useRef, useState } from "@rbxts/react";
 import type { FluxContextValue } from "../flux-context";
 
 /**
+ * Options accepted by `useCapture`.
+ *
+ * @remarks Read field by field on every render, so an inline object literal is
+ * fine — a fresh options object does not re-acquire the capture.
+ */
+export interface UseCaptureOptions {
+	/**
+	 * Label recorded on the capture's `debugCaptures` entry, to tell holders
+	 * apart when every acquisition in an app routes through this one hook and
+	 * the tracebacks look identical.
+	 *
+	 * @remarks Dev-mode only, and read at acquisition: changing the label does
+	 * not re-acquire the capture, so a new label applies to the next
+	 * acquisition rather than the capture already held.
+	 */
+	readonly debugLabel?: string;
+
+	/**
+	 * Whether the surface holds the capture, defaulting to `true`.
+	 *
+	 * @remarks Mounted-means-captured is the default idiom, and needs no
+	 * configuration. Reach for `enabled` only when ownership has to follow a
+	 * condition that flips while the widget stays up — a focus layer tracking
+	 * the engine's selected object, say. Expressing that by unmounting would
+	 * force a component split under the Rules of Hooks, with the token trapped
+	 * in a child that renders nothing.
+	 *
+	 * Toggling is symmetric: `false` releases, `true` re-captures. While
+	 * disabled the token reads inert, exactly as it does before the capture
+	 * lands and after it is released, so no call site branches on it. The one
+	 * exception is `canceled()`: disabling mid-press is a capture boundary, and
+	 * the resulting one-frame cancel is reported so a reader is never left with
+	 * an unexplained falling edge.
+	 */
+	readonly enabled?: boolean;
+}
+
+/**
  * Overloaded `useCapture` hook type.
  *
  * @template T - The action map type.
@@ -14,9 +52,10 @@ export interface FluxUseCapture<T extends ActionMap> {
 	 *
 	 * @template A - The captured action name, narrowing the token's reads.
 	 * @param action - The action to capture.
+	 * @param options - Optional capture options.
 	 * @returns A stable token, inert until the capture lands.
 	 */
-	<A extends AllActions<T>>(action: A): CaptureToken<T, A>;
+	<A extends AllActions<T>>(action: A, options?: UseCaptureOptions): CaptureToken<T, A>;
 
 	/**
 	 * Captures an action for the component's lifetime, on an explicit handle.
@@ -24,9 +63,14 @@ export interface FluxUseCapture<T extends ActionMap> {
 	 * @template A - The captured action name, narrowing the token's reads.
 	 * @param handle - The InputHandle to capture on (overrides Provider default).
 	 * @param action - The action to capture.
+	 * @param options - Optional capture options.
 	 * @returns A stable token, inert until the capture lands.
 	 */
-	<A extends AllActions<T>>(handle: InputHandle, action: A): CaptureToken<T, A>;
+	<A extends AllActions<T>>(
+		handle: InputHandle,
+		action: A,
+		options?: UseCaptureOptions,
+	): CaptureToken<T, A>;
 }
 
 /**
@@ -123,6 +167,14 @@ interface CaptureRequest<T extends ActionMap, Contexts extends string> {
 	readonly action: AllActions<T>;
 	/** The core owning the action. */
 	readonly core: FluxCore<T, Contexts>;
+	/**
+	 * Whether this render asks to hold the capture at all.
+	 *
+	 * Part of the request rather than the effect alone, so a render that
+	 * disables the capture goes inert in that same render instead of reading
+	 * live until the effect catches up.
+	 */
+	readonly enabled: boolean;
 	/** The handle the capture is scoped to. */
 	readonly handle: InputHandle;
 	/**
@@ -175,6 +227,25 @@ interface CaptureReader<T extends ActionMap, Contexts extends string> {
  * - The returned token is the same object for the component's lifetime and
  *   reads inert until the capture lands, so no call site needs `token?.x()`.
  *
+ * @example
+ * ```tsx
+ * // The default idiom: mounted means captured, no configuration.
+ * const confirm = useCapture("confirm");
+ *
+ * // `enabled` is for ownership that has to follow a condition flipping while
+ * // the widget stays up, and `debugLabel` names the holder in `debugCaptures`.
+ * const confirm = useCapture("confirm", { debugLabel: "hud", enabled: focused });
+ * ```
+ *
+ * @remarks Setting `enabled` to false makes every read inert from that render
+ * on — except `canceled()`. Dropping a capture mid-press is a capture boundary
+ * like any other, and core records the one-frame cancel against this very
+ * viewer, so the hook reports it. A child handed the token never sees
+ * `enabled`; swallowing the cancel would leave it watching `pressed()` fall
+ * with no verb explaining why, indistinguishable from the user letting go. A
+ * changed action is different and still swallows: that cancel belongs to a
+ * different action.
+ *
  * @remarks `canceled()` is the one read that keeps delegating after release,
  * so the one-frame boundary cancel reaches a reader that is tearing down. A
  * consumer that keeps the token past unmount therefore keeps seeing that
@@ -189,25 +260,41 @@ interface CaptureReader<T extends ActionMap, Contexts extends string> {
 export function createUseCapture<T extends ActionMap, Contexts extends string = string>(
 	useFluxContext: () => FluxContextValue<T, Contexts>,
 ): FluxUseCapture<T> {
-	function useCapture<A extends AllActions<T>>(action: A): CaptureToken<T, A>;
+	function useCapture<A extends AllActions<T>>(
+		action: A,
+		options?: UseCaptureOptions,
+	): CaptureToken<T, A>;
 	function useCapture<A extends AllActions<T>>(
 		handle: InputHandle,
 		action: A,
+		options?: UseCaptureOptions,
 	): CaptureToken<T, A>;
 	function useCapture<A extends AllActions<T>>(
 		handleOrAction: A | InputHandle,
-		maybeAction?: A,
+		actionOrOptions?: A | UseCaptureOptions,
+		maybeOptions?: UseCaptureOptions,
 	): CaptureToken<T, A> {
 		const { core, handle: defaultHandle } = useFluxContext();
 
 		const hasStringFirst = typeIs(handleOrAction, "string");
 		const handle = hasStringFirst ? defaultHandle : handleOrAction;
-		const action = hasStringFirst ? handleOrAction : (maybeAction as AllActions<T>);
+		const action = hasStringFirst ? handleOrAction : (actionOrOptions as AllActions<T>);
+		const options = hasStringFirst
+			? (actionOrOptions as undefined | UseCaptureOptions)
+			: maybeOptions;
+		const isEnabled = options?.enabled ?? true;
+		const debugLabel = options?.debugLabel;
 
 		const holdRef = useRef<CaptureHold<T, Contexts> | undefined>(undefined);
 		const releasedRef = useRef(true);
-		const [initialRequest] = useState(() => makeRequest(core, handle, action));
+		const [initialRequest] = useState(() => makeRequest(core, handle, action, isEnabled));
 		const requestRef = useRef(initialRequest);
+
+		// `debugLabel` is dev-only metadata, so it is read at acquisition
+		// rather than joining the request identity: a changing label must not
+		// churn the capture stack the way a changing action legitimately does.
+		const debugLabelRef = useRef(debugLabel);
+		debugLabelRef.current = debugLabel;
 		function buildFacade(): CaptureTokenSurface {
 			return createCaptureFacade({ holdRef, releasedRef, requestRef });
 		}
@@ -228,14 +315,36 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 		// discarded render is always followed by an unmount or a re-render
 		// that rewrites this. A concurrent renderer would invalidate the
 		// second reason.
-		const request = requestRef.current;
-		if (request.action !== action || request.core !== core || request.handle !== handle) {
-			requestRef.current = makeRequest(core, handle, action);
+		const previous = requestRef.current;
+		if (previous.action !== action || previous.core !== core || previous.handle !== handle) {
+			requestRef.current = makeRequest(core, handle, action, isEnabled);
+		} else if (previous.enabled !== isEnabled) {
+			// The captured triple is unchanged, so the neutral value is too:
+			// carry it forward rather than re-deriving it, since a surface
+			// whose `enabled` tracks focus can toggle at frame rate.
+			requestRef.current = { ...previous, enabled: isEnabled };
 		}
 
+		// The effect closes over the request this render resolved rather than
+		// reading the ref when it runs, so the hold it stores is structurally
+		// the one its own render asked for instead of whatever the ref happens
+		// to hold. Request identity changes exactly when the captured triple or
+		// `enabled` does, so this is also the whole dependency list.
+		const request = requestRef.current;
+
 		useEffect(() => {
-			const token = core.getState(handle).capture(action) as unknown as CaptureTokenSurface;
-			holdRef.current = { request: requestRef.current, token };
+			if (!request.enabled) {
+				// Nothing to acquire, and nothing to leave behind: the render
+				// that disabled the capture already rebuilt the request, so
+				// every read but `canceled()` reads stale and inert.
+				return;
+			}
+
+			const label = debugLabelRef.current;
+			const token = request.core.getState(request.handle).capture(request.action, {
+				...(label !== undefined && { debugLabel: label }),
+			}) as unknown as CaptureTokenSurface;
+			holdRef.current = { request, token };
 			releasedRef.current = false;
 
 			return () => {
@@ -246,7 +355,7 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 				// boundary, and the reader must still see it while tearing
 				// down. Every other read reports inert once released.
 			};
-		}, [core, handle, action]);
+		}, [request]);
 
 		return facade as unknown as CaptureToken<T, A>;
 	}
@@ -342,14 +451,16 @@ function inertStateFor<T extends ActionMap, Contexts extends string>(
  * @param core - The core owning the action.
  * @param handle - The handle the capture is scoped to.
  * @param action - The action to capture.
+ * @param enabled - Whether this render asks to hold the capture.
  * @returns The request, ready to compare against the current hold.
  */
 function makeRequest<T extends ActionMap, Contexts extends string>(
 	core: FluxCore<T, Contexts>,
 	handle: InputHandle,
 	action: AllActions<T>,
+	enabled: boolean,
 ): CaptureRequest<T, Contexts> {
-	return { action, core, handle, inert: inertStateFor(core, handle, action) };
+	return { action, core, enabled, handle, inert: inertStateFor(core, handle, action) };
 }
 
 /**
@@ -382,6 +493,28 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 		return hold;
 	}
 
+	function currentForCancel(): CaptureHold<T, Contexts> | undefined {
+		const hold = holdRef.current;
+		if (hold === undefined) {
+			return undefined;
+		}
+
+		const request = requestRef.current;
+		if (hold.request === request) {
+			return hold;
+		}
+
+		// Same action on the same core and handle, so only `enabled` withdrew:
+		// core recorded the boundary cancel against this very viewer, and it is
+		// still ours to report. A changed action fails this and stays swallowed,
+		// because that cancel belongs to a different action entirely.
+		return hold.request.action === request.action &&
+			hold.request.core === request.core &&
+			hold.request.handle === request.handle
+			? hold
+			: undefined;
+	}
+
 	function live(): CaptureTokenSurface | undefined {
 		if (releasedRef.current) {
 			return undefined;
@@ -410,9 +543,12 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 		canceled(): boolean {
 			// Deliberately not gated on release: core synthesizes the boundary
 			// cancel as the capture drops, and the reader tearing down has to
-			// see it. Staleness still applies — a changed action reports its
-			// own cancels, never the previous action's.
-			const hold = current();
+			// see it. Nor on `enabled` — a mid-press disable is a boundary like
+			// any other, and a child handed this token never sees `enabled`, so
+			// swallowing it would leave a bare falling edge with no verb.
+			// Staleness still applies to the action: a changed action reports
+			// its own cancels, never the previous action's.
+			const hold = currentForCancel();
 			return hold === undefined ? false : hold.token.canceled();
 		},
 		claim(): boolean {

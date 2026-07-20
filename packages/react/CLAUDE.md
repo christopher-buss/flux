@@ -41,6 +41,22 @@ or new selector identity does not update the rendered value immediately — the
 next `flush()` catches it via the subscribe callback. Locked by the
 `handle and rerender resync` block in `src/hooks/use-action.spec.tsx`.
 
+**`useCapture`'s `enabled` rides on the request, not the effect alone.** The
+facade decides liveness during render by comparing request identity, so gating
+the capture in the effect only would leave one commit reading live after
+`enabled` went false. Mounted-means-captured is the documented default idiom;
+`enabled` is for conditions that flip while the widget stays up. `debugLabel` is
+deliberately _not_ part of that identity — dev-only metadata must not churn the
+capture stack — so it is read at acquisition and a changed label applies to the
+next one.
+
+**`canceled()` compares the captured triple, not request identity.** Every other
+read goes inert the moment `enabled` flips false, but disabling mid-press is a
+capture boundary and core records the cancel against that very viewer. A child
+handed the token never sees `enabled`, so swallowing it would leave a falling
+edge with no verb — the charge-fired-because-a-menu-opened failure. A changed
+action still swallows, because that cancel belongs to a different action.
+
 **JSX intrinsics exclude `Name` and `Parent`.** `InstanceAttributes` in
 `@rbxts/react` omits them. Distinguish test probes by `Text` + `queryByText`,
 not `Name` + `FindFirstChild`.
