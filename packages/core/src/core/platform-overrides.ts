@@ -27,6 +27,18 @@ export const PLATFORM_ORDER = [
 ] as const satisfies ReadonlyArray<InputPlatform>;
 
 /**
+ * How one platform's effective bindings are chosen.
+ */
+export interface PlatformBucketOptions {
+	/** Reads the code-declared bindings targeting a platform. */
+	readonly declaredFor: (platform: InputPlatform) => ReadonlyArray<BindingLike>;
+	/** The action's per-platform buckets, if it has any. */
+	readonly overrides: PlatformOverrides | undefined;
+	/** The platform to resolve. */
+	readonly platform: InputPlatform;
+}
+
+/**
  * Groups bindings by the platform each one targets.
  * @param bindings - The bindings to classify.
  * @returns A map from platform to the bindings targeting it, in source order.
@@ -50,6 +62,42 @@ export function bucketByPlatform(
 	}
 
 	return byPlatform;
+}
+
+/**
+ * Finds one platform's override bucket.
+ *
+ * The single lookup every per-platform question goes through, so "this
+ * platform is overridden" and "these are its override bindings" cannot come
+ * apart: `getBindingOrigin` reports `"override"` exactly when this returns a
+ * value.
+ * @param overrides - The action's per-platform buckets, if it has any.
+ * @param platform - The platform to look up.
+ * @returns The bucket, or `undefined` when that platform still tracks its
+ * code-defined defaults. An empty bucket is a deliberate unbind, and is
+ * returned rather than treated as absent.
+ */
+export function findPlatformBucket(
+	overrides: PlatformOverrides | undefined,
+	platform: InputPlatform,
+): ReadonlyArray<BindingLike> | undefined {
+	return overrides?.get(platform);
+}
+
+/**
+ * Resolves one platform's contribution to an action's effective bindings.
+ *
+ * The rule, stated once: an override bucket wins where one exists, and the
+ * code-declared bindings targeting that platform apply where none does.
+ * {@link composeBindings} Applies it across every platform; a single-platform
+ * read applies it once.
+ * @param options - The overrides, the platform, and a reader for that
+ * platform's declared bindings.
+ * @returns That platform's effective bindings.
+ */
+export function resolvePlatformBucket(options: PlatformBucketOptions): ReadonlyArray<BindingLike> {
+	const { declaredFor, overrides, platform } = options;
+	return findPlatformBucket(overrides, platform) ?? declaredFor(platform);
 }
 
 /**
@@ -86,15 +134,13 @@ export function composeBindings(
 	const defaults = needsDefaults(overrides)
 		? bucketByPlatform(resolveDefaults())
 		: new Map<InputPlatform, Array<BindingLike>>();
+	function declaredFor(platform: InputPlatform): ReadonlyArray<BindingLike> {
+		return defaults.get(platform) ?? [];
+	}
 
 	const result = new Array<BindingLike>();
 	for (const platform of PLATFORM_ORDER) {
-		const bucket = overrides.get(platform) ?? defaults.get(platform);
-		if (bucket === undefined) {
-			continue;
-		}
-
-		for (const binding of bucket) {
+		for (const binding of resolvePlatformBucket({ declaredFor, overrides, platform })) {
 			result.push(binding);
 		}
 	}

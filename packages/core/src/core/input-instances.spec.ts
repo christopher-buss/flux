@@ -274,6 +274,32 @@ describe("createInputInstances", () => {
 		}).toThrow("UserInputType");
 	});
 
+	it("should throw when a keycode field holds something other than a KeyCode", () => {
+		expect.assertions(1);
+
+		const actions = {
+			aim: { type: "Bool" as const },
+		} satisfies ActionMap;
+
+		const contexts = {
+			gameplay: {
+				bindings: {
+					aim: fromAny([{ keyCode: Enum.UserInputType.MouseButton2 }]),
+				},
+				priority: 0,
+			},
+		} satisfies Record<string, ContextConfig>;
+
+		expect(() => {
+			createInputInstances({
+				actions,
+				contextNames: ["gameplay"],
+				contexts,
+				parent: new Instance("Folder"),
+			});
+		}).toThrow("no input source");
+	});
+
 	it("should throw naming the action when a binding has no input source", () => {
 		expect.assertions(1);
 

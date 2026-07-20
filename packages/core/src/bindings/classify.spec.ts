@@ -1,11 +1,12 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { fromAny } from "@rbxts/jest-utils";
 
 import type {
 	BoolBindingConfig,
 	Direction2dBindingConfig,
 	ViewportPositionBindingConfig,
 } from "../types/bindings";
-import { classifyBinding, getBindingsForPlatform } from "./classify";
+import { classifyBinding, filterBindingsByPlatform, hasInputSource } from "./classify";
 
 describe("classifyBinding", () => {
 	it("should classify a keyboard KeyCode as keyboard", () => {
@@ -139,9 +140,66 @@ describe("classifyBinding", () => {
 
 		expect(classifyBinding(config)).toBe("keyboard");
 	});
+
+	it("should ignore a keycode field holding something other than a KeyCode", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = fromAny({
+			keyCode: Enum.UserInputType.MouseButton1,
+			uiButton: new Instance("TextButton"),
+		});
+
+		expect(classifyBinding(config)).toBe("touch");
+	});
+
+	it("should classify a config whose only keycode field is not a KeyCode as keyboard", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = fromAny({
+			keyCode: Enum.UserInputType.MouseButton1,
+		});
+
+		expect(classifyBinding(config)).toBe("keyboard");
+	});
 });
 
-describe("getBindingsForPlatform", () => {
+describe("hasInputSource", () => {
+	it("should accept a config naming a KeyCode", () => {
+		expect.assertions(1);
+
+		expect(hasInputSource({ keyCode: Enum.KeyCode.Space })).toBeTrue();
+	});
+
+	it("should accept a raw KeyCode", () => {
+		expect.assertions(1);
+
+		expect(hasInputSource(Enum.KeyCode.Space)).toBeTrue();
+	});
+
+	it("should accept a config naming only a touch field", () => {
+		expect.assertions(1);
+
+		expect(hasInputSource({ pointerIndex: 1 })).toBeTrue();
+	});
+
+	it("should reject a config naming no input source", () => {
+		expect.assertions(1);
+
+		expect(hasInputSource({ pressedThreshold: 0.5 })).toBeFalse();
+	});
+
+	it("should reject a keycode field holding something other than a KeyCode", () => {
+		expect.assertions(1);
+
+		const config: BoolBindingConfig = fromAny({
+			keyCode: Enum.UserInputType.MouseButton1,
+		});
+
+		expect(hasInputSource(config)).toBeFalse();
+	});
+});
+
+describe("filterBindingsByPlatform", () => {
 	it("should filter bindings to only those matching the platform", () => {
 		expect.assertions(2);
 
@@ -152,7 +210,7 @@ describe("getBindingsForPlatform", () => {
 			Enum.KeyCode.DPadUp,
 		];
 
-		const result = getBindingsForPlatform(bindings, "gamepad");
+		const result = filterBindingsByPlatform(bindings, "gamepad");
 
 		expect(result.size()).toBe(2);
 		expect(result[0]).toBe(Enum.KeyCode.ButtonA);
@@ -163,7 +221,7 @@ describe("getBindingsForPlatform", () => {
 
 		const bindings = [Enum.KeyCode.Space, Enum.KeyCode.W];
 
-		const result = getBindingsForPlatform(bindings, "gamepad");
+		const result = filterBindingsByPlatform(bindings, "gamepad");
 
 		expect(result.size()).toBe(0);
 	});
