@@ -10,6 +10,7 @@ import {
 	getPreviousDuration,
 	isCanceled,
 	isOngoing,
+	isRealHolder,
 	isTriggered,
 	readEntry,
 	readEntryValue,
@@ -165,22 +166,26 @@ export function createCaptureToken(options: CreateCaptureTokenOptions): CaptureT
  * Lists an action's capture stack as debug entries, bottom-to-top.
  *
  * Callers gate on dev mode; this helper reports whatever metadata the holders
- * recorded at acquisition.
+ * recorded at acquisition. The drain sentinel — a capture held by nobody — is
+ * not a holder and is skipped.
  * @param entries - The action entry map.
  * @param action - The action name.
- * @returns One entry per holder, the last being the active holder.
+ * @returns One entry per real holder, the last being the active holder.
  */
 export function listDebugCaptures(
 	entries: Map<string, ActionEntry>,
 	action: string,
 ): Array<DebugCapture> {
-	return getEntry(entries, action).captures.map((holder) => {
-		return {
-			...(holder.debugLabel !== undefined && { label: holder.debugLabel }),
-			// A holder only lacks a traceback if it was acquired while the dev
-			// gate was off — impossible in real builds, where `_G.__DEV__` is a
-			// compile-time constant. The stack must still report every holder.
-			traceback: holder.traceback ?? "",
-		};
-	});
+	return getEntry(entries, action)
+		.captures.filter(isRealHolder)
+		.map((holder) => {
+			return {
+				...(holder.debugLabel !== undefined && { label: holder.debugLabel }),
+				// A holder only lacks a traceback if it was acquired while the
+				// dev gate was off — impossible in real builds, where
+				// `_G.__DEV__` is a compile-time constant. The stack must still
+				// report every real holder.
+				traceback: holder.traceback ?? "",
+			};
+		});
 }

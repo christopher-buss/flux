@@ -1473,6 +1473,22 @@ describe("createActionState", () => {
 				expect(state.debugCaptures("jump").size()).toBe(0);
 			});
 
+			it("should not report the drain as a holder", () => {
+				expect.assertions(2);
+
+				enableDevelopmentMode();
+
+				const [state, internal] = createActionState(TEST_ACTIONS, { debug: true });
+				const token = state.capture("jump", { debugLabel: "modal" });
+				internal.updateAction(pressedJumpFrame());
+				token.release();
+
+				// The mid-press release starts a drain: reads stay suppressed,
+				// but nobody holds the action.
+				expect(state.pressed("jump")).toBeFalse();
+				expect(state.debugCaptures("jump").size()).toBe(0);
+			});
+
 			it("should return an empty stack when _G.__DEV__ is false", () => {
 				expect.assertions(1);
 

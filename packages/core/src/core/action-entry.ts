@@ -160,6 +160,19 @@ export function settleDrain(entry: ActionEntry): void {
 }
 
 /**
+ * Whether a capture-stack entry is a real holder rather than the drain
+ * sentinel.
+ *
+ * Stack enumerators (dev-mode introspection) must skip the drain — it is a
+ * capture held by nobody, not a holder to report.
+ * @param viewer - The stack entry to test.
+ * @returns True for a real holder's viewer.
+ */
+export function isRealHolder(viewer: CaptureViewer): boolean {
+	return viewer !== DRAIN_HOLDER;
+}
+
+/**
  * Looks up an action's entry, erroring on unknown action names.
  * @param entries - The action entry map.
  * @param action - The action name.
