@@ -2,7 +2,7 @@
 
 `@rbxts/flux-react` — thin React wrapper over `@rbxts/flux`. Exports
 `createFluxReact<Actions, Contexts>()` returning
-`{ flush, FluxProvider, useAction, useActiveContext, useBindings, useFluxCore, useInputContext }`.
+`{ flush, FluxProvider, useAction, useActiveContext, useBindings, useCapture, useCaptureAction, useFluxCore, useInputContext }`.
 Core is injected at render time via
 `<FluxProvider core={core} handle={handle}>`, so the factory can live in a
 shared module that never touches a world or core at import time.
@@ -13,7 +13,8 @@ shared module that never touches a world or core at import time.
 - `flux-context.tsx` — internal `FluxContextValue` + `createUseFluxContext`.
 - `flux-provider.tsx` — `FluxProviderProps` + Provider factory.
 - `update-signal.ts` — subscribe/fire plumbing the wrapper drives.
-- `hooks/` — one hook per file: `use-action`, `use-bindings`, `use-flux-core`,
+- `hooks/` — one hook per file: `use-action`, `use-bindings`, `use-capture`
+  (exports `useCapture` + `useCaptureAction`), `use-flux-core`,
   `use-input-context` (exports `useActiveContext` + `useInputContext`).
 
 ## Testing
