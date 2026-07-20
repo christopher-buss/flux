@@ -16,16 +16,48 @@ import { bucketByPlatform, composeBindings, PLATFORM_ORDER } from "./platform-ov
 import { getContextBindings } from "./resolve-bindings";
 
 /**
- * Arguments for a rebind or reset scoped to a single platform.
+ * A binding state read action-by-action rather than through the action names
+ * its type parameter declares.
+ *
+ * Every {@link BindingState} satisfies this structurally, which lets the load
+ * path iterate a payload whose keys are only known at runtime — a save can
+ * name an action this build no longer has — without asserting its type.
+ */
+type SerializedBindings = Readonly<Record<string, PlatformBindings | undefined>>;
+
+/**
+ * An action map read name-by-name, for checking whether a loaded key is still
+ * a declared action.
+ */
+type DeclaredActions = Readonly<Record<string, unknown>>;
+
+/**
+ * The handle, contexts and action every rebind and reset operates on.
  * @template T - The action map type.
  */
-interface PlatformScopedOptions<T extends ActionMap> {
-	/** The action whose bucket the operation targets. */
+interface ActionScopedOptions<T extends ActionMap> {
+	/** The action the operation targets. */
 	readonly action: string;
 	/** Core context config used to resolve defaults. */
 	readonly contexts: Record<string, ContextConfig>;
 	/** Handle state to mutate. */
 	readonly handleData: HandleData<T>;
+}
+
+/**
+ * Arguments for a whole-action rebind.
+ * @template T - The action map type.
+ */
+interface ActionRebindOptions<T extends ActionMap> extends ActionScopedOptions<T> {
+	/** Replacement bindings for the action, across every platform. */
+	readonly bindings: ReadonlyArray<BindingLike>;
+}
+
+/**
+ * Arguments for a rebind or reset scoped to a single platform.
+ * @template T - The action map type.
+ */
+interface PlatformScopedOptions<T extends ActionMap> extends ActionScopedOptions<T> {
 	/** The platform whose bucket the operation targets. */
 	readonly platform: RebindPlatform;
 }
@@ -37,6 +69,59 @@ interface PlatformScopedOptions<T extends ActionMap> {
 interface PlatformRebindOptions<T extends ActionMap> extends PlatformScopedOptions<T> {
 	/** Replacement bindings for that platform. */
 	readonly bindings: ReadonlyArray<BindingLike>;
+}
+
+/**
+ * Arguments for a full replace of the override map.
+ * @template T - The action map type.
+ */
+interface RebindAllOptions<T extends ActionMap> {
+	/** Core action map used to filter unknown keys. */
+	readonly actions: DeclaredActions;
+	/** The full binding state to apply. */
+	readonly bindings: SerializedBindings;
+	/** Core context config used to resolve originals. */
+	readonly contexts: Record<string, ContextConfig>;
+	/** Handle state to mutate. */
+	readonly handleData: HandleData<T>;
+}
+
+/**
+ * Arguments for replaying overrides into one freshly-activated context.
+ * @template T - The action map type.
+ */
+interface ReplayOptions<T extends ActionMap> {
+	/** Name of the context that was just activated. */
+	readonly contextName: string;
+	/** Core context config used to resolve defaults. */
+	readonly contexts: Record<string, ContextConfig>;
+	/** Handle state containing the active overrides. */
+	readonly handleData: HandleData<T>;
+}
+
+/**
+ * Arguments for restoring actions to their per-context original bindings.
+ * @template T - The action map type.
+ */
+interface RestoreOptions<T extends ActionMap> {
+	/** Core context config used to resolve originals. */
+	readonly contexts: Record<string, ContextConfig>;
+	/** Handle state to rebuild from. */
+	readonly handleData: HandleData<T>;
+	/** Actions to leave untouched, typically those just overridden. */
+	readonly skip?: ReadonlySet<string>;
+}
+
+/**
+ * Arguments for reading a context's declared bindings for an action.
+ */
+interface ContextDefaultsOptions {
+	/** The action whose declared bindings to read. */
+	readonly action: string;
+	/** The context to read from. */
+	readonly contextName: string;
+	/** Core context config record. */
+	readonly contexts: Record<string, ContextConfig>;
 }
 
 /**
@@ -89,17 +174,11 @@ export function assertOwnedForRebind<T extends ActionMap>(handleData: HandleData
  * whole-action rebind replaces the action outright, so a platform the caller
  * omitted becomes unbound rather than falling back to its default.
  * @template T - The action map type.
- * @param handleData - Handle state to mutate.
- * @param contexts - Core context config used to resolve defaults.
- * @param action - The action name to rebind.
- * @param bindings - Replacement bindings for this action.
+ * @param options - The action, handle state and context config, plus the
+ * replacement bindings for the action.
  */
-export function applyRebindOne<T extends ActionMap>(
-	handleData: HandleData<T>,
-	contexts: Record<string, ContextConfig>,
-	action: string,
-	bindings: ReadonlyArray<BindingLike>,
-): void {
+export function applyRebindOne<T extends ActionMap>(options: ActionRebindOptions<T>): void {
+	const { action, bindings, contexts, handleData } = options;
 	const byPlatform = bucketByPlatform(bindings);
 	const overrides: PlatformOverrides = new Map();
 	for (const platform of PLATFORM_ORDER) {
@@ -107,7 +186,7 @@ export function applyRebindOne<T extends ActionMap>(
 	}
 
 	handleData.bindingOverrides.set(action, overrides);
-	rebuildFromOverrides(handleData, contexts, action);
+	rebuildFromOverrides({ action, contexts, handleData });
 }
 
 /**
@@ -130,7 +209,7 @@ export function applyRebindForPlatform<T extends ActionMap>(
 	}
 
 	overrides.set(platform, [...bindings]);
-	rebuildFromOverrides(handleData, contexts, action);
+	rebuildFromOverrides({ action, contexts, handleData });
 }
 
 /**
@@ -140,22 +219,15 @@ export function applyRebindForPlatform<T extends ActionMap>(
  * action map are dropped, which lets a saved payload survive action renames
  * or removals without leaking stale keys back out through `serializeBindings`.
  * @template T - The action map type.
- * @param handleData - Handle state to mutate.
- * @param actions - Core action map used to filter unknown keys.
- * @param contexts - Core context config used to resolve originals.
- * @param bindings - The full binding state to apply.
+ * @param options - The handle state, action map, context config and the full
+ * binding state to apply.
  */
-export function applyRebindAll<T extends ActionMap>(
-	handleData: HandleData<T>,
-	actions: T,
-	contexts: Record<string, ContextConfig>,
-	bindings: BindingState<T>,
-): void {
+export function applyRebindAll<T extends ActionMap>(options: RebindAllOptions<T>): void {
+	const { actions, bindings, contexts, handleData } = options;
 	handleData.bindingOverrides.clear();
 	const handledActions = new Set<string>();
-	const typedBindings = bindings as Record<string, PlatformBindings>;
-	for (const [action, platformBindings] of pairs(typedBindings)) {
-		if ((actions as Record<string, unknown>)[action] === undefined) {
+	for (const [action, platformBindings] of pairs(bindings)) {
+		if (actions[action] === undefined) {
 			if (_G.__DEV__) {
 				warn(`[flux] dropping unknown action from loaded bindings: ${action}`);
 			}
@@ -168,27 +240,22 @@ export function applyRebindAll<T extends ActionMap>(
 			handleData.bindingOverrides.set(action, overrides);
 		}
 
-		rebuildFromOverrides(handleData, contexts, action);
+		rebuildFromOverrides({ action, contexts, handleData });
 		handledActions.add(action);
 	}
 
-	restoreOriginalBindings(handleData, contexts, handledActions);
+	restoreOriginalBindings({ contexts, handleData, skip: handledActions });
 }
 
 /**
  * Removes the override for a single action and restores its original bindings.
  * @template T - The action map type.
- * @param handleData - Handle state to mutate.
- * @param contexts - Core context config used to resolve originals.
- * @param action - Action whose override to discard.
+ * @param options - The action, handle state and context config.
  */
-export function applyResetOne<T extends ActionMap>(
-	handleData: HandleData<T>,
-	contexts: Record<string, ContextConfig>,
-	action: string,
-): void {
+export function applyResetOne<T extends ActionMap>(options: ActionScopedOptions<T>): void {
+	const { action, contexts, handleData } = options;
 	handleData.bindingOverrides.delete(action);
-	rebuildFromOverrides(handleData, contexts, action);
+	rebuildFromOverrides({ action, contexts, handleData });
 }
 
 /**
@@ -215,7 +282,7 @@ export function applyResetForPlatform<T extends ActionMap>(
 		handleData.bindingOverrides.delete(action);
 	}
 
-	rebuildFromOverrides(handleData, contexts, action);
+	rebuildFromOverrides({ action, contexts, handleData });
 }
 
 /**
@@ -229,7 +296,7 @@ export function applyResetAll<T extends ActionMap>(
 	contexts: Record<string, ContextConfig>,
 ): void {
 	handleData.bindingOverrides.clear();
-	restoreOriginalBindings(handleData, contexts);
+	restoreOriginalBindings({ contexts, handleData });
 }
 
 /**
@@ -246,8 +313,8 @@ export function applyResetAll<T extends ActionMap>(
  */
 export function serializeFullBindings<T extends ActionMap>(
 	handleData: HandleData<T>,
-): Record<string, PlatformBindings> {
-	const result: Record<string, PlatformBindings> = {};
+): SerializedBindings {
+	const result: Writable<SerializedBindings> = {};
 	for (const [actionName, overrides] of handleData.bindingOverrides) {
 		const entry: Writable<PlatformBindings> = {};
 		for (const platform of PLATFORM_ORDER) {
@@ -272,15 +339,11 @@ export function serializeFullBindings<T extends ActionMap>(
  * defaults, so a platform the player never overrode picks up that context's
  * declared bindings rather than being dropped.
  * @template T - The action map type.
- * @param handleData - Handle state containing the active overrides.
- * @param contexts - Core context config used to resolve defaults.
- * @param contextName - Name of the context that was just activated.
+ * @param options - The handle state, context config and the name of the
+ * context that was just activated.
  */
-export function replayOverridesIntoContext<T extends ActionMap>(
-	handleData: HandleData<T>,
-	contexts: Record<string, ContextConfig>,
-	contextName: string,
-): void {
+export function replayOverridesIntoContext<T extends ActionMap>(options: ReplayOptions<T>): void {
+	const { contextName, contexts, handleData } = options;
 	if (handleData.bindingOverrides.isEmpty()) {
 		return;
 	}
@@ -298,7 +361,7 @@ export function replayOverridesIntoContext<T extends ActionMap>(
 		pruneInstances(handleData.instanceData.instances, destroyed);
 		const bindings = composeBindings(
 			overrides,
-			contextDefaults(contexts, contextName, actionName),
+			contextDefaults({ action: actionName, contextName, contexts }),
 		);
 		createBindingsForAction(bindings, inputAction, handleData.instanceData.instances);
 	}
@@ -340,16 +403,11 @@ function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): v
  * {@link composeBindings} only calls it when some platform still falls
  * through to the defaults, so the lookup is skipped for a fully-overridden
  * action.
- * @param contexts - Core context config record.
- * @param contextName - The context to read from.
- * @param action - The action whose declared bindings to read.
+ * @param options - The context config, context name and action to read.
  * @returns A thunk reading that context's declared bindings.
  */
-function contextDefaults(
-	contexts: Record<string, ContextConfig>,
-	contextName: string,
-	action: string,
-): () => ReadonlyArray<BindingLike> {
+function contextDefaults(options: ContextDefaultsOptions): () => ReadonlyArray<BindingLike> {
+	const { action, contextName, contexts } = options;
 	return () => getContextBindings(contexts, contextName, action);
 }
 
@@ -358,18 +416,13 @@ function contextDefaults(
  * buckets, composing each context's own defaults in for platforms the buckets
  * leave absent.
  * @template T - The action map type.
- * @param handleData - Handle state to read overrides from.
- * @param contexts - Core context config used to resolve defaults.
- * @param action - The action to rebuild.
+ * @param options - The action, handle state and context config.
  */
-function rebuildFromOverrides<T extends ActionMap>(
-	handleData: HandleData<T>,
-	contexts: Record<string, ContextConfig>,
-	action: string,
-): void {
+function rebuildFromOverrides<T extends ActionMap>(options: ActionScopedOptions<T>): void {
+	const { action, contexts, handleData } = options;
 	const overrides = handleData.bindingOverrides.get(action);
 	rebuildActionBindings(handleData.instanceData, action, (contextName) => {
-		return composeBindings(overrides, contextDefaults(contexts, contextName, action));
+		return composeBindings(overrides, contextDefaults({ action, contextName, contexts }));
 	});
 }
 
@@ -411,20 +464,15 @@ function collectActionNames(data: InputInstanceData): Set<string> {
  * scope, so this is {@link rebuildFromOverrides} in its no-override case
  * rather than a second definition of what a default composes to.
  * @template T - The action map type.
- * @param handleData - Handle state to rebuild from.
- * @param contexts - Core context config used to resolve originals.
- * @param skip - Actions to leave untouched, typically those just overridden.
+ * @param options - The handle state, context config and actions to skip.
  */
-function restoreOriginalBindings<T extends ActionMap>(
-	handleData: HandleData<T>,
-	contexts: Record<string, ContextConfig>,
-	skip?: ReadonlySet<string>,
-): void {
-	for (const actionName of collectActionNames(handleData.instanceData)) {
-		if (skip?.has(actionName) === true) {
+function restoreOriginalBindings<T extends ActionMap>(options: RestoreOptions<T>): void {
+	const { contexts, handleData, skip } = options;
+	for (const action of collectActionNames(handleData.instanceData)) {
+		if (skip?.has(action) === true) {
 			continue;
 		}
 
-		rebuildFromOverrides(handleData, contexts, actionName);
+		rebuildFromOverrides({ action, contexts, handleData });
 	}
 }

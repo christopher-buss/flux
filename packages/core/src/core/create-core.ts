@@ -88,7 +88,11 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 					adoptContextInstances(data.instanceData, context, existing, actions);
 				} else {
 					addContextInstances(context, contexts[context], actions, data.instanceData);
-					replayOverridesIntoContext(data, contexts, context);
+					replayOverridesIntoContext({
+						contextName: context,
+						contexts,
+						handleData: data,
+					});
 				}
 			}
 
@@ -166,7 +170,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		loadBindings(handle: InputHandle, data: BindingState<T>): void {
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
-			applyRebindAll(handleData, actions, contexts, data);
+			applyRebindAll({ actions, bindings: data, contexts, handleData });
 		},
 		rebind<A extends keyof T & string>(
 			handle: InputHandle,
@@ -175,12 +179,12 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		): void {
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
-			applyRebindOne(handleData, contexts, action, bindings as ReadonlyArray<BindingLike>);
+			applyRebindOne({ action, bindings, contexts, handleData });
 		},
 		rebindAll(handle: InputHandle, bindings: BindingState<T>): void {
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
-			applyRebindAll(handleData, actions, contexts, bindings);
+			applyRebindAll({ actions, bindings, contexts, handleData });
 		},
 		rebindForPlatform<A extends keyof T & string>(
 			handle: InputHandle,
@@ -244,7 +248,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		resetBindings(handle: InputHandle, action: keyof T & string): void {
 			const handleData = getHandleData(handles, handle);
 			assertOwnedForRebind(handleData);
-			applyResetOne(handleData, contexts, action);
+			applyResetOne({ action, contexts, handleData });
 		},
 		resetBindingsForPlatform(
 			handle: InputHandle,

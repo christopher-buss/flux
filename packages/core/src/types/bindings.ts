@@ -156,8 +156,13 @@ export type TypedBindings<Actions extends ActionMap> = {
  *
  * Touch is excluded: a touch binding can carry a `uiButton`, which is a live
  * `GuiButton` reference that cannot survive serialization, so a touch bucket
- * holding one would not round-trip. Touch bindings are preserved by every
- * operation but are not writable per platform.
+ * holding one would not round-trip.
+ *
+ * This constrains the per-platform operations only. `rebindForPlatform` and
+ * `resetBindingsForPlatform` leave an action's touch bindings untouched, but
+ * the whole-action forms — `rebind`, `rebindAll` and `resetBindings` — act on
+ * every platform including touch, because they replace or clear the action
+ * outright.
  */
 export type RebindPlatform = Exclude<InputPlatform, "touch">;
 

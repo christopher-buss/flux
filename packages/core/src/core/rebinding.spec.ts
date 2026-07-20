@@ -421,6 +421,19 @@ const PATCHED_PLATFORM_CONTEXTS = {
 	},
 } satisfies Record<string, ContextConfig>;
 
+const TOUCH_BUTTON = new Instance("TextButton");
+
+/** Contexts whose `jump` action declares a touch binding alongside keys. */
+const TOUCH_CONTEXTS = {
+	gameplay: {
+		bindings: {
+			jump: [Enum.KeyCode.Space, { uiButton: TOUCH_BUTTON }],
+			move: PLATFORM_CONTEXTS.gameplay.bindings.move,
+		},
+		priority: 0,
+	},
+} satisfies Record<string, ContextConfig>;
+
 const LATE_CONTEXTS = {
 	gameplay: PLATFORM_CONTEXTS.gameplay,
 	ui: {
@@ -461,6 +474,22 @@ describe("rebindForPlatform", () => {
 			Enum.KeyCode.Space,
 			Enum.KeyCode.ButtonY,
 			Enum.KeyCode.ButtonX,
+		]);
+	});
+
+	it("should order platforms by PLATFORM_ORDER, not by authored order", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebind(handle, "jump", [Enum.KeyCode.ButtonY, Enum.KeyCode.F]);
+
+		// Authored gamepad-first; keyboard still comes back first. Reversing
+		// PLATFORM_ORDER would flip this.
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonY,
 		]);
 	});
 
@@ -596,6 +625,33 @@ describe("resetBindingsForPlatform", () => {
 			Enum.KeyCode.Space,
 			Enum.KeyCode.ButtonA,
 		]);
+	});
+});
+
+describe("whole-action rebind and touch", () => {
+	it("should clear the touch bucket, since it replaces every platform", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: TOUCH_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebind(handle, "jump", [Enum.KeyCode.F]);
+
+		const saved = core.serializeBindings(handle);
+
+		expect(getPlatformBucket(saved, "jump", "keyboard")).toStrictEqual([Enum.KeyCode.F]);
+		expect(getPlatformBucket(saved, "jump", "touch")).toStrictEqual([]);
+	});
+
+	it("should leave the touch bucket absent after a per-platform rebind", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: TOUCH_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
+
+		expect(getPlatformBucket(core.serializeBindings(handle), "jump", "touch")).toBeUndefined();
 	});
 });
 
