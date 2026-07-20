@@ -57,6 +57,7 @@ export type {
 	BindingConfig,
 	BindingForAction,
 	BindingLike,
+	BindingOrigin,
 	BindingState,
 	BoolBindingConfig,
 	Direction1dBindingConfig,

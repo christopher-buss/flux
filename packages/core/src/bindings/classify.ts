@@ -47,19 +47,10 @@ const KEYCODE_KEYS = [
 	"keyCode",
 	"primaryModifier",
 	"secondaryModifier",
-] as const;
+] as const satisfies ReadonlyArray<BindingConfigKey>;
 
 /** Field names that only a touch binding carries. */
-const TOUCH_KEYS = ["pointerIndex", "uiButton"] as const;
-
-/**
- * Every field naming an input the engine fires on. The remaining
- * `BindingConfig` fields only tune how an input is read.
- */
-const INPUT_SOURCE_KEYS = [
-	...KEYCODE_KEYS,
-	...TOUCH_KEYS,
-] as const satisfies ReadonlyArray<BindingConfigKey>;
+const TOUCH_KEYS = ["pointerIndex", "uiButton"] as const satisfies ReadonlyArray<BindingConfigKey>;
 
 /**
  * Narrows an unknown value to a `KeyCode`.
@@ -95,26 +86,7 @@ export function isKeyCode(value: unknown): value is Enum.KeyCode {
  * classifyBinding({ pointerIndex: 1 }) // → "touch"
  */
 export function classifyBinding(binding: BindingLike): InputPlatform {
-	if (typeIs(binding, "EnumItem")) {
-		return classifyKeyCode(binding);
-	}
-
-	const config: BindingFields = binding;
-
-	for (const key of KEYCODE_KEYS) {
-		const keyCode = config[key];
-		if (isKeyCode(keyCode)) {
-			return classifyKeyCode(keyCode);
-		}
-	}
-
-	for (const key of TOUCH_KEYS) {
-		if (config[key] !== undefined) {
-			return "touch";
-		}
-	}
-
-	return "keyboard";
+	return findPlatform(binding) ?? "keyboard";
 }
 
 /**
@@ -122,6 +94,11 @@ export function classifyBinding(binding: BindingLike): InputPlatform {
  *
  * A config with no keycode, directional key, modifier or touch field is
  * type-legal but binds nothing, so `createInputBinding` rejects it.
+ *
+ * "Present" means exactly what {@link classifyBinding} means by it — both read
+ * the same scan — so a keycode field holding something that is not a `KeyCode`
+ * counts as absent here rather than passing this guard only to classify
+ * through the sourceless fallback.
  * @param binding - A raw KeyCode or binding config object.
  * @returns `true` when the binding carries at least one input source.
  * @example
@@ -129,18 +106,7 @@ export function classifyBinding(binding: BindingLike): InputPlatform {
  * hasInputSource({ pressedThreshold: 0.5 }) // → false
  */
 export function hasInputSource(binding: BindingLike): boolean {
-	if (typeIs(binding, "EnumItem")) {
-		return true;
-	}
-
-	const config: BindingFields = binding;
-	for (const key of INPUT_SOURCE_KEYS) {
-		if (config[key] !== undefined) {
-			return true;
-		}
-	}
-
-	return false;
+	return findPlatform(binding) !== undefined;
 }
 
 /**
@@ -169,4 +135,38 @@ export function getBindingsForPlatform(
  */
 function classifyKeyCode(keyCode: Enum.KeyCode): "gamepad" | "keyboard" {
 	return GAMEPAD_KEYCODES.has(keyCode) ? "gamepad" : "keyboard";
+}
+
+/**
+ * Finds the platform a binding names an input source for.
+ *
+ * The single scan both {@link classifyBinding} and {@link hasInputSource} are
+ * defined in terms of, so the two cannot disagree about whether a field counts
+ * as present. Keycode fields are consulted first, in
+ * {@link KEYCODE_KEYS} order, then the touch-only fields.
+ * @param binding - A raw KeyCode or binding config object.
+ * @returns The platform named, or `undefined` when the binding names no input
+ * source the engine can fire on.
+ */
+function findPlatform(binding: BindingLike): InputPlatform | undefined {
+	if (typeIs(binding, "EnumItem")) {
+		return classifyKeyCode(binding);
+	}
+
+	const config: BindingFields = binding;
+
+	for (const key of KEYCODE_KEYS) {
+		const keyCode = config[key];
+		if (isKeyCode(keyCode)) {
+			return classifyKeyCode(keyCode);
+		}
+	}
+
+	for (const key of TOUCH_KEYS) {
+		if (config[key] !== undefined) {
+			return "touch";
+		}
+	}
+
+	return undefined;
 }

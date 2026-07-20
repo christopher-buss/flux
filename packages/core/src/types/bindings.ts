@@ -152,6 +152,23 @@ export type TypedBindings<Actions extends ActionMap> = {
 };
 
 /**
+ * Where one platform's bindings for an action come from.
+ *
+ * - `"override"` — the player customized this platform. An empty override is
+ *   still an override: a deliberate unbind is a customization, and renders as
+ *   an empty slot the player can refill.
+ * - `"default"` — the context declares the action and this platform has no
+ *   override, so it tracks the code-defined bindings and keeps inheriting
+ *   changes to them.
+ * - `"undeclared"` — the context never declared the action, so a settings
+ *   screen should render no row for it at all.
+ *
+ * Reads per platform because overrides are written per platform: keyboard can
+ * be an override while gamepad is still a default.
+ */
+export type BindingOrigin = "default" | "override" | "undeclared";
+
+/**
  * Platforms a binding override may be written for.
  *
  * Touch is excluded: a touch binding can carry a `uiButton`, which is a live

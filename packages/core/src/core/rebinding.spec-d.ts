@@ -4,7 +4,7 @@ import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 import { bool, defineActions, direction2d } from "../actions/define";
 import type { InputPlatform } from "../bindings/classify";
 import { defineContexts } from "../contexts/define";
-import type { BindingState } from "../types/bindings";
+import type { BindingLike, BindingOrigin, BindingState } from "../types/bindings";
 import type { InputHandle } from "../types/core";
 import { createCore } from "./create-core";
 import type { PLATFORM_ORDER } from "./platform-overrides";
@@ -128,6 +128,57 @@ describe("resetBindingsForPlatform", () => {
 		const handle = {} as InputHandle;
 		// @ts-expect-error touch cannot be reset per platform
 		core.resetBindingsForPlatform(handle, "jump", "touch");
+	});
+});
+
+describe("getBindingOrigin", () => {
+	it("should return a BindingOrigin", () => {
+		const handle = {} as InputHandle;
+		expectTypeOf(
+			core.getBindingOrigin(handle, "jump", "keyboard"),
+		).toEqualTypeOf<BindingOrigin>();
+	});
+
+	it("should accept touch, which cannot be written per platform", () => {
+		const handle = {} as InputHandle;
+		expectTypeOf<typeof core.getBindingOrigin>().toBeCallableWith(handle, "jump", "touch");
+	});
+
+	it("should accept an optional context", () => {
+		const handle = {} as InputHandle;
+		expectTypeOf<typeof core.getBindingOrigin>().toBeCallableWith(
+			handle,
+			"jump",
+			"gamepad",
+			"gameplay",
+		);
+	});
+
+	it("should reject an unknown action", () => {
+		const handle = {} as InputHandle;
+		// @ts-expect-error unknown action
+		core.getBindingOrigin(handle, INVALID, "keyboard");
+	});
+
+	it("should reject an unknown platform", () => {
+		const handle = {} as InputHandle;
+		// @ts-expect-error unknown platform
+		core.getBindingOrigin(handle, "jump", "mouse");
+	});
+});
+
+describe("getBindingsForPlatform", () => {
+	it("should return the bindings for one platform", () => {
+		const handle = {} as InputHandle;
+		expectTypeOf(core.getBindingsForPlatform(handle, "jump", "touch")).toEqualTypeOf<
+			ReadonlyArray<BindingLike>
+		>();
+	});
+
+	it("should reject an unknown context", () => {
+		const handle = {} as InputHandle;
+		// @ts-expect-error unknown context
+		core.getBindingsForPlatform(handle, "jump", "keyboard", INVALID);
 	});
 });
 

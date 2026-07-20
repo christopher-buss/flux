@@ -235,6 +235,71 @@ describe("useBindings", () => {
 		expect(queryByText("count:2")).toBeDefined();
 	});
 
+	it("should read a platform's override bucket rather than re-deriving it", () => {
+		expect.assertions(2);
+
+		afterThis(() => {
+			cleanup();
+		});
+
+		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+		const handle = core.register(new Instance("Folder"), "gameplay");
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+		const { FluxProvider, useBindings } = flux;
+
+		// A gamepad key parked in the keyboard bucket: caller-side filtering by
+		// classification would file it under "gamepad" and leave the keyboard
+		// row looking unbound.
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.ButtonY]);
+
+		function Probe(): React.ReactNode {
+			const keyboard = useBindings("jump", "keyboard");
+			const gamepad = useBindings("jump", "gamepad");
+			return <textlabel Text={`split:${keyboard.size()}/${gamepad.size()}`} />;
+		}
+
+		const { queryByText } = render(
+			<FluxProvider core={core} handle={handle}>
+				<Probe />
+			</FluxProvider>,
+		);
+
+		expect(queryByText("split:1/0")).toBeDefined();
+		expect(queryByText("split:0/1")).never.toBeDefined();
+	});
+
+	it("should reflect a deliberate per-platform unbind", () => {
+		expect.assertions(2);
+
+		afterThis(() => {
+			cleanup();
+		});
+
+		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+		const handle = core.register(new Instance("Folder"), "gameplay");
+		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
+		const { FluxProvider, useBindings } = flux;
+
+		function Probe(): React.ReactNode {
+			const keyboard = useBindings("jump", "keyboard");
+			return <textlabel Text={`keyboard:${keyboard.size()}`} />;
+		}
+
+		const { queryByText } = render(
+			<FluxProvider core={core} handle={handle}>
+				<Probe />
+			</FluxProvider>,
+		);
+
+		expect(queryByText("keyboard:1")).toBeDefined();
+
+		core.rebindForPlatform(handle, "jump", "keyboard", []);
+		core.update(FRAME_TIME);
+		flux.flush();
+
+		expect(queryByText("keyboard:0")).toBeDefined();
+	});
+
 	it("should not re-render when bindings have not changed", () => {
 		expect.assertions(2);
 
