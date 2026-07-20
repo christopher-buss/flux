@@ -44,33 +44,13 @@ const KEYCODE_KEYS = [
 const TOUCH_KEYS = ["pointerIndex", "uiButton"] as const;
 
 /**
- * Whether each binding config field names an input the engine fires on
- * (`"source"`) or only tunes how an input is read (`"tuning"`).
- *
- * Typed as a total record so adding a field to `BindingConfig` without
- * classifying it fails to compile, rather than silently making a valid binding
- * look sourceless to `hasInputSource`.
+ * Every field naming an input the engine fires on. The remaining
+ * `BindingConfig` fields only tune how an input is read.
  */
-const KEY_ROLES = {
-	backward: "source",
-	clampMagnitudeToOne: "tuning",
-	down: "source",
-	forward: "source",
-	keyCode: "source",
-	left: "source",
-	pointerIndex: "source",
-	pressedThreshold: "tuning",
-	primaryModifier: "source",
-	releasedThreshold: "tuning",
-	responseCurve: "tuning",
-	right: "source",
-	scale: "tuning",
-	secondaryModifier: "source",
-	uiButton: "source",
-	up: "source",
-	vector2Scale: "tuning",
-	vector3Scale: "tuning",
-} as const satisfies Record<BindingConfigKey, "source" | "tuning">;
+const INPUT_SOURCE_KEYS = [
+	...KEYCODE_KEYS,
+	...TOUCH_KEYS,
+] as const satisfies ReadonlyArray<BindingConfigKey>;
 
 /**
  * Determines which input platform a binding targets.
@@ -83,8 +63,8 @@ const KEY_ROLES = {
  * binding it holds without a crash path.
  * @param binding - A raw KeyCode or binding config object.
  * @returns The input platform: `"gamepad"`, `"keyboard"`, or `"touch"`. A
- * config with no input source reports `"keyboard"`, the platform such a config
- * would have been authored for; it cannot be constructed, so nothing is bound.
+ * config with no input source reports `"keyboard"` — an arbitrary but stable
+ * answer for a binding that `createInputBinding` refuses to build.
  * @example
  * classifyBinding(Enum.KeyCode.Space) // → "keyboard"
  * classifyBinding(Enum.KeyCode.ButtonA) // → "gamepad"
@@ -129,9 +109,9 @@ export function hasInputSource(binding: BindingLike): boolean {
 		return true;
 	}
 
-	const roles = KEY_ROLES as Record<string, string>;
-	for (const [key] of pairs(binding as Record<string, unknown>)) {
-		if (roles[key] === "source") {
+	const config = binding as Record<string, unknown>;
+	for (const key of INPUT_SOURCE_KEYS) {
+		if (config[key] !== undefined) {
 			return true;
 		}
 	}

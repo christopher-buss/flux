@@ -37,7 +37,7 @@ const TEST_CONTEXTS = {
 } satisfies Record<string, ContextConfig>;
 
 /** Registers a context whose only binding names no input source. */
-function createSourcelessBinding(): void {
+function registerSourcelessBinding(): void {
 	createInputInstances({
 		actions: { aim: { type: "Bool" } } satisfies ActionMap,
 		contextNames: ["gameplay"],
@@ -278,7 +278,7 @@ describe("createInputInstances", () => {
 		expect.assertions(1);
 
 		expect(() => {
-			createSourcelessBinding();
+			registerSourcelessBinding();
 		}).toThrow("aim");
 	});
 
@@ -292,7 +292,7 @@ describe("createInputInstances", () => {
 		});
 
 		expect(() => {
-			createSourcelessBinding();
+			registerSourcelessBinding();
 		}).toThrow("aim");
 	});
 

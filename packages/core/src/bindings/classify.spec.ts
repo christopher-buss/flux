@@ -108,7 +108,7 @@ describe("classifyBinding", () => {
 		expect(classifyBinding(config)).toBe("touch");
 	});
 
-	it("should answer without throwing, and not touch, for a config with no input source", () => {
+	it("should classify a config with no input source as keyboard", () => {
 		expect.assertions(1);
 
 		const config: BoolBindingConfig = {
