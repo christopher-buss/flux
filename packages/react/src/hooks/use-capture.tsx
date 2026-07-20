@@ -70,21 +70,6 @@ interface CaptureTokenSurface {
 }
 
 /**
- * Where the facade looks up an inert `getState()` value.
- *
- * @template T - The action map type.
- * @template Contexts - Union of valid context name literals.
- */
-interface CaptureSource<T extends ActionMap, Contexts extends string> {
-	/** The captured action name. */
-	readonly action: AllActions<T>;
-	/** The core owning the action. */
-	readonly core: FluxCore<T, Contexts>;
-	/** The handle the capture is scoped to. */
-	readonly handle: InputHandle;
-}
-
-/**
  * - Builds the `useCapture` hook for a FluxReact instance.
  * - Mounted means captured: the capture is acquired in an effect and released
  *   in its cleanup, so ownership tracks the component with no schedule slot.
@@ -115,11 +100,12 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 		const action = hasStringFirst ? handleOrAction : (maybeAction as AllActions<T>);
 
 		const innerRef = useRef<CaptureTokenSurface | undefined>(undefined);
-		const sourceRef = useRef<CaptureSource<T, Contexts>>({ action, core, handle });
-		const [facade] = useState(() => createCaptureFacade(innerRef, sourceRef));
+		const [initialInert] = useState(() => inertStateFor(core, handle, action));
+		const inertRef = useRef(initialInert);
+		const [facade] = useState(() => createCaptureFacade(innerRef, inertRef));
 
 		useEffect(() => {
-			sourceRef.current = { action, core, handle };
+			inertRef.current = inertStateFor(core, handle, action);
 
 			const token = core.getState(handle).capture(action) as unknown as CaptureTokenSurface;
 			innerRef.current = token;
@@ -184,17 +170,22 @@ export function createUseCaptureAction<T extends ActionMap, Contexts extends str
 /**
  * - Resolves the neutral value an uncaptured `getState()` reports.
  * - The action's kind is not carried by the hook's arguments, so the neutral
- *   value is derived from the shape of the action's current value.
+ *   value is derived from the shape of the action's current value. Resolved
+ *   once per captured action rather than per read.
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
- * @param source - The action being captured and the core and handle owning it.
+ * @param core - The core owning the action.
+ * @param handle - The handle the capture is scoped to.
+ * @param action - The captured action name.
  * @returns The action type's neutral value.
  */
 function inertStateFor<T extends ActionMap, Contexts extends string>(
-	source: CaptureSource<T, Contexts>,
+	core: FluxCore<T, Contexts>,
+	handle: InputHandle,
+	action: AllActions<T>,
 ): CaptureValue {
-	const value = source.core.getState(source.handle).getState(source.action);
+	const value = core.getState(handle).getState(action);
 	if (typeIs(value, "number")) {
 		return 0;
 	}
@@ -215,48 +206,42 @@ function inertStateFor<T extends ActionMap, Contexts extends string>(
  * - Every read delegates to the captured token when one is held, and reports
  *   the suppressed result otherwise, matching what any non-holder reads.
  *
- * @template T - The action map type.
- * @template Contexts - Union of valid context name literals.
  * @param innerRef - Ref holding the live core token, absent until captured.
- * @param sourceRef - Ref holding the action being captured and its owner.
+ * @param inertRef - Ref holding the captured action's neutral value.
  * @returns A token-shaped reader that outlives any single capture.
  */
-function createCaptureFacade<T extends ActionMap, Contexts extends string>(
+function createCaptureFacade(
 	innerRef: { current: CaptureTokenSurface | undefined },
-	sourceRef: { current: CaptureSource<T, Contexts> },
+	inertRef: { current: CaptureValue },
 ): CaptureTokenSurface {
-	function flagRead(pick: (token: CaptureTokenSurface) => boolean): boolean {
-		const inner = innerRef.current;
-		return inner === undefined ? false : pick(inner);
-	}
-
-	function numberRead(pick: (token: CaptureTokenSurface) => number): number {
-		const inner = innerRef.current;
-		return inner === undefined ? 0 : pick(inner);
-	}
-
 	return {
 		axis1d(): number {
-			return numberRead((inner) => inner.axis1d());
+			const inner = innerRef.current;
+			return inner === undefined ? 0 : inner.axis1d();
 		},
 		axis3d(): Vector3 {
 			const inner = innerRef.current;
 			return inner === undefined ? Vector3.zero : inner.axis3d();
 		},
 		axisBecameActive(): boolean {
-			return flagRead((inner) => inner.axisBecameActive());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.axisBecameActive();
 		},
 		axisBecameInactive(): boolean {
-			return flagRead((inner) => inner.axisBecameInactive());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.axisBecameInactive();
 		},
 		canceled(): boolean {
-			return flagRead((inner) => inner.canceled());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.canceled();
 		},
 		claim(): boolean {
-			return flagRead((inner) => inner.claim());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.claim();
 		},
 		currentDuration(): number {
-			return numberRead((inner) => inner.currentDuration());
+			const inner = innerRef.current;
+			return inner === undefined ? 0 : inner.currentDuration();
 		},
 		direction2d(): Vector2 {
 			const inner = innerRef.current;
@@ -264,32 +249,38 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 		},
 		getState(): CaptureValue {
 			const inner = innerRef.current;
-			return inner === undefined ? inertStateFor(sourceRef.current) : inner.getState();
+			return inner === undefined ? inertRef.current : inner.getState();
 		},
 		justPressed(): boolean {
-			return flagRead((inner) => inner.justPressed());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.justPressed();
 		},
 		justReleased(): boolean {
-			return flagRead((inner) => inner.justReleased());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.justReleased();
 		},
 		ongoing(): boolean {
-			return flagRead((inner) => inner.ongoing());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.ongoing();
 		},
 		position2d(): Vector2 {
 			const inner = innerRef.current;
 			return inner === undefined ? Vector2.zero : inner.position2d();
 		},
 		pressed(): boolean {
-			return flagRead((inner) => inner.pressed());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.pressed();
 		},
 		previousDuration(): number {
-			return numberRead((inner) => inner.previousDuration());
+			const inner = innerRef.current;
+			return inner === undefined ? 0 : inner.previousDuration();
 		},
 		release(): void {
 			innerRef.current?.release();
 		},
 		triggered(): boolean {
-			return flagRead((inner) => inner.triggered());
+			const inner = innerRef.current;
+			return inner === undefined ? false : inner.triggered();
 		},
 	};
 }

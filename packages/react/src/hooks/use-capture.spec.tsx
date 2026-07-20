@@ -8,8 +8,8 @@ import React, { StrictMode, useEffect } from "@rbxts/react";
 
 import type { TestContexts } from "#test/fixtures";
 import { FRAME_TIME, TEST_ACTIONS, TEST_CONTEXTS } from "#test/fixtures";
-import type { RenderCounter } from "#test/probes";
-import { makeRenderCounter } from "#test/probes";
+import type { Log, RenderCounter } from "#test/probes";
+import { makeLog, makeRenderCounter } from "#test/probes";
 import type { FluxReact } from "../create-flux-react";
 import { createFluxReact } from "../create-flux-react";
 
@@ -21,39 +21,10 @@ type TestFlux = FluxReact<typeof TEST_ACTIONS, TestContexts>;
 /** A capture token for the fixture's plain Bool action. */
 type JumpToken = CaptureToken<typeof TEST_ACTIONS, "jump">;
 
-/**
- * Collects values recorded from inside a component body or effect.
- *
- * @template T - The recorded value type.
- */
-interface Log<T extends defined> {
-	/** Returns everything recorded so far, in order. */
-	readonly entries: () => Array<T>;
-	/** Records one value. */
-	readonly push: (value: T) => void;
-}
-
 /** Props for surfaces that render a caller-supplied tag. */
 interface TaggedProps {
 	/** Text rendered by the surface, used to force a re-render. */
 	readonly tag: string;
-}
-
-/**
- * Builds a log backed by a private closure, so components record into it
- * without reassigning an outer variable.
- *
- * @template T - The recorded value type.
- * @returns An empty log.
- */
-function makeLog<T extends defined>(): Log<T> {
-	const entries = new Array<T>();
-	return {
-		entries: () => entries,
-		push: (value: T) => {
-			entries.push(value);
-		},
-	};
 }
 
 /**
