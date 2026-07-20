@@ -474,7 +474,9 @@ interface CaptureTokenBase<Actions extends ActionMap, A extends AllActions<Actio
 	 * @remarks Removes only this token's slot in the stack, so releasing a
 	 * shadowed token out of order leaves the top holder unaffected.
 	 * Releasing an already-released token is a silent no-op, so defensive
-	 * cleanup code is harmless.
+	 * cleanup code is harmless. Releasing mid-press drains the in-flight
+	 * press before the holder beneath reads through; `ViewportPosition`
+	 * actions never drain, since a pointer position is not a press.
 	 */
 	release(): void;
 

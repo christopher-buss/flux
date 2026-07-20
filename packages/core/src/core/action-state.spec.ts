@@ -7,6 +7,7 @@ import type { UpdateActionOptions } from "./action-state";
 import { createActionState } from "./action-state";
 
 const TEST_ACTIONS = {
+	cursor: { type: "ViewportPosition" as const },
 	jump: { type: "Bool" as const },
 	look: { type: "Direction3D" as const },
 	move: { type: "Direction2D" as const },
@@ -1740,9 +1741,67 @@ describe("createActionState", () => {
 				expect(state.direction2d("move")).toBe(new Vector2(0, 1));
 				expect(state.axisBecameActive("move")).toBeTrue();
 			});
+
+			it("should release a ViewportPosition capture cleanly instead of draining", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const token = state.capture("cursor");
+				internal.updateAction({
+					action: "cursor",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: new Vector2(400, 300),
+				});
+
+				// A pointer position is never an in-flight press, and its
+				// magnitude is distance from pixel (0, 0) — a drain here would
+				// never settle.
+				token.release();
+
+				expect(state.position2d("cursor")).toBe(new Vector2(400, 300));
+
+				internal.endFrame();
+				internal.updateAction({
+					action: "cursor",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: new Vector2(410, 300),
+				});
+
+				expect(state.position2d("cursor")).toBe(new Vector2(410, 300));
+			});
 		});
 
 		describe("boundary cancel", () => {
+			it("should cancel nobody when a capture acquires over a moved cursor", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction({
+					action: "cursor",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: new Vector2(400, 300),
+				});
+
+				// A pointer away from pixel (0, 0) is not an interaction in
+				// flight, so the boundary force-drops nothing.
+				state.capture("cursor");
+
+				expect(state.canceled("cursor")).toBeFalse();
+
+				internal.endFrame();
+				internal.updateAction({
+					action: "cursor",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: new Vector2(410, 300),
+				});
+
+				expect(state.canceled("cursor")).toBeFalse();
+			});
+
 			it("should cancel the gameplay reader for exactly one frame when a capture acquires mid-press", () => {
 				expect.assertions(3);
 
