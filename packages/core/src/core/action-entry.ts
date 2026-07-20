@@ -7,8 +7,17 @@ export type ActionValueType = boolean | number | Vector2 | Vector3;
 /**
  * The identity a processed read is performed as. Capture tokens read as their
  * viewer; plain {@link ActionState} reads carry no viewer.
+ *
+ * Suppression compares viewers by identity only. The optional fields are
+ * dev-mode metadata recorded at acquisition and surfaced by
+ * `debugCaptures`; they play no part in arbitration.
  */
-export type CaptureViewer = object;
+export interface CaptureViewer {
+	/** The `debugLabel` supplied at acquisition; dev mode only. */
+	debugLabel?: string;
+	/** The acquisition-site traceback; recorded in dev mode only. */
+	traceback?: string;
+}
 
 /** Per-action mutable state driven by the pipeline and read by consumers. */
 export interface ActionEntry {

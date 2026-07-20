@@ -234,15 +234,13 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			context: Contexts,
 			...rest: ReadonlyArray<Contexts>
 		): InputHandle {
-			validateContextName(contexts, context);
-			for (const name of rest) {
-				validateContextName(contexts, name);
-			}
+			validateContextNames(contexts, [context, ...rest]);
 
 			return registerHandle(factory, {
 				actions,
 				contextNames: [context, ...rest],
 				contexts,
+				debug: isDevelopmentMode,
 				handles,
 				parent,
 			});
@@ -253,15 +251,13 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			context: Contexts,
 			...rest: ReadonlyArray<Contexts>
 		): void {
-			validateContextName(contexts, context);
-			for (const name of rest) {
-				validateContextName(contexts, name);
-			}
+			validateContextNames(contexts, [context, ...rest]);
 
 			registerHandleAs(handle, {
 				actions,
 				contextNames: [context, ...rest],
 				contexts,
+				debug: isDevelopmentMode,
 				handles,
 				parent,
 			});
@@ -294,14 +290,12 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			getHandleData(handles, handle).simulatedValues.set(action, value);
 		},
 		subscribe(parent: Instance, context: Contexts, ...rest: ReadonlyArray<Contexts>) {
-			validateContextName(contexts, context);
-			for (const name of rest) {
-				validateContextName(contexts, name);
-			}
+			validateContextNames(contexts, [context, ...rest]);
 
 			return subscribeHandle(factory, {
 				actions,
 				contextNames: [context, ...rest],
+				debug: isDevelopmentMode,
 				handles,
 				parent,
 			});
@@ -312,14 +306,12 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			context: Contexts,
 			...rest: ReadonlyArray<Contexts>
 		): () => void {
-			validateContextName(contexts, context);
-			for (const name of rest) {
-				validateContextName(contexts, name);
-			}
+			validateContextNames(contexts, [context, ...rest]);
 
 			return subscribeHandleAs(handle, {
 				actions,
 				contextNames: [context, ...rest],
+				debug: isDevelopmentMode,
 				handles,
 				parent,
 			});
@@ -348,6 +340,15 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 function validateContextName(contexts: Record<string, ContextConfig>, name: string): void {
 	if (contexts[name] === undefined) {
 		error(`unknown context: ${name}`);
+	}
+}
+
+function validateContextNames(
+	contexts: Record<string, ContextConfig>,
+	names: ReadonlyArray<string>,
+): void {
+	for (const name of names) {
+		validateContextName(contexts, name);
 	}
 }
 

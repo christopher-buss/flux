@@ -1,6 +1,6 @@
 import type { TriggerState } from "../triggers/types";
 import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
-import type { ActionState, ActionValue, CaptureToken } from "../types/state";
+import type { ActionState, ActionValue, CaptureOptions, CaptureToken } from "../types/state";
 import type { ActionEntry, ActionValueType } from "./action-entry";
 import {
 	claimAction,
@@ -20,7 +20,7 @@ import {
 	wasJustPressed,
 	wasJustReleased,
 } from "./action-entry";
-import { createCaptureToken } from "./capture";
+import { createCaptureToken, listDebugCaptures } from "./capture";
 
 /** Options for updating an action's state in the pipeline. */
 export interface UpdateActionOptions {
@@ -32,6 +32,17 @@ export interface UpdateActionOptions {
 	readonly triggerState: TriggerState;
 	/** The post-pipeline value. */
 	readonly value: ActionValueType;
+}
+
+/** Options for creating an action state. */
+export interface ActionStateOptions {
+	/**
+	 * Enables dev-mode introspection (`debugCaptures`). Requires `_G.__DEV__`
+	 * to also be `true` — when `_G.__DEV__` is `false`, debug code paths
+	 * become dead code eligible for removal by code transformation tools.
+	 * @default false
+	 */
+	readonly debug?: boolean;
 }
 
 /** Internal mutators for the action state, used by the core runtime. */
@@ -48,14 +59,16 @@ export interface InternalActionState {
  * Creates an action state tuple for querying and mutating input state.
  * @template T - The action map type.
  * @param actions - The action configuration map.
+ * @param options - Creation options; `debug` enables dev-mode introspection.
  * @returns A tuple of the public query interface and internal mutators.
  */
 export function createActionState<T extends ActionMap>(
 	actions: T,
+	options?: ActionStateOptions,
 ): [ActionState<T>, InternalActionState] {
 	const entries = initializeEntries(actions);
 
-	return [buildPublicState<T>(entries), buildInternalState(entries)];
+	return [buildPublicState<T>(entries, options?.debug === true), buildInternalState(entries)];
 }
 
 function defaultValueForType(actionType: ActionType): ActionValueType {
@@ -130,7 +143,10 @@ function wasRawJustPressed(entries: Map<string, ActionEntry>, action: string): b
 }
 
 // eslint-disable-next-line max-lines-per-function -- thin delegation methods
-function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>): ActionState<T> {
+function buildPublicState<T extends ActionMap>(
+	entries: Map<string, ActionEntry>,
+	isDebug: boolean,
+): ActionState<T> {
 	return {
 		axis1d(action) {
 			return readValue(entries, action) as number;
@@ -157,11 +173,14 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 		canceled(action) {
 			return read({ action, entries, pick: isCanceled, whenSuppressed: suppressedFalse });
 		},
-		capture<A extends keyof T & string>(action: A) {
+		capture<A extends keyof T & string>(action: A, options?: CaptureOptions) {
 			// The runtime token carries the full read surface; the public type
 			// narrows it to the action's kind, which only resolves once `A` is
 			// a concrete action name.
-			return createCaptureToken(entries, action) as unknown as CaptureToken<T, A>;
+			return createCaptureToken(entries, action, options, isDebug) as unknown as CaptureToken<
+				T,
+				A
+			>;
 		},
 		claim(action) {
 			return claimAction(entries, action);
@@ -173,6 +192,13 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 				pick: getCurrentDuration,
 				whenSuppressed: suppressedZero,
 			});
+		},
+		debugCaptures(action) {
+			if (_G.__DEV__ && isDebug) {
+				return listDebugCaptures(entries, action);
+			}
+
+			return [];
 		},
 		direction2d(action) {
 			return readValue(entries, action) as Vector2;

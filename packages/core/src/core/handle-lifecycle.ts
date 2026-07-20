@@ -23,6 +23,7 @@ interface RegisterOptions<T extends ActionMap> {
 	readonly actions: T;
 	readonly contextNames: ReadonlyArray<string>;
 	readonly contexts: Record<string, ContextConfig>;
+	readonly debug?: boolean;
 	readonly handles: Map<InputHandle, HandleData<T>>;
 	readonly parent: Instance;
 }
@@ -30,6 +31,7 @@ interface RegisterOptions<T extends ActionMap> {
 interface SubscribeOptions<T extends ActionMap> {
 	readonly actions: T;
 	readonly contextNames: ReadonlyArray<string>;
+	readonly debug?: boolean;
 	readonly handles: Map<InputHandle, HandleData<T>>;
 	readonly parent: Instance;
 }
@@ -141,8 +143,9 @@ function buildHandleData<T extends ActionMap>(
 	actions: T,
 	contextNames: ReadonlyArray<string>,
 	instanceData: HandleData<T>["instanceData"],
+	isDebug = false,
 ): HandleData<T> {
-	const [publicState, internalState] = createActionState(actions);
+	const [publicState, internalState] = createActionState(actions, { debug: isDebug });
 	return {
 		activeContexts: createActiveContexts(contextNames),
 		bindingOverrides: new Map<string, ReadonlyArray<BindingLike>>(),
@@ -158,9 +161,9 @@ function buildHandleData<T extends ActionMap>(
 }
 
 function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): HandleData<T> {
-	const { actions, contextNames, contexts, parent } = options;
+	const { actions, contextNames, contexts, debug: isDebug, parent } = options;
 	const instanceData = createInputInstances({ actions, contextNames, contexts, parent });
-	return buildHandleData(actions, contextNames, instanceData);
+	return buildHandleData(actions, contextNames, instanceData, isDebug);
 }
 
 function validateHandleUnique<T extends ActionMap>(
@@ -175,9 +178,9 @@ function validateHandleUnique<T extends ActionMap>(
 function createSubscribeData<T extends ActionMap>(
 	options: SubscribeOptions<T>,
 ): [HandleData<T>, () => void] {
-	const { actions, contextNames, parent } = options;
+	const { actions, contextNames, debug: isDebug, parent } = options;
 	const instanceData = findInputInstances({ actions, contextNames, parent });
-	const data = buildHandleData(actions, contextNames, instanceData);
+	const data = buildHandleData(actions, contextNames, instanceData, isDebug);
 	const cancel = (): void => {
 		for (const connection of instanceData.connections) {
 			connection.Disconnect();

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { afterThis } from "@rbxts/jest-utils";
 
 import type { ActionMap } from "../types/actions";
 import { getMagnitude } from "./action-entry";
@@ -1371,6 +1372,97 @@ describe("createActionState", () => {
 				first.release();
 
 				expect(state.pressed("jump")).toBeTrue();
+			});
+
+			it("should return the stack bottom-to-top from debugCaptures, top being the active holder", () => {
+				expect.assertions(5);
+
+				_G.__DEV__ = true;
+				afterThis(() => {
+					_G.__DEV__ = false;
+				});
+
+				const [state] = createActionState(TEST_ACTIONS, { debug: true });
+				state.capture("jump", { debugLabel: "bottom" });
+				const top = state.capture("jump", { debugLabel: "top" });
+
+				const captures = state.debugCaptures("jump");
+				const [bottomEntry, topEntry] = captures;
+				assert(bottomEntry);
+				assert(topEntry);
+
+				expect(captures.size()).toBe(2);
+				expect(bottomEntry.label).toBe("bottom");
+				expect(topEntry.label).toBe("top");
+
+				top.release();
+
+				const remaining = state.debugCaptures("jump");
+				const restoredEntry = remaining[0];
+				assert(restoredEntry);
+
+				expect(remaining.size()).toBe(1);
+				expect(restoredEntry.label).toBe("bottom");
+			});
+
+			it("should record an automatic traceback on each debugCaptures entry", () => {
+				expect.assertions(3);
+
+				_G.__DEV__ = true;
+				afterThis(() => {
+					_G.__DEV__ = false;
+				});
+
+				const [state] = createActionState(TEST_ACTIONS, { debug: true });
+				state.capture("jump");
+
+				const captures = state.debugCaptures("jump");
+				const entry = captures[0];
+				assert(entry);
+
+				expect(captures.size()).toBe(1);
+				expect(entry.traceback === "").toBeFalse();
+
+				// No label was supplied, so the entry carries none.
+				expect(entry.label).toBeUndefined();
+			});
+
+			it("should return an empty stack from debugCaptures when nothing is captured", () => {
+				expect.assertions(1);
+
+				_G.__DEV__ = true;
+				afterThis(() => {
+					_G.__DEV__ = false;
+				});
+
+				const [state] = createActionState(TEST_ACTIONS, { debug: true });
+
+				expect(state.debugCaptures("jump").size()).toBe(0);
+			});
+
+			it("should return an empty stack from debugCaptures without the debug flag", () => {
+				expect.assertions(1);
+
+				_G.__DEV__ = true;
+				afterThis(() => {
+					_G.__DEV__ = false;
+				});
+
+				const [state] = createActionState(TEST_ACTIONS);
+				state.capture("jump", { debugLabel: "modal" });
+
+				expect(state.debugCaptures("jump").size()).toBe(0);
+			});
+
+			it("should return an empty stack from debugCaptures when _G.__DEV__ is false", () => {
+				expect.assertions(1);
+
+				_G.__DEV__ = false;
+
+				const [state] = createActionState(TEST_ACTIONS, { debug: true });
+				state.capture("jump", { debugLabel: "modal" });
+
+				expect(state.debugCaptures("jump").size()).toBe(0);
 			});
 
 			it("should return an independent token from each capture call", () => {

@@ -1,3 +1,4 @@
+import type { CaptureOptions, DebugCapture } from "../types/state";
 import type { ActionEntry, ActionValueType, CaptureViewer } from "./action-entry";
 import {
 	acquireCapture,
@@ -68,17 +69,32 @@ export interface CaptureTokenRuntime {
  * every read routed through the token carries that identity past the holder
  * check. The public `CaptureToken` type narrows the returned surface to the
  * action's kind.
+ * In dev mode the viewer additionally records holder metadata — an automatic
+ * `debug.traceback()` and the optional `debugLabel` — surfaced later by
+ * `debugCaptures`. Outside dev mode nothing is recorded.
  * @param entries - The action entry map.
  * @param action - The action name.
+ * @param options - The capture options supplied at acquisition.
+ * @param isDebug - Whether the owning state was created in debug mode.
  * @returns The capture token, already installed as the active holder.
  */
 // eslint-disable-next-line max-lines-per-function -- thin pre-bound read delegations
 export function createCaptureToken(
 	entries: Map<string, ActionEntry>,
 	action: string,
+	options: CaptureOptions | undefined,
+	isDebug: boolean,
 ): CaptureTokenRuntime {
 	const entry = getEntry(entries, action);
 	const viewer: CaptureViewer = {};
+
+	if (_G.__DEV__ && isDebug) {
+		if (options?.debugLabel !== undefined) {
+			viewer.debugLabel = options.debugLabel;
+		}
+
+		viewer.traceback = debug.traceback();
+	}
 
 	function flagRead(pick: (entry: ActionEntry) => boolean): boolean {
 		return readEntry(entry, { pick, viewer, whenSuppressed: suppressedFalse });
@@ -143,4 +159,25 @@ export function createCaptureToken(
 			return flagRead(isTriggered);
 		},
 	};
+}
+
+/**
+ * Lists an action's capture stack as debug entries, bottom-to-top.
+ *
+ * Callers gate on dev mode; this helper reports whatever metadata the holders
+ * recorded at acquisition.
+ * @param entries - The action entry map.
+ * @param action - The action name.
+ * @returns One entry per holder, the last being the active holder.
+ */
+export function listDebugCaptures(
+	entries: Map<string, ActionEntry>,
+	action: string,
+): Array<DebugCapture> {
+	return getEntry(entries, action).captures.map((holder) => {
+		return {
+			...(holder.debugLabel !== undefined && { label: holder.debugLabel }),
+			traceback: holder.traceback ?? "",
+		};
+	});
 }

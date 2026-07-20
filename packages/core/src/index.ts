@@ -13,7 +13,11 @@ export { defineContexts } from "./contexts/define";
 
 export { createActionState } from "./core/action-state";
 
-export type { InternalActionState, UpdateActionOptions } from "./core/action-state";
+export type {
+	ActionStateOptions,
+	InternalActionState,
+	UpdateActionOptions,
+} from "./core/action-state";
 export { createCore } from "./core/create-core";
 export type {
 	CreateCoreOptions,
@@ -69,4 +73,5 @@ export type {
 	ActionValueMap,
 	CaptureOptions,
 	CaptureToken,
+	DebugCapture,
 } from "./types/state";
