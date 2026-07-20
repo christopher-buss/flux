@@ -72,9 +72,14 @@ render those differently — "Jump — Unbound" versus no row at all — and cou
 only tell them apart by cross-referencing `getContextInfo().actions`, the same
 caller-side composition #131 objects to.
 
-`getBindingOrigin(handle, action, context?)` returns
+`getBindingOrigin(handle, action, platform, context?)` returns
 `"override" | "default" | "undeclared"`. Additive; `getBindings` keeps its
 signature and its callers.
+
+Origin is per-platform because overrides are: keyboard can be an override while
+gamepad is still a default, and one verdict per action cannot express that. The
+platform parameter mirrors `rebindForPlatform`, so a settings screen asks about
+the device whose row it is rendering.
 
 ## Considered options
 
