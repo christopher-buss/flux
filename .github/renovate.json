@@ -4,7 +4,7 @@
 		"config:recommended",
 		":pinAllExceptPeerDependencies",
 		"helpers:pinGitHubActionDigests",
-		"npm:unpublishSafe"
+		"security:minimumReleaseAgeNpm"
 	],
 	"schedule": ["* 0-23 * * 1,4,6"],
 	"packageRules": [
