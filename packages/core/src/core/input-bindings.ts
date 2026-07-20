@@ -1,8 +1,5 @@
-import type { KeysOfUnion } from "type-fest";
-
-import type { BindingConfig, BindingLike } from "../types/bindings";
-
-type BindingConfigKey = Extract<KeysOfUnion<BindingConfig>, string>;
+import { hasInputSource } from "../bindings/classify";
+import type { BindingConfigKey, BindingLike } from "../types/bindings";
 
 type BindingProperty = WritablePropertyNames<InputBinding>;
 
@@ -32,7 +29,8 @@ const PROPERTY_MAP = {
  * @param bindingLike - The binding definition (KeyCode or config object).
  * @param parent - The `InputAction` to parent the binding under.
  * @param instances - Bulk cleanup array the new instance is appended to.
- * @throws If a raw `Enum.UserInputType` is passed.
+ * @throws If a raw `Enum.UserInputType` is passed, or if the binding names no
+ * input source at all.
  */
 export function createInputBinding(
 	bindingLike: BindingLike,
@@ -41,6 +39,13 @@ export function createInputBinding(
 ): void {
 	if (isUserInputType(bindingLike)) {
 		error(`UserInputType bindings are not supported: ${bindingLike}. Use Enum.KeyCode instead`);
+	}
+
+	if (!hasInputSource(bindingLike)) {
+		error(
+			`Binding for action "${parent.Name}" has no input source. Set a keyCode, ` +
+				"a directional key, a modifier, pointerIndex or uiButton",
+		);
 	}
 
 	const binding = new Instance("InputBinding");

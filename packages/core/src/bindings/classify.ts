@@ -1,4 +1,4 @@
-import type { BindingLike } from "../types/bindings";
+import type { BindingConfigKey, BindingLike } from "../types/bindings";
 
 /** The input platform a binding targets. */
 export type InputPlatform = "gamepad" | "keyboard" | "touch";
@@ -24,16 +24,47 @@ const GAMEPAD_KEYCODES = new Set<Enum.KeyCode>([
 	Enum.KeyCode.Thumbstick2,
 ]);
 
-/** Directional field names to check on binding config objects. */
-const DIRECTIONAL_KEYS = ["up", "down", "left", "right", "forward", "backward"] as const;
+/**
+ * Field names holding a KeyCode, in the order classification consults them:
+ * directional keys, then the primary key, then modifiers.
+ */
+const KEYCODE_KEYS = [
+	"up",
+	"down",
+	"left",
+	"right",
+	"forward",
+	"backward",
+	"keyCode",
+	"primaryModifier",
+	"secondaryModifier",
+] as const;
 
-/** Modifier field names to check on binding config objects. */
-const MODIFIER_KEYS = ["primaryModifier", "secondaryModifier"] as const;
+/** Field names that only a touch binding carries. */
+const TOUCH_KEYS = ["pointerIndex", "uiButton"] as const;
+
+/**
+ * Every field naming an input the engine fires on. The remaining
+ * `BindingConfig` fields only tune how an input is read.
+ */
+const INPUT_SOURCE_KEYS = [
+	...KEYCODE_KEYS,
+	...TOUCH_KEYS,
+] as const satisfies ReadonlyArray<BindingConfigKey>;
 
 /**
  * Determines which input platform a binding targets.
+ *
+ * Touch is a positive determination made from `pointerIndex` or `uiButton`,
+ * the two keyless shapes that are genuinely touch — never a fallback. A config
+ * carrying no input source at all is rejected by `createInputBinding`, so it
+ * cannot reach a running binding; this function still answers for one rather
+ * than throwing, because a settings screen must be able to classify every
+ * binding it holds without a crash path.
  * @param binding - A raw KeyCode or binding config object.
- * @returns The input platform: `"gamepad"`, `"keyboard"`, or `"touch"`.
+ * @returns The input platform: `"gamepad"`, `"keyboard"`, or `"touch"`. A
+ * config with no input source reports `"keyboard"` — an arbitrary but stable
+ * answer for a binding that `createInputBinding` refuses to build.
  * @example
  * classifyBinding(Enum.KeyCode.Space) // → "keyboard"
  * classifyBinding(Enum.KeyCode.ButtonA) // → "gamepad"
@@ -44,29 +75,48 @@ export function classifyBinding(binding: BindingLike): InputPlatform {
 		return classifyKeyCode(binding);
 	}
 
-	// Check directional keys (Direction1d/2d/3d configs).
-	for (const key of DIRECTIONAL_KEYS) {
-		const keyCode = (binding as Record<string, unknown>)[key] as Enum.KeyCode | undefined;
+	const config = binding as Record<string, unknown>;
+
+	for (const key of KEYCODE_KEYS) {
+		const keyCode = config[key] as Enum.KeyCode | undefined;
 		if (keyCode !== undefined) {
 			return classifyKeyCode(keyCode);
 		}
 	}
 
-	// Check the keyCode field (Bool, ViewportPosition, etc.).
-	const { keyCode } = binding as { keyCode?: Enum.KeyCode };
-	if (keyCode !== undefined) {
-		return classifyKeyCode(keyCode);
-	}
-
-	// Check modifier fields (primaryModifier, secondaryModifier).
-	for (const key of MODIFIER_KEYS) {
-		const modifier = (binding as Record<string, unknown>)[key] as Enum.KeyCode | undefined;
-		if (modifier !== undefined) {
-			return classifyKeyCode(modifier);
+	for (const key of TOUCH_KEYS) {
+		if (config[key] !== undefined) {
+			return "touch";
 		}
 	}
 
-	return "touch";
+	return "keyboard";
+}
+
+/**
+ * Reports whether a binding names any input the engine can fire on.
+ *
+ * A config with no keycode, directional key, modifier or touch field is
+ * type-legal but binds nothing, so `createInputBinding` rejects it.
+ * @param binding - A raw KeyCode or binding config object.
+ * @returns `true` when the binding carries at least one input source.
+ * @example
+ * hasInputSource({ keyCode: Enum.KeyCode.Space }) // → true
+ * hasInputSource({ pressedThreshold: 0.5 }) // → false
+ */
+export function hasInputSource(binding: BindingLike): boolean {
+	if (typeIs(binding, "EnumItem")) {
+		return true;
+	}
+
+	const config = binding as Record<string, unknown>;
+	for (const key of INPUT_SOURCE_KEYS) {
+		if (config[key] !== undefined) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
