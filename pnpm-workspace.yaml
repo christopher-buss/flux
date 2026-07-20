@@ -4,10 +4,6 @@ cleanupUnusedCatalogs: true
 ignoreWorkspaceRootCheck: true
 saveExact: true
 
-minimumReleaseAgeExclude:
-  - "@bedrock-rbx/ocale@0.1.0-beta.19"
-  - "@isentinel/jest-roblox@0.3.7"
-
 shellEmulator: true
 trustPolicy: no-downgrade
 
@@ -65,7 +61,7 @@ catalogs:
   script:
     jiti: 2.7.0
   test:
-    "@isentinel/jest-roblox": 0.3.7
+    "@isentinel/jest-roblox": 0.3.10
     "@rbxts-js/dom-testing-library-lua": 8.16.0-ts.3
     "@rbxts-js/emittery": 3.16.0-ts.1
     "@rbxts-js/expect": 3.16.0-ts.1
