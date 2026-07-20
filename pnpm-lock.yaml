@@ -111,8 +111,8 @@ catalogs:
       version: 2.7.0
   test:
     '@isentinel/jest-roblox':
-      specifier: 0.3.7
-      version: 0.3.7
+      specifier: 0.3.9
+      version: 0.3.9
     '@rbxts-js/dom-testing-library-lua':
       specifier: 8.16.0-ts.3
       version: 8.16.0-ts.3
@@ -206,7 +206,7 @@ importers:
         version: 1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(typescript@6.0.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.7(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11
@@ -435,7 +435,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.7(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11
@@ -486,7 +486,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.7(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11
@@ -540,7 +540,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.7(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11
@@ -603,7 +603,7 @@ importers:
     devDependencies:
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.7(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11
@@ -1383,8 +1383,8 @@ packages:
       '@typescript/native-preview':
         optional: true
 
-  '@isentinel/jest-roblox@0.3.7':
-    resolution: {integrity: sha512-odUl8g2NUS6NMMs6St1WSXWJXKZfv/dtaZ0rlKL9EwAqNhR82hxHDwbRCFV4XfhJmUlKfFHlJIUasxU6XoQMuA==}
+  '@isentinel/jest-roblox@0.3.9':
+    resolution: {integrity: sha512-8TcHN56XlFVm+81H8QU3ljSqnYbxAJFpdLFOXYK3nNTs8tUEktmotRu5thJZ2by8hRNem7B+b3DjEKfPo3qiHQ==}
     engines: {node: '>=24.12.0'}
     hasBin: true
 
@@ -5956,7 +5956,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/jest-roblox@0.3.7(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)':
+  '@isentinel/jest-roblox@0.3.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)':
     dependencies:
       '@bedrock-rbx/ocale': 0.1.0-beta.19
       '@jridgewell/trace-mapping': 0.3.31
@@ -6172,7 +6172,7 @@ snapshots:
 
   '@oxc-parser/binding-wasm32-wasi@0.123.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.4(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -6252,7 +6252,7 @@ snapshots:
 
   '@oxc-resolver/binding-wasm32-wasi@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.4(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -6973,7 +6973,7 @@ snapshots:
       eslint-visitor-keys: 4.2.1
       espree: 10.4.0
       estraverse: 5.3.0
-      picomatch: 4.0.4
+      picomatch: 4.0.5
 
   '@ts-graphviz/adapter@2.0.6':
     dependencies:
@@ -8131,7 +8131,7 @@ snapshots:
       generate-differences: 0.1.1
       load-oxfmt-config: 0.9.0(oxfmt@0.51.0)
       oxfmt: 0.51.0
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       synckit: 0.11.12
 
   eslint-plugin-package-json@1.1.0(@types/estree@1.0.8)(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2)):
@@ -8502,10 +8502,6 @@ snapshots:
   fault@2.0.1:
     dependencies:
       format: 0.2.2
-
-  fdir@6.5.0(picomatch@4.0.4):
-    optionalDependencies:
-      picomatch: 4.0.4
 
   fdir@6.5.0(picomatch@4.0.5):
     optionalDependencies:
@@ -9927,8 +9923,8 @@ snapshots:
 
   tinyglobby@0.2.16:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
 
   tinyglobby@0.2.17:
     dependencies:
