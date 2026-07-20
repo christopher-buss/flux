@@ -1,7 +1,7 @@
 import type { Tagged } from "type-fest";
 
 import type { ActionMap, AllActions } from "./actions";
-import type { BindingForAction, BindingLike, BindingState } from "./bindings";
+import type { BindingForAction, BindingLike, BindingState, RebindPlatform } from "./bindings";
 import type { ActionState, ActionValue } from "./state";
 
 /**
@@ -151,6 +151,38 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	rebindAll(handle: InputHandle, bindings: BindingState<Actions>): void;
 
 	/**
+	 * Replaces one platform's bindings for a single action, leaving every
+	 * other platform structurally untouched.
+	 *
+	 * A platform this call does not name keeps whatever it had: its own
+	 * override if the player set one, or the code-defined default if not — so
+	 * a player who only ever rebinds their gamepad still receives updated
+	 * keyboard defaults in a later patch. Passing an empty array is a
+	 * deliberate unbind of that platform, which is distinct from never having
+	 * touched it.
+	 *
+	 * Touch is not accepted. A touch binding can hold a live `GuiButton`
+	 * reference that cannot serialize, so a touch bucket would not round-trip
+	 * through a save; touch bindings are preserved by this call but are not
+	 * writable through it.
+	 * @template A - The action name.
+	 * @param handle - The input consumer handle.
+	 * @param action - The action to rebind.
+	 * @param platform - The platform whose bindings to replace.
+	 * @param bindings - The new bindings for that platform.
+	 * @throws If called on a subscribed handle.
+	 * @example
+	 * core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+	 * // keyboard bindings for "jump" are unchanged and still track defaults
+	 */
+	rebindForPlatform<A extends AllActions<Actions>>(
+		handle: InputHandle,
+		action: A,
+		platform: RebindPlatform,
+		bindings: ReadonlyArray<BindingForAction<Actions[A]["type"]>>,
+	): void;
+
+	/**
 	 * Registers a new input consumer, creating IAS instances under the parent.
 	 * @param parent - The instance to parent InputContexts under.
 	 * @param context - First context name to activate (at least one required).
@@ -203,16 +235,36 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	resetBindings(handle: InputHandle, action: AllActions<Actions>): void;
 
 	/**
+	 * Resets one platform's bindings for a single action to that platform's
+	 * defaults, preserving the other platforms' overrides.
+	 * @param handle - The input consumer handle.
+	 * @param action - The action whose bindings to reset.
+	 * @param platform - The platform to restore to its defaults.
+	 * @throws If called on a subscribed handle.
+	 * @example
+	 * core.resetBindingsForPlatform(handle, "jump", "gamepad");
+	 * // a keyboard rebind of "jump" survives untouched
+	 */
+	resetBindingsForPlatform(
+		handle: InputHandle,
+		action: AllActions<Actions>,
+		platform: RebindPlatform,
+	): void;
+
+	/**
 	 * Serializes the handle's active binding overrides for persistence.
 	 *
-	 * The result is sparse: only actions with an explicit override appear.
-	 * Unchanged actions are absent and, on `loadBindings`, are restored from
-	 * the current code's default context bindings. This lets multi-context
-	 * actions keep their per-context defaults across a save/load cycle
-	 * without flattening them into a single shared list. Suitable for
-	 * DataStore persistence of user customizations.
+	 * The result is sparse at both levels. Only actions with an explicit
+	 * override appear, and within an action only the platforms the player
+	 * touched appear. Absent entries are restored from the current code's
+	 * default context bindings on `loadBindings`, which lets multi-context
+	 * actions keep their per-context defaults across a save/load cycle and
+	 * lets an untouched platform keep inheriting changes to its defaults. A
+	 * platform present with an empty array is a deliberate unbind and loads
+	 * back as unbound. Suitable for DataStore persistence of user
+	 * customizations.
 	 * @param handle - The input consumer handle.
-	 * @returns A sparse record of overridden bindings keyed by action name.
+	 * @returns A sparse record of per-platform overrides keyed by action name.
 	 * @throws If called on a subscribed handle.
 	 */
 	serializeBindings(handle: InputHandle): BindingState<Actions>;

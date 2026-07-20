@@ -2,10 +2,12 @@ import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { bool, defineActions, direction2d } from "../actions/define";
+import type { InputPlatform } from "../bindings/classify";
 import { defineContexts } from "../contexts/define";
 import type { BindingState } from "../types/bindings";
 import type { InputHandle } from "../types/core";
 import { createCore } from "./create-core";
+import type { PLATFORM_ORDER } from "./platform-overrides";
 
 const actions = defineActions({
 	jump: bool(),
@@ -85,5 +87,52 @@ describe("serializeBindings", () => {
 	it("should return typed BindingState", () => {
 		const handle = {} as InputHandle;
 		expectTypeOf(core.serializeBindings(handle)).toEqualTypeOf<BindingState<typeof actions>>();
+	});
+});
+
+describe("rebindForPlatform", () => {
+	it("should accept keyboard and gamepad", () => {
+		const handle = {} as InputHandle;
+		expectTypeOf<typeof core.rebindForPlatform>().toBeCallableWith(handle, "jump", "keyboard", [
+			Enum.KeyCode.Space,
+		]);
+		expectTypeOf<typeof core.rebindForPlatform>().toBeCallableWith(handle, "jump", "gamepad", [
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should reject touch", () => {
+		const handle = {} as InputHandle;
+		// @ts-expect-error touch cannot be rebound per platform
+		core.rebindForPlatform(handle, "jump", "touch", []);
+	});
+
+	it("should reject invalid action", () => {
+		const handle = {} as InputHandle;
+		// @ts-expect-error unknown action
+		core.rebindForPlatform(handle, INVALID, "keyboard", []);
+	});
+});
+
+describe("resetBindingsForPlatform", () => {
+	it("should accept keyboard and gamepad", () => {
+		const handle = {} as InputHandle;
+		expectTypeOf<typeof core.resetBindingsForPlatform>().toBeCallableWith(
+			handle,
+			"move",
+			"keyboard",
+		);
+	});
+
+	it("should reject touch", () => {
+		const handle = {} as InputHandle;
+		// @ts-expect-error touch cannot be reset per platform
+		core.resetBindingsForPlatform(handle, "jump", "touch");
+	});
+});
+
+describe("PLATFORM_ORDER", () => {
+	it("should list every input platform", () => {
+		expectTypeOf<(typeof PLATFORM_ORDER)[number]>().toEqualTypeOf<InputPlatform>();
 	});
 });

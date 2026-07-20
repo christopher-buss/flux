@@ -47,7 +47,8 @@ interface CreateContextOptions {
 	readonly instances: Array<Instance>;
 }
 
-const INPUT_FOLDER_NAME = "input";
+/** Name of the folder every handle parents its `InputContext` instances under. */
+export const INPUT_FOLDER_NAME = "input";
 
 interface FindInstancesOptions {
 	readonly actions: ActionMap;

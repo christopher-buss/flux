@@ -333,11 +333,22 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 	): void;
 
 	rebindAll(handle: InputHandle, bindings: BindingState<TActions>): void;
+	rebindForPlatform(
+		handle: InputHandle,
+		action: AllActions<TActions>,
+		platform: RebindPlatform,
+		bindings: ReadonlyArray<BindingLike>,
+	): void;
 	register(...contexts: ReadonlyArray<string>): InputHandle;
 	removeContext(handle: InputHandle, context: string): void;
 
 	resetAllBindings(handle: InputHandle): void;
 	resetBindings(handle: InputHandle, action: AllActions<TActions>): void;
+	resetBindingsForPlatform(
+		handle: InputHandle,
+		action: AllActions<TActions>,
+		platform: RebindPlatform,
+	): void;
 	serializeBindings(handle: InputHandle): BindingState<TActions>;
 	simulateAction<A extends AllActions<TActions>>(
 		handle: InputHandle,
@@ -361,19 +372,28 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 - `getContexts()` is runtime/controller state, not `ActionState`
 - `rebind()` updates one action
 - `rebindAll()` replaces an owner's full binding state in one save/apply step
+- `rebindForPlatform()` updates one action on one device, leaving the other
+  devices structurally untouched
 
 ## Binding State
 
 ```ts
+type RebindPlatform = Exclude<InputPlatform, "touch">;
+
+type PlatformBindings = Readonly<
+	Partial<Record<InputPlatform, ReadonlyArray<BindingLike>>>
+>;
+
 type BindingState<TActions extends ActionMap = ActionMap> = Partial<
-	Record<AllActions<TActions>, ReadonlyArray<BindingLike>>
+	Record<AllActions<TActions>, PlatformBindings>
 >;
 ```
 
 ### Binding State Notes
 
-- `BindingState` represents the full current binding set for one registered
-  owner/handle
+- `BindingState` represents the per-platform override state for one registered
+  owner/handle. Within a platform an empty array is a deliberate unbind; an
+  absent platform key means that device still tracks its code-defined default
 - `rebindAll()` is for settings flows where several edits are staged, then saved
   together
 - `rebindAll()` should replace the current override state, not patch it
@@ -387,9 +407,9 @@ type BindingState<TActions extends ActionMap = ActionMap> = Partial<
 
 ```ts
 const pendingBindings: BindingState<typeof actions> = {
-	heavyAttack: [Enum.KeyCode.F, Enum.KeyCode.ButtonR2],
-	jump: [Enum.KeyCode.Space, Enum.KeyCode.ButtonA],
-	move: [WASD, Enum.KeyCode.Thumbstick1],
+	heavyAttack: { gamepad: [Enum.KeyCode.ButtonR2], keyboard: [Enum.KeyCode.F] },
+	jump: { gamepad: [Enum.KeyCode.ButtonA], keyboard: [Enum.KeyCode.Space] },
+	move: { gamepad: [Enum.KeyCode.Thumbstick1], keyboard: [WASD] },
 };
 
 function saveBindings(handle: InputHandle): void {

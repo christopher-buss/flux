@@ -2,6 +2,7 @@ import type { ActionMap } from "../types/actions";
 import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { HandleData } from "./handle-lifecycle";
+import { composeBindings } from "./platform-overrides";
 
 /**
  * Returns the default bindings for an action in a single context.
@@ -25,7 +26,8 @@ export function getContextBindings(
 }
 
 /**
- * Resolves effective bindings: override then context then merge.
+ * Resolves effective bindings by composing each platform's override bucket,
+ * where one exists, over the bindings the code declares for that platform.
  * @template T - The action map type.
  * @param handleData - Handle state to read.
  * @param contexts - Core context config record.
@@ -39,16 +41,12 @@ export function resolveBindings<T extends ActionMap>(
 	action: string,
 	context?: string,
 ): ReadonlyArray<BindingLike> {
-	const override = handleData.bindingOverrides.get(action);
-	if (override !== undefined) {
-		return override;
-	}
-
-	if (context !== undefined) {
-		return getContextBindings(contexts, context, action);
-	}
-
-	return mergeBindingsAcrossContexts(handleData, contexts, action);
+	const overrides = handleData.bindingOverrides.get(action);
+	return composeBindings(overrides, () => {
+		return context !== undefined
+			? getContextBindings(contexts, context, action)
+			: mergeBindingsAcrossContexts(handleData, contexts, action);
+	});
 }
 
 function mergeBindingsAcrossContexts<T extends ActionMap>(

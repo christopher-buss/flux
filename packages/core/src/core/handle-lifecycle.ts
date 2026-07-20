@@ -1,5 +1,4 @@
 import type { ActionMap } from "../types/actions";
-import type { BindingLike } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionState } from "../types/state";
@@ -8,6 +7,7 @@ import { createActionState } from "./action-state";
 import { createActiveContexts } from "./active-contexts";
 import type { HandleFactory } from "./handle-factory";
 import { createInputInstances, findInputInstances } from "./input-instances";
+import type { PlatformOverrides } from "./platform-overrides";
 import type { CoreHandleData } from "./update-handle";
 
 /**
@@ -150,7 +150,7 @@ function buildHandleData<T extends ActionMap>(options: BuildHandleDataOptions<T>
 	const [publicState, internalState] = createActionState(actions, { debug: isDebug });
 	return {
 		activeContexts: createActiveContexts(contextNames),
-		bindingOverrides: new Map<string, ReadonlyArray<BindingLike>>(),
+		bindingOverrides: new Map<string, PlatformOverrides>(),
 		durations: createDurations(actions),
 		instanceData,
 		internalState,
