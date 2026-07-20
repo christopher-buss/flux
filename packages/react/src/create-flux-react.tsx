@@ -10,6 +10,8 @@ import type { FluxUseAction } from "./hooks/use-action";
 import { createUseAction } from "./hooks/use-action";
 import type { FluxUseBindings } from "./hooks/use-bindings";
 import { createUseBindings } from "./hooks/use-bindings";
+import type { FluxUseCapture, FluxUseCaptureAction } from "./hooks/use-capture";
+import { createUseCapture, createUseCaptureAction } from "./hooks/use-capture";
 import type { FluxUseFluxCore } from "./hooks/use-flux-core";
 import { createUseFluxCore } from "./hooks/use-flux-core";
 import type { FluxUseActiveContext, FluxUseInputContext } from "./hooks/use-input-context";
@@ -56,6 +58,24 @@ export interface FluxReact<T extends ActionMap, Contexts extends string = string
 	 * when the bindings array changes.
 	 */
 	readonly useBindings: FluxUseBindings<T>;
+
+	/**
+	 * Hook that captures an action for as long as the component is mounted,
+	 * releasing it on unmount.
+	 *
+	 * Returns the same token object for the component's lifetime. The token
+	 * reads inert until the capture lands and after it is released, so call
+	 * sites never branch on ownership — except `canceled()`, which keeps
+	 * delegating after release so the one-frame boundary cancel still lands
+	 * during teardown.
+	 */
+	readonly useCapture: FluxUseCapture<T>;
+
+	/**
+	 * Hook that reads through a capture token via a selector. Re-renders only
+	 * when the selected value changes.
+	 */
+	readonly useCaptureAction: FluxUseCaptureAction;
 
 	/**
 	 * Hook that returns the `FluxCore` supplied to the nearest `FluxProvider`.
@@ -120,6 +140,8 @@ export function createFluxReact<T extends ActionMap, Contexts extends string = s
 		useAction: createUseAction(useFluxContext),
 		useActiveContext: createUseActiveContext<T, Contexts>(useFluxContext),
 		useBindings: createUseBindings(useFluxContext),
+		useCapture: createUseCapture(useFluxContext),
+		useCaptureAction: createUseCaptureAction(useFluxContext),
 		useFluxCore: createUseFluxCore<T, Contexts>(useFluxContext),
 		useInputContext: createUseInputContext<T, Contexts>(useFluxContext),
 	};

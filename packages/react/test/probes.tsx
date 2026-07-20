@@ -10,6 +10,18 @@ export type FluxActionState = ActionState<typeof TEST_ACTIONS>;
 /** Typed `useAction` hook bound to the integration fixture's action map. */
 export type UseFluxAction = FluxReact<typeof TEST_ACTIONS>["useAction"];
 
+/**
+ * Closure-private, ordered record of values observed from inside a component.
+ *
+ * @template T - The recorded value type.
+ */
+export interface Log<T extends defined> {
+	/** Returns everything recorded so far, in order. */
+	readonly entries: () => Array<T>;
+	/** Records one value. */
+	readonly push: (value: T) => void;
+}
+
 /** Closure-private counter with `tick`/`get` accessors. */
 export interface RenderCounter {
 	/** Returns the current count. */
@@ -30,6 +42,23 @@ export interface CountingProbe {
 export interface LabeledProbeProps {
 	/** Label embedded in the rendered Text so RTL queries can match it. */
 	readonly label: string;
+}
+
+/**
+ * Builds a {@link Log} backed by a private closure, so components record into
+ * it without reassigning a component-external variable.
+ *
+ * @template T - The recorded value type.
+ * @returns A new empty log.
+ */
+export function makeLog<T extends defined>(): Log<T> {
+	const entries = new Array<T>();
+	return {
+		entries: () => entries,
+		push: (value: T) => {
+			entries.push(value);
+		},
+	};
 }
 
 /**

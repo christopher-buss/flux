@@ -5,8 +5,10 @@ import {
 	defineContexts,
 	direction1d,
 	direction2d,
+	direction3d,
 	hold,
 	implicit,
+	position2d,
 	tap,
 } from "@rbxts/flux";
 
@@ -32,7 +34,10 @@ export const TEST_ACTIONS = defineActions({
 	}),
 	confirm: bool(),
 	dash: bool({ triggers: [implicit(tap({ threshold: TAP_THRESHOLD }))] }),
+	fly: direction3d(),
+	interact: bool(),
 	jump: bool(),
+	look: position2d(),
 	move: direction2d(),
 	throttle: direction1d(),
 });
@@ -49,7 +54,10 @@ export const TEST_CONTEXTS = defineContexts({
 		bindings: {
 			charge: [Enum.KeyCode.E],
 			dash: [Enum.KeyCode.Q],
+			fly: [Enum.KeyCode.F],
+			interact: [Enum.KeyCode.T],
 			jump: [Enum.KeyCode.Space],
+			look: [Enum.KeyCode.M],
 			move: [Enum.KeyCode.W],
 			throttle: [Enum.KeyCode.R],
 		},
