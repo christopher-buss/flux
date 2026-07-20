@@ -137,8 +137,8 @@ export function acquireCapture(entry: ActionEntry, viewer: CaptureViewer): void 
 	const displaced = getTopHolder(entry);
 	if (displaced === DRAIN_HOLDER) {
 		entry.captures.pop();
-	} else if (getMagnitude(entry.value) > 0) {
-		entry.canceledFor = displaced ?? GAMEPLAY_READER;
+	} else {
+		recordBoundaryCancel(entry, displaced ?? GAMEPLAY_READER);
 	}
 
 	entry.captures.push(viewer);
@@ -164,8 +164,7 @@ export function releaseCapture(entry: ActionEntry, viewer: CaptureViewer): void 
 	const didHoldTop = index === entry.captures.size() - 1;
 	entry.captures.remove(index);
 
-	if (didHoldTop && getMagnitude(entry.value) > 0) {
-		entry.canceledFor = viewer;
+	if (didHoldTop && recordBoundaryCancel(entry, viewer)) {
 		entry.captures.push(DRAIN_HOLDER);
 	}
 }
@@ -265,11 +264,17 @@ export function suppressedFalse(): boolean {
  * unsuppressed trigger-phase cancel.
  */
 export function readEntryCanceled(entry: ActionEntry, viewer?: CaptureViewer): boolean {
-	if (!entry.claimed && entry.canceledFor === (viewer ?? GAMEPLAY_READER)) {
+	if (entry.claimed) {
+		return false;
+	}
+
+	if (entry.canceledFor === (viewer ?? GAMEPLAY_READER)) {
 		return true;
 	}
 
-	return readEntry(entry, { pick: isCanceled, viewer, whenSuppressed: suppressedFalse });
+	// Inlined gate: this runs per frame, and both outcomes are constants
+	// here, so the readEntry options table would be pure allocation.
+	return !isCaptureSuppressedFor(entry, viewer) && isCanceled(entry);
 }
 
 /**
@@ -396,23 +401,54 @@ function getTopHolder(entry: ActionEntry): CaptureViewer | undefined {
 }
 
 /**
+ * Records a capture boundary in the entry's cancel slot if the displaced
+ * viewer's view was live.
+ *
+ * The single owner of what counts as a boundary worth canceling: the
+ * displaced view must have a visible in-flight interaction — magnitude above
+ * zero — or there is nothing to cancel. Overwrites any earlier boundary this
+ * frame: last wins.
+ * @param entry - The action entry at the boundary.
+ * @param displaced - The viewer whose view the boundary force-drops.
+ * @returns True if the boundary dropped a visible in-flight view.
+ */
+function recordBoundaryCancel(entry: ActionEntry, displaced: CaptureViewer): boolean {
+	if (getMagnitude(entry.value) === 0) {
+		return false;
+	}
+
+	entry.canceledFor = displaced;
+
+	return true;
+}
+
+/**
+ * The capture half of the suppression rule: whether a capture hides the
+ * entry from the given viewer.
+ * @param entry - The action entry being read.
+ * @param viewer - The identity reading; undefined for plain state reads.
+ * @returns True if a capture suppresses this viewer.
+ */
+function isCaptureSuppressedFor(entry: ActionEntry, viewer: CaptureViewer | undefined): boolean {
+	const topHolder = getTopHolder(entry);
+
+	return topHolder !== undefined && topHolder !== viewer;
+}
+
+/**
  * Whether a processed read is suppressed for the given viewer.
  *
  * The rule is `claimed || (captured && viewer !== topHolder)`: a claim
  * suppresses every viewer, and a capture suppresses everyone except the
- * token on top of the stack — shadowed holders read inert too.
+ * token on top of the stack — shadowed holders read inert too. The two
+ * reasons stay separable because the boundary cancel bypasses exactly one of
+ * them: {@link readEntryCanceled} respects the claim but not the capture.
  * @param entry - The action entry being read.
  * @param viewer - The identity reading; undefined for plain state reads.
  * @returns True if the read reports its suppressed result.
  */
 function isSuppressedFor(entry: ActionEntry, viewer: CaptureViewer | undefined): boolean {
-	if (entry.claimed) {
-		return true;
-	}
-
-	const topHolder = getTopHolder(entry);
-
-	return topHolder !== undefined && topHolder !== viewer;
+	return entry.claimed || isCaptureSuppressedFor(entry, viewer);
 }
 
 /**
