@@ -53,7 +53,7 @@ export interface CaptureTokenRuntime {
 	pressed(): boolean;
 	/** The captured action's previous trigger state duration. */
 	previousDuration(): number;
-	/** Releases the capture, restoring normal reads. */
+	/** Releases the capture, restoring the holder beneath or normal reads. */
 	release(): void;
 	/** Whether the captured action's trigger conditions were met this frame. */
 	triggered(): boolean;

@@ -261,9 +261,9 @@ export function getPreviousDuration(entry: ActionEntry): number {
 /**
  * Whether a processed read is suppressed for the given viewer.
  *
- * The rule is `claimed || (captured && viewer !== holder)`: a claim
+ * The rule is `claimed || (captured && viewer !== topHolder)`: a claim
  * suppresses every viewer, and a capture suppresses everyone except the
- * holding token.
+ * token on top of the stack — shadowed holders read inert too.
  * @param entry - The action entry being read.
  * @param viewer - The identity reading; undefined for plain state reads.
  * @returns True if the read reports its suppressed result.

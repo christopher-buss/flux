@@ -51,10 +51,11 @@ export interface CaptureOptions {}
  *
  * The token *is* the scoped reader: it carries every processed read with the
  * action pre-bound, narrowed to the action's kind — `axis1d()` on a Bool
- * action does not compile. While held, the token reads the action's real
- * state and every other consumer reads it as inert. `raw*` reads are absent:
- * raw bypasses captures by definition, so they stay on
- * {@link ActionState.rawPressed} and never route through a token.
+ * action does not compile. Captures stack LIFO: the newest token reads the
+ * action's real state, while shadowed tokens and every other consumer read
+ * it as inert. `raw*` reads are absent: raw bypasses captures by definition,
+ * so they stay on {@link ActionState.rawPressed} and never route through a
+ * token.
  *
  * @example
  * ```ts
@@ -147,6 +148,11 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	 * survives `core.update`; it lasts until {@link CaptureToken.release} or
 	 * until the handle is unregistered. Only {@link ActionState.rawPressed}
 	 * and {@link ActionState.rawJustPressed} see through a capture.
+	 *
+	 * Capturing an already-captured action succeeds and stacks LIFO: the new
+	 * token shadows the holders beneath it, which read inert until it
+	 * releases. Every call pushes a fresh independent token — core tracks no
+	 * caller identity, so deduplication is the caller's concern.
 	 *
 	 * @example
 	 * ```ts
@@ -370,9 +376,12 @@ interface CaptureTokenBase<Actions extends ActionMap, A extends AllActions<Actio
 	previousDuration(): number;
 
 	/**
-	 * Releases the capture, restoring normal reads for every consumer.
-	 * @remarks Releasing an already-released token is a silent no-op, so
-	 * defensive cleanup code is harmless.
+	 * Releases the capture, restoring the holder beneath it in the same
+	 * frame — or normal reads for every consumer if none remains.
+	 * @remarks Removes only this token's slot in the stack, so releasing a
+	 * shadowed token out of order leaves the top holder unaffected.
+	 * Releasing an already-released token is a silent no-op, so defensive
+	 * cleanup code is harmless.
 	 */
 	release(): void;
 
