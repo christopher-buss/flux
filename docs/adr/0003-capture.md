@@ -83,6 +83,11 @@ held in a closure or the consumer's own component.
   already threads a viewer through one helper, so the full surface is near-free,
   and a reader-object token makes "forgot to thread the viewer" and action/token
   mismatch unrepresentable.
+- **A movement-delta or instant-settle drain terminator for `ViewportPosition`**
+  — rejected: both dress up "never drains" as a threshold. Delta needs a
+  rest-detection window nothing else in the pipeline has, and instant-settle is
+  a no-drain release that still pays a frame of suppression. Neither buys
+  anything, because there is no in-flight press to withhold.
 - **`release({ immediate: true })`** — rejected for now: no consumer evidence
   for mid-press handoff, and the flag re-enables the exact leak the drain plugs.
   `release(options?)` reserved.

@@ -239,6 +239,9 @@ export function releaseCapture(entry: ActionEntry, viewer: CaptureViewer): void 
  * still suppressed — not even the trailing release edge leaks to whoever is
  * underneath. Terminates on magnitude, not trigger state: a custom trigger
  * can leave "triggered" while the button is still physically down.
+ *
+ * Shares {@link hasLiveInteraction} with the two boundaries that start a
+ * drain, so a kind that can never be in flight can never be left draining.
  * @param entry - The action entry to settle.
  */
 export function settleDrain(entry: ActionEntry): void {
