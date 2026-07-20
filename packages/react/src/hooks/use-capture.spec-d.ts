@@ -13,7 +13,7 @@ import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { createFluxReact } from "../create-flux-react";
-import type { CaptureTokenSurface } from "./use-capture";
+import type { CaptureTokenSurface, UseCaptureOptions } from "./use-capture";
 
 const actions = defineActions({
 	fly: direction3d(),
@@ -148,6 +148,46 @@ describe("FluxUseCapture", () => {
 		it("should reject a missing action", () => {
 			// @ts-expect-error missing action argument
 			flux.useCapture();
+		});
+	});
+
+	describe("options", () => {
+		it("should accept the options bag on both overloads", () => {
+			expectTypeOf(
+				flux.useCapture("jump", { debugLabel: "pause-menu", enabled: false }),
+			).toEqualTypeOf<CaptureToken<typeof actions, "jump">>();
+			expectTypeOf(
+				flux.useCapture(handle, "jump", { debugLabel: "pause-menu", enabled: false }),
+			).toEqualTypeOf<CaptureToken<typeof actions, "jump">>();
+		});
+
+		it("should accept either option on its own", () => {
+			flux.useCapture("jump", { enabled: true });
+			flux.useCapture("jump", { debugLabel: "hud" });
+			flux.useCapture("jump", {});
+		});
+
+		it("should carry exactly the documented options", () => {
+			expectTypeOf<keyof UseCaptureOptions>().toEqualTypeOf<"debugLabel" | "enabled">();
+			expectTypeOf<UseCaptureOptions["enabled"]>().toEqualTypeOf<boolean | undefined>();
+			expectTypeOf<UseCaptureOptions["debugLabel"]>().toEqualTypeOf<string | undefined>();
+		});
+
+		it("should reject unknown options", () => {
+			// @ts-expect-error `quiet` is not an option this hook accepts
+			flux.useCapture("jump", { quiet: true });
+		});
+
+		it("should reject mistyped options", () => {
+			// @ts-expect-error `enabled` is a boolean
+			flux.useCapture("jump", { enabled: "yes" });
+			// @ts-expect-error `debugLabel` is a string
+			flux.useCapture("jump", { debugLabel: 1 });
+		});
+
+		it("should reject the options bag in the action position", () => {
+			// @ts-expect-error an options bag is not an action name
+			flux.useCapture({ enabled: true });
 		});
 	});
 });
