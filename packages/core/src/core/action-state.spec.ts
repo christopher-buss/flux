@@ -2,6 +2,7 @@ import { describe, expect, it } from "@rbxts/jest-globals";
 
 import type { ActionMap } from "../types/actions";
 import { getMagnitude } from "./action-entry";
+import type { UpdateActionOptions } from "./action-state";
 import { createActionState } from "./action-state";
 
 const TEST_ACTIONS = {
@@ -1188,6 +1189,176 @@ describe("createActionState", () => {
 			expect(state.isClaimed("jump")).toBeFalse();
 			expect(token.pressed()).toBeTrue();
 			expect(state.pressed("jump")).toBeFalse();
+		});
+
+		// Release-mid-press cases assert the in-flight press reads through
+		// immediately on restore. Drain (#174) revises that: suppression will
+		// persist until magnitude reaches zero, so those assertions are
+		// provisional, not the final ADR 0003 contract.
+		describe("lifo stacking", () => {
+			function pressedJumpFrame(): UpdateActionOptions {
+				return {
+					action: "jump",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: true,
+				};
+			}
+
+			it("should let a second capture succeed and shadow the first", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				expect(second.pressed()).toBeTrue();
+				expect(first.pressed()).toBeFalse();
+			});
+
+			it("should let shadowed tokens read trigger and edge reads as inert", () => {
+				expect.assertions(5);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.pressed()).toBeFalse();
+				expect(first.triggered()).toBeFalse();
+				expect(first.justPressed()).toBeFalse();
+				expect(first.ongoing()).toBeFalse();
+				expect(first.justReleased()).toBeFalse();
+			});
+
+			it("should let shadowed tokens read values and durations as inert", () => {
+				expect.assertions(4);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				state.capture("jump");
+				internal.updateAction({
+					action: "jump",
+					deltaTime: 0.016,
+					triggerState: "ongoing",
+					value: true,
+				});
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.getState()).toBeFalse();
+				expect(first.currentDuration()).toBe(0);
+				expect(first.previousDuration()).toBe(0);
+				expect(first.canceled()).toBeFalse();
+			});
+
+			it("should let only the top holder read real state", () => {
+				expect.assertions(4);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				const third = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				expect(third.pressed()).toBeTrue();
+				expect(second.pressed()).toBeFalse();
+				expect(first.pressed()).toBeFalse();
+				expect(state.pressed("jump")).toBeFalse();
+			});
+
+			it("should restore the next holder in the same frame when the top releases", () => {
+				expect.assertions(4);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.pressed()).toBeFalse();
+
+				second.release();
+
+				// No endFrame or update between release and read: same frame.
+				expect(first.pressed()).toBeTrue();
+				expect(first.getState()).toBeTrue();
+
+				// The action stays owned throughout — no unowned frame.
+				expect(state.pressed("jump")).toBeFalse();
+			});
+
+			it("should keep the restored holder across the next frame boundary", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+				second.release();
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first.pressed()).toBeTrue();
+				expect(state.pressed("jump")).toBeFalse();
+			});
+
+			it("should remove an out-of-order release silently, leaving the top holder unaffected", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				first.release();
+
+				expect(second.pressed()).toBeTrue();
+				expect(state.pressed("jump")).toBeFalse();
+
+				second.release();
+
+				expect(state.pressed("jump")).toBeTrue();
+			});
+
+			it("should treat double release of the top as a no-op that spares the holder beneath", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				second.release();
+				second.release();
+
+				expect(first.pressed()).toBeTrue();
+				expect(state.pressed("jump")).toBeFalse();
+
+				first.release();
+
+				expect(state.pressed("jump")).toBeTrue();
+			});
+
+			it("should return an independent token from each capture call", () => {
+				expect.assertions(3);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				const first = state.capture("jump");
+				const second = state.capture("jump");
+				internal.updateAction(pressedJumpFrame());
+
+				expect(first).never.toBe(second);
+
+				// Each token holds its own stack slot; both must release before
+				// the action is restored.
+				first.release();
+
+				expect(state.pressed("jump")).toBeFalse();
+
+				second.release();
+
+				expect(state.pressed("jump")).toBeTrue();
+			});
 		});
 	});
 
