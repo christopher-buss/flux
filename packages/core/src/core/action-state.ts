@@ -48,10 +48,10 @@ interface ReadOptions<V> {
 	readonly action: string;
 	/** The action entry map. */
 	readonly entries: Map<string, ActionEntry>;
-	/** Computes the unclaimed result from the entry. */
+	/** Computes the unsuppressed result from the entry. */
 	readonly pick: (entry: ActionEntry) => V;
-	/** The value the read reports while the action is claimed. */
-	readonly whenClaimed: V;
+	/** Computes the result the read reports while suppressed. */
+	readonly whenSuppressed: (entry: ActionEntry) => V;
 }
 
 /**
@@ -135,10 +135,42 @@ function initializeEntries(actions: ActionMap): Map<string, ActionEntry> {
 	return entries;
 }
 
+function suppressedFalse(): boolean {
+	return false;
+}
+
+function suppressedZero(): number {
+	return 0;
+}
+
 function getEntry(entries: Map<string, ActionEntry>, action: string): ActionEntry {
 	const entry = entries.get(action);
 	assert(entry, `unknown action: ${action}`);
 	return entry;
+}
+
+/**
+ * Performs a processed read, suppressed while the action is claimed.
+ *
+ * The single gate every processed read funnels through; `raw*` reads bypass
+ * it.
+ * @param options - The action to read and how to compute both outcomes.
+ * @returns The suppressed result if the action is claimed, otherwise the
+ * picked value.
+ * @template V - The value type the read reports.
+ */
+function read<V>(options: ReadOptions<V>): V {
+	const entry = getEntry(options.entries, options.action);
+
+	return entry.claimed ? options.whenSuppressed(entry) : options.pick(entry);
+}
+
+function getValue(entry: ActionEntry): ActionValueType {
+	return entry.value;
+}
+
+function getNeutralValue(entry: ActionEntry): ActionValueType {
+	return entry.neutralValue;
 }
 
 /**
@@ -148,9 +180,7 @@ function getEntry(entries: Map<string, ActionEntry>, action: string): ActionEntr
  * @returns The neutral value if claimed, otherwise the current value.
  */
 function readValue(entries: Map<string, ActionEntry>, action: string): ActionValueType {
-	const entry = getEntry(entries, action);
-
-	return entry.claimed ? entry.neutralValue : entry.value;
+	return read({ action, entries, pick: getValue, whenSuppressed: getNeutralValue });
 }
 
 function isTriggered(entry: ActionEntry): boolean {
@@ -224,18 +254,6 @@ function wasRawJustPressed(entries: Map<string, ActionEntry>, action: string): b
 	return entry.value === true && entry.previousValue === false;
 }
 
-/**
- * Performs a processed read, suppressed while the action is claimed.
- * @template V - The value type the read reports.
- * @param options - The action to read and how to compute both outcomes.
- * @returns `whenClaimed` if the action is claimed, otherwise the picked value.
- */
-function read<V>(options: ReadOptions<V>): V {
-	const entry = getEntry(options.entries, options.action);
-
-	return entry.claimed ? options.whenClaimed : options.pick(entry);
-}
-
 // eslint-disable-next-line max-lines-per-function -- thin delegation methods
 function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>): ActionState<T> {
 	return {
@@ -246,19 +264,34 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 			return readValue(entries, action) as Vector3;
 		},
 		axisBecameActive(action) {
-			return read({ action, entries, pick: didAxisBecomeActive, whenClaimed: false });
+			return read({
+				action,
+				entries,
+				pick: didAxisBecomeActive,
+				whenSuppressed: suppressedFalse,
+			});
 		},
 		axisBecameInactive(action) {
-			return read({ action, entries, pick: didAxisBecomeInactive, whenClaimed: false });
+			return read({
+				action,
+				entries,
+				pick: didAxisBecomeInactive,
+				whenSuppressed: suppressedFalse,
+			});
 		},
 		canceled(action) {
-			return read({ action, entries, pick: isCanceled, whenClaimed: false });
+			return read({ action, entries, pick: isCanceled, whenSuppressed: suppressedFalse });
 		},
 		claim(action) {
 			return claimAction(entries, action);
 		},
 		currentDuration(action) {
-			return read({ action, entries, pick: getCurrentDuration, whenClaimed: 0 });
+			return read({
+				action,
+				entries,
+				pick: getCurrentDuration,
+				whenSuppressed: suppressedZero,
+			});
 		},
 		direction2d(action) {
 			return readValue(entries, action) as Vector2;
@@ -276,22 +309,32 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 			return isActionEnabled(entries, action);
 		},
 		justPressed(action) {
-			return read({ action, entries, pick: wasJustPressed, whenClaimed: false });
+			return read({ action, entries, pick: wasJustPressed, whenSuppressed: suppressedFalse });
 		},
 		justReleased(action) {
-			return read({ action, entries, pick: wasJustReleased, whenClaimed: false });
+			return read({
+				action,
+				entries,
+				pick: wasJustReleased,
+				whenSuppressed: suppressedFalse,
+			});
 		},
 		ongoing(action) {
-			return read({ action, entries, pick: isOngoing, whenClaimed: false });
+			return read({ action, entries, pick: isOngoing, whenSuppressed: suppressedFalse });
 		},
 		position2d(action) {
 			return readValue(entries, action) as Vector2;
 		},
 		pressed(action) {
-			return read({ action, entries, pick: isTriggered, whenClaimed: false });
+			return read({ action, entries, pick: isTriggered, whenSuppressed: suppressedFalse });
 		},
 		previousDuration(action) {
-			return read({ action, entries, pick: getPreviousDuration, whenClaimed: 0 });
+			return read({
+				action,
+				entries,
+				pick: getPreviousDuration,
+				whenSuppressed: suppressedZero,
+			});
 		},
 		rawJustPressed(action) {
 			return wasRawJustPressed(entries, action);
@@ -300,7 +343,7 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 			return isRawPressed(entries, action);
 		},
 		triggered(action) {
-			return read({ action, entries, pick: isTriggered, whenClaimed: false });
+			return read({ action, entries, pick: isTriggered, whenSuppressed: suppressedFalse });
 		},
 	} as const satisfies ActionState<T>;
 }
