@@ -35,18 +35,27 @@ export interface ActionEntry {
 }
 
 /**
- * A processed read of one action, gated on claims and captures.
+ * A processed read against an already-resolved entry.
  * @template V - The value type the read reports.
  */
-export interface ReadOptions<V> {
+export interface ReadEntryOptions<V> {
+	/** Computes the unsuppressed result from the entry. */
+	readonly pick: (entry: ActionEntry) => V;
+	/** The identity reading; omitted for plain {@link ActionState} reads. */
+	readonly viewer?: CaptureViewer | undefined;
+	/** Computes the result the read reports while suppressed. */
+	readonly whenSuppressed: (entry: ActionEntry) => V;
+}
+
+/**
+ * A processed read of one action by name, gated on claims and captures.
+ * @template V - The value type the read reports.
+ */
+export interface ReadOptions<V> extends ReadEntryOptions<V> {
 	/** The action name. */
 	readonly action: string;
 	/** The action entry map. */
 	readonly entries: Map<string, ActionEntry>;
-	/** Computes the unsuppressed result from the entry. */
-	readonly pick: (entry: ActionEntry) => V;
-	/** Computes the result the read reports while suppressed. */
-	readonly whenSuppressed: (entry: ActionEntry) => V;
 }
 
 /**
@@ -85,40 +94,32 @@ export function getEntry(entries: Map<string, ActionEntry>, action: string): Act
 /**
  * Performs a processed read against an already-resolved entry.
  *
- * The entry-level form of {@link read}, for callers that hold the entry —
- * capture tokens resolve theirs once at acquisition.
+ * The single gate every processed read funnels through — {@link read}
+ * resolves the entry by name first, and capture tokens resolve theirs once
+ * at acquisition. `raw*` reads bypass it.
  * @param entry - The action entry to read.
- * @param viewer - The identity reading; undefined for plain state reads.
- * @param pick - Computes the unsuppressed result from the entry.
- * @param whenSuppressed - Computes the result the read reports while
- * suppressed.
+ * @param options - The viewer and how to compute both outcomes.
  * @returns The suppressed result if the read is suppressed for the viewer,
  * otherwise the picked value.
  * @template V - The value type the read reports.
  */
-export function readEntry<V>(
-	entry: ActionEntry,
-	viewer: CaptureViewer | undefined,
-	pick: (entry: ActionEntry) => V,
-	whenSuppressed: (entry: ActionEntry) => V,
-): V {
-	return isSuppressedFor(entry, viewer) ? whenSuppressed(entry) : pick(entry);
+export function readEntry<V>(entry: ActionEntry, options: ReadEntryOptions<V>): V {
+	return isSuppressedFor(entry, options.viewer)
+		? options.whenSuppressed(entry)
+		: options.pick(entry);
 }
 
 /**
  * Performs a processed read by action name, with no viewer identity.
  *
- * Resolves the entry and delegates to {@link readEntry}, the single gate
- * every processed read funnels through; `raw*` reads bypass it.
+ * Resolves the entry and delegates to {@link readEntry}.
  * @param options - The action to read and how to compute both outcomes.
  * @returns The suppressed result if the action is claimed or captured,
  * otherwise the picked value.
  * @template V - The value type the read reports.
  */
 export function read<V>(options: ReadOptions<V>): V {
-	const entry = getEntry(options.entries, options.action);
-
-	return readEntry(entry, undefined, options.pick, options.whenSuppressed);
+	return readEntry(getEntry(options.entries, options.action), options);
 }
 
 /**
@@ -129,7 +130,7 @@ export function read<V>(options: ReadOptions<V>): V {
  * @returns The neutral value if suppressed, otherwise the current value.
  */
 export function readEntryValue(entry: ActionEntry, viewer?: CaptureViewer): ActionValueType {
-	return readEntry(entry, viewer, getValue, getNeutralValue);
+	return readEntry(entry, { pick: getValue, viewer, whenSuppressed: getNeutralValue });
 }
 
 /**

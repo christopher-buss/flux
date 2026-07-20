@@ -1,7 +1,8 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
 import type { ActionMap } from "../types/actions";
-import { createActionState, getMagnitude } from "./action-state";
+import { getMagnitude } from "./action-entry";
+import { createActionState } from "./action-state";
 
 const TEST_ACTIONS = {
 	jump: { type: "Bool" as const },

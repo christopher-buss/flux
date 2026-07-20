@@ -79,11 +79,11 @@ export function createCaptureToken(
 	const viewer: CaptureViewer = {};
 
 	function flagRead(pick: (entry: ActionEntry) => boolean): boolean {
-		return readEntry(entry, viewer, pick, suppressedFalse);
+		return readEntry(entry, { pick, viewer, whenSuppressed: suppressedFalse });
 	}
 
 	function durationRead(pick: (entry: ActionEntry) => number): number {
-		return readEntry(entry, viewer, pick, suppressedZero);
+		return readEntry(entry, { pick, viewer, whenSuppressed: suppressedZero });
 	}
 
 	entry.captures.push(viewer);

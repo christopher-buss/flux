@@ -21,9 +21,6 @@ import {
 } from "./action-entry";
 import { createCaptureToken } from "./capture";
 
-export { getMagnitude } from "./action-entry";
-export type { ActionValueType } from "./action-entry";
-
 /** Options for updating an action's state in the pipeline. */
 export interface UpdateActionOptions {
 	/** The action name. */
@@ -160,6 +157,9 @@ function buildPublicState<T extends ActionMap>(entries: Map<string, ActionEntry>
 			return read({ action, entries, pick: isCanceled, whenSuppressed: suppressedFalse });
 		},
 		capture<A extends keyof T & string>(action: A) {
+			// The runtime token carries the full read surface; the public type
+			// narrows it to the action's kind, which only resolves once `A` is
+			// a concrete action name.
 			return createCaptureToken(entries, action) as unknown as CaptureToken<T, A>;
 		},
 		claim(action) {
