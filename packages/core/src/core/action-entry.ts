@@ -22,11 +22,12 @@ export interface CaptureViewer {
 /** Per-action mutable state driven by the pipeline and read by consumers. */
 export interface ActionEntry {
 	/**
-	 * How far the pending boundary cancel has got towards its reader. Drives
-	 * expiry in {@link expireBoundaryCancel}; meaningless while
-	 * {@link ActionEntry.canceledFor} is undefined.
+	 * Whether the pending boundary cancel has had its one exposure — either
+	 * read by the displaced viewer or carried across one frame reset. The next
+	 * reset drops it. Meaningless while {@link ActionEntry.canceledFor} is
+	 * undefined.
 	 */
-	canceledDelivery: CancelDelivery;
+	canceledConsumed: boolean;
 	/**
 	 * The viewer whose in-flight view a capture boundary force-dropped;
 	 * undefined outside a boundary frame. The gameplay (viewer-less) reader is
@@ -80,18 +81,6 @@ export interface ReadOptions<V> extends ReadEntryOptions<V> {
 	/** The action entry map. */
 	readonly entries: Map<string, ActionEntry>;
 }
-
-/**
- * How far a pending boundary cancel has got towards the displaced reader.
- *
- * A boundary can be recorded at any point relative to `core.update`, because
- * a capture is acquired from consumer code and `endFrame` runs first inside
- * the update. Expiring purely on the frame reset would therefore lose every
- * cancel recorded before the next update — so the slot expires on delivery
- * instead, and only carries across one reset so a stale cancel cannot
- * surface frames later.
- */
-type CancelDelivery = "carried" | "delivered" | "pending";
 
 /**
  * The holder identity of a draining capture — a capture held by nobody.
@@ -287,8 +276,11 @@ export function readEntryCanceled(entry: ActionEntry, viewer?: CaptureViewer): b
 		return false;
 	}
 
+	// Only the displaced viewer's own read consumes the slot. A bystander's
+	// read must leave it alone, or one consumer's read would mutate what
+	// another sees — the shape ADR 0001 rejects auto-consume to avoid.
 	if (entry.canceledFor === (viewer ?? GAMEPLAY_READER)) {
-		entry.canceledDelivery = "delivered";
+		entry.canceledConsumed = true;
 		return true;
 	}
 
@@ -301,13 +293,17 @@ export function readEntryCanceled(entry: ActionEntry, viewer?: CaptureViewer): b
 
 /**
  * Ages the pending boundary cancel at the frame reset, expiring it once it
- * has been seen.
+ * has had its one exposure.
  *
- * A delivered cancel is done, and so is one the claim ate — a claimed frame
- * consumes the cancel like any other processed read, so it must not resurface
- * next frame. Anything still unseen is carried across exactly one reset, which
- * is what makes the signal survive a boundary recorded before `core.update`
- * without ever showing up twice.
+ * A boundary can be recorded at any point relative to `core.update`, since a
+ * capture is acquired from consumer code and `endFrame` runs first inside the
+ * update. Expiring purely on the frame reset would therefore lose every cancel
+ * recorded before the next update, so an unseen cancel is carried across
+ * exactly one reset instead — enough for the read phase to see it, and bounded
+ * so a stale cancel cannot surface frames later.
+ *
+ * A cancel the claim ate counts as exposed: a claimed frame consumes it like
+ * any other processed read, so it must not resurface next frame.
  * @param entry - The action entry to age. Must still carry this frame's claim.
  */
 export function expireBoundaryCancel(entry: ActionEntry): void {
@@ -315,13 +311,13 @@ export function expireBoundaryCancel(entry: ActionEntry): void {
 		return;
 	}
 
-	if (entry.canceledDelivery === "pending" && !entry.claimed) {
-		entry.canceledDelivery = "carried";
+	if (!entry.canceledConsumed && !entry.claimed) {
+		entry.canceledConsumed = true;
 		return;
 	}
 
 	entry.canceledFor = undefined;
-	entry.canceledDelivery = "pending";
+	entry.canceledConsumed = false;
 }
 
 /**
@@ -471,7 +467,7 @@ function hasLiveInteraction(entry: ActionEntry): boolean {
  */
 function recordBoundaryCancel(entry: ActionEntry, displaced: CaptureViewer): void {
 	entry.canceledFor = displaced;
-	entry.canceledDelivery = "pending";
+	entry.canceledConsumed = false;
 }
 
 /**

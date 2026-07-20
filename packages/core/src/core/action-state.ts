@@ -57,7 +57,10 @@ export interface ActionStateOptions {
 
 /** Internal mutators for the action state, used by the core runtime. */
 export interface InternalActionState {
-	/** Shifts current values to previous and resets claimed flags. */
+	/**
+	 * Closes the frame: shifts current values to previous, resets claimed
+	 * flags, ages any pending boundary cancel, and settles a finished drain.
+	 */
 	endFrame(): void;
 	/** Sets whether an action is enabled. */
 	setEnabled(action: string, enabled: boolean): void;
@@ -105,7 +108,7 @@ function createEntry(config: ActionConfig): ActionEntry {
 	const defaultValue = defaultValueForType(config.type);
 
 	return {
-		canceledDelivery: "pending",
+		canceledConsumed: false,
 		canceledFor: undefined,
 		captures: [],
 		claimed: false,

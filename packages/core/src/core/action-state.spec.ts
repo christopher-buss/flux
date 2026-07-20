@@ -2008,6 +2008,29 @@ describe("createActionState", () => {
 				expect(state.pressed("jump")).toBeFalse();
 			});
 
+			it("should not let an unrelated viewer's read consume the displaced reader's cancel", () => {
+				expect.assertions(2);
+
+				const [state, internal] = createActionState(TEST_ACTIONS);
+				internal.updateAction(pressedJumpFrame());
+
+				// Gameplay is the displaced reader here; the acquiring token
+				// is not.
+				const token = state.capture("jump");
+
+				// The token reads the same action before gameplay gets its
+				// turn. Only the displaced reader's own read may consume the
+				// slot, or one consumer's read would mutate what another
+				// sees — the "debug overlay eats input" shape ADR 0001
+				// rejects.
+				expect(token.canceled()).toBeFalse();
+
+				internal.endFrame();
+				internal.updateAction(pressedJumpFrame());
+
+				expect(state.canceled("jump")).toBeTrue();
+			});
+
 			it("should drop an unobserved boundary rather than holding it indefinitely", () => {
 				expect.assertions(1);
 
