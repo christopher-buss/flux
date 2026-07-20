@@ -9,19 +9,12 @@ import type { ActiveContexts } from "./active-contexts";
 import { resolveContextOrder } from "./active-contexts";
 import type { InputInstanceData } from "./input-instances";
 import { processPipeline } from "./pipeline";
-import type { PlatformOverrides } from "./platform-overrides";
 import { resolveActionInstance } from "./resolve-action";
 
 /** Internal per-handle data used during update processing. */
 export interface CoreHandleData {
 	/** Currently active context names, oldest activation first. */
 	readonly activeContexts: ActiveContexts;
-	/**
-	 * Active binding overrides, keyed by action and then by platform. An
-	 * absent platform bucket means that platform tracks its code-defined
-	 * default; a present but empty bucket is a deliberate unbind.
-	 */
-	readonly bindingOverrides: Map<string, PlatformOverrides>;
 	/** Per-action trigger duration accumulators in seconds. */
 	readonly durations: Map<string, number>;
 	/** Roblox InputContext instance references. */

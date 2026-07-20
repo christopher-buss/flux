@@ -1,4 +1,4 @@
-import type { ActionMap } from "../types/actions";
+import type { ActionMap, AllActions } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionState } from "../types/state";
@@ -15,6 +15,12 @@ import type { CoreHandleData } from "./update-handle";
  * @template T - The action map type.
  */
 export interface HandleData<T extends ActionMap> extends CoreHandleData {
+	/**
+	 * Active binding overrides, keyed by action name and then by platform. An
+	 * absent platform bucket means that platform tracks its code-defined
+	 * default; a present but empty bucket is a deliberate unbind.
+	 */
+	readonly bindingOverrides: Map<AllActions<T>, PlatformOverrides>;
 	/** The typed action state exposed to consumers. */
 	readonly publicState: ActionState<T>;
 }
@@ -150,7 +156,7 @@ function buildHandleData<T extends ActionMap>(options: BuildHandleDataOptions<T>
 	const [publicState, internalState] = createActionState(actions, { debug: isDebug });
 	return {
 		activeContexts: createActiveContexts(contextNames),
-		bindingOverrides: new Map<string, PlatformOverrides>(),
+		bindingOverrides: new Map<AllActions<T>, PlatformOverrides>(),
 		durations: createDurations(actions),
 		instanceData,
 		internalState,

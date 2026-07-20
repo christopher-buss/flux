@@ -1,6 +1,6 @@
 import type { Writable } from "type-fest";
 
-import type { ActionMap } from "../types/actions";
+import type { ActionMap, AllActions } from "../types/actions";
 import type {
 	BindingLike,
 	BindingState,
@@ -26,12 +26,6 @@ import { getContextBindings } from "./resolve-bindings";
  * name an action this build no longer has — without asserting its type.
  */
 type SerializedBindings = Readonly<Record<string, PlatformBindings | undefined>>;
-
-/**
- * An action map read name-by-name, for checking whether a loaded key is still
- * a declared action.
- */
-type DeclaredActions = Readonly<Record<string, unknown>>;
 
 /**
  * The handle, contexts and action every rebind and reset operates on.
@@ -79,7 +73,7 @@ interface PlatformRebindOptions<T extends ActionMap> extends PlatformScopedOptio
  */
 interface RebindAllOptions<T extends ActionMap> {
 	/** Core action map used to filter unknown keys. */
-	readonly actions: DeclaredActions;
+	readonly actions: T;
 	/** The full binding state to apply. */
 	readonly bindings: SerializedBindings;
 	/** Core context config used to resolve originals. */
@@ -251,7 +245,7 @@ export function applyRebindAll<T extends ActionMap>(options: RebindAllOptions<T>
 	handleData.bindingOverrides.clear();
 	const handledActions = new Set<string>();
 	for (const [action, platformBindings] of pairs(bindings)) {
-		if (actions[action] === undefined) {
+		if (!isKnownAction(actions, action)) {
 			if (_G.__DEV__) {
 				warn(`[flux] dropping unknown action from loaded bindings: ${action}`);
 			}
@@ -337,8 +331,8 @@ export function applyResetAll<T extends ActionMap>(
  */
 export function serializeFullBindings<T extends ActionMap>(
 	handleData: HandleData<T>,
-): SerializedBindings {
-	const result: Writable<SerializedBindings> = {};
+): BindingState<T> {
+	const result: BindingState<T> = {};
 	for (const [actionName, overrides] of handleData.bindingOverrides) {
 		const entry: Writable<PlatformBindings> = {};
 		for (const platform of PLATFORM_ORDER) {
@@ -499,4 +493,21 @@ function restoreOriginalBindings<T extends ActionMap>(options: RestoreOptions<T>
 
 		rebuildFromOverrides({ action, contexts, handleData });
 	}
+}
+
+/**
+ * Narrows a loaded key to a declared action name.
+ *
+ * The override map is keyed by {@link AllActions}, so a payload key — a bare
+ * `string` a save may carry for an action this build no longer has — has to be
+ * proven declared before it can key the store. The runtime membership check is
+ * what the predicate rests on, so the load path drops unknown keys rather than
+ * asserting them into the typed store.
+ * @template T - The action map type.
+ * @param actions - The core action map to check against.
+ * @param action - The loaded key to classify.
+ * @returns `true` when the action map declares the key.
+ */
+function isKnownAction<T extends ActionMap>(actions: T, action: string): action is AllActions<T> {
+	return actions[action] !== undefined;
 }
