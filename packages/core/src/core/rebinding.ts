@@ -317,8 +317,10 @@ export function applyResetForPlatform<T extends ActionMap>(
  * platform's context defaults across the handle. Backs a settings screen's
  * "reset gamepad controls" without touching the other platforms.
  *
- * The action names are snapshotted first because resetting an action's last
- * bucket drops its entry from the very map being iterated.
+ * The actions holding a bucket for the platform are collected first, because
+ * resetting an action's last bucket drops its entry from the very map being
+ * iterated. Actions the platform never touched are skipped, so a player who
+ * rebound two keys does not pay a rebuild for every other action.
  * @template T - The action map type.
  * @param options - The platform, handle state and context config.
  */
@@ -327,8 +329,10 @@ export function applyResetAllForPlatform<T extends ActionMap>(
 ): void {
 	const { contexts, handleData, platform } = options;
 	const overridden = new Array<string>();
-	for (const [action] of handleData.bindingOverrides) {
-		overridden.push(action);
+	for (const [action, overrides] of handleData.bindingOverrides) {
+		if (overrides.get(platform) !== undefined) {
+			overridden.push(action);
+		}
 	}
 
 	for (const action of overridden) {

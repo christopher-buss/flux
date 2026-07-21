@@ -490,6 +490,14 @@ const PATCHED_PLATFORM_CONTEXTS = {
 	},
 } satisfies Record<string, ContextConfig>;
 
+/** A `move` binding classifying to the gamepad platform. */
+const DpadMove = {
+	down: Enum.KeyCode.DPadDown,
+	left: Enum.KeyCode.DPadLeft,
+	right: Enum.KeyCode.DPadRight,
+	up: Enum.KeyCode.DPadUp,
+} as const;
+
 const TOUCH_BUTTON = new Instance("TextButton");
 
 /** Contexts whose `jump` action declares a touch binding alongside keys. */
@@ -705,14 +713,7 @@ describe("resetAllBindingsForPlatform", () => {
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
 		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
-		core.rebindForPlatform(handle, "move", "gamepad", [
-			{
-				down: Enum.KeyCode.DPadDown,
-				left: Enum.KeyCode.DPadLeft,
-				right: Enum.KeyCode.DPadRight,
-				up: Enum.KeyCode.DPadUp,
-			},
-		]);
+		core.rebindForPlatform(handle, "move", "gamepad", [DpadMove]);
 		core.resetAllBindingsForPlatform(handle, "gamepad");
 
 		expect(core.serializeBindings(handle).jump).toBeUndefined();
@@ -742,14 +743,7 @@ describe("resetAllBindingsForPlatform", () => {
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
 		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
-		core.rebindForPlatform(handle, "move", "gamepad", [
-			{
-				down: Enum.KeyCode.DPadDown,
-				left: Enum.KeyCode.DPadLeft,
-				right: Enum.KeyCode.DPadRight,
-				up: Enum.KeyCode.DPadUp,
-			},
-		]);
+		core.rebindForPlatform(handle, "move", "gamepad", [DpadMove]);
 		core.resetAllBindingsForPlatform(handle, "gamepad");
 
 		expect(getPlatformBucket(core.serializeBindings(handle), "jump", "keyboard")).toStrictEqual(
