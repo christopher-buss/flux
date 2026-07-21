@@ -31,6 +31,12 @@ export { processPipeline } from "./core/pipeline";
 export type { PipelineOptions, PipelineResult } from "./core/pipeline";
 export { deadZone, negate, scale } from "./modifiers";
 export type { Modifier, ModifierContext, ModifierValue } from "./modifiers";
+export {
+	getInputPlatform,
+	onInputPlatformChanged,
+	setInputPlatformOverride,
+} from "./platform/input-platform";
+export type { InputPlatformListener } from "./platform/source";
 export { blocker, doubleTap, explicit, hold, implicit, tap } from "./triggers";
 export type {
 	DoubleTapOptions,
