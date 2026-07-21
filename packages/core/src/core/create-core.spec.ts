@@ -1505,6 +1505,9 @@ describe("createCore", () => {
 
 			const spy = jest.spyOn(jest.globalEnv, "warn");
 			spy.mockImplementation(() => {});
+			afterThis(() => {
+				spy.mockRestore();
+			});
 
 			const parent = new Instance("Folder");
 			const core = createCore({
@@ -1523,7 +1526,6 @@ describe("createCore", () => {
 
 			const callCount = spy.mock.calls.size();
 			const firstArgument = spy.mock.calls[0]![0];
-			spy.mockRestore();
 
 			assert(callCount > 0, "expected warn to be called");
 
