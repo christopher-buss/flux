@@ -71,14 +71,7 @@ interface PlatformRebindOptions<T extends ActionMap> extends PlatformScopedOptio
  * Arguments for a reset scoped to a single platform across every action.
  * @template T - The action map type.
  */
-interface PlatformResetAllOptions<T extends ActionMap> {
-	/** Core context config used to resolve defaults. */
-	readonly contexts: Record<string, ContextConfig>;
-	/** Handle state to mutate. */
-	readonly handleData: HandleData<T>;
-	/** The platform whose bucket the reset targets. */
-	readonly platform: RebindPlatform;
-}
+type PlatformResetAllOptions<T extends ActionMap> = Omit<PlatformScopedOptions<T>, "action">;
 
 /**
  * Arguments for a full replace of the override map.
@@ -323,6 +316,9 @@ export function applyResetForPlatform<T extends ActionMap>(
  * Removes one platform's override bucket from every action, restoring that
  * platform's context defaults across the handle. Backs a settings screen's
  * "reset gamepad controls" without touching the other platforms.
+ *
+ * The action names are snapshotted first because resetting an action's last
+ * bucket drops its entry from the very map being iterated.
  * @template T - The action map type.
  * @param options - The platform, handle state and context config.
  */
@@ -330,7 +326,12 @@ export function applyResetAllForPlatform<T extends ActionMap>(
 	options: PlatformResetAllOptions<T>,
 ): void {
 	const { contexts, handleData, platform } = options;
+	const overridden = new Array<string>();
 	for (const [action] of handleData.bindingOverrides) {
+		overridden.push(action);
+	}
+
+	for (const action of overridden) {
 		applyResetForPlatform({ action, contexts, handleData, platform });
 	}
 }

@@ -735,6 +735,28 @@ describe("resetAllBindingsForPlatform", () => {
 		]);
 	});
 
+	it("should leave an action that only overrides another platform alone", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
+		core.rebindForPlatform(handle, "move", "gamepad", [
+			{
+				down: Enum.KeyCode.DPadDown,
+				left: Enum.KeyCode.DPadLeft,
+				right: Enum.KeyCode.DPadRight,
+				up: Enum.KeyCode.DPadUp,
+			},
+		]);
+		core.resetAllBindingsForPlatform(handle, "gamepad");
+
+		expect(getPlatformBucket(core.serializeBindings(handle), "jump", "keyboard")).toStrictEqual(
+			[Enum.KeyCode.F],
+		);
+	});
+
 	it("should throw for subscribed handles", () => {
 		expect.assertions(1);
 
