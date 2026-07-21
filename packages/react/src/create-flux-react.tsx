@@ -1,4 +1,4 @@
-import type { ActionMap } from "@rbxts/flux";
+import type { ActionMap, InputPlatform } from "@rbxts/flux";
 import type React from "@rbxts/react";
 import { createContext } from "@rbxts/react";
 
@@ -16,6 +16,7 @@ import type { FluxUseFluxCore } from "./hooks/use-flux-core";
 import { createUseFluxCore } from "./hooks/use-flux-core";
 import type { FluxUseActiveContext, FluxUseInputContext } from "./hooks/use-input-context";
 import { createUseActiveContext, createUseInputContext } from "./hooks/use-input-context";
+import { useInputPlatform } from "./hooks/use-input-platform";
 import { createUpdateSignal } from "./update-signal";
 
 /**
@@ -94,6 +95,15 @@ export interface FluxReact<T extends ActionMap, Contexts extends string = string
 	 * fields are memoized per context name.
 	 */
 	readonly useInputContext: FluxUseInputContext<T, Contexts>;
+
+	/**
+	 * Hook that subscribes to the platform the player is currently using.
+	 * Re-renders only when it changes.
+	 *
+	 * Pass it to `useBindings` to read the bindings for whatever the player is
+	 * holding right now.
+	 */
+	readonly useInputPlatform: () => InputPlatform;
 }
 
 /**
@@ -144,5 +154,6 @@ export function createFluxReact<T extends ActionMap, Contexts extends string = s
 		useCaptureAction: createUseCaptureAction(useFluxContext),
 		useFluxCore: createUseFluxCore<T, Contexts>(useFluxContext),
 		useInputContext: createUseInputContext<T, Contexts>(useFluxContext),
+		useInputPlatform,
 	};
 }

@@ -50,6 +50,19 @@ _context_, which groups bindings by situation rather than by hardware; an action
 can be bound on several platforms in the same context. _Avoid_: device, scheme,
 input type, input method.
 
+**Current platform**: The platform the player is using _right now_, read from
+`UserInputService.PreferredInput`. A property of the player's device, where
+_platform_ is a property of a binding — a glyph UI asks for the current platform
+and then asks for that platform's bindings. Client-only: off the client there is
+no device to answer for. _Avoid_: input mode, input method, active platform,
+device state.
+
+**Platform override**: A forced current platform that outranks the device for
+every reader — the Studio force-a-platform toggle, and the seam tests read
+through. Deliberately global rather than per-consumer: an override only half the
+readers honour is worse than none. _Avoid_: platform mock, forced input, debug
+platform.
+
 **Unbound**: An action a player deliberately cleared, per platform — distinct
 from one that merely has no override and so uses its code-defined default, and
 from one a context never declared. All three read back differently: unbound

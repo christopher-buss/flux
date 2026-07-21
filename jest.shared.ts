@@ -26,6 +26,7 @@ export default defineConfig({
 			tsconfig: "tsconfig.typetest.json",
 		},
 	},
+	timeout: 60000,
 	workspace: {
 		outputFile: true,
 	},

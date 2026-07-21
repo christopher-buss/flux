@@ -3,8 +3,9 @@ import { defineContexts } from "@flux/core";
 export const contexts = defineContexts({
 	gameplay: {
 		bindings: {
+			cycleOverride: [Enum.KeyCode.P, Enum.KeyCode.ButtonY],
 			fire: [Enum.KeyCode.MouseRightButton],
-			jump: [Enum.KeyCode.Space],
+			jump: [Enum.KeyCode.Space, Enum.KeyCode.ButtonA],
 			move: [
 				{
 					down: Enum.KeyCode.S,

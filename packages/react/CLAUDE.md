@@ -2,7 +2,7 @@
 
 `@rbxts/flux-react` — thin React wrapper over `@rbxts/flux`. Exports
 `createFluxReact<Actions, Contexts>()` returning
-`{ flush, FluxProvider, useAction, useActiveContext, useBindings, useCapture, useCaptureAction, useFluxCore, useInputContext }`.
+`{ flush, FluxProvider, useAction, useActiveContext, useBindings, useCapture, useCaptureAction, useFluxCore, useInputContext, useInputPlatform }`.
 Core is injected at render time via
 `<FluxProvider core={core} handle={handle}>`, so the factory can live in a
 shared module that never touches a world or core at import time.
@@ -15,7 +15,11 @@ shared module that never touches a world or core at import time.
 - `update-signal.ts` — subscribe/fire plumbing the wrapper drives.
 - `hooks/` — one hook per file: `use-action`, `use-bindings`, `use-capture`
   (exports `useCapture` + `useCaptureAction`), `use-flux-core`,
-  `use-input-context` (exports `useActiveContext` + `useInputContext`).
+  `use-input-context` (exports `useActiveContext` + `useInputContext`),
+  `use-input-platform`. `useInputPlatform` is the odd one out: it reads core's
+  module-level platform signal, so it takes no `FluxContextValue`, is a plain
+  hook rather than a `createUseX` factory, and is exported from the package
+  index as well as hanging off `createFluxReact()`.
 
 ## Testing
 

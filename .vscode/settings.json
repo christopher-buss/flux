@@ -1,5 +1,5 @@
 {
-	"typescript.tsdk": "node_modules/typescript/lib",
+	"js/ts.tsdk.path": "node_modules/typescript/lib",
 	"files.eol": "\n",
 	"eslint.run": "onType",
 	"eslint.format.enable": true,
@@ -37,7 +37,6 @@
 		"source.organizeImports": "never"
 	},
 	// npm
-	"npm.exclude": "**/rojo-sync/**",
 	"npm.packageManager": "pnpm",
 	// Mise Tools settings
 	"mise.configureExtensionsUseSymLinks": true,

@@ -53,6 +53,9 @@
 		"typecheck": "tsgo --noEmit",
 		"typecheck:types": "tsgo --project tsconfig.typetest.json --noEmit"
 	},
+	"dependencies": {
+		"@rbxts/services": "catalog:prod"
+	},
 	"devDependencies": {
 		"@flux/test-utils": "workspace:*",
 		"@isentinel/jest-roblox": "catalog:test",
@@ -63,7 +66,6 @@
 		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",
 		"@rbxts/jest-utils": "catalog:test",
-		"@rbxts/react-roblox-fire": "catalog:test",
 		"@rbxts/regexp": "catalog:test",
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
