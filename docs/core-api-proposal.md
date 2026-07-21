@@ -343,6 +343,10 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 	removeContext(handle: InputHandle, context: string): void;
 
 	resetAllBindings(handle: InputHandle): void;
+	resetAllBindingsForPlatform(
+		handle: InputHandle,
+		platform: RebindPlatform,
+	): void;
 	resetBindings(handle: InputHandle, action: AllActions<TActions>): void;
 	resetBindingsForPlatform(
 		handle: InputHandle,

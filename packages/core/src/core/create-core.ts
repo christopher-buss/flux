@@ -36,6 +36,7 @@ import {
 	applyRebindForPlatform,
 	applyRebindOne,
 	applyResetAll,
+	applyResetAllForPlatform,
 	applyResetForPlatform,
 	applyResetOne,
 	ownedHandleData,
@@ -245,6 +246,10 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		},
 		resetAllBindings(handle: InputHandle): void {
 			applyResetAll(ownedHandleData(handles, handle), contexts);
+		},
+		resetAllBindingsForPlatform(handle: InputHandle, platform: RebindPlatform): void {
+			const handleData = ownedHandleData(handles, handle);
+			applyResetAllForPlatform({ contexts, handleData, platform });
 		},
 		resetBindings(handle: InputHandle, action: keyof T & string): void {
 			applyResetOne({ action, contexts, handleData: ownedHandleData(handles, handle) });

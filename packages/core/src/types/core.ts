@@ -306,6 +306,18 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	resetAllBindings(handle: InputHandle): void;
 
 	/**
+	 * Resets one platform's bindings for every action to that platform's
+	 * defaults, preserving the other platforms' overrides.
+	 * @param handle - The input consumer handle.
+	 * @param platform - The platform to restore to its defaults.
+	 * @throws If called on a subscribed handle.
+	 * @example
+	 * core.resetAllBindingsForPlatform(handle, "gamepad");
+	 * // every keyboard rebind survives untouched
+	 */
+	resetAllBindingsForPlatform(handle: InputHandle, platform: RebindPlatform): void;
+
+	/**
 	 * Resets bindings for a single action to its default.
 	 * @param handle - The input consumer handle.
 	 * @param action - The action whose bindings to reset.

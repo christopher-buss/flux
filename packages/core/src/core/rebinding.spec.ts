@@ -697,6 +697,62 @@ describe("resetBindingsForPlatform", () => {
 	});
 });
 
+describe("resetAllBindingsForPlatform", () => {
+	it("should restore that platform's defaults across every action", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		core.rebindForPlatform(handle, "move", "gamepad", [
+			{
+				down: Enum.KeyCode.DPadDown,
+				left: Enum.KeyCode.DPadLeft,
+				right: Enum.KeyCode.DPadRight,
+				up: Enum.KeyCode.DPadUp,
+			},
+		]);
+		core.resetAllBindingsForPlatform(handle, "gamepad");
+
+		expect(core.serializeBindings(handle).jump).toBeUndefined();
+		expect(core.serializeBindings(handle).move).toBeUndefined();
+	});
+
+	it("should keep the other platform's overrides", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		core.resetAllBindingsForPlatform(handle, "gamepad");
+
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should throw for subscribed handles", () => {
+		expect.assertions(1);
+
+		const serverParent = new Instance("Folder");
+		const serverCore = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		serverCore.register(serverParent, "gameplay");
+
+		const clientCore = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const [clientHandle] = clientCore.subscribe(serverParent, "gameplay");
+
+		const reset = (): void => {
+			clientCore.resetAllBindingsForPlatform(clientHandle, "gamepad");
+		};
+
+		expect(reset).toThrow("subscribed handle");
+	});
+});
+
 describe("whole-action rebind and touch", () => {
 	it("should clear the touch bucket, since it replaces every platform", () => {
 		expect.assertions(2);

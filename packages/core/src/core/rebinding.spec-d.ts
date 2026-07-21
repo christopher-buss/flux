@@ -131,6 +131,19 @@ describe("resetBindingsForPlatform", () => {
 	});
 });
 
+describe("resetAllBindingsForPlatform", () => {
+	it("should accept a writable platform", () => {
+		const handle = {} as InputHandle;
+		expectTypeOf<typeof core.resetAllBindingsForPlatform>().toBeCallableWith(handle, "gamepad");
+	});
+
+	it("should reject the touch platform", () => {
+		const handle = {} as InputHandle;
+		// @ts-expect-error touch cannot be reset per platform
+		core.resetAllBindingsForPlatform(handle, "touch");
+	});
+});
+
 describe("getBindingOrigin", () => {
 	it("should return a BindingOrigin", () => {
 		const handle = {} as InputHandle;
