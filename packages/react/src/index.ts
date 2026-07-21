@@ -15,3 +15,4 @@ export type {
 	FluxUseActiveContext,
 	FluxUseInputContext,
 } from "./hooks/use-input-context";
+export { useInputPlatform } from "./hooks/use-input-platform";

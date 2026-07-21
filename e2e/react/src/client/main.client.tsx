@@ -7,12 +7,22 @@ import { Players, RunService } from "@rbxts/services";
 import { actions } from "shared/actions";
 import { contexts } from "shared/contexts";
 
+import { createPlatformOverrideCycle, mountPlatformReadout } from "./platform-readout";
+
 const player = Players.LocalPlayer;
 const core = createCore({ actions, contexts });
 const [handle] = core.subscribe(player, "gameplay");
 
-const { flush, FluxProvider, useAction, useActiveContext, useFluxCore, useInputContext } =
-	createFluxReact<typeof actions, keyof typeof contexts>();
+const {
+	flush,
+	FluxProvider,
+	useAction,
+	useActiveContext,
+	useBindings,
+	useFluxCore,
+	useInputContext,
+	useInputPlatform,
+} = createFluxReact<typeof actions, keyof typeof contexts>();
 
 interface StatusRowProps {
 	readonly label: string;
@@ -118,6 +128,38 @@ function MenuContextPanel(): React.ReactNode {
 	);
 }
 
+function PlatformPanel(): React.ReactNode {
+	const platform = useInputPlatform();
+	const jumpBindings = useBindings("jump", platform);
+
+	return (
+		<frame
+			BackgroundColor3={new Color3(0.05, 0.05, 0.05)}
+			BackgroundTransparency={0.2}
+			BorderSizePixel={0}
+			Size={new UDim2(1, 0, 0, 66)}
+		>
+			<uicorner CornerRadius={new UDim(0, 6)} />
+			<uipadding PaddingLeft={new UDim(0, 8)} PaddingTop={new UDim(0, 6)} />
+			<uilistlayout Padding={new UDim(0, 2)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<textlabel
+				BackgroundTransparency={1}
+				FontFace={Font.fromEnum(Enum.Font.GothamBold)}
+				Size={new UDim2(1, 0, 0, 18)}
+				Text="[useInputPlatform()]"
+				TextColor3={new Color3(0.9, 0.7, 0.4)}
+				TextSize={13}
+				TextXAlignment={Enum.TextXAlignment.Left}
+			/>
+			<StatusRow label="platform" value={platform} />
+			<StatusRow
+				label="jump bindings"
+				value={jumpBindings.map((binding) => tostring(binding)).join(", ")}
+			/>
+		</frame>
+	);
+}
+
 function App(): React.ReactNode {
 	return (
 		<screengui ResetOnSpawn={false}>
@@ -126,7 +168,7 @@ function App(): React.ReactNode {
 				BackgroundTransparency={0.3}
 				BorderSizePixel={0}
 				Position={new UDim2(0, 10, 0, 10)}
-				Size={new UDim2(0, 300, 0, 270)}
+				Size={new UDim2(0, 300, 0, 345)}
 			>
 				<uicorner CornerRadius={new UDim(0, 8)} />
 				<uipadding PaddingLeft={new UDim(0, 10)} PaddingTop={new UDim(0, 10)} />
@@ -146,13 +188,16 @@ function App(): React.ReactNode {
 				<MenuToggle />
 				<ConfirmIndicator />
 				<MenuContextPanel />
+				<PlatformPanel />
 			</frame>
 		</screengui>
 	);
 }
 
-// eslint-disable-next-line ts/no-non-null-assertion -- Exists
-const root = ReactRoblox.createRoot(player.FindFirstChildOfClass("PlayerGui")!);
+const playerGui = player.FindFirstChildOfClass("PlayerGui");
+assert(playerGui, "PlayerGui not found on LocalPlayer");
+
+const root = ReactRoblox.createRoot(playerGui);
 
 root.render(
 	<FluxProvider core={core} handle={handle}>
@@ -160,7 +205,19 @@ root.render(
 	</FluxProvider>,
 );
 
+mountPlatformReadout(playerGui);
+
+const state = core.getState(handle);
+const cyclePlatformOverride = createPlatformOverrideCycle();
+
 RunService.Heartbeat.Connect((deltaTime) => {
 	core.update(deltaTime);
+
+	// Read and cycled outside React, so the panel and the no-react readout are
+	// both downstream of a caller that never saw a component.
+	if (state.justPressed("cycleOverride")) {
+		cyclePlatformOverride();
+	}
+
 	flush();
 });
