@@ -15,7 +15,7 @@
 					"$className": "Folder",
 					"@rbxts": {
 						"$className": "Folder",
-						"$path": "../../rojo-sync/@rbxts",
+						"$path": "../../node_modules/@rbxts.project.json",
 						"flux": {
 							"$path": "node_modules/@rbxts/flux"
 						},
@@ -25,7 +25,7 @@
 					},
 					"@rbxts-js": {
 						"$className": "Folder",
-						"$path": "../../rojo-sync/@rbxts-js"
+						"$path": "../../node_modules/@rbxts-js.project.json"
 					}
 				}
 			},

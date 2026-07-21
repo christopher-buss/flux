@@ -22,7 +22,7 @@ mise = "mise trust"
 mise-install = "mise install"
 
 # ni and copy run concurrently (one block, multiple keys): disjoint file sets,
-# so no race on node_modules. `ni` triggers the postinstall rojo-sync.
+# so no race on node_modules. `ni` triggers the postinstall Rojo project generator.
 [[pre-start]]
 deps = "ni"
 copy = "wt step copy-ignored"

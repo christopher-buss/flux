@@ -1,0 +1,14 @@
+diff --git a/dist/createProjectProgram-DLhOd4qw.cjs b/dist/createProjectProgram-DLhOd4qw.cjs
+index 1aa898b112f81a3274fe2c7d7e0a7528132345e9..4c5df42b3794ff9782ab2b6b10b8e5ce5624f123 100644
+--- a/dist/createProjectProgram-DLhOd4qw.cjs
++++ b/dist/createProjectProgram-DLhOd4qw.cjs
+@@ -7769,7 +7769,8 @@ var TransformState = class {
+ 			const parent = typescript.default.ensureTrailingDirectorySeparator(path.default.dirname(fsPath));
+ 			if (fsPath === parent) break;
+ 			fsPath = parent;
+-			const symlink = reverseSymlinkMap.get(typescript.default.toPath(fsPath, this.program.getCurrentDirectory(), getCanonicalFileName))?.[0];
++			const symlinks = reverseSymlinkMap.get(typescript.default.toPath(fsPath, this.program.getCurrentDirectory(), getCanonicalFileName));
++			const symlink = symlinks?.find((candidate) => isPathDescendantOf(candidate, this.data.nodeModulesPath)) ?? symlinks?.[0];
+ 			if (symlink) return path.default.join(symlink, path.default.relative(fsPath, original));
+ 		}
+ 	}

@@ -21,11 +21,11 @@
 					},
 					"@rbxts": {
 						"$className": "Folder",
-						"$path": "../../rojo-sync/@rbxts"
+						"$path": "../../node_modules/@rbxts.project.json"
 					},
 					"@rbxts-js": {
 						"$className": "Folder",
-						"$path": "../../rojo-sync/@rbxts-js"
+						"$path": "../../node_modules/@rbxts-js.project.json"
 					}
 				}
 			},

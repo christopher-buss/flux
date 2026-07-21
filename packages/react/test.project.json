@@ -16,7 +16,7 @@
 						"$path": "node_modules/@flux"
 					},
 					"@rbxts": {
-						"$path": "../../rojo-sync/@rbxts",
+						"$path": "../../node_modules/@rbxts.project.json",
 						"flux": {
 							"$path": "../core/out"
 						},
@@ -25,7 +25,7 @@
 						}
 					},
 					"@rbxts-js": {
-						"$path": "../../rojo-sync/@rbxts-js"
+						"$path": "../../node_modules/@rbxts-js.project.json"
 					}
 				}
 			}

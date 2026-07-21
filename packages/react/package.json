@@ -69,7 +69,6 @@
 		"@rbxts/jest-utils": "catalog:test",
 		"@rbxts/react": "catalog:peer",
 		"@rbxts/react-roblox": "catalog:peer",
-		"@rbxts/react-roblox-fire": "catalog:test",
 		"@rbxts/regexp": "catalog:test",
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",

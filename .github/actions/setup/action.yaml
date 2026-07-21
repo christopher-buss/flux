@@ -24,6 +24,6 @@ runs:
       run: pnpm install --frozen-lockfile --ignore-scripts
       shell: bash
 
-    - name: Rojo Sync
-      run: pnpm rojo-sync
+    - name: Generate Rojo node_modules projects
+      run: node scripts/generate-rojo-node-modules.ts
       shell: bash

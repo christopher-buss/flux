@@ -20,7 +20,6 @@ sourcemap.json
 .turbo/
 /.claude/state
 
-rojo-sync/
 game-output.log
 jest-output.log
 .jest-roblox/
