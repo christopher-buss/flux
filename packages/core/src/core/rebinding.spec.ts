@@ -490,6 +490,14 @@ const PATCHED_PLATFORM_CONTEXTS = {
 	},
 } satisfies Record<string, ContextConfig>;
 
+/** A `move` binding classifying to the gamepad platform. */
+const DpadMove = {
+	down: Enum.KeyCode.DPadDown,
+	left: Enum.KeyCode.DPadLeft,
+	right: Enum.KeyCode.DPadRight,
+	up: Enum.KeyCode.DPadUp,
+} as const;
+
 const TOUCH_BUTTON = new Instance("TextButton");
 
 /** Contexts whose `jump` action declares a touch binding alongside keys. */
@@ -694,6 +702,70 @@ describe("resetBindingsForPlatform", () => {
 			Enum.KeyCode.Space,
 			Enum.KeyCode.ButtonA,
 		]);
+	});
+});
+
+describe("resetAllBindingsForPlatform", () => {
+	it("should restore that platform's defaults across every action", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		core.rebindForPlatform(handle, "move", "gamepad", [DpadMove]);
+		core.resetAllBindingsForPlatform(handle, "gamepad");
+
+		expect(core.serializeBindings(handle).jump).toBeUndefined();
+		expect(core.serializeBindings(handle).move).toBeUndefined();
+	});
+
+	it("should keep the other platform's overrides", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
+		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
+		core.resetAllBindingsForPlatform(handle, "gamepad");
+
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should leave an action that only overrides another platform alone", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
+		core.rebindForPlatform(handle, "move", "gamepad", [DpadMove]);
+		core.resetAllBindingsForPlatform(handle, "gamepad");
+
+		expect(getPlatformBucket(core.serializeBindings(handle), "jump", "keyboard")).toStrictEqual(
+			[Enum.KeyCode.F],
+		);
+	});
+
+	it("should throw for subscribed handles", () => {
+		expect.assertions(1);
+
+		const serverParent = new Instance("Folder");
+		const serverCore = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		serverCore.register(serverParent, "gameplay");
+
+		const clientCore = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const [clientHandle] = clientCore.subscribe(serverParent, "gameplay");
+
+		const reset = (): void => {
+			clientCore.resetAllBindingsForPlatform(clientHandle, "gamepad");
+		};
+
+		expect(reset).toThrow("subscribed handle");
 	});
 });
 
