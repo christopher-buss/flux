@@ -3,33 +3,42 @@ import { createInputBinding } from "./input-bindings";
 import type { InputInstanceData } from "./input-instances";
 
 /**
- * Destroys every child of an `InputAction`, recording what was destroyed.
+ * Replaces one context's `InputBinding` children for one action.
  *
- * The record is what lets {@link pruneInstances} drop the same instances from
- * the handle's flat tracking list, which holds them for teardown.
- * @param inputAction - The instance whose bindings to clear.
- * @param destroyed - Set collecting the destroyed children, mutated in place.
+ * The one-context primitive both rebuild paths are defined in terms of:
+ * {@link rebuildActionBindings} loops it across every registered context, and
+ * a replay into a freshly-activated context calls it once, so activating a
+ * context does not destroy and recreate the instances of every context already
+ * live.
+ *
+ * The destroy is unfiltered by design. A rebuild recomposes the action's full
+ * binding list from its platform buckets plus the defaults for the platforms
+ * with no bucket, so there is no platform predicate to get wrong — see
+ * `docs/adr/0004-per-platform-binding-overrides.md`.
+ * @param data - The handle's input instance data.
+ * @param contextName - The context whose bindings to rebuild.
+ * @param actionName - The action whose bindings to rebuild.
+ * @param bindings - The replacement bindings for that context.
+ * @throws If the context is not registered for the handle.
  */
-export function destroyChildrenInto(inputAction: InputAction, destroyed: Set<Instance>): void {
-	for (const child of inputAction.GetChildren()) {
-		destroyed.add(child);
-		child.Destroy();
+export function rebuildContextAction(
+	data: InputInstanceData,
+	contextName: string,
+	actionName: string,
+	bindings: ReadonlyArray<BindingLike>,
+): void {
+	const actionInstances = data.actionsByContext.get(contextName);
+	assert(actionInstances, `context not registered: ${contextName}`);
+	const inputAction = actionInstances.get(actionName);
+	if (inputAction === undefined) {
+		return;
 	}
-}
 
-/**
- * Drops every destroyed instance from the handle's flat tracking list.
- *
- * Iterates backwards so a removal does not shift an index yet to be visited.
- * @param instances - The handle's tracked instances, mutated in place.
- * @param destroyed - The instances already destroyed.
- */
-export function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): void {
-	for (let index = instances.size() - 1; index >= 0; index -= 1) {
-		const instance = instances[index];
-		if (instance !== undefined && destroyed.has(instance)) {
-			instances.remove(index);
-		}
+	const destroyed = new Set<Instance>();
+	destroyChildrenInto(inputAction, destroyed);
+	pruneInstances(data.instances, destroyed);
+	for (const bindingLike of bindings) {
+		createInputBinding(bindingLike, inputAction, data.instances);
 	}
 }
 
@@ -48,31 +57,42 @@ export function rebuildActionBindings(
 	actionName: string,
 	resolve: (contextName: string) => ReadonlyArray<BindingLike>,
 ): void {
-	const destroyed = destroyExistingBindings(data, actionName);
-	pruneInstances(data.instances, destroyed);
-
 	for (const [contextName, actionInstances] of data.actionsByContext) {
-		const inputAction = actionInstances.get(actionName);
-		if (inputAction === undefined) {
+		if (actionInstances.get(actionName) === undefined) {
 			continue;
 		}
 
-		for (const bindingLike of resolve(contextName)) {
-			createInputBinding(bindingLike, inputAction, data.instances);
-		}
+		rebuildContextAction(data, contextName, actionName, resolve(contextName));
 	}
 }
 
-function destroyExistingBindings(data: InputInstanceData, actionName: string): Set<Instance> {
-	const destroyed = new Set<Instance>();
-	for (const [, actionInstances] of data.actionsByContext) {
-		const inputAction = actionInstances.get(actionName);
-		if (inputAction === undefined) {
-			continue;
-		}
-
-		destroyChildrenInto(inputAction, destroyed);
+/**
+ * Destroys every child of an `InputAction`, recording what was destroyed.
+ *
+ * The record is what lets {@link pruneInstances} drop the same instances from
+ * the handle's flat tracking list, which holds them for teardown.
+ * @param inputAction - The instance whose bindings to clear.
+ * @param destroyed - Set collecting the destroyed children, mutated in place.
+ */
+function destroyChildrenInto(inputAction: InputAction, destroyed: Set<Instance>): void {
+	for (const child of inputAction.GetChildren()) {
+		destroyed.add(child);
+		child.Destroy();
 	}
+}
 
-	return destroyed;
+/**
+ * Drops every destroyed instance from the handle's flat tracking list.
+ *
+ * Iterates backwards so a removal does not shift an index yet to be visited.
+ * @param instances - The handle's tracked instances, mutated in place.
+ * @param destroyed - The instances already destroyed.
+ */
+function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): void {
+	for (let index = instances.size() - 1; index >= 0; index -= 1) {
+		const instance = instances[index];
+		if (instance !== undefined && destroyed.has(instance)) {
+			instances.remove(index);
+		}
+	}
 }
