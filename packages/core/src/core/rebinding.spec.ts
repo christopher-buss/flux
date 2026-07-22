@@ -132,6 +132,19 @@ describe("rebind", () => {
 		expect(getKeyCodes(parent, "ui", "jump")).toContain(Enum.KeyCode.F);
 	});
 
+	it("should apply to a context adopted from instances already in the hierarchy", () => {
+		expect.assertions(1);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		core.register(parent, "ui");
+		const handle = core.register(parent, "gameplay");
+		core.rebind(handle, "jump", [Enum.KeyCode.F]);
+		core.addContext(handle, "ui");
+
+		expect(getKeyCodes(parent, "ui", "jump")).toContain(Enum.KeyCode.F);
+	});
+
 	it("should skip replay for actions absent from the newly added context", () => {
 		expect.assertions(1);
 

@@ -37,9 +37,11 @@ export interface AddContextOptions<T extends ActionMap> {
  * Activates a context for one handle, creating or adopting its instances.
  *
  * A context the handle has never carried gets instances first: an existing set
- * elsewhere in the hierarchy is adopted, and otherwise a fresh set is built and
- * any stored overrides replayed into it, so a rebind made before the context
- * was active still applies when it becomes active.
+ * elsewhere in the hierarchy is adopted, and otherwise a fresh set is built.
+ * Either way the handle's stored overrides are replayed into the context, so a
+ * rebind made before the context was active still applies when it becomes
+ * active. Replaying into adopted instances rewrites what the handle that
+ * created them also reads, which is what sharing a context already means.
  * @template T - The action map type.
  * @param options - The handle, context name, action map and context config.
  * @throws If the context name is unknown, the handle is not registered, the
@@ -71,8 +73,9 @@ export function addHandleContext<T extends ActionMap>({
 			adoptContextInstances(data.instanceData, context, existing, actions);
 		} else {
 			addContextInstances(context, contextConfig, actions, data.instanceData);
-			replayOverridesIntoContext({ contextName: context, contexts, handleData: data });
 		}
+
+		replayOverridesIntoContext({ contextName: context, contexts, handleData: data });
 	}
 
 	setContextEnabled(data.instanceData, context, true);
