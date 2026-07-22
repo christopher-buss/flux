@@ -38,7 +38,7 @@ function loadEngineSource(options: {
 
 			return connection;
 		},
-	} satisfies Partial<RBXScriptSignal>);
+	});
 
 	const userInputService = {
 		GetPropertyChangedSignal() {
