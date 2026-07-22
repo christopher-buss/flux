@@ -26,10 +26,10 @@ event, control.
 `pressed`, `justPressed`, `axis2d`, `triggered`, `canceled`, and so on. The read
 side of Flux. _Avoid_: input state, snapshot, result.
 
-**Raw input**: An action's value bypassing Flux's gating entirely — read before
-_trigger_ evaluation and ignoring _claims_ (`rawPressed`, `rawJustPressed`);
-modifiers still apply. The unarbitrated truth, distinct from the processed value
-most code reads. _Avoid_: live input, direct input, unprocessed input.
+**Raw input**: An action's value read before _trigger_ evaluation and ignoring
+_claims_ and _captures_ (`rawPressed`, `rawJustPressed`); modifiers still apply.
+The unarbitrated truth, distinct from the processed value most code reads.
+_Avoid_: live input, direct input, unprocessed input.
 
 ### Bindings & contexts
 
@@ -77,9 +77,12 @@ profile, mapping.
 **Priority**: Ordering of contexts — a higher number receives input first. UI
 contexts typically run high priority. _Avoid_: rank, weight, z-index.
 
-**Sink**: A context flag that, when set, stops lower-priority contexts from
-receiving the input it consumes. How a UI context blocks gameplay input
-underneath it. _Avoid_: block, swallow, capture, absorb.
+**Sink**: A context flag that, when set, drops every lower-priority context on
+the same handle out of the frame entirely — a curtain, not a filter. Actions
+declared only beneath a sink read inert, whether or not the sink context binds
+them, and unlike a _claim_ or _capture_, raw reads do not see through one. How a
+UI context blocks gameplay input underneath it. _Avoid_: block, swallow,
+capture, absorb.
 
 **Resolution**: Choosing which context supplies an action's value each frame
 when several declare it. An action may be declared in any number of contexts;
