@@ -11,8 +11,15 @@
 /** @deprecated Does not exist on Roblox - use `DateTime` or `os.time`. */
 type Date = never;
 
-/** @deprecated Does not exist on Roblox - use `string.match` or `@rbxts/regexp`. */
-type RegExp = never;
+/**
+ * An interface rather than a `never` alias: the TS checker itself requests the
+ * global `RegExp` type and errors (TS2316) unless it is a class or interface.
+ * The brand keeps it unmatchable, so it behaves like `never` in practice.
+ * @deprecated Does not exist on Roblox - use `string.match` or `@rbxts/regexp`.
+ */
+interface RegExp {
+	readonly __nonLuauRegExp: unique symbol;
+}
 
 /** @deprecated Does not exist on Roblox. */
 type WeakKey = object;
