@@ -1,3 +1,5 @@
+import { instantiateTriggers } from "../triggers/instantiate";
+import type { TriggerInstance } from "../triggers/types";
 import type { ActionMap, AllActions } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
@@ -151,6 +153,15 @@ function createPreviousMagnitudes(actions: ActionMap): Map<string, number> {
 	return previousMagnitudes;
 }
 
+function createTriggerInstances(actions: ActionMap): Map<string, ReadonlyArray<TriggerInstance>> {
+	const instances = new Map<string, ReadonlyArray<TriggerInstance>>();
+	for (const [name, config] of pairs(actions)) {
+		instances.set(name, instantiateTriggers(config.triggers));
+	}
+
+	return instances;
+}
+
 function buildHandleData<T extends ActionMap>({
 	actions,
 	contextNames,
@@ -162,12 +173,14 @@ function buildHandleData<T extends ActionMap>({
 		activeContexts: createActiveContexts(contextNames),
 		bindingOverrides: new Map<AllActions<T>, PlatformOverrides>(),
 		durations: createDurations(actions),
+		evaluatedActions: new Set<string>(),
 		instanceData,
 		internalState,
 		pendingActions: new Map<string, number>(),
 		previousMagnitudes: createPreviousMagnitudes(actions),
 		publicState,
 		simulatedValues: new Map<string, ActionValueType>(),
+		triggerInstances: createTriggerInstances(actions),
 		warnedActions: new Set<string>(),
 	};
 }

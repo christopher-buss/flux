@@ -106,6 +106,12 @@ owner, source context.
 magnitude and timing — e.g. tap, hold, double-tap. Evaluates to a **trigger
 state** each frame. _Avoid_: condition, gate, rule.
 
+**Trigger factory**: What `hold`/`tap`/`doubleTap` return. An action config is
+shared by every handle on a core, so triggers are declared as factories and each
+handle mints its own instances — trigger state belongs to a handle, never to the
+config. See `docs/adr/0006-per-handle-trigger-state.md`. _Avoid_: trigger
+builder, trigger constructor.
+
 **Trigger state**: The outcome of a trigger this frame: `none`, `ongoing`,
 `triggered`, or `canceled`. _Avoid_: phase, status.
 

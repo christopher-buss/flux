@@ -8,7 +8,7 @@ describe("doubleTap", () => {
 	it("should return 'none' on first tap", () => {
 		expect.assertions(1);
 
-		const trigger = doubleTap({ window: 0.5 });
+		const trigger = doubleTap({ window: 0.5 })();
 
 		expect(trigger.update(1, 0, deltaTime)).toBe("none");
 	});
@@ -16,7 +16,7 @@ describe("doubleTap", () => {
 	it("should return 'triggered' on second tap within window", () => {
 		expect.assertions(1);
 
-		const trigger = doubleTap({ window: 0.5 });
+		const trigger = doubleTap({ window: 0.5 })();
 		trigger.update(1, 0, deltaTime);
 		trigger.update(0, 0, deltaTime);
 
@@ -26,7 +26,7 @@ describe("doubleTap", () => {
 	it("should return 'none' if second tap is outside window", () => {
 		expect.assertions(1);
 
-		const trigger = doubleTap({ window: 0 });
+		const trigger = doubleTap({ window: 0 })();
 
 		trigger.update(1, 0, deltaTime);
 		trigger.update(0, 0, deltaTime);
@@ -34,10 +34,21 @@ describe("doubleTap", () => {
 		expect(trigger.update(1, 0, deltaTime)).toBe("none");
 	});
 
+	it("should mint triggers with independent state", () => {
+		expect.assertions(1);
+
+		const create = doubleTap({ window: 0.5 });
+		const first = create();
+		first.update(1, 0, deltaTime);
+		first.update(0, 0, deltaTime);
+
+		expect(create().update(1, 0, deltaTime)).toBe("none");
+	});
+
 	it("should clear state on reset", () => {
 		expect.assertions(1);
 
-		const trigger = doubleTap({ window: 0.5 });
+		const trigger = doubleTap({ window: 0.5 })();
 		trigger.update(1, 0, deltaTime);
 		trigger.reset!();
 
@@ -47,7 +58,7 @@ describe("doubleTap", () => {
 	it("should not count sustained holds as multiple taps", () => {
 		expect.assertions(3);
 
-		const trigger = doubleTap({ window: 0.5 });
+		const trigger = doubleTap({ window: 0.5 })();
 
 		expect(trigger.update(1, 0, deltaTime)).toBe("none");
 		expect(trigger.update(1, 0, deltaTime)).toBe("none");

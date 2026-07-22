@@ -1,4 +1,4 @@
-import type { Trigger, TriggerState } from "./types";
+import type { TriggerFactory, TriggerState } from "./types";
 
 /** Options for the tap trigger. */
 export interface TapOptions {
@@ -10,19 +10,21 @@ export interface TapOptions {
 }
 
 /**
- * Creates a trigger that fires on quick press-and-release.
+ * Creates a factory for triggers that fire on quick press-and-release.
  *
  * @param options - Tap trigger configuration.
- * @returns A trigger that detects taps.
+ * @returns A factory minting triggers that detect taps.
  */
-export function tap({ threshold }: TapOptions): Trigger {
-	return {
-		update(magnitude: number, duration: number): TriggerState {
-			if (magnitude === 0 && duration > 0 && duration < threshold) {
-				return "triggered";
-			}
+export function tap({ threshold }: TapOptions): TriggerFactory {
+	return () => {
+		return {
+			update(magnitude: number, duration: number): TriggerState {
+				if (magnitude === 0 && duration > 0 && duration < threshold) {
+					return "triggered";
+				}
 
-			return magnitude > 0 ? "ongoing" : "none";
-		},
+				return magnitude > 0 ? "ongoing" : "none";
+			},
+		};
 	};
 }

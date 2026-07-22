@@ -1,4 +1,4 @@
-import type { Trigger, TriggerState } from "./types";
+import type { Trigger, TriggerFactory, TriggerState } from "./types";
 
 /** Options for the hold trigger. */
 export interface HoldOptions {
@@ -17,12 +17,16 @@ export interface HoldOptions {
 }
 
 /**
- * Creates a trigger that fires after input is held for a duration.
+ * Creates a factory for triggers that fire after input is held for a duration.
  *
  * @param options - Hold trigger configuration.
- * @returns A trigger that tracks hold duration.
+ * @returns A factory minting triggers that track hold duration.
  */
-export function hold({ attempting, oneShot, threshold }: HoldOptions): Trigger {
+export function hold(options: HoldOptions): TriggerFactory {
+	return () => createHoldTrigger(options);
+}
+
+function createHoldTrigger({ attempting, oneShot, threshold }: HoldOptions): Trigger {
 	let hasTriggered = false;
 
 	return {

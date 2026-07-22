@@ -4,7 +4,7 @@ import type { PipelineOptions } from "#src/core/pipeline";
 import { processPipeline } from "#src/core/pipeline";
 import type { ModifierContext } from "#src/modifiers";
 import { deadZone, negate, scale } from "#src/modifiers";
-import { hold, implicit } from "#src/triggers";
+import { hold, implicit, instantiateTriggers } from "#src/triggers";
 import type { InputHandle } from "../types/core";
 
 const modifierContext = {
@@ -19,13 +19,15 @@ describe("pipeline integration: deadZone + hold trigger", () => {
 		const options: PipelineOptions = {
 			actionConfig: {
 				modifiers: [deadZone(0.2)],
-				triggers: [implicit(hold({ attempting: 0.1, threshold: 0.5 }))],
 				type: "Direction1D",
 			},
 			deltaTime: 0.016,
 			duration: 0,
 			modifierContext,
 			rawValue: 0.1,
+			triggerInstances: instantiateTriggers([
+				implicit(hold({ attempting: 0.1, threshold: 0.5 })),
+			]),
 		};
 
 		const result = processPipeline(options);
@@ -39,13 +41,15 @@ describe("pipeline integration: deadZone + hold trigger", () => {
 		const options = {
 			actionConfig: {
 				modifiers: [deadZone(0.2)],
-				triggers: [implicit(hold({ attempting: 0, threshold: 0.5 }))],
 				type: "Direction1D",
 			},
 			deltaTime: 0.016,
 			duration: 0.6,
 			modifierContext,
 			rawValue: 0.6,
+			triggerInstances: instantiateTriggers([
+				implicit(hold({ attempting: 0, threshold: 0.5 })),
+			]),
 		} satisfies PipelineOptions;
 
 		const result = processPipeline(options);
@@ -61,13 +65,15 @@ describe("pipeline integration: scale + implicit trigger", () => {
 		const options = {
 			actionConfig: {
 				modifiers: [scale(2)],
-				triggers: [implicit(hold({ attempting: 0, threshold: 0 }))],
 				type: "Direction1D",
 			},
 			deltaTime: 0.016,
 			duration: 0,
 			modifierContext,
 			rawValue: 0.5,
+			triggerInstances: instantiateTriggers([
+				implicit(hold({ attempting: 0, threshold: 0 })),
+			]),
 		} satisfies PipelineOptions;
 
 		const result = processPipeline(options);
@@ -81,13 +87,15 @@ describe("pipeline integration: scale + implicit trigger", () => {
 		const options = {
 			actionConfig: {
 				modifiers: [scale(2)],
-				triggers: [implicit(hold({ attempting: 0, threshold: 0 }))],
 				type: "Direction1D",
 			},
 			deltaTime: 0.016,
 			duration: 0,
 			modifierContext,
 			rawValue: 0,
+			triggerInstances: instantiateTriggers([
+				implicit(hold({ attempting: 0, threshold: 0 })),
+			]),
 		} satisfies PipelineOptions;
 
 		const result = processPipeline(options);
@@ -109,6 +117,7 @@ describe("pipeline integration: negate modifier preserves trigger behavior", () 
 			duration: 0,
 			modifierContext,
 			rawValue: 0.5,
+			triggerInstances: instantiateTriggers([]),
 		} satisfies PipelineOptions;
 
 		const result = processPipeline(options);

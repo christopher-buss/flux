@@ -1,5 +1,5 @@
 import type { ModifierContext, ModifierValue } from "../modifiers/types";
-import type { TriggerState, TypedTrigger } from "../triggers/types";
+import type { TriggerInstance, TriggerState } from "../triggers/types";
 import type { ActionConfig } from "../types/actions";
 import { getMagnitude } from "./action-entry";
 import type { ActionValueType } from "./action-entry";
@@ -26,6 +26,8 @@ export interface PipelineOptions {
 	readonly modifierContext: ModifierContext;
 	/** The raw input value before any processing. */
 	readonly rawValue: ActionValueType;
+	/** The calling handle's own trigger instances for this action. */
+	readonly triggerInstances: ReadonlyArray<TriggerInstance>;
 }
 
 interface TriggerTally {
@@ -51,10 +53,11 @@ export function processPipeline({
 	duration,
 	modifierContext,
 	rawValue,
+	triggerInstances: triggers,
 }: PipelineOptions): PipelineResult {
 	const value = applyModifiers(rawValue, actionConfig, modifierContext);
 	const magnitude = getMagnitude(value);
-	const triggerState = resolveTriggers(actionConfig, magnitude, duration, deltaTime);
+	const triggerState = resolveTriggers(triggers, magnitude, duration, deltaTime);
 
 	return { triggerState, value };
 }
@@ -104,7 +107,7 @@ function combineTriggerStates(current: TriggerState, incoming: TriggerState): Tr
 }
 
 function tallyTriggerResults(
-	triggers: ReadonlyArray<TypedTrigger>,
+	triggers: ReadonlyArray<TriggerInstance>,
 	magnitude: number,
 	duration: number,
 	deltaTime: number,
@@ -146,12 +149,12 @@ function resolveFromTally(tally: TriggerTally): TriggerState {
 }
 
 function resolveTriggers(
-	{ triggers }: ActionConfig,
+	triggers: ReadonlyArray<TriggerInstance>,
 	magnitude: number,
 	duration: number,
 	deltaTime: number,
 ): TriggerState {
-	if (triggers === undefined || triggers.size() === 0) {
+	if (triggers.size() === 0) {
 		return magnitude > 0 ? "triggered" : "none";
 	}
 
