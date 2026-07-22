@@ -399,7 +399,12 @@ export function replayOverridesIntoContext<T extends ActionMap>({
 			overrides,
 			contextDefaults({ action: actionName, contextName, contexts }),
 		);
-		rebuildContextAction(handleData.instanceData, contextName, actionName, bindings);
+		rebuildContextAction({
+			actionName,
+			bindings,
+			contextName,
+			data: handleData.instanceData,
+		});
 	}
 }
 
@@ -433,8 +438,12 @@ function rebuildFromOverrides<T extends ActionMap>({
 	handleData,
 }: ActionScopedOptions<T>): void {
 	const overrides = handleData.bindingOverrides.get(action);
-	rebuildActionBindings(handleData.instanceData, action, (contextName) => {
-		return composeBindings(overrides, contextDefaults({ action, contextName, contexts }));
+	rebuildActionBindings({
+		actionName: action,
+		data: handleData.instanceData,
+		resolve: (contextName) => {
+			return composeBindings(overrides, contextDefaults({ action, contextName, contexts }));
+		},
 	});
 }
 

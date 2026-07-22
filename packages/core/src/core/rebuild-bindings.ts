@@ -3,23 +3,59 @@ import { createInputBinding } from "./input-bindings";
 import type { InputInstanceData } from "./input-instances";
 
 /**
+ * Arguments for replacing one context's bindings for one action.
+ */
+export interface RebuildContextActionOptions {
+	/** The action whose bindings to rebuild. */
+	readonly actionName: string;
+	/** The replacement bindings for that context. */
+	readonly bindings: ReadonlyArray<BindingLike>;
+	/** The context whose bindings to rebuild. */
+	readonly contextName: string;
+	/** The handle's input instance data. */
+	readonly data: InputInstanceData;
+}
+
+/**
+ * Arguments for rebuilding one action across every registered context.
+ */
+export interface RebuildActionOptions {
+	/** The action whose bindings to rebuild. */
+	readonly actionName: string;
+	/** The handle's input instance data. */
+	readonly data: InputInstanceData;
+	/** Per-context resolver returning replacement bindings. */
+	readonly resolve: (contextName: string) => ReadonlyArray<BindingLike>;
+}
+
+/**
+ * Arguments for swapping one `InputAction`'s children for a new set.
+ */
+interface ReplaceActionBindingsOptions {
+	/** The replacement bindings. */
+	readonly bindings: ReadonlyArray<BindingLike>;
+	/** The handle's input instance data. */
+	readonly data: InputInstanceData;
+	/** The instance whose bindings to replace. */
+	readonly inputAction: InputAction;
+}
+
+/**
  * Replaces one context's `InputBinding` children for one action.
  *
  * The single-context entry point, used by a replay into a freshly-activated
  * context so that activating a context does not destroy and recreate the
  * instances of every context already live.
- * @param data - The handle's input instance data.
- * @param contextName - The context whose bindings to rebuild.
- * @param actionName - The action whose bindings to rebuild.
- * @param bindings - The replacement bindings for that context.
+ * @param options - The handle's instance data, the context and action to
+ * rebuild, and the replacement bindings for that context.
  * @throws If the context is not registered for the handle.
  */
-export function rebuildContextAction(
-	data: InputInstanceData,
-	contextName: string,
-	actionName: string,
-	bindings: ReadonlyArray<BindingLike>,
-): void {
+export function rebuildContextAction({
+	actionName,
+	bindings,
+	contextName,
+	data,
+}: RebuildContextActionOptions): void {
 	const actionInstances = data.actionsByContext.get(contextName);
 	assert(actionInstances, `context not registered: ${contextName}`);
 	const inputAction = actionInstances.get(actionName);
@@ -27,7 +63,7 @@ export function rebuildContextAction(
 		return;
 	}
 
-	replaceActionBindings(data, inputAction, bindings);
+	replaceActionBindings({ bindings, data, inputAction });
 }
 
 /**
@@ -36,22 +72,17 @@ export function rebuildContextAction(
  * resolver picks the replacement bindings per context, so callers can share
  * one set across contexts (for rebind) or restore per-context originals
  * (for reset).
- * @param data - The handle's input instance data.
- * @param actionName - The action whose bindings to rebuild.
- * @param resolve - Per-context resolver returning replacement bindings.
+ * @param options - The handle's instance data, the action to rebuild and a
+ * per-context resolver returning replacement bindings.
  */
-export function rebuildActionBindings(
-	data: InputInstanceData,
-	actionName: string,
-	resolve: (contextName: string) => ReadonlyArray<BindingLike>,
-): void {
+export function rebuildActionBindings({ actionName, data, resolve }: RebuildActionOptions): void {
 	for (const [contextName, actionInstances] of data.actionsByContext) {
 		const inputAction = actionInstances.get(actionName);
 		if (inputAction === undefined) {
 			continue;
 		}
 
-		replaceActionBindings(data, inputAction, resolve(contextName));
+		replaceActionBindings({ bindings: resolve(contextName), data, inputAction });
 	}
 }
 
@@ -97,15 +128,14 @@ function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): v
  * binding list from its platform buckets plus the defaults for the platforms
  * with no bucket, so there is no platform predicate to get wrong — see
  * `docs/adr/0004-per-platform-binding-overrides.md`.
- * @param data - The handle's input instance data.
- * @param inputAction - The instance whose bindings to replace.
- * @param bindings - The replacement bindings.
+ * @param options - The handle's instance data, the instance whose bindings to
+ * replace and the replacement bindings.
  */
-function replaceActionBindings(
-	data: InputInstanceData,
-	inputAction: InputAction,
-	bindings: ReadonlyArray<BindingLike>,
-): void {
+function replaceActionBindings({
+	bindings,
+	data,
+	inputAction,
+}: ReplaceActionBindingsOptions): void {
 	const destroyed = new Set<Instance>();
 	destroyChildrenInto(inputAction, destroyed);
 	pruneInstances(data.instances, destroyed);
