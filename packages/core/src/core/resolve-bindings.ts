@@ -85,7 +85,7 @@ export function freezeContextBindings(contexts: Record<string, ContextConfig>): 
  * @returns The declared bindings or an empty array.
  */
 export function getContextBindings(options: ContextBindingOptions): ReadonlyArray<BindingLike> {
-	return contextConfigFor(options).bindings[options.action] ?? [];
+	return requireContextConfig(options.contexts, options.context).bindings[options.action] ?? [];
 }
 
 /**
@@ -152,16 +152,6 @@ export function resolveBindingOrigin<T extends ActionMap>(
 
 	const bucket = findPlatformBucket(actionOverrides(options), options.platform);
 	return bucket !== undefined ? "override" : "default";
-}
-
-/**
- * Finds a context's config, failing loudly on a name that does not exist.
- * @param options - The context config record and the context name to find.
- * @returns That context's config.
- * @throws If the context name is unknown.
- */
-function contextConfigFor(options: ContextBindingOptions): ContextConfig {
-	return requireContextConfig(options.contexts, options.context);
 }
 
 /**
@@ -258,12 +248,12 @@ function isActionDeclared<T extends ActionMap>({
 		return isContextAction({
 			action,
 			actions,
-			bindings: contextConfigFor({ action, context, contexts }).bindings,
+			bindings: requireContextConfig(contexts, context).bindings,
 		});
 	}
 
 	for (const contextName of handleData.activeContexts) {
-		const { bindings } = contextConfigFor({ action, context: contextName, contexts });
+		const { bindings } = requireContextConfig(contexts, contextName);
 		if (isContextAction({ action, actions, bindings })) {
 			return true;
 		}
