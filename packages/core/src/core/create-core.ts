@@ -39,6 +39,7 @@ import {
 	serializeFullBindings,
 } from "./rebinding";
 import {
+	freezeContextBindings,
 	resolveBindingOrigin,
 	resolveBindings,
 	resolveBindingsForPlatform,
@@ -67,6 +68,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 	replication,
 }: CreateCoreOptions<T, C>): FluxCore<T, keyof C & string> {
 	type Contexts = keyof C & string;
+	freezeContextBindings(contexts);
 	const replicationTransport = replication?.transport;
 	const isDevelopmentMode = _G.__DEV__ && isDebug === true;
 	const factory = createHandleFactory();

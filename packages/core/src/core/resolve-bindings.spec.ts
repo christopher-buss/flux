@@ -7,6 +7,7 @@ import type { ContextConfig } from "../types/contexts";
 import type { HandleData } from "./handle-lifecycle";
 import type { PlatformOverrides } from "./platform-overrides";
 import {
+	freezeContextBindings,
 	getContextBindings,
 	resolveBindingOrigin,
 	resolveBindings,
@@ -77,6 +78,36 @@ function handleWith(
 function overridesFor(action: string, buckets: PlatformOverrides): Map<string, PlatformOverrides> {
 	return new Map([[action, buckets]]);
 }
+
+describe("freezeContextBindings", () => {
+	it("should freeze every binding array the config declares", () => {
+		expect.assertions(1);
+
+		const jumpBindings: ReadonlyArray<BindingLike> = [Enum.KeyCode.Space];
+		const contexts: Record<string, ContextConfig> = {
+			gameplay: { bindings: { jump: jumpBindings } },
+		};
+
+		freezeContextBindings(contexts);
+
+		expect(table.isfrozen(jumpBindings)).toBeTrue();
+	});
+
+	it("should tolerate a config record already frozen by another core", () => {
+		expect.assertions(1);
+
+		const contexts: Record<string, ContextConfig> = {
+			gameplay: { bindings: { jump: [Enum.KeyCode.Space] } },
+		};
+		freezeContextBindings(contexts);
+
+		const freezeAgain = (): void => {
+			freezeContextBindings(contexts);
+		};
+
+		expect(freezeAgain).never.toThrow();
+	});
+});
 
 describe("getContextBindings", () => {
 	it("should return the bindings a context declares for an action", () => {
