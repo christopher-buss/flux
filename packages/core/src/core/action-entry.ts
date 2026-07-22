@@ -350,32 +350,18 @@ export function readEntryCanceled(entry: ActionEntry, viewer?: CaptureViewer): b
 }
 
 /**
- * Ages the pending boundary cancel at the frame reset, expiring it once it
- * has had its one exposure.
+ * Consumes the frame's claim, ageing the boundary cancel first.
  *
- * A boundary can be recorded at any point relative to `core.update`, since a
- * capture is acquired from consumer code and `endFrame` runs first inside the
- * update. Expiring purely on the frame reset would therefore lose every cancel
- * recorded before the next update, so an unseen cancel is carried across
- * exactly one reset instead — enough for the read phase to see it, and bounded
- * so a stale cancel cannot surface frames later.
- *
- * A cancel the claim ate counts as exposed: a claimed frame consumes it like
- * any other processed read, so it must not resurface next frame.
- * @param entry - The action entry to age. Must still carry this frame's claim.
+ * The one ordering constraint inside the frame reset: `expireBoundaryCancel`
+ * reads `entry.claimed`, so clearing the claim first would turn a cancel the
+ * claim ate into one that resurfaces next frame. The pair lives here, and the
+ * ageing step is module-private, so there is nothing left at the call site to
+ * reorder.
+ * @param entry - The action entry to reset for the next frame.
  */
-export function expireBoundaryCancel(entry: ActionEntry): void {
-	if (entry.canceledFor === undefined) {
-		return;
-	}
-
-	if (!entry.canceledConsumed && !entry.claimed) {
-		entry.canceledConsumed = true;
-		return;
-	}
-
-	entry.canceledFor = undefined;
-	entry.canceledConsumed = false;
+export function consumeFrameClaim(entry: ActionEntry): void {
+	expireBoundaryCancel(entry);
+	entry.claimed = false;
 }
 
 /**
@@ -573,6 +559,36 @@ function isSuppressedFor(entry: ActionEntry, viewer: CaptureViewer | undefined):
  */
 function isCanceled(entry: ActionEntry): boolean {
 	return entry.triggerState === "canceled";
+}
+
+/**
+ * Ages the pending boundary cancel at the frame reset, expiring it once it
+ * has had its one exposure.
+ *
+ * A boundary can be recorded at any point relative to `core.update`, since a
+ * capture is acquired from consumer code and `endFrame` runs first inside the
+ * update. Expiring purely on the frame reset would therefore lose every cancel
+ * recorded before the next update, so an unseen cancel is carried across
+ * exactly one reset instead — enough for the read phase to see it, and bounded
+ * so a stale cancel cannot surface frames later.
+ *
+ * A cancel the claim ate counts as exposed: a claimed frame consumes it like
+ * any other processed read, so it must not resurface next frame.
+ * @param entry - The action entry to age. Must still carry this frame's claim,
+ * which is why {@link consumeFrameClaim} is the only caller.
+ */
+function expireBoundaryCancel(entry: ActionEntry): void {
+	if (entry.canceledFor === undefined) {
+		return;
+	}
+
+	if (!entry.canceledConsumed && !entry.claimed) {
+		entry.canceledConsumed = true;
+		return;
+	}
+
+	entry.canceledFor = undefined;
+	entry.canceledConsumed = false;
 }
 
 function getValue(entry: ActionEntry): ActionValueType {
