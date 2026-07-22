@@ -3,7 +3,7 @@ import type { ActionConfig, ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionValueType } from "./action-entry";
-import { getDefaultValue, getMagnitude } from "./action-entry";
+import { getMagnitude, getNeutralValue } from "./action-entry";
 import type { InternalActionState } from "./action-state";
 import type { ActiveContexts } from "./active-contexts";
 import { resolveContextOrder } from "./active-contexts";
@@ -218,7 +218,7 @@ function resetAction(
 		action: actionName,
 		deltaTime,
 		triggerState: "none",
-		value: getDefaultValue(actionConfig.type),
+		value: getNeutralValue(actionConfig.type),
 	});
 }
 
