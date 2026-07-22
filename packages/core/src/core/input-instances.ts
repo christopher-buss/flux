@@ -25,6 +25,20 @@ export interface InputInstanceData {
 	readonly parent: Instance;
 }
 
+/** What backfilling an adopted context's missing actions needs. */
+export interface FillContextOptions {
+	/** The action map for looking up action configs. */
+	readonly actions: ActionMap;
+	/** The context's configuration, naming its declared actions. */
+	readonly contextConfig: ContextConfig;
+	/** The name of the context to backfill. */
+	readonly contextName: string;
+	/** The existing instance data to append to. */
+	readonly data: InputInstanceData;
+	/** The context's InputContext instance. */
+	readonly inputContext: InputContext;
+}
+
 interface CreateInstancesOptions {
 	readonly actions: ActionMap;
 	readonly contextNames: ReadonlyArray<string>;
@@ -48,22 +62,18 @@ interface CreateContextOptions {
 	readonly instances: Array<Instance>;
 }
 
+interface PopulateActionsOptions {
+	readonly actions: ActionMap;
+	readonly contextConfig: ContextConfig;
+	readonly declared: Map<string, InputAction>;
+	readonly inputContext: InputContext;
+	readonly instances: Array<Instance>;
+}
+
 /**
  * Name of the folder every handle parents its `InputContext` instances under.
  */
 export const INPUT_FOLDER_NAME = "input";
-
-interface FindInstancesOptions {
-	readonly actions: ActionMap;
-	readonly contextNames: ReadonlyArray<string>;
-	readonly parent: Instance;
-}
-interface SearchState {
-	readonly actions: ActionMap;
-	readonly actionsByContext: Map<string, Map<string, InputAction>>;
-	readonly connections: Array<RBXScriptConnection>;
-	readonly inputContexts: Map<string, InputContext>;
-}
 
 /**
  * Creates all IAS instances for a handle's registered contexts.
@@ -119,37 +129,6 @@ export function destroyInputInstances(data: InputInstanceData): void {
 }
 
 /**
- * Finds existing IAS instances under the parent's "input" folder (server-created).
- * Uses FindFirstChild for already-present instances and ChildAdded for pending ones.
- * @param options - Context names and parent to search under.
- * @returns The discovered instance data and connections for cleanup.
- */
-export function findInputInstances({
-	actions,
-	contextNames,
-	parent,
-}: FindInstancesOptions): InputInstanceData {
-	const state = createSearchState(actions);
-
-	const folder = parent.FindFirstChild(INPUT_FOLDER_NAME);
-	if (folder !== undefined && classIs(folder, "Folder")) {
-		searchForContexts(folder, contextNames, state);
-	} else {
-		const connection = parent.ChildAdded.Connect((child) => {
-			if (child.Name !== INPUT_FOLDER_NAME || !classIs(child, "Folder")) {
-				return;
-			}
-
-			searchForContexts(child, contextNames, state);
-		});
-
-		state.connections.push(connection);
-	}
-
-	return { ...state, instances: [], owned: false, parent };
-}
-
-/**
  * Creates an InputContext instance for a newly added context.
  * @param contextName - The name of the context to add.
  * @param contextConfig - The context's configuration.
@@ -190,7 +169,36 @@ export function adoptContextInstances(
 	actions: ActionMap,
 ): void {
 	data.inputContexts.set(contextName, inputContext);
-	indexContextActions(data.actionsByContext, contextName, inputContext, actions);
+	const declared = getOrCreateContextActions(data.actionsByContext, contextName);
+	for (const child of inputContext.GetChildren()) {
+		if (classIs(child, "InputAction") && actions[child.Name] !== undefined) {
+			declared.set(child.Name, child);
+		}
+	}
+}
+
+/**
+ * Creates the declared `InputAction` instances a context is missing.
+ *
+ * Only an owning handle may call this: it leaves an adopted context with the
+ * instance set creation would have given it, which is what reads assume when
+ * they resolve an owned handle's actions.
+ * @param options - The instance data, context to backfill, and action map.
+ */
+export function fillContextActions({
+	actions,
+	contextConfig,
+	contextName,
+	data,
+	inputContext,
+}: FillContextOptions): void {
+	populateContextActions({
+		actions,
+		contextConfig,
+		declared: getOrCreateContextActions(data.actionsByContext, contextName),
+		inputContext,
+		instances: data.instances,
+	});
 }
 
 /**
@@ -306,6 +314,33 @@ function createAction({
 	return inputAction;
 }
 
+/** Creates an `InputAction` for every declared action not already indexed. */
+function populateContextActions({
+	actions,
+	contextConfig,
+	declared,
+	inputContext,
+	instances,
+}: PopulateActionsOptions): void {
+	for (const [actionName, bindings] of pairs(contextConfig.bindings)) {
+		const actionConfig = actions[actionName];
+		if (actionConfig === undefined || declared.has(actionName)) {
+			continue;
+		}
+
+		declared.set(
+			actionName,
+			createAction({
+				actionConfig,
+				actionName,
+				bindings,
+				instances,
+				parent: inputContext,
+			}),
+		);
+	}
+}
+
 function createContext({
 	actions,
 	actionsByContext,
@@ -318,73 +353,14 @@ function createContext({
 	inputContext.Priority = contextConfig.priority ?? DEFAULT_CONTEXT_PRIORITY;
 	inputContext.Sink = contextConfig.sink === true;
 
-	const declared = getOrCreateContextActions(actionsByContext, contextName);
-	for (const [actionName, bindings] of pairs(contextConfig.bindings)) {
-		const actionConfig = actions[actionName];
-		if (actionConfig === undefined) {
-			continue;
-		}
-
-		const inputAction = createAction({
-			actionConfig,
-			actionName,
-			bindings,
-			instances,
-			parent: inputContext,
-		});
-
-		declared.set(actionName, inputAction);
-	}
+	populateContextActions({
+		actions,
+		contextConfig,
+		declared: getOrCreateContextActions(actionsByContext, contextName),
+		inputContext,
+		instances,
+	});
 
 	instances.push(inputContext);
 	return inputContext;
-}
-
-function createSearchState(actions: ActionMap): SearchState {
-	return {
-		actions,
-		actionsByContext: new Map<string, Map<string, InputAction>>(),
-		connections: new Array<RBXScriptConnection>(),
-		inputContexts: new Map<string, InputContext>(),
-	};
-}
-
-function indexContextActions(
-	actionsByContext: Map<string, Map<string, InputAction>>,
-	contextName: string,
-	inputContext: InputContext,
-	actions: ActionMap,
-): void {
-	const declared = getOrCreateContextActions(actionsByContext, contextName);
-	for (const child of inputContext.GetChildren()) {
-		if (classIs(child, "InputAction") && actions[child.Name] !== undefined) {
-			declared.set(child.Name, child);
-		}
-	}
-}
-
-function searchForContexts(
-	folder: Instance,
-	contextNames: ReadonlyArray<string>,
-	state: SearchState,
-): void {
-	for (const contextName of contextNames) {
-		const existing = folder.FindFirstChild(contextName);
-		if (existing !== undefined && classIs(existing, "InputContext")) {
-			state.inputContexts.set(contextName, existing);
-			indexContextActions(state.actionsByContext, contextName, existing, state.actions);
-			continue;
-		}
-
-		const connection = folder.ChildAdded.Connect((child) => {
-			if (child.Name !== contextName || !classIs(child, "InputContext")) {
-				return;
-			}
-
-			state.inputContexts.set(contextName, child);
-			indexContextActions(state.actionsByContext, contextName, child, state.actions);
-		});
-
-		state.connections.push(connection);
-	}
 }

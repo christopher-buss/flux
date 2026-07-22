@@ -9,6 +9,7 @@ import { getHandleData } from "./handle-lifecycle";
 import {
 	addContextInstances,
 	adoptContextInstances,
+	fillContextActions,
 	findExistingContext,
 	setContextEnabled,
 } from "./input-instances";
@@ -33,6 +34,14 @@ export interface AddContextOptions<T extends ActionMap> {
 	readonly replicationTransport: ReplicationTransport | undefined;
 }
 
+interface ProvisionOptions<T extends ActionMap> {
+	readonly actions: T;
+	readonly context: string;
+	readonly contextConfig: ContextConfig;
+	readonly contexts: Record<string, ContextConfig>;
+	readonly data: HandleData<T>;
+}
+
 /**
  * Activates a context for one handle, creating or adopting its instances.
  *
@@ -41,7 +50,9 @@ export interface AddContextOptions<T extends ActionMap> {
  * Either way the handle's stored overrides are replayed into the context, so a
  * rebind made before the context was active still applies when it becomes
  * active. Replaying into adopted instances rewrites what the handle that
- * created them also reads, which is what sharing a context already means.
+ * created them also reads, which is what sharing a context already means. An
+ * owning handle backfills the declared actions an adopted context lacks,
+ * because reads assume it can resolve every action its contexts declare.
  * @template T - The action map type.
  * @param options - The handle, context name, action map and context config.
  * @throws If the context name is unknown, the handle is not registered, the
@@ -68,16 +79,35 @@ export function addHandleContext<T extends ActionMap>({
 	);
 
 	if (!data.instanceData.inputContexts.has(context)) {
-		const existing = findExistingContext(context, data.instanceData);
-		if (existing !== undefined) {
-			adoptContextInstances(data.instanceData, context, existing, actions);
-		} else {
-			addContextInstances(context, contextConfig, actions, data.instanceData);
-		}
-
-		replayOverridesIntoContext({ contextName: context, contexts, handleData: data });
+		provisionContextInstances({ actions, context, contextConfig, contexts, data });
 	}
 
 	setContextEnabled(data.instanceData, context, true);
 	activateContext(data.activeContexts, context);
+}
+
+function provisionContextInstances<T extends ActionMap>({
+	actions,
+	context,
+	contextConfig,
+	contexts,
+	data,
+}: ProvisionOptions<T>): void {
+	const existing = findExistingContext(context, data.instanceData);
+	if (existing === undefined) {
+		addContextInstances(context, contextConfig, actions, data.instanceData);
+	} else {
+		adoptContextInstances(data.instanceData, context, existing, actions);
+		if (data.instanceData.owned) {
+			fillContextActions({
+				actions,
+				contextConfig,
+				contextName: context,
+				data: data.instanceData,
+				inputContext: existing,
+			});
+		}
+	}
+
+	replayOverridesIntoContext({ contextName: context, contexts, handleData: data });
 }

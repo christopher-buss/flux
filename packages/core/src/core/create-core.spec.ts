@@ -360,6 +360,26 @@ describe("createCore", () => {
 			expect(addContext).toThrow("context already active");
 		});
 
+		it("should update after adopting a context whose InputActions are missing", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(parent, "gameplay");
+
+			const inputFolder = parent.FindFirstChild("input");
+			assert(inputFolder, "no input folder");
+			const uiContext = new Instance("InputContext");
+			uiContext.Name = "ui";
+			uiContext.Parent = inputFolder;
+
+			core.addContext(handle, "ui");
+
+			expect(() => {
+				core.update(0.016);
+			}).never.toThrow();
+		});
+
 		it("should remove context", () => {
 			expect.assertions(1);
 
