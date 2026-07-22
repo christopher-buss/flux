@@ -151,8 +151,12 @@ function createPreviousMagnitudes(actions: ActionMap): Map<string, number> {
 	return previousMagnitudes;
 }
 
-function buildHandleData<T extends ActionMap>(options: BuildHandleDataOptions<T>): HandleData<T> {
-	const { actions, contextNames, instanceData, isDebug } = options;
+function buildHandleData<T extends ActionMap>({
+	actions,
+	contextNames,
+	instanceData,
+	isDebug,
+}: BuildHandleDataOptions<T>): HandleData<T> {
 	const [publicState, internalState] = createActionState(actions, { debug: isDebug });
 	return {
 		activeContexts: createActiveContexts(contextNames),
@@ -168,8 +172,13 @@ function buildHandleData<T extends ActionMap>(options: BuildHandleDataOptions<T>
 	};
 }
 
-function createHandleData<T extends ActionMap>(options: RegisterOptions<T>): HandleData<T> {
-	const { actions, contextNames, contexts, debug: isDebug, parent } = options;
+function createHandleData<T extends ActionMap>({
+	actions,
+	contextNames,
+	contexts,
+	debug: isDebug,
+	parent,
+}: RegisterOptions<T>): HandleData<T> {
 	const instanceData = createInputInstances({ actions, contextNames, contexts, parent });
 	return buildHandleData({ actions, contextNames, instanceData, isDebug: isDebug === true });
 }
@@ -183,10 +192,12 @@ function validateHandleUnique<T extends ActionMap>(
 	}
 }
 
-function createSubscribeData<T extends ActionMap>(
-	options: HandleOptions<T>,
-): [HandleData<T>, () => void] {
-	const { actions, contextNames, debug: isDebug, parent } = options;
+function createSubscribeData<T extends ActionMap>({
+	actions,
+	contextNames,
+	debug: isDebug,
+	parent,
+}: HandleOptions<T>): [HandleData<T>, () => void] {
 	const instanceData = findInputInstances({ actions, contextNames, parent });
 	const data = buildHandleData({
 		actions,

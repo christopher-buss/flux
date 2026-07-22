@@ -21,14 +21,16 @@ export interface InputPlatformSignal {
  * @param source - Where the player's device is read from.
  * @returns The signal's reads and writes.
  */
-// eslint-disable-next-line max-lines-per-function -- one closure per exported verb
+// eslint-disable-next-line flawless/max-lines-per-function -- one closure per exported verb
 export function createInputPlatformSignal(source: InputPlatformSource): InputPlatformSignal {
 	const listeners = new Set<InputPlatformListener>();
 
 	/** The platform every reader is told about, whatever the device says. */
 	let override: InputPlatform | undefined;
 
-	/** Releases the device watcher; present only while someone is subscribed. */
+	/**
+	 * Releases the device watcher; present only while someone is subscribed.
+	 */
 	let unwatch: (() => void) | undefined;
 
 	/**

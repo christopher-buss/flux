@@ -37,7 +37,7 @@ const doubleModifier: Modifier = {
 	},
 };
 
-const addOneModifier: Modifier = {
+const incrementModifier: Modifier = {
 	modify(value: never): never {
 		if (typeIs(value, "number")) {
 			return fromAny((value as number) + 1);
@@ -86,7 +86,7 @@ describe("processPipeline", () => {
 		expect.assertions(1);
 
 		const config = {
-			modifiers: [doubleModifier, addOneModifier],
+			modifiers: [doubleModifier, incrementModifier],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({

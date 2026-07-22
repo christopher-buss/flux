@@ -86,11 +86,7 @@ const actions = defineActions({
 
 ```ts
 type ActionType =
-	| "Bool"
-	| "Direction1D"
-	| "Direction2D"
-	| "Direction3D"
-	| "ViewportPosition";
+	"Bool" | "Direction1D" | "Direction2D" | "Direction3D" | "ViewportPosition";
 
 interface ActionConfig<T extends ActionType = ActionType> {
 	readonly description?: string;
@@ -160,9 +156,7 @@ type ViewportPositionActions<T extends ActionMap> = {
 }[keyof T];
 
 type AxisActions<T extends ActionMap> =
-	| Direction1dActions<T>
-	| Direction2dActions<T>
-	| Direction3dActions<T>;
+	Direction1dActions<T> | Direction2dActions<T> | Direction3dActions<T>;
 
 type AllActions<T extends ActionMap> = keyof T & string;
 ```

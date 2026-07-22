@@ -16,7 +16,7 @@ import type { FluxJecs, FluxJecsOptions } from "./types";
  * @param options - Actions, contexts, and optional user-provided component.
  * @returns A FluxJecs instance.
  */
-// eslint-disable-next-line max-lines-per-function -- factory with thin delegation
+// eslint-disable-next-line flawless/max-lines-per-function -- factory with thin delegation
 export function createFluxJecs<T extends ActionMap, C extends Record<string, ContextConfig>>(
 	world: World,
 	options: FluxJecsOptions<T, C>,

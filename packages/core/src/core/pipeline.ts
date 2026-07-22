@@ -4,7 +4,9 @@ import type { ActionConfig } from "../types/actions";
 import { getMagnitude } from "./action-entry";
 import type { ActionValueType } from "./action-entry";
 
-/** Result of processing a single action through the modifier/trigger pipeline. */
+/**
+ * Result of processing a single action through the modifier/trigger pipeline.
+ */
 export interface PipelineResult {
 	/** The resolved trigger state after evaluating all triggers. */
 	triggerState: TriggerState;
@@ -43,9 +45,13 @@ interface TriggerTally {
  * @param options - Pipeline processing options.
  * @returns The post-modifier value and resolved trigger state.
  */
-export function processPipeline(options: PipelineOptions): PipelineResult {
-	const { actionConfig, deltaTime, duration, modifierContext, rawValue } = options;
-
+export function processPipeline({
+	actionConfig,
+	deltaTime,
+	duration,
+	modifierContext,
+	rawValue,
+}: PipelineOptions): PipelineResult {
 	const value = applyModifiers(rawValue, actionConfig, modifierContext);
 	const magnitude = getMagnitude(value);
 	const triggerState = resolveTriggers(actionConfig, magnitude, duration, deltaTime);
@@ -140,12 +146,11 @@ function resolveFromTally(tally: TriggerTally): TriggerState {
 }
 
 function resolveTriggers(
-	actionConfig: ActionConfig,
+	{ triggers }: ActionConfig,
 	magnitude: number,
 	duration: number,
 	deltaTime: number,
 ): TriggerState {
-	const { triggers } = actionConfig;
 	if (triggers === undefined || triggers.size() === 0) {
 		return magnitude > 0 ? "triggered" : "none";
 	}

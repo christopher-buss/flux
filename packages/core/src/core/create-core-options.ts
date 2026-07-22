@@ -10,7 +10,9 @@ import type { ContextConfig } from "../types/contexts";
  */
 export type ReplicationTransport = "native" | "remote";
 
-/** Configuration for how input state is replicated between client and server. */
+/**
+ * Configuration for how input state is replicated between client and server.
+ */
 export interface ReplicationConfig {
 	/** The transport mechanism for replication. */
 	readonly transport: ReplicationTransport;

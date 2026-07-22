@@ -91,11 +91,7 @@ type InputHandle = number & { readonly __brand: unique symbol };
 
 ```ts
 type ActionType =
-	| "Bool"
-	| "Direction1D"
-	| "Direction2D"
-	| "Direction3D"
-	| "ViewportPosition";
+	"Bool" | "Direction1D" | "Direction2D" | "Direction3D" | "ViewportPosition";
 
 interface ActionConfig<T extends ActionType = ActionType> {
 	readonly description?: string;

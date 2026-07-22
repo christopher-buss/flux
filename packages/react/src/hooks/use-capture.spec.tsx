@@ -91,13 +91,11 @@ function createTokenLoggingSurface(
  * @returns The host component.
  */
 function createActionHost(
-	flux: TestFlux,
+	{ FluxProvider, useCapture }: TestFlux,
 	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
 	handle: InputHandle,
 	reads: Log<ActionReads>,
 ): (props: ActionProps) => React.ReactNode {
-	const { FluxProvider, useCapture } = flux;
-
 	function Surface({ action }: ActionProps): React.ReactNode {
 		const token = useCapture(action);
 		reads.push({
@@ -128,13 +126,11 @@ function createActionHost(
  * @returns The host component.
  */
 function createKindHost(
-	flux: TestFlux,
+	{ FluxProvider, useCapture }: TestFlux,
 	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
 	handle: InputHandle,
 	reads: Log<boolean | Vector2>,
 ): (props: KindProps) => React.ReactNode {
-	const { FluxProvider, useCapture } = flux;
-
 	function Surface({ action }: KindProps): React.ReactNode {
 		const token = useCapture(action);
 		reads.push(token.getState());
@@ -161,12 +157,11 @@ function createKindHost(
  * @returns The host component.
  */
 function createTaggedHost(
-	flux: TestFlux,
+	{ FluxProvider }: TestFlux,
 	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
 	handle: InputHandle,
 	Surface: (props: TaggedProps) => React.ReactNode,
 ): (props: TaggedProps) => React.ReactNode {
-	const { FluxProvider } = flux;
 	return ({ tag }: TaggedProps): React.ReactNode => {
 		return (
 			<FluxProvider core={core} handle={handle}>
@@ -216,12 +211,10 @@ function makeTokenStub(): CaptureTokenLike {
  * @returns The host component.
  */
 function createSiblingHost(
-	flux: TestFlux,
+	{ FluxProvider, useCapture }: TestFlux,
 	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
 	handle: InputHandle,
 ): (props: LiveProps) => React.ReactNode {
-	const { FluxProvider, useCapture } = flux;
-
 	function Surface(): React.ReactNode {
 		useCapture("jump");
 		return <frame />;
@@ -249,13 +242,11 @@ function createSiblingHost(
  * @returns The host component.
  */
 function createToggleHost(
-	flux: TestFlux,
+	{ FluxProvider, useCapture }: TestFlux,
 	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
 	handle: InputHandle,
 	reads: Log<ActionReads>,
 ): (props: EnabledProps) => React.ReactNode {
-	const { FluxProvider, useCapture } = flux;
-
 	function Surface({ enabled }: EnabledProps): React.ReactNode {
 		const token = useCapture("jump", { enabled });
 		reads.push({
@@ -286,13 +277,11 @@ function createToggleHost(
  * @returns The host component.
  */
 function createTogglingTokenHost(
-	flux: TestFlux,
+	{ FluxProvider, useCapture }: TestFlux,
 	core: FluxCore<typeof TEST_ACTIONS, TestContexts>,
 	handle: InputHandle,
 	log: Log<JumpToken>,
 ): (props: EnabledProps) => React.ReactNode {
-	const { FluxProvider, useCapture } = flux;
-
 	function Surface({ enabled }: EnabledProps): React.ReactNode {
 		log.push(useCapture("jump", { enabled }));
 		return <frame />;

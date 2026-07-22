@@ -3,12 +3,15 @@
 
 version: "0.2"
 language: en
+
 words:
   - claudecode
   - exclusify
   - interactable
   - jecs
   - ocale
+  - oxlint
+  - pcall
   - rbxl
   - rojo
   - thumbstick

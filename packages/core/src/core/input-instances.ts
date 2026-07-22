@@ -47,7 +47,9 @@ interface CreateContextOptions {
 	readonly instances: Array<Instance>;
 }
 
-/** Name of the folder every handle parents its `InputContext` instances under. */
+/**
+ * Name of the folder every handle parents its `InputContext` instances under.
+ */
 export const INPUT_FOLDER_NAME = "input";
 
 interface FindInstancesOptions {
@@ -67,8 +69,12 @@ interface SearchState {
  * @param options - Context names, context configs, and action configs.
  * @returns The created instance data for storage in handle data.
  */
-export function createInputInstances(options: CreateInstancesOptions): InputInstanceData {
-	const { actions, contextNames, contexts, parent } = options;
+export function createInputInstances({
+	actions,
+	contextNames,
+	contexts,
+	parent,
+}: CreateInstancesOptions): InputInstanceData {
 	const actionsByContext = new Map<string, Map<string, InputAction>>();
 	const inputContexts = new Map<string, InputContext>();
 	const instances = new Array<Instance>();
@@ -119,8 +125,11 @@ export function destroyInputInstances(data: InputInstanceData): void {
  * @param options - Context names and parent to search under.
  * @returns The discovered instance data and connections for cleanup.
  */
-export function findInputInstances(options: FindInstancesOptions): InputInstanceData {
-	const { actions, contextNames, parent } = options;
+export function findInputInstances({
+	actions,
+	contextNames,
+	parent,
+}: FindInstancesOptions): InputInstanceData {
 	const state = createSearchState(actions);
 
 	const folder = parent.FindFirstChild(INPUT_FOLDER_NAME);
@@ -258,8 +267,13 @@ function toInputActionType(actionType: ActionType): Enum.InputActionType {
 	}
 }
 
-function createAction(options: CreateActionOptions): InputAction {
-	const { actionConfig, actionName, bindings, instances, parent } = options;
+function createAction({
+	actionConfig,
+	actionName,
+	bindings,
+	instances,
+	parent,
+}: CreateActionOptions): InputAction {
 	const inputAction = new Instance("InputAction");
 	inputAction.Name = actionName;
 	inputAction.Type = toInputActionType(actionConfig.type);
@@ -269,8 +283,13 @@ function createAction(options: CreateActionOptions): InputAction {
 	return inputAction;
 }
 
-function createContext(options: CreateContextOptions): InputContext {
-	const { actions, actionsByContext, contextConfig, contextName, instances } = options;
+function createContext({
+	actions,
+	actionsByContext,
+	contextConfig,
+	contextName,
+	instances,
+}: CreateContextOptions): InputContext {
 	const inputContext = new Instance("InputContext");
 	inputContext.Name = contextName;
 	inputContext.Priority = contextConfig.priority ?? DEFAULT_CONTEXT_PRIORITY;

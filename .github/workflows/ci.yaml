@@ -54,7 +54,7 @@ jobs:
         run: pnpm exec turbo run typecheck
 
       - name: Lint
-        run: pnpm exec turbo run lint:ci
+        run: pnpm exec turbo run lint
 
     timeout-minutes: 5
 
@@ -82,13 +82,13 @@ jobs:
       - name: Test Scripts
         run: pnpm run test:scripts
 
-      - env:
+      - name: Test
+        run: pnpm run test:affected -- --coverage --coverageReporters json-summary --coverageReporters json
+        env:
           BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
           ROBLOX_OPEN_CLOUD_API_KEY: ${{ secrets.ROBLOX_OPEN_CLOUD_API_KEY }}
           ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
           ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}
-        name: Test
-        run: pnpm run test:affected -- --coverage --coverageReporters json-summary --coverageReporters json
 
       - if: ${{ always() && hashFiles('coverage/coverage-summary.json') != '' }}
         name: Coverage Report

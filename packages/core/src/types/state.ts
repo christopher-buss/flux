@@ -212,8 +212,8 @@ export interface ActionState<Actions extends ActionMap = ActionMap> {
 	): CaptureToken<Actions, A>;
 
 	/**
-	 * Marks the action as consumed for the rest of the frame, so every processed
-	 * read returns false or the type's neutral value.
+	 * Marks the action as consumed for the rest of the frame, so every
+	 * processed read returns false or the type's neutral value.
 	 *
 	 * The claim flag carries no owner identity, so claiming before reading
 	 * suppresses your own reads. Always read first, then claim — priority comes

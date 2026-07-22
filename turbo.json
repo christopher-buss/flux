@@ -59,17 +59,6 @@
 			],
 			"outputs": [".eslintcache"]
 		},
-		"//#lint:ci": {
-			"inputs": [
-				"packages/*/src/**",
-				"packages/*/test/**",
-				"e2e/*/src/**",
-				"scripts/*.ts",
-				"eslint.config.ts",
-				"package.json"
-			],
-			"outputs": [".eslintcache"]
-		},
 		"//#typecheck": {
 			"inputs": [
 				"packages/*/src/**",

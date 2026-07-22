@@ -11,10 +11,11 @@ import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { HandleData } from "./handle-lifecycle";
 import { getHandleData } from "./handle-lifecycle";
-import { assertValidBindings, createBindingsForAction, createInputBinding } from "./input-bindings";
+import { assertValidBindings, createBindingsForAction } from "./input-bindings";
 import type { InputInstanceData } from "./input-instances";
 import type { PlatformOverrides } from "./platform-overrides";
 import { bucketByPlatform, composeBindings, PLATFORM_ORDER } from "./platform-overrides";
+import { destroyChildrenInto, pruneInstances, rebuildActionBindings } from "./rebuild-bindings";
 import { getContextBindings } from "./resolve-bindings";
 
 /**
@@ -127,36 +128,6 @@ interface ContextDefaultsOptions {
 }
 
 /**
- * Replaces every `InputBinding` child on all `InputAction` instances that
- * match the given action name across the handle's registered contexts. The
- * resolver picks the replacement bindings per context, so callers can share
- * one set across contexts (for rebind) or restore per-context originals
- * (for reset).
- * @param data - The handle's input instance data.
- * @param actionName - The action whose bindings to rebuild.
- * @param resolve - Per-context resolver returning replacement bindings.
- */
-export function rebuildActionBindings(
-	data: InputInstanceData,
-	actionName: string,
-	resolve: (contextName: string) => ReadonlyArray<BindingLike>,
-): void {
-	const destroyed = destroyExistingBindings(data, actionName);
-	pruneInstances(data.instances, destroyed);
-
-	for (const [contextName, actionInstances] of data.actionsByContext) {
-		const inputAction = actionInstances.get(actionName);
-		if (inputAction === undefined) {
-			continue;
-		}
-
-		for (const bindingLike of resolve(contextName)) {
-			createInputBinding(bindingLike, inputAction, data.instances);
-		}
-	}
-}
-
-/**
  * Throws if the given handle subscribes to server-owned instances. Rebinding
  * mutates `InputBinding` instances, which only the owner may modify.
  * @template T - The action map type.
@@ -201,8 +172,12 @@ export function ownedHandleData<T extends ActionMap>(
  * @param options - The action, handle state and context config, plus the
  * replacement bindings for the action.
  */
-export function applyRebindOne<T extends ActionMap>(options: ActionRebindOptions<T>): void {
-	const { action, bindings, contexts, handleData } = options;
+export function applyRebindOne<T extends ActionMap>({
+	action,
+	bindings,
+	contexts,
+	handleData,
+}: ActionRebindOptions<T>): void {
 	assertValidBindings(bindings, action);
 	const byPlatform = bucketByPlatform(bindings);
 	const overrides: PlatformOverrides = new Map();
@@ -223,10 +198,13 @@ export function applyRebindOne<T extends ActionMap>(options: ActionRebindOptions
  * @param options - The action, platform, handle state and context config, plus
  * the replacement bindings. An empty array is a deliberate unbind.
  */
-export function applyRebindForPlatform<T extends ActionMap>(
-	options: PlatformRebindOptions<T>,
-): void {
-	const { action, bindings, contexts, handleData, platform } = options;
+export function applyRebindForPlatform<T extends ActionMap>({
+	action,
+	bindings,
+	contexts,
+	handleData,
+	platform,
+}: PlatformRebindOptions<T>): void {
 	assertValidBindings(bindings, action);
 	let overrides = handleData.bindingOverrides.get(action);
 	if (overrides === undefined) {
@@ -248,8 +226,12 @@ export function applyRebindForPlatform<T extends ActionMap>(
  * @param options - The handle state, action map, context config and the full
  * binding state to apply.
  */
-export function applyRebindAll<T extends ActionMap>(options: RebindAllOptions<T>): void {
-	const { actions, bindings, contexts, handleData } = options;
+export function applyRebindAll<T extends ActionMap>({
+	actions,
+	bindings,
+	contexts,
+	handleData,
+}: RebindAllOptions<T>): void {
 	assertRebindAllValid(actions, bindings);
 	handleData.bindingOverrides.clear();
 	const handledActions = new Set<string>();
@@ -279,8 +261,11 @@ export function applyRebindAll<T extends ActionMap>(options: RebindAllOptions<T>
  * @template T - The action map type.
  * @param options - The action, handle state and context config.
  */
-export function applyResetOne<T extends ActionMap>(options: ActionScopedOptions<T>): void {
-	const { action, contexts, handleData } = options;
+export function applyResetOne<T extends ActionMap>({
+	action,
+	contexts,
+	handleData,
+}: ActionScopedOptions<T>): void {
 	handleData.bindingOverrides.delete(action);
 	rebuildFromOverrides({ action, contexts, handleData });
 }
@@ -292,10 +277,12 @@ export function applyResetOne<T extends ActionMap>(options: ActionScopedOptions<
  * @template T - The action map type.
  * @param options - The action, platform, handle state and context config.
  */
-export function applyResetForPlatform<T extends ActionMap>(
-	options: PlatformScopedOptions<T>,
-): void {
-	const { action, contexts, handleData, platform } = options;
+export function applyResetForPlatform<T extends ActionMap>({
+	action,
+	contexts,
+	handleData,
+	platform,
+}: PlatformScopedOptions<T>): void {
 	const overrides = handleData.bindingOverrides.get(action);
 	if (overrides?.get(platform) === undefined) {
 		// Nothing was overridden for this platform, so the instances already
@@ -324,10 +311,11 @@ export function applyResetForPlatform<T extends ActionMap>(
  * @template T - The action map type.
  * @param options - The platform, handle state and context config.
  */
-export function applyResetAllForPlatform<T extends ActionMap>(
-	options: PlatformResetAllOptions<T>,
-): void {
-	const { contexts, handleData, platform } = options;
+export function applyResetAllForPlatform<T extends ActionMap>({
+	contexts,
+	handleData,
+	platform,
+}: PlatformResetAllOptions<T>): void {
 	const overridden = new Array<string>();
 	for (const [action, overrides] of handleData.bindingOverrides) {
 		if (overrides.get(platform) !== undefined) {
@@ -397,8 +385,11 @@ export function serializeFullBindings<T extends ActionMap>(
  * @param options - The handle state, context config and the name of the
  * context that was just activated.
  */
-export function replayOverridesIntoContext<T extends ActionMap>(options: ReplayOptions<T>): void {
-	const { contextName, contexts, handleData } = options;
+export function replayOverridesIntoContext<T extends ActionMap>({
+	contextName,
+	contexts,
+	handleData,
+}: ReplayOptions<T>): void {
 	if (handleData.bindingOverrides.isEmpty()) {
 		return;
 	}
@@ -422,36 +413,6 @@ export function replayOverridesIntoContext<T extends ActionMap>(options: ReplayO
 	}
 }
 
-function destroyChildrenInto(inputAction: InputAction, destroyed: Set<Instance>): void {
-	for (const child of inputAction.GetChildren()) {
-		destroyed.add(child);
-		child.Destroy();
-	}
-}
-
-function destroyExistingBindings(data: InputInstanceData, actionName: string): Set<Instance> {
-	const destroyed = new Set<Instance>();
-	for (const [, actionInstances] of data.actionsByContext) {
-		const inputAction = actionInstances.get(actionName);
-		if (inputAction === undefined) {
-			continue;
-		}
-
-		destroyChildrenInto(inputAction, destroyed);
-	}
-
-	return destroyed;
-}
-
-function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): void {
-	for (let index = instances.size() - 1; index >= 0; index -= 1) {
-		const instance = instances[index];
-		if (instance !== undefined && destroyed.has(instance)) {
-			instances.remove(index);
-		}
-	}
-}
-
 /**
  * Builds a lazy reader for the bindings a context declares for an action.
  *
@@ -461,8 +422,11 @@ function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): v
  * @param options - The context config, context name and action to read.
  * @returns A thunk reading that context's declared bindings.
  */
-function contextDefaults(options: ContextDefaultsOptions): () => ReadonlyArray<BindingLike> {
-	const { action, contextName, contexts } = options;
+function contextDefaults({
+	action,
+	contextName,
+	contexts,
+}: ContextDefaultsOptions): () => ReadonlyArray<BindingLike> {
 	return () => getContextBindings({ action, context: contextName, contexts });
 }
 
@@ -473,8 +437,11 @@ function contextDefaults(options: ContextDefaultsOptions): () => ReadonlyArray<B
  * @template T - The action map type.
  * @param options - The action, handle state and context config.
  */
-function rebuildFromOverrides<T extends ActionMap>(options: ActionScopedOptions<T>): void {
-	const { action, contexts, handleData } = options;
+function rebuildFromOverrides<T extends ActionMap>({
+	action,
+	contexts,
+	handleData,
+}: ActionScopedOptions<T>): void {
 	const overrides = handleData.bindingOverrides.get(action);
 	rebuildActionBindings(handleData.instanceData, action, (contextName) => {
 		return composeBindings(overrides, contextDefaults({ action, contextName, contexts }));
@@ -564,8 +531,11 @@ function collectActionNames(data: InputInstanceData): Set<string> {
  * @template T - The action map type.
  * @param options - The handle state, context config and actions to skip.
  */
-function restoreOriginalBindings<T extends ActionMap>(options: RestoreOptions<T>): void {
-	const { contexts, handleData, skip } = options;
+function restoreOriginalBindings<T extends ActionMap>({
+	contexts,
+	handleData,
+	skip,
+}: RestoreOptions<T>): void {
 	for (const action of collectActionNames(handleData.instanceData)) {
 		if (skip?.has(action) === true) {
 			continue;

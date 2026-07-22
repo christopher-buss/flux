@@ -19,7 +19,5 @@
 		{
 			"path": "./tsconfig.typetest.json"
 		}
-	],
-	"files": [],
-	"include": []
+	]
 }

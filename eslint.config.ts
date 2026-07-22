@@ -1,12 +1,16 @@
-import isentinel, { GLOB_MARKDOWN_CODE, GLOB_SRC } from "@isentinel/eslint-config";
+import isentinel, { GLOB_MARKDOWN_CODE, GLOB_SRC, GLOB_TESTS } from "@isentinel/eslint-config";
 
 export default isentinel(
 	{
 		name: "flux/root",
-		flawless: true,
-		ignores: ["!.claude", "flux"],
-		namedConfigs: true,
-		react: true,
+		ignores: ["flux"],
+		naming: true,
+		oxlint: "native",
+		react: {
+			overrides: {
+				"react/immutability": "off",
+			},
+		},
 		roblox: {
 			files: [`packages/*/*/${GLOB_SRC}`],
 			filesTypeAware: [`packages/*/*/${GLOB_SRC}`],
@@ -14,13 +18,18 @@ export default isentinel(
 		test: {
 			jest: {
 				extended: true,
+				files: [
+					...GLOB_TESTS.map((path) => `packages/*/*/src/${path}`),
+					...GLOB_TESTS.map((path) => `packages/*/*/test/${path}`),
+				],
+			},
+			vitest: {
+				extended: false,
+				files: [...GLOB_TESTS.map((path) => `scripts/${path}`)],
 			},
 		},
 		type: "package",
 		typescript: {
-			overridesTypeAware: {
-				"ts/no-deprecated": "error",
-			},
 			parserOptionsTypeAware: {
 				projectService: true,
 			},
@@ -57,6 +66,7 @@ export default isentinel(
 		name: "project/markdown",
 		files: [GLOB_MARKDOWN_CODE],
 		rules: {
+			"flawless/max-lines-per-function": "off",
 			"ts/no-unused-private-class-members": "off",
 		},
 	},
@@ -64,14 +74,7 @@ export default isentinel(
 		name: "project/type-tests",
 		files: ["**/*.spec-d.ts"],
 		rules: {
-			"max-lines-per-function": "off",
-		},
-	},
-	{
-		name: "project/github-required-filenames",
-		files: [".github/FUNDING.{yml,yaml}", ".github/ISSUE_TEMPLATE/**"],
-		rules: {
-			"unicorn/filename-case": "off",
+			"flawless/max-lines-per-function": "off",
 		},
 	},
 );

@@ -60,7 +60,7 @@ declare function renderWithFlux<T extends ActionMap>(
 		actions: T;
 		context: string;
 		contexts: Record<string, ContextConfig>;
-		instance?: Instance | undefined;
+		instance?: Instance;
 	},
 ): RenderResult & {
 	readonly core: FluxCore<T>;

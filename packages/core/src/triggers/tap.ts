@@ -2,7 +2,10 @@ import type { Trigger, TriggerState } from "./types";
 
 /** Options for the tap trigger. */
 export interface TapOptions {
-	/** Maximum duration in seconds to count as a tap (exclusive — duration must be strictly less). */
+	/**
+	 * Maximum duration in seconds to count as a tap (exclusive — duration must
+	 * be strictly less).
+	 */
 	readonly threshold: number;
 }
 

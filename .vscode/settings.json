@@ -48,5 +48,7 @@
 	"git.branchProtectionPrompt": "alwaysCommitToNewBranch",
 	"git.inputValidation": true,
 	"git.inputValidationLength": 100,
-	"git.inputValidationSubjectLength": 72
+	"git.inputValidationSubjectLength": 72,
+	"oxc.path.node": "${workspaceFolder}\\.vscode\\mise-tools\\node.exe",
+	"oxc.enable.oxfmt": false
 }

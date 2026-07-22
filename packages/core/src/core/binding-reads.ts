@@ -52,8 +52,12 @@ type ActionNames = Readonly<Record<string, unknown>>;
  * @returns The handle's state.
  * @throws If the context name is unknown, or the handle is not registered.
  */
-export function scopedHandleData<T extends ActionMap>(options: CoreScopeOptions<T>): HandleData<T> {
-	const { context, contexts, handle, handles } = options;
+export function scopedHandleData<T extends ActionMap>({
+	context,
+	contexts,
+	handle,
+	handles,
+}: CoreScopeOptions<T>): HandleData<T> {
 	if (context !== undefined) {
 		validateContextName(contexts, context);
 	}

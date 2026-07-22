@@ -1398,7 +1398,9 @@ describe("createActionState", () => {
 		});
 
 		describe("debugCaptures", () => {
-			/** Turns the dev gate on for this test and restores it afterward. */
+			/**
+			 * Turns the dev gate on for this test and restores it afterward.
+			 */
 			function enableDevelopmentMode(): void {
 				_G.__DEV__ = true;
 				afterThis(() => {

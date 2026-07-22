@@ -1,7 +1,8 @@
 import type { Trigger, TypedTrigger } from "./types";
 
 /**
- * Wraps a trigger as implicit. All implicit triggers must pass for the action to fire.
+ * Wraps a trigger as implicit. All implicit triggers must pass for the action
+ * to fire.
  *
  * @param trigger - The trigger to wrap.
  * @returns A typed trigger with `"implicit"` classification.
@@ -11,7 +12,8 @@ export function implicit(trigger: Trigger): TypedTrigger {
 }
 
 /**
- * Wraps a trigger as explicit. Any one explicit trigger passing fires the action.
+ * Wraps a trigger as explicit. Any one explicit trigger passing fires the
+ * action.
  *
  * @param trigger - The trigger to wrap.
  * @returns A typed trigger with `"explicit"` classification.
@@ -21,7 +23,8 @@ export function explicit(trigger: Trigger): TypedTrigger {
 }
 
 /**
- * Wraps a trigger as a blocker. If any blocker triggers, the action is prevented.
+ * Wraps a trigger as a blocker. If any blocker triggers, the action is
+ * prevented.
  *
  * @param trigger - The trigger to wrap.
  * @returns A typed trigger with `"blocker"` classification.

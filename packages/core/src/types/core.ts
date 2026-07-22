@@ -114,8 +114,8 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	 * Returns the effective bindings for a single action.
 	 *
 	 * Merges default bindings from context configs with any active overrides.
-	 * If a context is specified, returns only bindings from that context.
-	 * When no context is given, returns bindings from all active contexts (deduped).
+	 * If a context is specified, returns only bindings from that context. When
+	 * no context is given, returns bindings from all active contexts (deduped).
 	 *
 	 * @param handle - The input consumer handle.
 	 * @param action - The action name to query.
@@ -388,7 +388,8 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	): [InputHandle, () => void];
 
 	/**
-	 * Subscribes to server-created IAS instances using an externally-provided handle.
+	 * Subscribes to server-created IAS instances using an externally-provided
+	 * handle.
 	 *
 	 * @param handle - The externally-provided handle to register under.
 	 * @param parent - The instance containing server-created InputContexts.

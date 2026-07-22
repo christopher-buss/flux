@@ -1,6 +1,8 @@
 import type { OptionsReceived } from "@rbxts/pretty-format";
 
-/** Options for `prettyDOM`, extending pretty-format options with a node filter. */
+/**
+ * Options for `prettyDOM`, extending pretty-format options with a node filter.
+ */
 export interface PrettyDOMOptions extends OptionsReceived {
 	/**
 	 * Given a `Instance` return `false` if you wish to ignore that node in the

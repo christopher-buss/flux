@@ -9,7 +9,5 @@
 		{ "path": "packages/core/tsconfig.spec.json" },
 		{ "path": "packages/jecs/tsconfig.spec.json" },
 		{ "path": "packages/react/tsconfig.spec.json" }
-	],
-	"files": [],
-	"include": []
+	]
 }

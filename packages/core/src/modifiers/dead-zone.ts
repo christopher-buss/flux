@@ -1,7 +1,8 @@
 import type { Modifier, ModifierValue } from "./types";
 
 /**
- * Creates a dead zone modifier that zeroes input below a threshold and rescales above it.
+ * Creates a dead zone modifier that zeroes input below a threshold and
+ * rescales above it.
  *
  * @param threshold - Magnitude below which input is zeroed. Output is rescaled so there is
  *   no jump discontinuity at the boundary.

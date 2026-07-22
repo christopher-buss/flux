@@ -17,7 +17,10 @@ export interface FluxJecsOptions<
 	T extends ActionMap,
 	C extends Record<string, ContextConfig>,
 > extends CreateCoreOptions<T, C> {
-	/** User-provided jecs component for ActionState, created automatically if omitted. */
+	/**
+	 * User-provided jecs component for ActionState, created automatically if
+	 * omitted.
+	 */
 	readonly actionStateComponent?: Entity<ActionState<T>>;
 }
 

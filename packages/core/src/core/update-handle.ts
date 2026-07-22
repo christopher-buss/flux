@@ -74,9 +74,15 @@ interface ContextActionsOptions {
  * Processes all actions for a single handle during an update tick.
  * @param options - The handle, actions, contexts, and delta time.
  */
-export function updateHandle(options: HandleUpdateOptions): void {
-	const { actions, contexts, deltaTime, handle, handleData, isDebug, onReplicationTimeout } =
-		options;
+export function updateHandle({
+	actions,
+	contexts,
+	deltaTime,
+	handle,
+	handleData,
+	isDebug,
+	onReplicationTimeout,
+}: HandleUpdateOptions): void {
 	handleData.internalState.endFrame();
 	const eligible = resolveContextOrder(handleData.activeContexts, contexts);
 	const orderedContexts = eligible.map(({ name }) => name);
@@ -89,7 +95,7 @@ export function updateHandle(options: HandleUpdateOptions): void {
 			handle,
 			handleData,
 			isDebug,
-			...(onReplicationTimeout !== undefined && { onReplicationTimeout }),
+			...(onReplicationTimeout !== undefined ? { onReplicationTimeout } : {}),
 			orderedContexts,
 			processedActions,
 		});
@@ -141,8 +147,14 @@ function updateDuration(
 	return updated;
 }
 
-function processAction(options: ActionUpdateOptions): void {
-	const { actionConfig, actionName, deltaTime, handle, handleData, inputAction } = options;
+function processAction({
+	actionConfig,
+	actionName,
+	deltaTime,
+	handle,
+	handleData,
+	inputAction,
+}: ActionUpdateOptions): void {
 	const rawValue = getRawValue(handleData, actionName, inputAction);
 	const duration = updateDuration(handleData, actionName, rawValue, deltaTime);
 	const modifierContext: ModifierContext = { deltaTime, handle };
@@ -226,19 +238,18 @@ function canProcessAction(
 	return inputAction !== undefined;
 }
 
-// eslint-disable-next-line max-lines-per-function -- dev-mode tracking adds guard branches
-function processContextActions(options: ContextActionsOptions): void {
-	const {
-		actions,
-		contextConfig,
-		deltaTime,
-		handle,
-		handleData,
-		isDebug,
-		onReplicationTimeout,
-		orderedContexts,
-		processedActions,
-	} = options;
+// eslint-disable-next-line flawless/max-lines-per-function -- dev-mode tracking adds guard branches
+function processContextActions({
+	actions,
+	contextConfig,
+	deltaTime,
+	handle,
+	handleData,
+	isDebug,
+	onReplicationTimeout,
+	orderedContexts,
+	processedActions,
+}: ContextActionsOptions): void {
 	for (const [actionName] of pairs(contextConfig.bindings)) {
 		if (processedActions.has(actionName)) {
 			continue;
@@ -255,7 +266,7 @@ function processContextActions(options: ContextActionsOptions): void {
 			actionName,
 		);
 		if (!canProcessAction(handleData, actionName, inputAction)) {
-			if (_G.__DEV__ && isDebug) {
+			if (isDebug && _G.__DEV__) {
 				trackPendingAction(handleData, actionName, deltaTime, onReplicationTimeout);
 			}
 
@@ -264,7 +275,7 @@ function processContextActions(options: ContextActionsOptions): void {
 			continue;
 		}
 
-		if (_G.__DEV__ && isDebug) {
+		if (isDebug && _G.__DEV__) {
 			clearPendingAction(handleData, actionName);
 		}
 

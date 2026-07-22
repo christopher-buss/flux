@@ -154,25 +154,42 @@ function actionOverrides<T extends ActionMap>(
 }
 
 /**
+ * Appends every binding not already in `seen`, recording each as it lands.
+ * @param bindings - The bindings declared by one context.
+ * @param seen - Bindings already merged, mutated in place.
+ * @param result - The merged list, mutated in place.
+ */
+function appendUnseen(
+	bindings: ReadonlyArray<BindingLike>,
+	seen: Set<BindingLike>,
+	result: Array<BindingLike>,
+): void {
+	for (const binding of bindings) {
+		if (seen.has(binding)) {
+			continue;
+		}
+
+		seen.add(binding);
+		result.push(binding);
+	}
+}
+
+/**
  * Merges an action's declared bindings across every active context, keeping
  * first-seen order.
  * @template T - The action map type.
  * @param options - The action, handle state and context config.
  * @returns The merged bindings.
  */
-function mergeBindingsAcrossContexts<T extends ActionMap>(
-	options: BindingQueryOptions<T>,
-): ReadonlyArray<BindingLike> {
-	const { action, contexts, handleData } = options;
+function mergeBindingsAcrossContexts<T extends ActionMap>({
+	action,
+	contexts,
+	handleData,
+}: BindingQueryOptions<T>): ReadonlyArray<BindingLike> {
 	const result = new Array<BindingLike>();
 	const seen = new Set<BindingLike>();
 	for (const context of handleData.activeContexts) {
-		for (const binding of getContextBindings({ action, context, contexts })) {
-			if (!seen.has(binding)) {
-				seen.add(binding);
-				result.push(binding);
-			}
-		}
+		appendUnseen(getContextBindings({ action, context, contexts }), seen, result);
 	}
 
 	return result;
@@ -207,8 +224,13 @@ function declaredBindings<T extends ActionMap>(
  * @returns `true` when the scoped context declares the action, or when any
  * active context does if no context was named.
  */
-function isActionDeclared<T extends ActionMap>(options: OriginQueryOptions<T>): boolean {
-	const { action, actions, context, contexts, handleData } = options;
+function isActionDeclared<T extends ActionMap>({
+	action,
+	actions,
+	context,
+	contexts,
+	handleData,
+}: OriginQueryOptions<T>): boolean {
 	if (context !== undefined) {
 		return isContextAction({
 			action,
