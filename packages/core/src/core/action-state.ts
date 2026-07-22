@@ -14,8 +14,8 @@ import {
 	didAxisBecomeActive,
 	didAxisBecomeInactive,
 	getCurrentDuration,
-	getDefaultValue,
 	getEntry,
+	getNeutralValue,
 	getPreviousDuration,
 	isOngoing,
 	isTriggered,
@@ -87,7 +87,7 @@ export function createActionState<T extends ActionMap>(
 }
 
 function createEntry(config: ActionConfig): ActionEntry {
-	const defaultValue = getDefaultValue(config.type);
+	const neutralValue = getNeutralValue(config.type);
 
 	return {
 		canceledConsumed: false,
@@ -96,12 +96,12 @@ function createEntry(config: ActionConfig): ActionEntry {
 		claimed: false,
 		duration: 0,
 		enabled: config.enabled ?? true,
-		neutralValue: defaultValue,
+		neutralValue,
 		previousDuration: 0,
 		previousTriggerState: "none",
-		previousValue: defaultValue,
+		previousValue: neutralValue,
 		triggerState: "none",
-		value: defaultValue,
+		value: neutralValue,
 		valueRestsAtZero: valueRestsAtZero(config.type),
 	};
 }

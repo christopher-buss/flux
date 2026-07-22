@@ -115,11 +115,11 @@ const DRAIN_HOLDER: CaptureViewer = {};
 const GAMEPLAY_READER: CaptureViewer = {};
 
 /**
- * Returns the default zero value for an action type.
+ * Returns the neutral value for an action type.
  * @param actionType - Bool, Direction1D, Direction2D, Direction3D, or ViewportPosition.
- * @returns The corresponding zero/false value.
+ * @returns The corresponding neutral value.
  */
-export function getDefaultValue(actionType: ActionType): ActionValueType {
+export function getNeutralValue(actionType: ActionType): ActionValueType {
 	switch (actionType) {
 		case "Bool": {
 			return false;
@@ -372,7 +372,7 @@ export function consumeFrameClaim(entry: ActionEntry): void {
  * @returns The neutral value if suppressed, otherwise the current value.
  */
 export function readEntryValue(entry: ActionEntry, viewer?: CaptureViewer): ActionValueType {
-	return readEntry(entry, { pick: getValue, viewer, whenSuppressed: getNeutralValue });
+	return readEntry(entry, { pick: getValue, viewer, whenSuppressed: getEntryNeutralValue });
 }
 
 /**
@@ -595,6 +595,6 @@ function getValue(entry: ActionEntry): ActionValueType {
 	return entry.value;
 }
 
-function getNeutralValue(entry: ActionEntry): ActionValueType {
+function getEntryNeutralValue(entry: ActionEntry): ActionValueType {
 	return entry.neutralValue;
 }

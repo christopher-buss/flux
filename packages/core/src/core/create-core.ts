@@ -12,7 +12,7 @@ import type { ContextConfig } from "../types/contexts";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
-import { getDefaultValue } from "./action-entry";
+import { getNeutralValue } from "./action-entry";
 import { deactivateContext, isContextActive } from "./active-contexts";
 import { addHandleContext } from "./add-context";
 import { readAllBindings, scopedHandleData } from "./binding-reads";
@@ -164,7 +164,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		getNeutralValue<A extends keyof T & string>(action: A): ActionValue<T, A> {
 			const config = actions[action];
 			assert(config, `unknown action: ${action}`);
-			return getDefaultValue(config.type) as ActionValue<T, A>;
+			return getNeutralValue(config.type) as ActionValue<T, A>;
 		},
 		getState(handle: InputHandle): ActionState<T> {
 			return getHandleData(handles, handle).publicState;
