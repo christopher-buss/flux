@@ -42,21 +42,32 @@
 				"!packages/*/**/*.tsbuildinfo"
 			]
 		},
-		"test": {
+		"//#test:run": {
 			"dependsOn": ["//#dev:build"],
-			"inputs": ["src/**", "test/**", "tsconfig.spec.json", "package.json"],
+			"inputs": [
+				"packages/*/src/**",
+				"packages/*/test/**",
+				"packages/*/jest.config.ts",
+				"packages/*/test.project.json",
+				"packages/*/package.json"
+			],
+			"outputs": [".jest-roblox/**", "coverage/**"],
+			"env": ["ROBLOX_OPEN_CLOUD_API_KEY", "ROBLOX_PLACE_ID", "ROBLOX_UNIVERSE_ID"]
+		},
+		"//#test:run:all": {
+			"dependsOn": ["//#dev:build"],
+			"inputs": [
+				"packages/*/src/**",
+				"packages/*/test/**",
+				"packages/*/jest.config.ts",
+				"packages/*/test.project.json",
+				"packages/*/package.json"
+			],
 			"outputs": [".jest-roblox/**", "coverage/**"],
 			"env": ["ROBLOX_OPEN_CLOUD_API_KEY", "ROBLOX_PLACE_ID", "ROBLOX_UNIVERSE_ID"]
 		},
 		"//#lint": {
-			"inputs": [
-				"packages/*/src/**",
-				"packages/*/test/**",
-				"e2e/*/src/**",
-				"scripts/*.ts",
-				"eslint.config.ts",
-				"package.json"
-			],
+			"inputs": ["$TURBO_DEFAULT$"],
 			"outputs": [".eslintcache"]
 		},
 		"//#typecheck": {
@@ -66,6 +77,9 @@
 				"packages/*/tsconfig*.json",
 				"e2e/*/src/**",
 				"e2e/*/tsconfig*.json",
+				"scripts/*.ts",
+				"scripts/hooks/*.ts",
+				"scripts/tsconfig.json",
 				"tsconfig.build.json",
 				"tsconfig.json"
 			],

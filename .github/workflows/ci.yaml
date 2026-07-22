@@ -83,9 +83,10 @@ jobs:
         run: pnpm run test:scripts
 
       - name: Test
-        run: pnpm run test:affected -- --coverage --coverageReporters json-summary --coverageReporters json
+        run: pnpm exec turbo run test:run -- --affected-since="$BASE_REF" --coverage --coverageReporters json-summary --coverageReporters json
         env:
-          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before || 'main' }}
+          FORCE_COLOR: 1
           ROBLOX_OPEN_CLOUD_API_KEY: ${{ secrets.ROBLOX_OPEN_CLOUD_API_KEY }}
           ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
           ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}

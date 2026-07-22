@@ -17,8 +17,10 @@
 		"eslint-config": "npx @eslint/config-inspector",
 		"postinstall": "node scripts/generate-rojo-node-modules.ts",
 		"lint": "pnpm exec isentinel-lint",
-		"test": "FORCE_COLOR=1 turbo run dev:build && jest-roblox --workspace --packages @rbxts/flux,@rbxts/flux-jecs,@rbxts/flux-react,@flux/test-utils",
-		"test:affected": "FORCE_COLOR=1 turbo run dev:build && jest-roblox --workspace --affected-since=${BASE_REF:-main}",
+		"test": "FORCE_COLOR=1 turbo run test:run",
+		"test:all": "FORCE_COLOR=1 turbo run test:run:all",
+		"test:run": "jest-roblox --workspace --affected-since=main",
+		"test:run:all": "jest-roblox --workspace --packages @rbxts/flux,@rbxts/flux-jecs,@rbxts/flux-react,@flux/test-utils",
 		"test:scripts": "pnpm --filter scripts test",
 		"typecheck": "tsgo --build --emitDeclarationOnly"
 	},
