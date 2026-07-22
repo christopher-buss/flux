@@ -94,10 +94,13 @@ tree (`You cannot use modules directly under node_modules`). The
 compiling project's own `node_modules`, so the import resolves for every
 consumer.
 
-So `services.ts` carries the coverage exclusion instead: two `game.GetService`
-calls, no branches, no rule. Services are read per call rather than held at
-module scope, so importing `@rbxts/flux` on the server never reaches for a
-client-only service.
+So `engine-source.ts` imports `@rbxts/services` directly, and nothing needs a
+coverage exclusion — the adapter is a covered file like any other. Two more
+pieces make the module mock work: `rbxts-transformer-jest`, wired through
+`plugins` in `tsconfig.spec.json`, rewrites the `"@rbxts/services"` specifier
+into the module instance at compile time, and `@roblox-ts/rojo-resolver` is
+aliased to `@isentinel/rojo-utils` in the catalog so the nested `*.project.json`
+mounts resolve.
 
 ## Considered options
 
