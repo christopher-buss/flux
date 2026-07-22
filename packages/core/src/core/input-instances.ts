@@ -192,6 +192,7 @@ export function fillContextActions({
 	data,
 	inputContext,
 }: FillContextOptions): void {
+	assert(data.owned, "cannot create instances for a handle that does not own them");
 	populateContextActions({
 		actions,
 		contextConfig,

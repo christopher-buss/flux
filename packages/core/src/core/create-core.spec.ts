@@ -6,7 +6,7 @@ import { hold, implicit, tap } from "../triggers";
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
-import type { InputHandle } from "../types/core";
+import type { FluxCore, InputHandle } from "../types/core";
 import { createCore } from "./create-core";
 
 _G.__DEV__ = true;
@@ -113,6 +113,26 @@ const ONE_SHOT_ACTIONS = {
 const ONE_SHOT_CONTEXTS = {
 	gameplay: { bindings: { charge: [Enum.KeyCode.E] } },
 } satisfies Record<string, ContextConfig>;
+
+/**
+ * Registers a handle, then activates a "ui" context whose InputContext is
+ * already in the hierarchy with no InputAction children.
+ * @param core - The core to register the handle with.
+ * @returns The handle and the adopted, initially childless InputContext.
+ */
+function adoptBareContext(core: FluxCore<typeof TEST_ACTIONS>): [InputHandle, InputContext] {
+	const parent = new Instance("Folder");
+	const handle = core.register(parent, "gameplay");
+
+	const inputFolder = parent.FindFirstChild("input");
+	assert(inputFolder, "no input folder");
+	const uiContext = new Instance("InputContext");
+	uiContext.Name = "ui";
+	uiContext.Parent = inputFolder;
+
+	core.addContext(handle, "ui");
+	return [handle, uiContext];
+}
 
 describe("createCore", () => {
 	it("should return object with all FluxCore methods", () => {
@@ -363,21 +383,21 @@ describe("createCore", () => {
 		it("should update after adopting a context whose InputActions are missing", () => {
 			expect.assertions(1);
 
-			const parent = new Instance("Folder");
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = core.register(parent, "gameplay");
-
-			const inputFolder = parent.FindFirstChild("input");
-			assert(inputFolder, "no input folder");
-			const uiContext = new Instance("InputContext");
-			uiContext.Name = "ui";
-			uiContext.Parent = inputFolder;
-
-			core.addContext(handle, "ui");
+			adoptBareContext(core);
 
 			expect(() => {
 				core.update(0.016);
 			}).never.toThrow();
+		});
+
+		it("should create the InputActions an adopted context is missing", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const [, uiContext] = adoptBareContext(core);
+
+			expect(uiContext.FindFirstChild("jump")).toBeDefined();
 		});
 
 		it("should remove context", () => {
