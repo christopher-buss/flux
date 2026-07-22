@@ -1,4 +1,3 @@
-/* eslint-disable flawless/naming-convention -- React components use PascalCase */
 import { cleanup, render } from "@flux/test-utils/react-testing-library-lua";
 import type { InputHandle } from "@rbxts/flux";
 import { createCore } from "@rbxts/flux";

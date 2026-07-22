@@ -57,12 +57,18 @@ export type BoundFunctions<Q> = Q extends typeof queries
 				this: void,
 				...args: Parameters<BoundFunction<queries.FindByText<T>>>
 			): ReturnType<queries.FindByText<T>>;
-			/** Get all elements matching a display value, throwing if none found. */
+			/**
+			 * Get all elements matching a display value, throwing if none
+			 * found.
+			 */
 			getAllByDisplayValue<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.AllByBoundAttribute<T>>>
 			): ReturnType<queries.AllByBoundAttribute<T>>;
-			/** Get all elements matching placeholder text, throwing if none found. */
+			/**
+			 * Get all elements matching placeholder text, throwing if none
+			 * found.
+			 */
 			getAllByPlaceholderText<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.AllByBoundAttribute<T>>>
@@ -72,67 +78,105 @@ export type BoundFunctions<Q> = Q extends typeof queries
 				this: void,
 				...args: Parameters<BoundFunction<queries.AllByBoundAttribute<T>>>
 			): ReturnType<queries.AllByBoundAttribute<T>>;
-			/** Get all elements matching text content, throwing if none found. */
+			/**
+			 * Get all elements matching text content, throwing if none found.
+			 */
 			getAllByText<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.AllByText<T>>>
 			): ReturnType<queries.AllByText<T>>;
-			/** Get a single element by display value, throwing if not found or ambiguous. */
+			/**
+			 * Get a single element by display value, throwing if not found or
+			 * ambiguous.
+			 */
 			getByDisplayValue<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.GetByBoundAttribute<T>>>
 			): ReturnType<queries.GetByBoundAttribute<T>>;
-			/** Get a single element by placeholder text, throwing if not found or ambiguous. */
+			/**
+			 * Get a single element by placeholder text, throwing if not found
+			 * or ambiguous.
+			 */
 			getByPlaceholderText<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.GetByBoundAttribute<T>>>
 			): ReturnType<queries.GetByBoundAttribute<T>>;
-			/** Get a single element by test ID, throwing if not found or ambiguous. */
+			/**
+			 * Get a single element by test ID, throwing if not found or
+			 * ambiguous.
+			 */
 			getByTestId<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.GetByBoundAttribute<T>>>
 			): ReturnType<queries.GetByBoundAttribute<T>>;
-			/** Get a single element by text content, throwing if not found or ambiguous. */
+			/**
+			 * Get a single element by text content, throwing if not found or
+			 * ambiguous.
+			 */
 			getByText<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.GetByText<T>>>
 			): ReturnType<queries.GetByText<T>>;
-			/** Query all elements matching a display value, returning empty array if none. */
+			/**
+			 * Query all elements matching a display value, returning empty
+			 * array if none.
+			 */
 			queryAllByDisplayValue<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.AllByBoundAttribute<T>>>
 			): ReturnType<queries.AllByBoundAttribute<T>>;
-			/** Query all elements matching placeholder text, returning empty array if none. */
+			/**
+			 * Query all elements matching placeholder text, returning empty
+			 * array if none.
+			 */
 			queryAllByPlaceholderText<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.AllByBoundAttribute<T>>>
 			): ReturnType<queries.AllByBoundAttribute<T>>;
-			/** Query all elements matching a test ID, returning empty array if none. */
+			/**
+			 * Query all elements matching a test ID, returning empty array if
+			 * none.
+			 */
 			queryAllByTestId<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.AllByBoundAttribute<T>>>
 			): ReturnType<queries.AllByBoundAttribute<T>>;
-			/** Query all elements matching text content, returning empty array if none. */
+			/**
+			 * Query all elements matching text content, returning empty array
+			 * if none.
+			 */
 			queryAllByText<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.AllByText<T>>>
 			): ReturnType<queries.AllByText<T>>;
-			/** Query a single element by display value, returning undefined if not found. */
+			/**
+			 * Query a single element by display value, returning undefined if
+			 * not found.
+			 */
 			queryByDisplayValue<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.QueryByBoundAttribute<T>>>
 			): ReturnType<queries.QueryByBoundAttribute<T>>;
-			/** Query a single element by placeholder text, returning undefined if not found. */
+			/**
+			 * Query a single element by placeholder text, returning undefined
+			 * if not found.
+			 */
 			queryByPlaceholderText<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.QueryByBoundAttribute<T>>>
 			): ReturnType<queries.QueryByBoundAttribute<T>>;
-			/** Query a single element by test ID, returning undefined if not found. */
+			/**
+			 * Query a single element by test ID, returning undefined if not
+			 * found.
+			 */
 			queryByTestId<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.QueryByBoundAttribute<T>>>
 			): ReturnType<queries.QueryByBoundAttribute<T>>;
-			/** Query a single element by text content, returning undefined if not found. */
+			/**
+			 * Query a single element by text content, returning undefined if
+			 * not found.
+			 */
 			queryByText<T extends Instance = Instance>(
 				this: void,
 				...args: Parameters<BoundFunction<queries.QueryByText<T>>>

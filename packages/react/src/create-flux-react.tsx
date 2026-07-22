@@ -39,7 +39,6 @@ export interface FluxReact<T extends ActionMap, Contexts extends string = string
 	 * Components below this provider can call any Flux hook to reactively read
 	 * input state for the supplied core and handle.
 	 */
-	// eslint-disable-next-line flawless/naming-convention -- React component
 	readonly FluxProvider: (props: FluxProviderProps<T, Contexts>) => React.ReactNode;
 
 	/**
@@ -138,7 +137,6 @@ export function createFluxReact<T extends ActionMap, Contexts extends string = s
 > {
 	const signal = createUpdateSignal();
 
-	// eslint-disable-next-line flawless/naming-convention -- React convention
 	const FluxContext = createContext<FluxContextValue<T, Contexts> | undefined>(undefined);
 	FluxContext.displayName = "FluxContext";
 

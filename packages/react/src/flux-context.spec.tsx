@@ -21,7 +21,6 @@ describe("createUseFluxContext", () => {
 
 		const { useAction } = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		expect(() => render(<Probe label="jump" />)).toThrow(
@@ -41,7 +40,6 @@ describe("createUseFluxContext", () => {
 		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(
@@ -65,7 +63,6 @@ describe("createUseFluxContext", () => {
 		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(

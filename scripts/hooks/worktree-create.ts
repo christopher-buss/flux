@@ -131,7 +131,9 @@ export interface TrustDependencies {
 	readonly configPath: string;
 	/** Reads the config, returning `undefined` when the file is absent. */
 	readonly readFile: (path: string) => string | undefined;
-	/** Resolves a path's real casing, returning `undefined` when unresolvable. */
+	/**
+	 * Resolves a path's real casing, returning `undefined` when unresolvable.
+	 */
 	readonly realpath: (path: string) => string | undefined;
 	/** Writes the config back. */
 	readonly writeFile: (path: string, contents: string) => void;

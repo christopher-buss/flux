@@ -13,6 +13,13 @@ const OUTPUT_DIR = NODE_MODULES;
 const SCOPES = ["@rbxts", "@rbxts-js"];
 const GLOB_IGNORE_PATHS = ["**/.package-lock.json", "**/package.json", "**/tsconfig.json"];
 
+/** Trailing peer-dependency suffix pnpm appends to a package-map key. */
+const PEER_SUFFIX_PATTERN = /\(.*\)$/s;
+/** Separators between the parts of a semver string. */
+const VERSION_PART_SEPARATOR = /[-+.]/;
+/** Sorts package names in the default locale, matching `localeCompare()`. */
+const NAME_COLLATOR = new Intl.Collator();
+
 interface PackageEntry {
 	dependencies?: Record<string, string>;
 	url: string;
@@ -51,15 +58,15 @@ function isScoped(name: string): boolean {
 }
 
 function parseKey(key: string): { name: string; version: string } {
-	const withoutSuffix = key.replace(/\(.*\)$/s, "");
+	const withoutSuffix = key.replace(PEER_SUFFIX_PATTERN, "");
 	const at = withoutSuffix.lastIndexOf("@");
 	assert.ok(at > 0, `Unparsable package-map key: ${key}`);
 	return { name: withoutSuffix.slice(0, at), version: withoutSuffix.slice(at + 1) };
 }
 
 function compareVersions(left: string, right: string): number {
-	const leftParts = left.split(/[-+.]/);
-	const rightParts = right.split(/[-+.]/);
+	const leftParts = left.split(VERSION_PART_SEPARATOR);
+	const rightParts = right.split(VERSION_PART_SEPARATOR);
 	for (let index = 0; index < Math.max(leftParts.length, rightParts.length); index += 1) {
 		const leftPart = leftParts[index] ?? "";
 		const rightPart = rightParts[index] ?? "";
@@ -100,7 +107,7 @@ function transitiveCandidates(
 	const candidates = new Map<string, Array<string>>();
 
 	for (const key of Object.keys(map.packages)) {
-		if (key === "." || key.replace(/\(.*\)$/s, "").lastIndexOf("@") <= 0) {
+		if (key === "." || key.replace(PEER_SUFFIX_PATTERN, "").lastIndexOf("@") <= 0) {
 			continue;
 		}
 
@@ -178,7 +185,11 @@ function packageInstanceName(absolute: string, fallback: string): string {
 function buildScopeTrees(map: PackageMap, winners: Map<string, string>): Map<string, ProjectNode> {
 	const scopeNodes = new Map<string, ProjectNode>();
 
-	for (const [name, fullKey] of [...winners].toSorted(([a], [b]) => a.localeCompare(b))) {
+	const sortedWinners = [...winners].toSorted(([left], [right]) => {
+		return NAME_COLLATOR.compare(left, right);
+	});
+
+	for (const [name, fullKey] of sortedWinners) {
 		const slash = name.indexOf("/");
 		const scope = name.slice(0, slash);
 		const bare = name.slice(slash + 1);

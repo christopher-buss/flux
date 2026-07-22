@@ -1,4 +1,5 @@
 amends "package://github.com/jdx/hk/releases/download/v1.42.0/hk@1.42.0#/Config.pkl"
+
 import "package://github.com/jdx/hk/releases/download/v1.42.0/hk@1.42.0#/Builtins.pkl"
 
 // Workaround: hk util commands fail on Windows via cmd.exe, bash -c fixes it
@@ -17,8 +18,8 @@ local guards = new Mapping<String, Step> {
 }
 
 local eslint = new Step {
-  check = "pnpm lint:ci ."
-  fix = "pnpm lint:ci --fix ."
+  check = "nr lint ."
+  fix = "nr lint --fix ."
   shell = bash
   exclusive = true
 }

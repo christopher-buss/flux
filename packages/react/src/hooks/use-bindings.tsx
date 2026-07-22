@@ -1,7 +1,8 @@
 import type { ActionMap, AllActions, BindingLike, InputHandle, InputPlatform } from "@rbxts/flux";
-import { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import { useMemo } from "@rbxts/react";
 
 import type { FluxContextValue } from "../flux-context";
+import { useCachedSnapshot, useSyncExternalStore } from "../use-sync-external-store";
 
 /**
  * Overloaded `useBindings` hook type.
@@ -84,38 +85,12 @@ export function createUseBindings<T extends ActionMap, Contexts extends string =
 			};
 		}, [core, handle, action, platform]);
 
-		const [value, setValue] = useState(getBindingsValue);
-		// Mirrors the rendered value so a resolve can be compared against it
-		// without re-rendering. Every write to `setValue` updates it first, so
-		// it needs no effect of its own to stay in step.
-		const lastValueRef = useRef(value);
-		const hasResolvedRef = useRef(false);
+		// Core resolves a fresh array per read, so the store would see every
+		// render as a change without this. Shallow equality is the right key:
+		// the bindings themselves are interned, only the array is new.
+		const getSnapshot = useCachedSnapshot(getBindingsValue, shallowArrayEqual);
 
-		const publishIfChanged = useCallback((): void => {
-			const updated = getBindingsValue();
-			if (shallowArrayEqual(lastValueRef.current, updated)) {
-				return;
-			}
-
-			lastValueRef.current = updated;
-			setValue(updated);
-		}, [getBindingsValue]);
-
-		useEffect(() => {
-			// `useState` already resolved with this reader on mount; re-running
-			// here would resolve the same bindings a second time per mount.
-			// Later runs mean a dependency changed, so the reader is new.
-			if (!hasResolvedRef.current) {
-				hasResolvedRef.current = true;
-				return;
-			}
-
-			publishIfChanged();
-		}, [publishIfChanged]);
-
-		useEffect(() => subscribe(publishIfChanged), [subscribe, publishIfChanged]);
-
-		return value;
+		return useSyncExternalStore(subscribe, getSnapshot);
 	}
 
 	return useBindings;

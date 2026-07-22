@@ -77,9 +77,7 @@ type InputHandle = number & { readonly __brand: unique symbol };
 
 ```ts
 type BindingLike =
-	| Enum.KeyCode
-	| Enum.UserInputType
-	| Record<string, Enum.KeyCode>;
+	Enum.KeyCode | Enum.UserInputType | Record<string, Enum.KeyCode>;
 
 type BindingState<TActions extends ActionMap = ActionMap> = Partial<
 	Record<AllActions<TActions>, ReadonlyArray<BindingLike>>

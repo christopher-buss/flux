@@ -1,6 +1,3 @@
-/* eslint-disable test/require-hook -- These node-side specs run on vitest, not
-   jest-roblox; eslint-plugin-jest does not recognize `describe` imported from
-   vitest, so it reads each block as a bare top-level call. */
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -30,6 +27,47 @@ function fakeSpawn(result: { error?: Error; status: null | number; stdout?: stri
 	return () => result;
 }
 
+/**
+ * Spawn double that answers the git base lookups and records the wt call.
+ *
+ * Lives outside the tests because routing a fake by command is branching in the
+ * double, not in the assertions.
+ * @param captured - Mutable record the wt arguments are written to.
+ * @returns A spawn function that reports `origin/main` as the remote default.
+ */
+function routingSpawn(captured: { args: ReadonlyArray<string> }): SpawnFunc {
+	return (command, args) => {
+		if (command === "git" && args[0] === "rev-parse") {
+			return { status: 0, stdout: "origin/main\n" };
+		}
+
+		if (command === "git") {
+			return { status: 0 };
+		}
+
+		captured.args = args;
+		return { status: 0, stdout: '{"path":"/repo/foo"}' };
+	};
+}
+
+/**
+ * Spawn double that records the worktrunk command only.
+ *
+ * Git rev-parse/fetch also run, so last-call-wins would be fragile to
+ * reordering; the git calls are filtered out here rather than in a test body.
+ * @param captured - Mutable record the worktrunk command name is written to.
+ * @returns A spawn function that always succeeds with a worktree path.
+ */
+function commandRecordingSpawn(captured: { command: string }): SpawnFunc {
+	return (command) => {
+		if (command !== "git") {
+			captured.command = command;
+		}
+
+		return { status: 0, stdout: '{"path":"/repo/foo"}' };
+	};
+}
+
 function captureConsoleError(run: () => void): string {
 	const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 	try {
@@ -42,7 +80,7 @@ function captureConsoleError(run: () => void): string {
 	}
 }
 
-describe("buildWtArgs", () => {
+describe(buildWtArgs, () => {
 	it("should omit --no-hooks so wt switch runs pre-start/post-start during create", () => {
 		expect.assertions(1);
 
@@ -65,7 +103,7 @@ describe("buildWtArgs", () => {
 	});
 });
 
-describe("worktrunkBinary", () => {
+describe(worktrunkBinary, () => {
 	it("should use git-wt.exe on Windows to dodge the Windows Terminal `wt` shadow", () => {
 		expect.assertions(1);
 
@@ -79,7 +117,7 @@ describe("worktrunkBinary", () => {
 	});
 });
 
-describe("resolveRemoteBase", () => {
+describe(resolveRemoteBase, () => {
 	it("should return origin/HEAD when it resolves to a remote ref", () => {
 		expect.assertions(1);
 
@@ -105,7 +143,7 @@ describe("resolveRemoteBase", () => {
 	});
 });
 
-describe("fetchRemoteBase", () => {
+describe(fetchRemoteBase, () => {
 	it("should fetch the branch name without the origin/ prefix", () => {
 		expect.assertions(2);
 
@@ -122,7 +160,7 @@ describe("fetchRemoteBase", () => {
 	});
 });
 
-describe("extractPath", () => {
+describe(extractPath, () => {
 	it("should return the path field from wt's JSON output", () => {
 		expect.assertions(1);
 
@@ -160,7 +198,7 @@ describe("extractPath", () => {
 	});
 });
 
-describe("parseName", () => {
+describe(parseName, () => {
 	it("should extract the branch name from the stdin payload", () => {
 		expect.assertions(1);
 
@@ -180,7 +218,7 @@ describe("parseName", () => {
 	});
 });
 
-describe("resolveProjectDirectory", () => {
+describe(resolveProjectDirectory, () => {
 	it("should read CLAUDE_PROJECT_DIR from the environment", () => {
 		expect.assertions(1);
 
@@ -200,7 +238,7 @@ describe("resolveProjectDirectory", () => {
 	});
 });
 
-describe("captureStdout", () => {
+describe(captureStdout, () => {
 	it("should return promptly when the command backgrounds a child that inherits stdout", () => {
 		expect.assertions(2);
 
@@ -262,7 +300,7 @@ describe("captureStdout", () => {
 	});
 });
 
-describe("createWorktree", () => {
+describe(createWorktree, () => {
 	it("should return the worktree path on success", () => {
 		expect.assertions(1);
 
@@ -330,26 +368,14 @@ describe("createWorktree", () => {
 	it("should base the worktree on the fetched remote default", () => {
 		expect.assertions(2);
 
-		let switchArgs: ReadonlyArray<string> = [];
-		function spawn(command: string, args: ReadonlyArray<string>): SpawnResult {
-			if (command === "git" && args[0] === "rev-parse") {
-				return { status: 0, stdout: "origin/main\n" };
-			}
+		const captured: { args: ReadonlyArray<string> } = { args: [] };
 
-			if (command === "git") {
-				return { status: 0 };
-			}
-
-			switchArgs = args;
-			return { status: 0, stdout: '{"path":"/repo/foo"}' };
-		}
-
-		expect(createWorktree(spawn, "wt", "foo")).toBe("/repo/foo");
-		expect(switchArgs).toContain("origin/main");
+		expect(createWorktree(routingSpawn(captured), "wt", "foo")).toBe("/repo/foo");
+		expect(captured.args).toContain("origin/main");
 	});
 });
 
-describe("resolveClaudeConfigPath", () => {
+describe(resolveClaudeConfigPath, () => {
 	it("should join CLAUDE_CONFIG_DIR with .claude.json when set", () => {
 		expect.assertions(1);
 
@@ -416,7 +442,7 @@ function writtenProjects(dependencies: { writes: Array<{ contents: string }> }):
 	return asJsonObject(writtenConfig(dependencies)["projects"]);
 }
 
-describe("trustWorktreePath", () => {
+describe(trustWorktreePath, () => {
 	it("should create the config with a trusted entry when the file is missing", () => {
 		expect.assertions(3);
 
@@ -548,7 +574,7 @@ describe("trustWorktreePath", () => {
 	});
 });
 
-describe("runWorktreeCreate", () => {
+describe(runWorktreeCreate, () => {
 	it("should write the path with a trailing newline on success", () => {
 		expect.assertions(1);
 
@@ -662,27 +688,17 @@ describe("runWorktreeCreate", () => {
 	it("should call git-wt.exe on Windows", () => {
 		expect.assertions(1);
 
-		let capturedCommand = "";
+		const captured = { command: "" };
 		runWorktreeCreate({
 			cwd: "/cwd",
 			env: { CLAUDE_PROJECT_DIR: "/repo" },
 			platform: "win32",
-			spawn: () => {
-				return (command) => {
-					// Record only the worktrunk call; git rev-parse/fetch also
-					// run, so last-call-wins would be fragile to reordering.
-					if (command !== "git") {
-						capturedCommand = command;
-					}
-
-					return { status: 0, stdout: '{"path":"/repo/foo"}' };
-				};
-			},
+			spawn: () => commandRecordingSpawn(captured),
 			stdin: '{"name":"foo"}',
 			trust: () => {},
 		});
 
-		expect(capturedCommand).toBe("git-wt.exe");
+		expect(captured.command).toBe("git-wt.exe");
 	});
 
 	it("should fail when wt returns no path", () => {

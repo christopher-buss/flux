@@ -1,6 +1,7 @@
 import type { InputPlatform } from "@rbxts/flux";
 import { getInputPlatform, onInputPlatformChanged } from "@rbxts/flux";
-import { useEffect, useRef, useState } from "@rbxts/react";
+
+import { useSyncExternalStore } from "../use-sync-external-store";
 
 /**
  * - Subscribes to the platform the player is currently using.
@@ -24,27 +25,7 @@ import { useEffect, useRef, useState } from "@rbxts/react";
  * ```
  */
 export function useInputPlatform(): InputPlatform {
-	const [platform, setPlatform] = useState(getInputPlatform);
-	// Mirrors the rendered value so a change can be compared against it without
-	// re-rendering. Every write to `setPlatform` updates it first, so it needs
-	// no effect of its own to stay in step.
-	const lastValueRef = useRef(platform);
-
-	useEffect(() => {
-		function publishIfChanged(updated: InputPlatform): void {
-			if (lastValueRef.current === updated) {
-				return;
-			}
-
-			lastValueRef.current = updated;
-			setPlatform(updated);
-		}
-
-		// Catches a flip landing between the initial render and this effect.
-		publishIfChanged(getInputPlatform());
-
-		return onInputPlatformChanged(publishIfChanged);
-	}, []);
-
-	return platform;
+	// The platform is a plain enum value, so the module-level reader is already
+	// reference-cached and needs no snapshot cache in front of it.
+	return useSyncExternalStore(onInputPlatformChanged, getInputPlatform);
 }

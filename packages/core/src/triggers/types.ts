@@ -1,7 +1,10 @@
 /** The state a trigger can be in after evaluation. */
 export type TriggerState = "canceled" | "none" | "ongoing" | "triggered";
 
-/** Stateful gate that determines when an action fires based on input magnitude and timing. */
+/**
+ * Stateful gate that determines when an action fires based on input magnitude
+ * and timing.
+ */
 export interface Trigger {
 	/** Resets internal state (e.g., after context switch or action release). */
 	reset?(): void;

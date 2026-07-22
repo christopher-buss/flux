@@ -140,7 +140,7 @@ function wasRawJustPressed(entries: Map<string, ActionEntry>, action: string): b
 	return entry.value === true && entry.previousValue === false;
 }
 
-// eslint-disable-next-line max-lines-per-function -- thin delegation methods
+// eslint-disable-next-line flawless/max-lines-per-function -- thin delegation methods
 function buildPublicState<T extends ActionMap>(
 	entries: Map<string, ActionEntry>,
 	isDebug: boolean,
@@ -194,7 +194,7 @@ function buildPublicState<T extends ActionMap>(
 			});
 		},
 		debugCaptures(action) {
-			if (_G.__DEV__ && isDebug) {
+			if (isDebug && _G.__DEV__) {
 				return listDebugCaptures(entries, action);
 			}
 

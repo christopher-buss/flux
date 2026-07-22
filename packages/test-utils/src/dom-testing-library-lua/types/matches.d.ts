@@ -7,7 +7,9 @@ export type MatcherFunction = (content: string, element: Instance | undefined) =
 export type Matcher = MatcherFunction | number | RegExp | string;
 
 // ARIARole not yet supported
-/** Matcher for role-based queries, accepting a role string or custom function. */
+/**
+ * Matcher for role-based queries, accepting a role string or custom function.
+ */
 export type ByRoleMatcher = MatcherFunction | object;
 
 /** Function that normalizes text before matching. */

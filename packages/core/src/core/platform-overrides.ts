@@ -95,8 +95,11 @@ export function findPlatformBucket(
  * platform's declared bindings.
  * @returns That platform's effective bindings.
  */
-export function resolvePlatformBucket(options: PlatformBucketOptions): ReadonlyArray<BindingLike> {
-	const { declaredFor, overrides, platform } = options;
+export function resolvePlatformBucket({
+	declaredFor,
+	overrides,
+	platform,
+}: PlatformBucketOptions): ReadonlyArray<BindingLike> {
 	return findPlatformBucket(overrides, platform) ?? declaredFor(platform);
 }
 
@@ -140,7 +143,8 @@ export function composeBindings(
 
 	const result = new Array<BindingLike>();
 	for (const platform of PLATFORM_ORDER) {
-		for (const binding of resolvePlatformBucket({ declaredFor, overrides, platform })) {
+		const bindings = resolvePlatformBucket({ declaredFor, overrides, platform });
+		for (const binding of bindings) {
 			result.push(binding);
 		}
 	}

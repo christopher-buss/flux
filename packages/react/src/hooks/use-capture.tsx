@@ -1,5 +1,5 @@
 import type { ActionMap, AllActions, CaptureToken, FluxCore, InputHandle } from "@rbxts/flux";
-import { useEffect, useRef, useState } from "@rbxts/react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "@rbxts/react";
 
 import type { FluxContextValue } from "../flux-context";
 
@@ -287,50 +287,54 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 
 		const holdRef = useRef<CaptureHold<T, Contexts> | undefined>(undefined);
 		const releasedRef = useRef(true);
-		const [initialRequest] = useState(() => makeRequest(core, handle, action, isEnabled));
-		const requestRef = useRef(initialRequest);
 
-		// `debugLabel` is dev-only metadata, so it is read at acquisition
-		// rather than joining the request identity: a changing label must not
-		// churn the capture stack the way a changing action legitimately does.
-		const debugLabelRef = useRef(debugLabel);
-		debugLabelRef.current = debugLabel;
+		// The neutral value is a property of the captured triple alone, so
+		// `enabled` layers on top of it rather than feeding it: a surface whose
+		// `enabled` tracks focus can toggle at frame rate, and re-deriving the
+		// neutral value on each flip would be waste. Splitting the two memos is
+		// what keeps `enabled` out of the capture identity.
+		const captured = useMemo(() => makeCaptured(core, handle, action), [core, handle, action]);
+
+		// The effect closes over the request this render derived rather than
+		// reading a cell when it runs, so the hold it stores is structurally
+		// the one its own render asked for. Request identity changes exactly
+		// when the captured triple or `enabled` does, so this is also the whole
+		// dependency list.
+		const request = useMemo(() => ({ ...captured, enabled: isEnabled }), [captured, isEnabled]);
+
+		// The facade is built once and handed out for the component's lifetime,
+		// so it cannot close over `request` — it reads this cell to answer
+		// "what does the latest render ask for?", which is how a commit between
+		// an action change and its effect reads inert rather than reporting the
+		// previous action.
+		//
+		// This is the one write React's docs warn about that the design cannot
+		// avoid: a child may read the facade during its own render, which is
+		// strictly before any effect of this one. It is sound here because the
+		// write is idempotent for a given render — StrictMode's double render
+		// derives the same request — and react-lua 17.3.7 renders legacy roots
+		// synchronously, so a discarded render is always followed by an unmount
+		// or a re-render that rewrites it. A concurrent renderer would
+		// invalidate the second reason.
+		const requestRef = useRef(request);
+		// eslint-disable-next-line react/refs -- see above; the facade is read during render
+		requestRef.current = request;
+
 		function buildFacade(): CaptureTokenSurface {
 			return createCaptureFacade({ holdRef, releasedRef, requestRef });
 		}
 
 		const [facade] = useState(buildFacade);
 
-		// The reader is only live while the held token matches what this
-		// render asks for, so the commit between an action change and its
-		// effect reads inert rather than reporting the previous action. The
-		// request is resolved during render because the facade is read during
-		// render, before any effect has run.
-		//
-		// Writing a ref during render is the pattern React's docs warn about,
-		// and `eslint-plugin-react-hooks` v7 is the ruleset that polices it.
-		// It is sound here for two reasons: the write is idempotent for a
-		// given render (StrictMode's double render produces the same request),
-		// and react-lua 17.3.7 renders legacy roots synchronously, so a
-		// discarded render is always followed by an unmount or a re-render
-		// that rewrites this. A concurrent renderer would invalidate the
-		// second reason.
-		const previous = requestRef.current;
-		if (previous.action !== action || previous.core !== core || previous.handle !== handle) {
-			requestRef.current = makeRequest(core, handle, action, isEnabled);
-		} else if (previous.enabled !== isEnabled) {
-			// The captured triple is unchanged, so the neutral value is too:
-			// carry it forward rather than re-deriving it, since a surface
-			// whose `enabled` tracks focus can toggle at frame rate.
-			requestRef.current = { ...previous, enabled: isEnabled };
-		}
-
-		// The effect closes over the request this render resolved rather than
-		// reading the ref when it runs, so the hold it stores is structurally
-		// the one its own render asked for instead of whatever the ref happens
-		// to hold. Request identity changes exactly when the captured triple or
-		// `enabled` does, so this is also the whole dependency list.
-		const request = requestRef.current;
+		// `debugLabel` is dev-only metadata, so it is read at acquisition
+		// rather than joining the request identity: a changing label must not
+		// churn the capture stack the way a changing action legitimately does.
+		// A layout effect is early enough — it runs before the passive effect
+		// below in the same commit — so this stays out of render.
+		const debugLabelRef = useRef(debugLabel);
+		useLayoutEffect(() => {
+			debugLabelRef.current = debugLabel;
+		}, [debugLabel]);
 
 		useEffect(() => {
 			if (!request.enabled) {
@@ -342,7 +346,7 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 
 			const label = debugLabelRef.current;
 			const token = request.core.getState(request.handle).capture(request.action, {
-				...(label !== undefined && { debugLabel: label }),
+				...(label !== undefined ? { debugLabel: label } : {}),
 			}) as unknown as CaptureTokenSurface;
 			holdRef.current = { request, token };
 			releasedRef.current = false;
@@ -409,61 +413,6 @@ export function createUseCaptureAction<T extends ActionMap, Contexts extends str
 }
 
 /**
- * - Resolves the neutral value an uncaptured `getState()` reports.
- * - The action's kind is not carried by the hook's arguments, so the neutral
- *   value is derived from the shape of the action's current value.
- *
- * @template T - The action map type.
- * @template Contexts - Union of valid context name literals.
- * @param core - The core owning the action.
- * @param handle - The handle the capture is scoped to.
- * @param action - The captured action name.
- * @returns The action type's neutral value.
- */
-function inertStateFor<T extends ActionMap, Contexts extends string>(
-	core: FluxCore<T, Contexts>,
-	handle: InputHandle,
-	action: AllActions<T>,
-): CaptureValue {
-	const value = core.getState(handle).getState(action);
-	if (typeIs(value, "number")) {
-		return 0;
-	}
-
-	if (typeIs(value, "Vector2")) {
-		return Vector2.zero;
-	}
-
-	if (typeIs(value, "Vector3")) {
-		return Vector3.zero;
-	}
-
-	return false;
-}
-
-/**
- * - Resolves what a render asks the hook to capture, neutral value included.
- * - Built only when the request changes, so the `getState()` lookup behind the
- *   neutral value costs nothing per render or per read.
- *
- * @template T - The action map type.
- * @template Contexts - Union of valid context name literals.
- * @param core - The core owning the action.
- * @param handle - The handle the capture is scoped to.
- * @param action - The action to capture.
- * @param enabled - Whether this render asks to hold the capture.
- * @returns The request, ready to compare against the current hold.
- */
-function makeRequest<T extends ActionMap, Contexts extends string>(
-	core: FluxCore<T, Contexts>,
-	handle: InputHandle,
-	action: AllActions<T>,
-	enabled: boolean,
-): CaptureRequest<T, Contexts> {
-	return { action, core, enabled, handle, inert: inertStateFor(core, handle, action) };
-}
-
-/**
  * - Builds the stable facade returned by `useCapture`.
  * - Every read delegates to the held token while the capture is live, and
  *   reports the suppressed result otherwise — before the capture lands, after
@@ -479,11 +428,11 @@ function makeRequest<T extends ActionMap, Contexts extends string>(
  * @param reader - The refs the facade reads the current capture through.
  * @returns A token-shaped reader that outlives any single capture.
  */
-function createCaptureFacade<T extends ActionMap, Contexts extends string>(
-	reader: CaptureReader<T, Contexts>,
-): CaptureTokenSurface {
-	const { holdRef, releasedRef, requestRef } = reader;
-
+function createCaptureFacade<T extends ActionMap, Contexts extends string>({
+	holdRef,
+	releasedRef,
+	requestRef,
+}: CaptureReader<T, Contexts>): CaptureTokenSurface {
 	function current(): CaptureHold<T, Contexts> | undefined {
 		const hold = holdRef.current;
 		if (hold?.request !== requestRef.current) {
@@ -605,4 +554,59 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>(
 			return inner === undefined ? false : inner.triggered();
 		},
 	};
+}
+
+/**
+ * - Resolves the neutral value an uncaptured `getState()` reports.
+ * - The action's kind is not carried by the hook's arguments, so the neutral
+ *   value is derived from the shape of the action's current value.
+ *
+ * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
+ * @param core - The core owning the action.
+ * @param handle - The handle the capture is scoped to.
+ * @param action - The captured action name.
+ * @returns The action type's neutral value.
+ */
+function inertStateFor<T extends ActionMap, Contexts extends string>(
+	core: FluxCore<T, Contexts>,
+	handle: InputHandle,
+	action: AllActions<T>,
+): CaptureValue {
+	const value = core.getState(handle).getState(action);
+	if (typeIs(value, "number")) {
+		return 0;
+	}
+
+	if (typeIs(value, "Vector2")) {
+		return Vector2.zero;
+	}
+
+	if (typeIs(value, "Vector3")) {
+		return Vector3.zero;
+	}
+
+	return false;
+}
+
+/**
+ * - Resolves the part of a capture request that the triple alone decides,
+ *   neutral value included.
+ * - Built only when the triple changes, so the `getState()` lookup behind the
+ *   neutral value costs nothing per render or per read, and an `enabled` that
+ *   toggles at frame rate never triggers it.
+ *
+ * @template T - The action map type.
+ * @template Contexts - Union of valid context name literals.
+ * @param core - The core owning the action.
+ * @param handle - The handle the capture is scoped to.
+ * @param action - The action to capture.
+ * @returns The request less `enabled`, which the caller layers on.
+ */
+function makeCaptured<T extends ActionMap, Contexts extends string>(
+	core: FluxCore<T, Contexts>,
+	handle: InputHandle,
+	action: AllActions<T>,
+): Omit<CaptureRequest<T, Contexts>, "enabled"> {
+	return { action, core, handle, inert: inertStateFor(core, handle, action) };
 }

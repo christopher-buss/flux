@@ -1,6 +1,3 @@
-/* eslint-disable test/require-hook -- These node-side specs run on vitest, not
-   jest-roblox; eslint-plugin-jest does not recognize `describe` imported from
-   vitest, so it reads each block as a bare top-level call. */
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -28,7 +25,7 @@ function captureConsoleError(run: () => void): string {
 	}
 }
 
-describe("worktrunkBinary", () => {
+describe(worktrunkBinary, () => {
 	it("should use git-wt.exe on Windows to dodge the Windows Terminal `wt` shadow", () => {
 		expect.assertions(1);
 
@@ -42,7 +39,7 @@ describe("worktrunkBinary", () => {
 	});
 });
 
-describe("buildWtArgs", () => {
+describe(buildWtArgs, () => {
 	it("should remove the worktree at the given path", () => {
 		expect.assertions(2);
 
@@ -71,7 +68,7 @@ describe("buildWtArgs", () => {
 	});
 });
 
-describe("parseWorktreePath", () => {
+describe(parseWorktreePath, () => {
 	it("should extract the worktree path from the stdin payload", () => {
 		expect.assertions(1);
 
@@ -105,7 +102,7 @@ describe("parseWorktreePath", () => {
 	});
 });
 
-describe("removeWorktree", () => {
+describe(removeWorktree, () => {
 	it("should return true when wt exits zero", () => {
 		expect.assertions(1);
 
@@ -137,7 +134,7 @@ describe("removeWorktree", () => {
 	});
 });
 
-describe("runWorktreeRemove", () => {
+describe(runWorktreeRemove, () => {
 	it("should return code 0 on success", () => {
 		expect.assertions(1);
 

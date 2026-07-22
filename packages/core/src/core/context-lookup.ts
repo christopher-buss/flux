@@ -28,14 +28,24 @@ export function findExistingContext(
 
 /**
  * Throws if a context name is not declared in the core's context config.
+ *
+ * Hands back the config it looked up, so a caller that needs it does not repeat
+ * the lookup only to re-narrow a type the check already settled.
  * @param contexts - The core's context config record.
  * @param name - The context name to validate.
+ * @returns That context's config.
  * @throws If the context is unknown.
  */
-export function validateContextName(contexts: Record<string, ContextConfig>, name: string): void {
-	if (contexts[name] === undefined) {
+export function validateContextName(
+	contexts: Record<string, ContextConfig>,
+	name: string,
+): ContextConfig {
+	const contextConfig = contexts[name];
+	if (contextConfig === undefined) {
 		error(`unknown context: ${name}`);
 	}
+
+	return contextConfig;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
-import { fromPartial } from "@rbxts/jest-utils";
+import { fromAny } from "@rbxts/jest-utils";
 
 import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
@@ -79,7 +79,7 @@ describe("registerHandleAs", () => {
 	it("should store data under provided handle", () => {
 		expect.assertions(1);
 
-		const handle = fromPartial<InputHandle>(42);
+		const handle = fromAny<InputHandle, number>(42);
 		const options = createOptions();
 		registerHandleAs(handle, options);
 
@@ -89,7 +89,7 @@ describe("registerHandleAs", () => {
 	it("should throw on duplicate handle", () => {
 		expect.assertions(1);
 
-		const handle = fromPartial<InputHandle>(42);
+		const handle = fromAny<InputHandle, number>(42);
 		const options = createOptions();
 		registerHandleAs(handle, options);
 		const duplicate = () => {
@@ -102,7 +102,7 @@ describe("registerHandleAs", () => {
 	it("should create action state for each action", () => {
 		expect.assertions(1);
 
-		const handle = fromPartial<InputHandle>(42);
+		const handle = fromAny<InputHandle, number>(42);
 		const options = createOptions();
 		registerHandleAs(handle, options);
 		const data = options.handles.get(handle)!;
@@ -134,7 +134,7 @@ describe("subscribeHandleAs", () => {
 	it("should store data under provided handle", () => {
 		expect.assertions(1);
 
-		const handle = fromPartial<InputHandle>(42);
+		const handle = fromAny<InputHandle, number>(42);
 		const parent = new Instance("Folder");
 		const options = {
 			actions: TEST_ACTIONS,
@@ -150,7 +150,7 @@ describe("subscribeHandleAs", () => {
 	it("should throw on duplicate handle", () => {
 		expect.assertions(1);
 
-		const handle = fromPartial<InputHandle>(42);
+		const handle = fromAny<InputHandle, number>(42);
 		const parent = new Instance("Folder");
 		const options = {
 			actions: TEST_ACTIONS,
@@ -169,7 +169,7 @@ describe("subscribeHandleAs", () => {
 	it("should return cancel function", () => {
 		expect.assertions(1);
 
-		const handle = fromPartial<InputHandle>(42);
+		const handle = fromAny<InputHandle, number>(42);
 		const parent = new Instance("Folder");
 		const options = {
 			actions: TEST_ACTIONS,
@@ -199,7 +199,7 @@ describe("getHandleData", () => {
 		expect.assertions(1);
 
 		const handles = new Map<InputHandle, HandleData<typeof TEST_ACTIONS>>();
-		const handle = fromPartial<InputHandle>(999);
+		const handle = fromAny<InputHandle, number>(999);
 		const lookup = () => {
 			getHandleData(handles, handle);
 		};

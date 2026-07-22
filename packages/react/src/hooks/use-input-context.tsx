@@ -1,7 +1,8 @@
 import type { ActionMap, AllActions, InputHandle } from "@rbxts/flux";
-import { useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import { useMemo } from "@rbxts/react";
 
 import type { FluxContextValue } from "../flux-context";
+import { useCachedSnapshot, useSyncExternalStore } from "../use-sync-external-store";
 
 /**
  * Overloaded `useActiveContext` hook type.
@@ -99,36 +100,9 @@ export function createUseActiveContext<T extends ActionMap, Contexts extends str
 			[core, handle, context],
 		);
 
-		const [isActive, setIsActive] = useState(getActive);
-		const lastActiveRef = useRef(isActive);
-
-		useEffect(() => {
-			lastActiveRef.current = isActive;
-		});
-
-		useEffect(() => {
-			const isActiveNow = getActive();
-			if (lastActiveRef.current === isActiveNow) {
-				return;
-			}
-
-			lastActiveRef.current = isActiveNow;
-			setIsActive(isActiveNow);
-		}, [getActive]);
-
-		useEffect(() => {
-			return subscribe(() => {
-				const isActiveNow = getActive();
-				if (lastActiveRef.current === isActiveNow) {
-					return;
-				}
-
-				lastActiveRef.current = isActiveNow;
-				setIsActive(isActiveNow);
-			});
-		}, [subscribe, getActive]);
-
-		return isActive;
+		// A boolean is its own cache key, so the reader is already stable
+		// enough for the store; only the composite read below needs wrapping.
+		return useSyncExternalStore(subscribe, getActive);
 	}
 
 	return useActiveContext;
@@ -175,45 +149,22 @@ export function createUseInputContext<T extends ActionMap, Contexts extends stri
 			};
 		}, [core, handle, context, staticSlice]);
 
-		const [info, setInfo] = useState(getInfo);
-		const lastActiveRef = useRef(info.isActive);
-		const lastInfoRef = useRef(info);
+		// `getInfo` allocates a fresh object per call, so it is cached down to
+		// the two fields that can move: the static slice is memoized by
+		// identity above, and `isActive` is the only live one.
+		const getSnapshot = useCachedSnapshot(getInfo, isSameInfo);
 
-		useEffect(() => {
-			lastActiveRef.current = info.isActive;
-			lastInfoRef.current = info;
-		});
-
-		useEffect(() => {
-			const updatedInfo = getInfo();
-			if (
-				lastInfoRef.current.actions === updatedInfo.actions &&
-				lastInfoRef.current.isActive === updatedInfo.isActive
-			) {
-				return;
-			}
-
-			lastActiveRef.current = updatedInfo.isActive;
-			lastInfoRef.current = updatedInfo;
-			setInfo(updatedInfo);
-		}, [getInfo]);
-
-		useEffect(() => {
-			return subscribe(() => {
-				const isActiveNow = core.hasContext(handle, context);
-				if (lastActiveRef.current === isActiveNow) {
-					return;
-				}
-
-				const updatedInfo = getInfo();
-				lastActiveRef.current = updatedInfo.isActive;
-				lastInfoRef.current = updatedInfo;
-				setInfo(updatedInfo);
-			});
-		}, [subscribe, core, handle, context, getInfo]);
-
-		return info;
+		return useSyncExternalStore(subscribe, getSnapshot);
 	}
 
 	return useInputContext;
+}
+
+function isSameInfo<T extends ActionMap>(
+	a: FluxInputContextInfo<T>,
+	b: FluxInputContextInfo<T>,
+): boolean {
+	// `priority` and `sink` ride on the same memoized static slice as
+	// `actions`, so one identity check covers all three.
+	return a.actions === b.actions && a.isActive === b.isActive;
 }

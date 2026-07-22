@@ -88,12 +88,16 @@ export interface CreateCaptureTokenOptions {
  * @param options - The action, entry map, capture options, and debug flag.
  * @returns The capture token, already installed as the active holder.
  */
-// eslint-disable-next-line max-lines-per-function -- thin pre-bound read delegations
-export function createCaptureToken(options: CreateCaptureTokenOptions): CaptureTokenRuntime {
-	const { action, captureOptions, entries, isDebug } = options;
+// eslint-disable-next-line flawless/max-lines-per-function -- thin pre-bound read delegations
+export function createCaptureToken({
+	action,
+	captureOptions,
+	entries,
+	isDebug,
+}: CreateCaptureTokenOptions): CaptureTokenRuntime {
 	const entry = getEntry(entries, action);
 	const viewer: CaptureViewer =
-		_G.__DEV__ && isDebug
+		isDebug && _G.__DEV__
 			? { debugLabel: captureOptions?.debugLabel, traceback: debug.traceback() }
 			: {};
 
@@ -179,13 +183,15 @@ export function listDebugCaptures(
 	return getEntry(entries, action)
 		.captures.filter(isRealHolder)
 		.map((holder) => {
-			return {
-				...(holder.debugLabel !== undefined && { label: holder.debugLabel }),
-				// A holder only lacks a traceback if it was acquired while the
-				// dev gate was off — impossible in real builds, where
-				// `_G.__DEV__` is a compile-time constant. The stack must still
-				// report every real holder.
-				traceback: holder.traceback ?? "",
-			};
+			// A holder only lacks a traceback if it was acquired while the dev
+			// gate was off — impossible in real builds, where `_G.__DEV__` is a
+			// compile-time constant. The stack must still report every real
+			// holder.
+			const traceback = holder.traceback ?? "";
+			if (holder.debugLabel !== undefined) {
+				return { label: holder.debugLabel, traceback };
+			}
+
+			return { traceback };
 		});
 }

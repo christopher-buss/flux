@@ -31,8 +31,7 @@ export interface ContextActionOptions {
  * @example
  * isContextAction({ action: "jump", actions, bindings: contexts.ui.bindings })
  */
-export function isContextAction(options: ContextActionOptions): boolean {
-	const { action, actions, bindings } = options;
+export function isContextAction({ action, actions, bindings }: ContextActionOptions): boolean {
 	return actions[action] !== undefined && bindings[action] !== undefined;
 }
 

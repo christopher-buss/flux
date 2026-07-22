@@ -80,11 +80,7 @@ implement them.
 ```ts
 // Roblox-aligned action types mapping to InputAction.Type.
 export type ActionType =
-	| "Bool"
-	| "Direction1D"
-	| "Direction2D"
-	| "Direction3D"
-	| "ViewportPosition";
+	"Bool" | "Direction1D" | "Direction2D" | "Direction3D" | "ViewportPosition";
 
 // Configuration for a single input action.
 export interface ActionConfig<T extends ActionType = ActionType> {
@@ -121,9 +117,7 @@ export type ViewportPositionActions<T extends ActionMap> = {
 }[keyof T];
 
 export type AxisActions<T extends ActionMap> =
-	| Direction1dActions<T>
-	| Direction2dActions<T>
-	| Direction3dActions<T>;
+	Direction1dActions<T> | Direction2dActions<T> | Direction3dActions<T>;
 
 export type AllActions<T extends ActionMap> = keyof T & string;
 ```
@@ -208,19 +202,19 @@ describe("defineActions", () => {
 
 describe("action", () => {
 	it("should preserve the type literal", () => {
-		const cfg = action({ type: "Bool" });
-		expect(cfg.type).toBe("Bool");
+		const config = action({ type: "Bool" });
+		expect(config.type).toBe("Bool");
 	});
 
 	it("should accept optional fields", () => {
-		const cfg = action({
+		const config = action({
 			description: "Jump action",
 			enabled: false,
 			type: "Bool",
 		});
 
-		expect(cfg.description).toBe("Jump action");
-		expect(cfg.enabled).toBe(false);
+		expect(config.description).toBe("Jump action");
+		expect(config.enabled).toBe(false);
 	});
 });
 
@@ -333,9 +327,7 @@ Define `ContextConfig` and implement `defineContexts`. **Tests first.**
 ```ts
 // A binding-like value: KeyCode, UserInputType, or directional preset object.
 export type BindingLike =
-	| Enum.KeyCode
-	| Enum.UserInputType
-	| Record<string, Enum.KeyCode>;
+	Enum.KeyCode | Enum.UserInputType | Record<string, Enum.KeyCode>;
 ```
 
 **`packages/core/src/types/contexts.ts`** -- context config lives here, not in a
@@ -361,7 +353,6 @@ import { describe, expect, it } from "@rbxts/jest-globals";
 
 import { defineContexts } from "./define";
 
-// eslint-disable-next-line max-lines-per-function -- Test file
 describe("defineContexts", () => {
 	it("should return the same contexts object", () => {
 		const contexts = defineContexts({

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
-import { fromAny, fromPartial } from "@rbxts/jest-utils";
+import { fromAny } from "@rbxts/jest-utils";
 
 import type { Modifier, ModifierContext } from "../modifiers/types";
 import type { Trigger, TriggerState, TypedTrigger } from "../triggers/types";
@@ -9,7 +9,7 @@ import { processPipeline } from "./pipeline";
 
 const MODIFIER_CONTEXT = {
 	deltaTime: 0.016,
-	handle: fromPartial<InputHandle>(0),
+	handle: fromAny<InputHandle, number>(0),
 } satisfies ModifierContext;
 
 function mockTrigger(returnState: TriggerState): Trigger {
@@ -37,7 +37,7 @@ const doubleModifier: Modifier = {
 	},
 };
 
-const addOneModifier: Modifier = {
+const incrementModifier: Modifier = {
 	modify(value: never): never {
 		if (typeIs(value, "number")) {
 			return fromAny((value as number) + 1);
@@ -86,7 +86,7 @@ describe("processPipeline", () => {
 		expect.assertions(1);
 
 		const config = {
-			modifiers: [doubleModifier, addOneModifier],
+			modifiers: [doubleModifier, incrementModifier],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({

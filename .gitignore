@@ -16,7 +16,7 @@ sourcemap.json
 *.rbxlx
 
 .env
-.eslintcache
+.eslintcache*
 .turbo/
 /.claude/state
 

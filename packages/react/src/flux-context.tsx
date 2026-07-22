@@ -26,14 +26,14 @@ export interface FluxContextValue<T extends ActionMap, Contexts extends string =
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
- * @param context - The React context created by the FluxReact factory.
+ * @param FluxContext - The React context created by the FluxReact factory.
  * @returns A hook that returns the current `FluxContextValue<T, Contexts>`.
  */
 export function createUseFluxContext<T extends ActionMap, Contexts extends string = string>(
-	context: React.Context<FluxContextValue<T, Contexts> | undefined>,
+	FluxContext: React.Context<FluxContextValue<T, Contexts> | undefined>,
 ): () => FluxContextValue<T, Contexts> {
 	return () => {
-		const value = useContext(context);
+		const value = useContext(FluxContext);
 		assert(value !== undefined, "Flux hooks must be used within a FluxProvider");
 
 		return value;

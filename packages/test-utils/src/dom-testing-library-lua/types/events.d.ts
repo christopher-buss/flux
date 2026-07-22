@@ -93,7 +93,6 @@ export type EventType =
 /** Low-level function that fires a raw event on an element. */
 export type FireFunction = (element: Instance, event: Event) => boolean;
 
-// oxlint-disable-next-line typescript/no-empty-object-type
 /** Object with a method for each event type that fires it on an element. */
 export type FireObject = Record<EventType, (element: Instance, options?: object) => boolean>;
 

@@ -12,9 +12,10 @@ import type { ContextConfig } from "../types/contexts";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { FluxCore, InputHandle } from "../types/core";
 import type { ActionState, ActionValue } from "../types/state";
-import { activateContext, deactivateContext, isContextActive } from "./active-contexts";
+import { deactivateContext, isContextActive } from "./active-contexts";
+import { addHandleContext } from "./add-context";
 import { readAllBindings, scopedHandleData } from "./binding-reads";
-import { findExistingContext, validateContextName, validateContextNames } from "./context-lookup";
+import { validateContextName, validateContextNames } from "./context-lookup";
 import type { CreateCoreOptions } from "./create-core-options";
 import { createHandleFactory } from "./handle-factory";
 import type { HandleData } from "./handle-lifecycle";
@@ -25,12 +26,7 @@ import {
 	subscribeHandle,
 	subscribeHandleAs,
 } from "./handle-lifecycle";
-import {
-	addContextInstances,
-	adoptContextInstances,
-	destroyInputInstances,
-	setContextEnabled,
-} from "./input-instances";
+import { destroyInputInstances, setContextEnabled } from "./input-instances";
 import {
 	applyRebindAll,
 	applyRebindForPlatform,
@@ -40,7 +36,6 @@ import {
 	applyResetForPlatform,
 	applyResetOne,
 	ownedHandleData,
-	replayOverridesIntoContext,
 	serializeFullBindings,
 } from "./rebinding";
 import {
@@ -63,51 +58,36 @@ export type {
  * @param options - Core creation options with actions and contexts.
  * @returns A fully initialized {@link FluxCore} instance.
  */
-// eslint-disable-next-line max-lines-per-function -- thin delegation to helpers
-export function createCore<T extends ActionMap, C extends Record<string, ContextConfig>>(
-	options: CreateCoreOptions<T, C>,
-): FluxCore<T, keyof C & string> {
+// eslint-disable-next-line flawless/max-lines-per-function -- thin delegation to helpers
+export function createCore<T extends ActionMap, C extends Record<string, ContextConfig>>({
+	actions,
+	contexts,
+	debug: isDebug,
+	onReplicationTimeout,
+	replication,
+}: CreateCoreOptions<T, C>): FluxCore<T, keyof C & string> {
 	type Contexts = keyof C & string;
-	const { actions, contexts, debug: isDebug, onReplicationTimeout, replication } = options;
 	const replicationTransport = replication?.transport;
 	const isDevelopmentMode = _G.__DEV__ && isDebug === true;
 	const factory = createHandleFactory();
 	const handles = new Map<InputHandle, HandleData<T>>();
 
-	// eslint-disable-next-line ts/no-empty-function -- intentional no-op
-	const noop = (): void => {};
+	/**
+	 * Cancel function for an `addContext` call with nothing to cancel.
+	 *
+	 * The contract promises a function that disconnects the ChildAdded
+	 * listeners a subscribed handle sets up. An owned handle creates its
+	 * instances outright and has none, so it returns this rather than widening
+	 * the return type to `undefined` at every call site.
+	 */
+	const noCancel = (): void => {
+		// Nothing to disconnect.
+	};
 
 	return {
 		addContext(handle: InputHandle, context: Contexts): () => void {
-			validateContextName(contexts, context);
-			const data = getHandleData(handles, handle);
-			if (isContextActive(data.activeContexts, context)) {
-				error(`context already active: ${context}`);
-			}
-
-			assert(
-				data.instanceData.owned || replicationTransport !== "native",
-				"cannot call addContext on a subscribed handle with native replication",
-			);
-
-			if (!data.instanceData.inputContexts.has(context)) {
-				const existing = findExistingContext(context, data.instanceData);
-				if (existing !== undefined) {
-					adoptContextInstances(data.instanceData, context, existing, actions);
-				} else {
-					addContextInstances(context, contexts[context], actions, data.instanceData);
-					replayOverridesIntoContext({
-						contextName: context,
-						contexts,
-						handleData: data,
-					});
-				}
-			}
-
-			setContextEnabled(data.instanceData, context, true);
-			activateContext(data.activeContexts, context);
-
-			return noop;
+			addHandleContext({ actions, context, contexts, handle, handles, replicationTransport });
+			return noCancel;
 		},
 		destroy(): void {
 			for (const [, data] of handles) {
@@ -313,7 +293,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 					handle,
 					handleData,
 					isDebug: isDevelopmentMode,
-					...(onReplicationTimeout !== undefined && { onReplicationTimeout }),
+					...(onReplicationTimeout !== undefined ? { onReplicationTimeout } : {}),
 				});
 			}
 		},
