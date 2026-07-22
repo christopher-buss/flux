@@ -73,7 +73,7 @@ export type UnclaimedBindingKey = Exclude<
  * Exported only so the assertion is not dead code to the linter; it is not
  * re-exported from the package index.
  */
-export type ClaimedBindingKeys = AssertClaimed<UnclaimedBindingKey>;
+export type BindingKeysAreClaimed = AssertClaimed<UnclaimedBindingKey>;
 
 /**
  * Field names that shape what an input source produces rather than naming one.
