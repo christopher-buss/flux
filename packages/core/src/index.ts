@@ -43,6 +43,7 @@ export type {
 	HoldOptions,
 	TapOptions,
 	Trigger,
+	TriggerFactory,
 	TriggerState,
 	TriggerType,
 	TypedTrigger,

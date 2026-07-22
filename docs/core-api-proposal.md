@@ -546,13 +546,21 @@ interface Trigger {
 	update(magnitude: number, duration: number, deltaTime: number): TriggerState;
 }
 
+type TriggerFactory = () => Trigger;
+
 type TriggerType = "blocker" | "explicit" | "implicit";
 
 interface TypedTrigger {
-	readonly trigger: Trigger;
+	readonly create: TriggerFactory;
 	readonly type: TriggerType;
 }
 ```
+
+`hold`, `tap` and `doubleTap` return a `TriggerFactory`, not a `Trigger` — an
+action config is shared by every handle on a core, so each handle mints its own
+instances. The sketches below predate that and still show the bare `Trigger`
+form; the authoring syntax (`implicit(hold({ ... }))`) is the same either way.
+See `docs/adr/0006-per-handle-trigger-state.md`.
 
 ### Magnitude Approach
 

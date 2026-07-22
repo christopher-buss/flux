@@ -22,6 +22,7 @@ describe("PipelineOptions", () => {
 		expectTypeOf<PipelineOptions>().toHaveProperty("duration");
 		expectTypeOf<PipelineOptions>().toHaveProperty("modifierContext");
 		expectTypeOf<PipelineOptions>().toHaveProperty("rawValue");
+		expectTypeOf<PipelineOptions>().toHaveProperty("triggerInstances");
 	});
 
 	it("should type actionConfig as ActionConfig", () => {

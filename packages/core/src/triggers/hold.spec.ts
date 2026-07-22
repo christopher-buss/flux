@@ -9,7 +9,7 @@ describe("hold", () => {
 	it("should return 'none' when magnitude is 0 with no prior input", () => {
 		expect.assertions(1);
 
-		const trigger = hold(options);
+		const trigger = hold(options)();
 
 		expect(trigger.update(0, 0, deltaTime)).toBe("none");
 	});
@@ -17,7 +17,7 @@ describe("hold", () => {
 	it("should return 'ongoing' while held below threshold duration", () => {
 		expect.assertions(1);
 
-		const trigger = hold(options);
+		const trigger = hold(options)();
 
 		expect(trigger.update(1, 0.3, deltaTime)).toBe("ongoing");
 	});
@@ -25,7 +25,7 @@ describe("hold", () => {
 	it("should return 'triggered' when duration reaches threshold", () => {
 		expect.assertions(1);
 
-		const trigger = hold(options);
+		const trigger = hold(options)();
 
 		expect(trigger.update(1, 0.5, deltaTime)).toBe("triggered");
 	});
@@ -33,7 +33,7 @@ describe("hold", () => {
 	it("should return 'triggered' repeatedly without oneShot", () => {
 		expect.assertions(2);
 
-		const trigger = hold(options);
+		const trigger = hold(options)();
 
 		expect(trigger.update(1, 0.5, deltaTime)).toBe("triggered");
 		expect(trigger.update(1, 0.6, deltaTime)).toBe("triggered");
@@ -42,7 +42,7 @@ describe("hold", () => {
 	it("should return 'triggered' once then 'none' with oneShot", () => {
 		expect.assertions(2);
 
-		const trigger = hold({ ...options, oneShot: true });
+		const trigger = hold({ ...options, oneShot: true })();
 
 		expect(trigger.update(1, 0.5, deltaTime)).toBe("triggered");
 		expect(trigger.update(1, 0.6, deltaTime)).toBe("none");
@@ -51,7 +51,7 @@ describe("hold", () => {
 	it("should return 'canceled' when released after attempting but before threshold", () => {
 		expect.assertions(1);
 
-		const trigger = hold(options);
+		const trigger = hold(options)();
 		trigger.update(1, 0.3, deltaTime);
 
 		expect(trigger.update(0, 0.3, deltaTime)).toBe("canceled");
@@ -60,16 +60,26 @@ describe("hold", () => {
 	it("should return 'none' when released before attempting duration", () => {
 		expect.assertions(1);
 
-		const trigger = hold(options);
+		const trigger = hold(options)();
 		trigger.update(1, 0.05, deltaTime);
 
 		expect(trigger.update(0, 0.05, deltaTime)).toBe("none");
 	});
 
+	it("should mint triggers with independent state", () => {
+		expect.assertions(1);
+
+		const create = hold({ ...options, oneShot: true });
+		const first = create();
+		first.update(1, 0.5, deltaTime);
+
+		expect(create().update(1, 0.5, deltaTime)).toBe("triggered");
+	});
+
 	it("should reset hasTriggered state", () => {
 		expect.assertions(2);
 
-		const trigger = hold({ ...options, oneShot: true });
+		const trigger = hold({ ...options, oneShot: true })();
 		trigger.update(1, 0.5, deltaTime);
 		trigger.update(1, 0.6, deltaTime);
 		trigger.reset!();

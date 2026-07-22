@@ -1,4 +1,6 @@
 import type { ModifierContext } from "../modifiers/types";
+import { resetTriggers } from "../triggers/instantiate";
+import type { TriggerInstance } from "../triggers/types";
 import type { ActionConfig, ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
@@ -17,6 +19,10 @@ export interface CoreHandleData {
 	readonly activeContexts: ActiveContexts;
 	/** Per-action trigger duration accumulators in seconds. */
 	readonly durations: Map<string, number>;
+	/**
+	 * Actions whose triggers ran last frame, so leaving the set resets them.
+	 */
+	readonly evaluatedActions: Set<string>;
 	/** Roblox InputContext instance references. */
 	readonly instanceData: InputInstanceData;
 	/** Mutable internal action state used during update. */
@@ -27,6 +33,11 @@ export interface CoreHandleData {
 	readonly previousMagnitudes: Map<string, number>;
 	/** Injected values from `simulateAction`. */
 	readonly simulatedValues: Map<string, ActionValueType>;
+	/**
+	 * This handle's own trigger instances, keyed by action name. Trigger state
+	 * is per handle, never shared through the action config.
+	 */
+	readonly triggerInstances: Map<string, ReadonlyArray<TriggerInstance>>;
 	/** Actions that have already emitted a timeout warning. Dev-only. */
 	readonly warnedActions: Set<string>;
 }
@@ -164,7 +175,9 @@ function processAction({
 		duration,
 		modifierContext,
 		rawValue,
+		triggerInstances: handleTriggers(handleData, actionName),
 	});
+	handleData.evaluatedActions.add(actionName);
 	handleData.internalState.updateAction({
 		action: actionName,
 		deltaTime,
@@ -206,6 +219,15 @@ function clearPendingAction(handleData: CoreHandleData, actionName: string): voi
 	handleData.pendingActions.delete(actionName);
 }
 
+function handleTriggers(
+	handleData: CoreHandleData,
+	actionName: string,
+): ReadonlyArray<TriggerInstance> {
+	const triggers = handleData.triggerInstances.get(actionName);
+	assert(triggers, `missing trigger instances for action: ${actionName}`);
+	return triggers;
+}
+
 function resetAction(
 	handleData: CoreHandleData,
 	actionName: string,
@@ -214,6 +236,10 @@ function resetAction(
 ): void {
 	handleData.durations.set(actionName, 0);
 	handleData.previousMagnitudes.set(actionName, 0);
+	if (handleData.evaluatedActions.delete(actionName)) {
+		resetTriggers(handleTriggers(handleData, actionName));
+	}
+
 	handleData.internalState.updateAction({
 		action: actionName,
 		deltaTime,
@@ -302,13 +328,6 @@ function updateUnprocessedActions(
 			continue;
 		}
 
-		handleData.durations.set(actionName, 0);
-		handleData.previousMagnitudes.set(actionName, 0);
-		handleData.internalState.updateAction({
-			action: actionName,
-			deltaTime,
-			triggerState: "none",
-			value: getDefaultValue(actionConfig.type),
-		});
+		resetAction(handleData, actionName, actionConfig, deltaTime);
 	}
 }

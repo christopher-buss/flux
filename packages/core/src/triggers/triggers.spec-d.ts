@@ -5,13 +5,13 @@ import { doubleTap } from "./double-tap";
 import { hold } from "./hold";
 import type { DoubleTapOptions, HoldOptions, TapOptions } from "./index";
 import { tap } from "./tap";
-import type { Trigger, TriggerState, TriggerType, TypedTrigger } from "./types";
+import type { Trigger, TriggerFactory, TriggerState, TriggerType, TypedTrigger } from "./types";
 import { blocker, explicit, implicit } from "./wrappers";
 
 describe("doubleTap", () => {
-	it("should accept DoubleTapOptions and return Trigger", () => {
+	it("should accept DoubleTapOptions and return TriggerFactory", () => {
 		expectTypeOf(doubleTap).parameter(0).toEqualTypeOf<DoubleTapOptions>();
-		expectTypeOf(doubleTap).returns.toEqualTypeOf<Trigger>();
+		expectTypeOf(doubleTap).returns.toEqualTypeOf<TriggerFactory>();
 	});
 
 	it("should reject missing window field", () => {
@@ -21,9 +21,9 @@ describe("doubleTap", () => {
 });
 
 describe("hold", () => {
-	it("should accept HoldOptions and return Trigger", () => {
+	it("should accept HoldOptions and return TriggerFactory", () => {
 		expectTypeOf(hold).parameter(0).toEqualTypeOf<HoldOptions>();
-		expectTypeOf(hold).returns.toEqualTypeOf<Trigger>();
+		expectTypeOf(hold).returns.toEqualTypeOf<TriggerFactory>();
 	});
 
 	it("should accept optional oneShot field", () => {
@@ -38,9 +38,9 @@ describe("hold", () => {
 });
 
 describe("tap", () => {
-	it("should accept TapOptions and return Trigger", () => {
+	it("should accept TapOptions and return TriggerFactory", () => {
 		expectTypeOf(tap).parameter(0).toEqualTypeOf<TapOptions>();
-		expectTypeOf(tap).returns.toEqualTypeOf<Trigger>();
+		expectTypeOf(tap).returns.toEqualTypeOf<TriggerFactory>();
 	});
 
 	it("should reject missing threshold", () => {
@@ -50,17 +50,17 @@ describe("tap", () => {
 });
 
 describe("wrappers", () => {
-	it("should accept Trigger and return TypedTrigger", () => {
-		expectTypeOf(implicit).parameter(0).toEqualTypeOf<Trigger>();
-		expectTypeOf(explicit).parameter(0).toEqualTypeOf<Trigger>();
-		expectTypeOf(blocker).parameter(0).toEqualTypeOf<Trigger>();
+	it("should accept TriggerFactory and return TypedTrigger", () => {
+		expectTypeOf(implicit).parameter(0).toEqualTypeOf<TriggerFactory>();
+		expectTypeOf(explicit).parameter(0).toEqualTypeOf<TriggerFactory>();
+		expectTypeOf(blocker).parameter(0).toEqualTypeOf<TriggerFactory>();
 		expectTypeOf(implicit).returns.toEqualTypeOf<TypedTrigger>();
 		expectTypeOf(explicit).returns.toEqualTypeOf<TypedTrigger>();
 		expectTypeOf(blocker).returns.toEqualTypeOf<TypedTrigger>();
 	});
 
-	it("should reject non-Trigger arguments", () => {
-		// @ts-expect-error string is not a Trigger
+	it("should reject non-factory arguments", () => {
+		// @ts-expect-error string is not a TriggerFactory
 		implicit("not a trigger");
 	});
 });
@@ -92,13 +92,13 @@ describe("TriggerType", () => {
 });
 
 describe("TypedTrigger", () => {
-	it("should have trigger and type fields", () => {
-		expectTypeOf<TypedTrigger>().toHaveProperty("trigger");
+	it("should have create and type fields", () => {
+		expectTypeOf<TypedTrigger>().toHaveProperty("create");
 		expectTypeOf<TypedTrigger>().toHaveProperty("type");
 	});
 
-	it("should type trigger as Trigger", () => {
-		expectTypeOf<TypedTrigger["trigger"]>().toEqualTypeOf<Trigger>();
+	it("should type create as TriggerFactory", () => {
+		expectTypeOf<TypedTrigger["create"]>().toEqualTypeOf<TriggerFactory>();
 	});
 
 	it("should type type as TriggerType", () => {

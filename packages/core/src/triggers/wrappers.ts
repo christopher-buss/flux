@@ -1,34 +1,34 @@
-import type { Trigger, TypedTrigger } from "./types";
+import type { TriggerFactory, TypedTrigger } from "./types";
 
 /**
- * Wraps a trigger as implicit. All implicit triggers must pass for the action
- * to fire.
+ * Wraps a trigger factory as implicit. All implicit triggers must pass for the
+ * action to fire.
  *
- * @param trigger - The trigger to wrap.
+ * @param create - The trigger factory to wrap.
  * @returns A typed trigger with `"implicit"` classification.
  */
-export function implicit(trigger: Trigger): TypedTrigger {
-	return { trigger, type: "implicit" };
+export function implicit(create: TriggerFactory): TypedTrigger {
+	return { create, type: "implicit" };
 }
 
 /**
- * Wraps a trigger as explicit. Any one explicit trigger passing fires the
- * action.
+ * Wraps a trigger factory as explicit. Any one explicit trigger passing fires
+ * the action.
  *
- * @param trigger - The trigger to wrap.
+ * @param create - The trigger factory to wrap.
  * @returns A typed trigger with `"explicit"` classification.
  */
-export function explicit(trigger: Trigger): TypedTrigger {
-	return { trigger, type: "explicit" };
+export function explicit(create: TriggerFactory): TypedTrigger {
+	return { create, type: "explicit" };
 }
 
 /**
- * Wraps a trigger as a blocker. If any blocker triggers, the action is
+ * Wraps a trigger factory as a blocker. If any blocker triggers, the action is
  * prevented.
  *
- * @param trigger - The trigger to wrap.
+ * @param create - The trigger factory to wrap.
  * @returns A typed trigger with `"blocker"` classification.
  */
-export function blocker(trigger: Trigger): TypedTrigger {
-	return { trigger, type: "blocker" };
+export function blocker(create: TriggerFactory): TypedTrigger {
+	return { create, type: "blocker" };
 }

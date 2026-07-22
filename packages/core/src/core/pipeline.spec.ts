@@ -2,7 +2,7 @@ import { describe, expect, it } from "@rbxts/jest-globals";
 import { fromAny } from "@rbxts/jest-utils";
 
 import type { Modifier, ModifierContext } from "../modifiers/types";
-import type { Trigger, TriggerState, TypedTrigger } from "../triggers/types";
+import type { Trigger, TriggerInstance, TriggerState } from "../triggers/types";
 import type { ActionConfig } from "../types/actions";
 import type { InputHandle } from "../types/core";
 import { processPipeline } from "./pipeline";
@@ -20,10 +20,10 @@ function mockTrigger(returnState: TriggerState): Trigger {
 	};
 }
 
-function createTypedTrigger(
-	triggerKind: TypedTrigger["type"],
+function createTriggerInstance(
+	triggerKind: TriggerInstance["type"],
 	returnState: TriggerState,
-): TypedTrigger {
+): TriggerInstance {
 	return { trigger: mockTrigger(returnState), type: triggerKind };
 }
 
@@ -58,6 +58,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: [],
 		});
 
 		expect(result.value).toBe(5);
@@ -77,6 +78,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 3,
+			triggerInstances: [],
 		});
 
 		expect(result.value).toBe(6);
@@ -95,6 +97,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 3,
+			triggerInstances: [],
 		});
 
 		// 3 * 2 = 6, then 6 + 1 = 7
@@ -104,8 +107,8 @@ describe("processPipeline", () => {
 	it("should trigger when a single implicit trigger returns triggered", () => {
 		expect.assertions(1);
 
+		const triggers = [createTriggerInstance("implicit", "triggered")];
 		const config = {
-			triggers: [createTypedTrigger("implicit", "triggered")],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -114,6 +117,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("triggered");
@@ -122,8 +126,8 @@ describe("processPipeline", () => {
 	it("should trigger when a single explicit trigger returns triggered", () => {
 		expect.assertions(1);
 
+		const triggers = [createTriggerInstance("explicit", "triggered")];
 		const config = {
-			triggers: [createTypedTrigger("explicit", "triggered")],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -132,6 +136,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("triggered");
@@ -140,8 +145,8 @@ describe("processPipeline", () => {
 	it("should return none when a blocker trigger returns triggered", () => {
 		expect.assertions(1);
 
+		const triggers = [createTriggerInstance("blocker", "triggered")];
 		const config = {
-			triggers: [createTypedTrigger("blocker", "triggered")],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -150,6 +155,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("none");
@@ -158,11 +164,11 @@ describe("processPipeline", () => {
 	it("should trigger when explicit returns triggered even if implicit returns none", () => {
 		expect.assertions(1);
 
+		const triggers = [
+			createTriggerInstance("implicit", "none"),
+			createTriggerInstance("explicit", "triggered"),
+		];
 		const config = {
-			triggers: [
-				createTypedTrigger("implicit", "none"),
-				createTypedTrigger("explicit", "triggered"),
-			],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -171,6 +177,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("triggered");
@@ -187,6 +194,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: true,
+			triggerInstances: [],
 		});
 
 		expect(resultTrue.triggerState).toBe("triggered");
@@ -197,6 +205,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: false,
+			triggerInstances: [],
 		});
 
 		expect(resultFalse.triggerState).toBe("none");
@@ -212,6 +221,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: new Vector2(3, 4),
+			triggerInstances: [],
 		});
 
 		// magnitude = 5, so triggered
@@ -228,6 +238,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: false,
+			triggerInstances: [],
 		});
 
 		expect(result.triggerState).toBe("none");
@@ -246,6 +257,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: true,
+			triggerInstances: [],
 		});
 
 		expect(result.value).toBeTrue();
@@ -254,11 +266,11 @@ describe("processPipeline", () => {
 	it("should require all implicit triggers to pass", () => {
 		expect.assertions(1);
 
+		const triggers = [
+			createTriggerInstance("implicit", "triggered"),
+			createTriggerInstance("implicit", "none"),
+		];
 		const config = {
-			triggers: [
-				createTypedTrigger("implicit", "triggered"),
-				createTypedTrigger("implicit", "none"),
-			],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -267,6 +279,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("none");
@@ -275,8 +288,8 @@ describe("processPipeline", () => {
 	it("should propagate ongoing state", () => {
 		expect.assertions(1);
 
+		const triggers = [createTriggerInstance("implicit", "ongoing")];
 		const config = {
-			triggers: [createTypedTrigger("implicit", "ongoing")],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -285,6 +298,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("ongoing");
@@ -293,8 +307,8 @@ describe("processPipeline", () => {
 	it("should propagate canceled state", () => {
 		expect.assertions(1);
 
+		const triggers = [createTriggerInstance("implicit", "canceled")];
 		const config = {
-			triggers: [createTypedTrigger("implicit", "canceled")],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -303,6 +317,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("canceled");
@@ -311,11 +326,11 @@ describe("processPipeline", () => {
 	it("should let blocker override explicit trigger", () => {
 		expect.assertions(1);
 
+		const triggers = [
+			createTriggerInstance("blocker", "triggered"),
+			createTriggerInstance("explicit", "triggered"),
+		];
 		const config = {
-			triggers: [
-				createTypedTrigger("blocker", "triggered"),
-				createTypedTrigger("explicit", "triggered"),
-			],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -324,6 +339,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("none");
@@ -332,11 +348,11 @@ describe("processPipeline", () => {
 	it("should short-circuit multiple blockers after first triggered", () => {
 		expect.assertions(1);
 
+		const triggers = [
+			createTriggerInstance("blocker", "triggered"),
+			createTriggerInstance("blocker", "triggered"),
+		];
 		const config = {
-			triggers: [
-				createTypedTrigger("blocker", "triggered"),
-				createTypedTrigger("blocker", "triggered"),
-			],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -345,6 +361,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("none");
@@ -353,11 +370,11 @@ describe("processPipeline", () => {
 	it("should short-circuit multiple explicit triggers after first triggered", () => {
 		expect.assertions(1);
 
+		const triggers = [
+			createTriggerInstance("explicit", "triggered"),
+			createTriggerInstance("explicit", "triggered"),
+		];
 		const config = {
-			triggers: [
-				createTypedTrigger("explicit", "triggered"),
-				createTypedTrigger("explicit", "triggered"),
-			],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -366,6 +383,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("triggered");
@@ -374,11 +392,11 @@ describe("processPipeline", () => {
 	it("should short-circuit implicit when one is not triggered", () => {
 		expect.assertions(1);
 
+		const triggers = [
+			createTriggerInstance("implicit", "none"),
+			createTriggerInstance("implicit", "triggered"),
+		];
 		const config = {
-			triggers: [
-				createTypedTrigger("implicit", "none"),
-				createTypedTrigger("implicit", "triggered"),
-			],
 			type: "Direction1D",
 		} satisfies ActionConfig;
 		const result = processPipeline({
@@ -387,6 +405,7 @@ describe("processPipeline", () => {
 			duration: 0,
 			modifierContext: MODIFIER_CONTEXT,
 			rawValue: 5,
+			triggerInstances: triggers,
 		});
 
 		expect(result.triggerState).toBe("none");

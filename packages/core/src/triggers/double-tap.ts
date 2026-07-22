@@ -1,4 +1,4 @@
-import type { Trigger, TriggerState } from "./types";
+import type { Trigger, TriggerFactory, TriggerState } from "./types";
 
 /** Options for the double-tap trigger. */
 export interface DoubleTapOptions {
@@ -7,12 +7,16 @@ export interface DoubleTapOptions {
 }
 
 /**
- * Creates a trigger that fires on two rapid presses.
+ * Creates a factory for triggers that fire on two rapid presses.
  *
  * @param options - Double-tap trigger configuration.
- * @returns A trigger that detects double taps.
+ * @returns A factory minting triggers that detect double taps.
  */
-export function doubleTap({ window: tapWindow }: DoubleTapOptions): Trigger {
+export function doubleTap({ window: tapWindow }: DoubleTapOptions): TriggerFactory {
+	return () => createDoubleTapTrigger(tapWindow);
+}
+
+function createDoubleTapTrigger(tapWindow: number): Trigger {
 	let timeSinceLastTap = math.huge;
 	let tapCount = 0;
 	let didPress = false;

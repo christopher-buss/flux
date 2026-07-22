@@ -101,6 +101,19 @@ const SHARED_CONTEXTS = {
 	},
 } satisfies Record<string, ContextConfig>;
 
+// A one-shot hold only re-fires once its trigger state is cleared, so it
+// reports whether that state is owned per handle and cleared on context exit.
+const ONE_SHOT_ACTIONS = {
+	charge: {
+		triggers: [implicit(hold({ attempting: 0, oneShot: true, threshold: 0.5 }))],
+		type: "Bool" as const,
+	},
+} satisfies ActionMap;
+
+const ONE_SHOT_CONTEXTS = {
+	gameplay: { bindings: { charge: [Enum.KeyCode.E] } },
+} satisfies Record<string, ContextConfig>;
+
 describe("createCore", () => {
 	it("should return object with all FluxCore methods", () => {
 		expect.assertions(1);
@@ -632,6 +645,41 @@ describe("createCore", () => {
 			core.removeContext(handle, "primary");
 			core.simulateAction(handle, "charge", true);
 			core.update(0.3);
+
+			expect(core.getState(handle).pressed("charge")).toBeTrue();
+		});
+	});
+
+	describe("trigger state ownership", () => {
+		it("should keep trigger state independent per handle", () => {
+			expect.assertions(2);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: ONE_SHOT_ACTIONS, contexts: ONE_SHOT_CONTEXTS });
+			const first = core.register(parent, "gameplay");
+			const second = core.register(parent, "gameplay");
+
+			core.simulateAction(first, "charge", true);
+			core.simulateAction(second, "charge", true);
+			core.update(0.6);
+
+			expect(core.getState(first).pressed("charge")).toBeTrue();
+			expect(core.getState(second).pressed("charge")).toBeTrue();
+		});
+
+		it("should reset triggers once no active context declares the action", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: ONE_SHOT_ACTIONS, contexts: ONE_SHOT_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+
+			core.simulateAction(handle, "charge", true);
+			core.update(0.6);
+			core.removeContext(handle, "gameplay");
+			core.update(0.016);
+			core.addContext(handle, "gameplay");
+			core.simulateAction(handle, "charge", true);
+			core.update(0.6);
 
 			expect(core.getState(handle).pressed("charge")).toBeTrue();
 		});

@@ -1,17 +1,19 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
 
-import type { Trigger } from "./types";
+import type { TriggerFactory } from "./types";
 import { blocker, explicit, implicit } from "./wrappers";
 
 describe("trigger wrappers", () => {
-	const mockTrigger: Trigger = {
-		/**
-		 * Intentionally empty for mock.
-		 */
-		reset(): void {},
-		update(): "none" {
-			return "none";
-		},
+	const mockTrigger: TriggerFactory = () => {
+		return {
+			/**
+			 * Intentionally empty for mock.
+			 */
+			reset(): void {},
+			update(): "none" {
+				return "none";
+			},
+		};
 	};
 
 	it("should wrap with implicit type", () => {
@@ -32,11 +34,11 @@ describe("trigger wrappers", () => {
 		expect(blocker(mockTrigger).type).toBe("blocker");
 	});
 
-	it("should preserve the trigger reference", () => {
+	it("should preserve the factory reference", () => {
 		expect.assertions(3);
 
-		expect(implicit(mockTrigger).trigger).toBe(mockTrigger);
-		expect(explicit(mockTrigger).trigger).toBe(mockTrigger);
-		expect(blocker(mockTrigger).trigger).toBe(mockTrigger);
+		expect(implicit(mockTrigger).create).toBe(mockTrigger);
+		expect(explicit(mockTrigger).create).toBe(mockTrigger);
+		expect(blocker(mockTrigger).create).toBe(mockTrigger);
 	});
 });
