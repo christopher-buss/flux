@@ -8,7 +8,6 @@ import { contexts } from "shared/contexts";
 
 const player = Players.LocalPlayer;
 const world = Jecs.world();
-// eslint-disable-next-line flawless/naming-convention -- Jecs component convention
 const ActionState = world.component<ActionState<typeof actions>>();
 const flux = createFluxJecs(world, {
 	actions,

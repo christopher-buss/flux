@@ -27,8 +27,7 @@ function loadEngineSource(options: {
 	preferred?: Enum.PreferredInput;
 }): EngineStub {
 	const handlers = new Set<() => void>();
-	/* eslint-disable flawless/naming-convention -- stubs mirror the engine's API */
-	const signal: RBXScriptSignal = fromAny({
+	const signal = fromPartial<RBXScriptSignal>({
 		Connect(handler: () => void) {
 			handlers.add(handler);
 			const connection: RBXScriptConnection = fromAny({
@@ -39,29 +38,29 @@ function loadEngineSource(options: {
 
 			return connection;
 		},
-	});
+	} satisfies Partial<RBXScriptSignal>);
 
 	const userInputService = {
 		GetPropertyChangedSignal() {
 			return signal;
 		},
 		PreferredInput: options.preferred ?? Enum.PreferredInput.KeyboardAndMouse,
-	};
+	} satisfies Partial<UserInputService>;
 
 	const runService = {
 		IsClient() {
 			return options.isClient;
 		},
-	};
+	} satisfies Partial<RunService>;
 
 	jest.resetModules();
+
 	jest.doMock<typeof import("@rbxts/services")>("@rbxts/services", () => {
 		return fromPartial({
 			RunService: runService,
 			UserInputService: userInputService,
 		});
 	});
-	/* eslint-enable flawless/naming-convention */
 
 	let engineInputSource!: InputPlatformSource;
 	jest.isolateModules(() => {

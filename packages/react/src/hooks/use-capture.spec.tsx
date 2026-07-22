@@ -1,4 +1,3 @@
-/* eslint-disable flawless/naming-convention -- React components use PascalCase */
 import { cleanup, render } from "@flux/test-utils/react-testing-library-lua";
 import type { CaptureToken, FluxCore, InputHandle } from "@rbxts/flux";
 import { createCore } from "@rbxts/flux";
@@ -1589,8 +1588,8 @@ describe("useCapture", () => {
 			const { useCaptureAction } = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 
 			function Surface(): React.ReactNode {
-				const value = useCaptureAction(makeTokenStub(), (token) => token.triggered());
-				return <textlabel Text={tostring(value)} />;
+				const isTriggered = useCaptureAction(makeTokenStub(), (token) => token.triggered());
+				return <textlabel Text={tostring(isTriggered)} />;
 			}
 
 			expect(() => render(<Surface />)).toThrow(

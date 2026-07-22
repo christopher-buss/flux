@@ -9,7 +9,6 @@ const world = Jecs.world();
 const flux = createFluxJecs(world, { actions, contexts });
 const entityByPlayer = new Map<Player, ReturnType<typeof world.entity>>();
 
-// eslint-disable-next-line flawless/naming-convention -- Jecs component convention
 const User = world.component();
 
 Players.PlayerAdded.Connect((player) => {

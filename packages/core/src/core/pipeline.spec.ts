@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
-import { fromAny, fromPartial } from "@rbxts/jest-utils";
+import { fromAny } from "@rbxts/jest-utils";
 
 import type { Modifier, ModifierContext } from "../modifiers/types";
 import type { Trigger, TriggerState, TypedTrigger } from "../triggers/types";
@@ -9,7 +9,7 @@ import { processPipeline } from "./pipeline";
 
 const MODIFIER_CONTEXT = {
 	deltaTime: 0.016,
-	handle: fromPartial<InputHandle>(0),
+	handle: fromAny<InputHandle, number>(0),
 } satisfies ModifierContext;
 
 function mockTrigger(returnState: TriggerState): Trigger {

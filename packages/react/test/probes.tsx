@@ -116,7 +116,7 @@ export function createCountingProbe(
  */
 export function createLabeledJumpProbe(
 	useAction: UseFluxAction,
-): (props: LabeledProbeProps) => React.ReactNode {
+): React.FunctionComponent<LabeledProbeProps> {
 	return (props: LabeledProbeProps): React.ReactNode => {
 		const isJumping = useAction((state) => state.pressed("jump"));
 		return <textlabel Text={`${props.label}:${tostring(isJumping)}`} />;

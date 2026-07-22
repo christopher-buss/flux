@@ -12,12 +12,7 @@ import type { TypedTrigger } from "../triggers/types";
  *
  * @see https://create.roblox.com/docs/reference/engine/enums/InputActionType
  */
-export type ActionType =
-	| "Bool"
-	| "Direction1D"
-	| "Direction2D"
-	| "Direction3D"
-	| "ViewportPosition";
+export type ActionType = Enum.InputActionType["Name"];
 
 /**
  * Configuration for a single input action.

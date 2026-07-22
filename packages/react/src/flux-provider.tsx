@@ -32,7 +32,6 @@ export interface FluxProviderProps<T extends ActionMap, Contexts extends string 
  * @returns A FluxProvider component.
  */
 export function createFluxProvider<T extends ActionMap, Contexts extends string = string>(
-	// eslint-disable-next-line flawless/naming-convention -- React convention
 	FluxContext: React.Context<FluxContextValue<T, Contexts> | undefined>,
 	subscribe: (listener: () => void) => Disconnect,
 ): (props: FluxProviderProps<T, Contexts>) => React.ReactNode {

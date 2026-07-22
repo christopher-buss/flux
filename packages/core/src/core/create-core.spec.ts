@@ -1,6 +1,6 @@
 import { awaitDefer } from "@flux/test-utils";
 import { describe, expect, it, jest } from "@rbxts/jest-globals";
-import { afterThis, fromAny, fromPartial } from "@rbxts/jest-utils";
+import { afterThis, fromAny } from "@rbxts/jest-utils";
 
 import { hold, implicit, tap } from "../triggers";
 import type { ActionMap } from "../types/actions";
@@ -1239,7 +1239,7 @@ describe("createCore", () => {
 			expect.assertions(2);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = fromPartial<InputHandle>(99);
+			const handle = fromAny<InputHandle, number>(99);
 			core.registerAs(handle, new Instance("Folder"), "gameplay", "ui");
 
 			expect(core.hasContext(handle, "gameplay")).toBeTrue();
@@ -1250,7 +1250,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = fromPartial<InputHandle>(7);
+			const handle = fromAny<InputHandle, number>(7);
 			core.registerAs(handle, new Instance("Folder"), "gameplay");
 			core.simulateAction(handle, "jump", true);
 			core.update(0.016);
@@ -1262,7 +1262,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = fromPartial<InputHandle>(42);
+			const handle = fromAny<InputHandle, number>(42);
 			core.registerAs(handle, new Instance("Folder"), "gameplay");
 			core.unregister(handle);
 			const getState = () => {
@@ -1276,7 +1276,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = fromPartial<InputHandle>(42);
+			const handle = fromAny<InputHandle, number>(42);
 			const registerAs = () => {
 				core.registerAs(handle, new Instance("Folder"), fromAny("nonexistent"));
 			};
@@ -1295,7 +1295,7 @@ describe("createCore", () => {
 			const serverCore = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 			serverCore.register(parent, "gameplay");
 
-			const handle = fromPartial<InputHandle>(42);
+			const handle = fromAny<InputHandle, number>(42);
 			core.subscribeAs(handle, parent, "gameplay");
 
 			expect(core.hasContext(handle, "gameplay")).toBeTrue();
@@ -1305,7 +1305,7 @@ describe("createCore", () => {
 			expect.assertions(1);
 
 			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
-			const handle = fromPartial<InputHandle>(42);
+			const handle = fromAny<InputHandle, number>(42);
 			const subscribeAs = () => {
 				core.subscribeAs(handle, new Instance("Folder"), fromAny("nonexistent"));
 			};

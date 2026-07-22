@@ -39,7 +39,6 @@ export interface FluxJecs<
 	C extends Record<string, ContextConfig> = Record<string, ContextConfig>,
 > {
 	/** Jecs component entity for ActionState data. */
-	// eslint-disable-next-line flawless/naming-convention -- Jecs component entities are typically PascalCase
 	readonly ActionState: Entity<ActionState<T>>;
 
 	/**

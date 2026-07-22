@@ -1,10 +1,25 @@
 import isentinel, { GLOB_MARKDOWN_CODE, GLOB_SRC, GLOB_TESTS } from "@isentinel/eslint-config";
 
+const RBXTS_JECS = "@rbxts/jecs";
+
 export default isentinel(
 	{
 		name: "flux/root",
 		ignores: ["flux"],
-		naming: true,
+		naming: {
+			selectors: [
+				// jecs entities conventionally use PascalCase
+				{
+					format: ["strictCamelCase", "StrictPascalCase"],
+					selector: ["typeProperty", "variable"],
+					types: [
+						{ name: "Entity", from: RBXTS_JECS },
+						{ name: "Pair", from: RBXTS_JECS },
+						{ name: "Tag", from: RBXTS_JECS },
+					],
+				},
+			],
+		},
 		oxlint: "native",
 		react: {
 			overrides: {

@@ -5,7 +5,7 @@ dedupePeers: true
 ignoreWorkspaceRootCheck: true
 
 minimumReleaseAgeExclude:
-  - "@isentinel/eslint-config@6.0.0-beta.14"
+  - "@isentinel/eslint-config@6.0.0-beta.15"
   - "@isentinel/rojo-utils@0.1.0"
   - "@oxlint/binding-android-arm-eabi@1.75.0"
   - "@oxlint/binding-android-arm64@1.75.0"
@@ -32,7 +32,7 @@ minimumReleaseAgeExclude:
   - "@oxlint-tsgolint/linux-x64@7.0.2001"
   - "@oxlint-tsgolint/win32-arm64@7.0.2001"
   - "@oxlint-tsgolint/win32-x64@7.0.2001"
-  - eslint-plugin-flawless@1.0.0
+  - eslint-plugin-flawless
   - oxlint@1.75.0
   - oxlint-tsgolint@7.0.2001
 
@@ -76,7 +76,7 @@ catalogs:
     std-env: 4.2.0
   lint:
     "@eslint/config-inspector": 3.1.0
-    "@isentinel/eslint-config": 6.0.0-beta.14
+    "@isentinel/eslint-config": 6.0.0-beta.15
     "@isentinel/hooks": 1.5.3
     "@vitest/eslint-plugin": 1.6.23
     eslint: 10.7.0

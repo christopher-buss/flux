@@ -24,7 +24,6 @@ describe("provider lifecycle", () => {
 		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { unmount } = render(
@@ -59,7 +58,6 @@ describe("provider lifecycle", () => {
 		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(
@@ -92,7 +90,6 @@ describe("provider lifecycle", () => {
 		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(
@@ -129,10 +126,8 @@ describe("provider lifecycle", () => {
 		const fluxA = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const fluxB = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const ProbeA = createLabeledJumpProbe(fluxA.useAction);
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const ProbeB = createLabeledJumpProbe(fluxB.useAction);
 
 		render(
@@ -167,7 +162,6 @@ describe("provider lifecycle", () => {
 		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const { FluxProvider, useAction } = flux;
 
-		// eslint-disable-next-line flawless/naming-convention -- React component
 		const Probe = createLabeledJumpProbe(useAction);
 
 		const { queryByText } = render(

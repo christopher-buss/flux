@@ -1,5 +1,6 @@
 import type {
 	ActionMap,
+	ActionType,
 	AllActions,
 	AxisActions,
 	BoolActions,
@@ -13,20 +14,17 @@ import type {
  * Maps each ActionType to its runtime value type.
  * @remarks Used by {@link ActionValue} to resolve the concrete type a query method returns.
  */
-export interface ActionValueMap {
-	/* eslint-disable flawless/naming-convention -- Matches Roblox API. */
-	/** Boolean on/off state. */
-	Bool: boolean;
-	/** Scalar axis value. */
-	Direction1D: number;
-	/** 2D directional vector. */
-	Direction2D: Vector2;
-	/** 3D directional vector. */
-	Direction3D: Vector3;
-	/** Screen-space pointer position. */
-	ViewportPosition: Vector2;
-	/* eslint-enable flawless/naming-convention */
-}
+export type ActionValueMap = {
+	[K in ActionType]: K extends "Bool"
+		? boolean
+		: K extends "Direction1D"
+			? number
+			: K extends "Direction2D" | "ViewportPosition"
+				? Vector2
+				: K extends "Direction3D"
+					? Vector3
+					: never;
+};
 
 /**
  * Resolves the runtime value type for a specific action in an action map.
