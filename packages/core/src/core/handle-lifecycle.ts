@@ -7,8 +7,9 @@ import type { ActionState } from "../types/state";
 import type { ActionValueType } from "./action-entry";
 import { createActionState } from "./action-state";
 import { createActiveContexts } from "./active-contexts";
+import { findInputInstances } from "./find-instances";
 import type { HandleFactory } from "./handle-factory";
-import { createInputInstances, findInputInstances } from "./input-instances";
+import { createInputInstances } from "./input-instances";
 import type { PlatformOverrides } from "./platform-overrides";
 import type { CoreHandleData } from "./update-handle";
 
