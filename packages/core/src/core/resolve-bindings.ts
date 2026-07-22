@@ -4,6 +4,7 @@ import { isContextAction } from "../contexts/collect-actions";
 import type { ActionMap } from "../types/actions";
 import type { BindingLike, BindingOrigin } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
+import { requireContextConfig } from "./context-lookup";
 import type { HandleData } from "./handle-lifecycle";
 import type { PlatformOverrides } from "./platform-overrides";
 import { composeBindings, findPlatformBucket, resolvePlatformBucket } from "./platform-overrides";
@@ -160,9 +161,7 @@ export function resolveBindingOrigin<T extends ActionMap>(
  * @throws If the context name is unknown.
  */
 function contextConfigFor(options: ContextBindingOptions): ContextConfig {
-	const contextConfig = options.contexts[options.context];
-	assert(contextConfig, `missing context config: ${options.context}`);
-	return contextConfig;
+	return requireContextConfig(options.contexts, options.context);
 }
 
 /**

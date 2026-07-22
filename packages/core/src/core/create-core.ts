@@ -222,6 +222,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			});
 		},
 		removeContext(handle: InputHandle, context: Contexts): void {
+			validateContextName(contexts, context);
 			const data = getHandleData(handles, handle);
 			deactivateContext(data.activeContexts, context);
 			setContextEnabled(data.instanceData, context, false);

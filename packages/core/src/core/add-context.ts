@@ -2,11 +2,16 @@ import type { ActionMap } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import { activateContext, isContextActive } from "./active-contexts";
-import { findExistingContext, validateContextName } from "./context-lookup";
+import { validateContextName } from "./context-lookup";
 import type { ReplicationTransport } from "./create-core-options";
 import type { HandleData } from "./handle-lifecycle";
 import { getHandleData } from "./handle-lifecycle";
-import { addContextInstances, adoptContextInstances, setContextEnabled } from "./input-instances";
+import {
+	addContextInstances,
+	adoptContextInstances,
+	findExistingContext,
+	setContextEnabled,
+} from "./input-instances";
 import { replayOverridesIntoContext } from "./rebinding";
 
 /**
