@@ -316,6 +316,9 @@ interface FluxCore<TActions extends ActionMap = ActionMap> {
 	flushDiffs(handle: InputHandle): ReadonlyArray<ActionDiff>;
 	getContexts(handle: InputHandle): ReadonlyArray<string>;
 
+	getNeutralValue<A extends AllActions<TActions>>(
+		action: A,
+	): ActionValue<TActions, A>;
 	getState(handle: InputHandle): ActionState<TActions>;
 	hasContext(handle: InputHandle, context: string): boolean;
 
