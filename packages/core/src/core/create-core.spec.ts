@@ -168,6 +168,59 @@ describe("createCore", () => {
 		});
 	});
 
+	describe("getNeutralValue", () => {
+		it("should report false for a Bool action", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			expect(core.getNeutralValue("jump")).toBeFalse();
+		});
+
+		it("should report zero for a Direction1D action", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			expect(core.getNeutralValue("throttle")).toBe(0);
+		});
+
+		it("should report Vector2.zero for a Direction2D action", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			expect(core.getNeutralValue("move")).toBe(Vector2.zero);
+		});
+
+		it("should report Vector3.zero for a Direction3D action", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			expect(core.getNeutralValue("look")).toBe(Vector3.zero);
+		});
+
+		it("should report Vector2.zero for a ViewportPosition action", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+
+			expect(core.getNeutralValue("cursor")).toBe(Vector2.zero);
+		});
+
+		it("should throw for an undeclared action", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const getNeutralValue = () => {
+				core.getNeutralValue(fromAny<keyof typeof TEST_ACTIONS, string>("missing"));
+			};
+
+			expect(getNeutralValue).toThrow("unknown action: missing");
+		});
+	});
+
 	describe("unregister", () => {
 		it("should release captures held on the handle", () => {
 			expect.assertions(1);

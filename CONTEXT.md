@@ -26,6 +26,13 @@ event, control.
 `pressed`, `justPressed`, `axis2d`, `triggered`, `canceled`, and so on. The read
 side of Flux. _Avoid_: input state, snapshot, result.
 
+**Neutral value**: The value an inert read of an action reports — `false`, `0`,
+`Vector2.zero`, `Vector3.zero`, one per _action type_. A property of the type
+alone, so `core.getNeutralValue(action)` needs no handle. Distinct from reading
+inert, which is the condition (claimed, sunk, captured elsewhere); the neutral
+value is only what that read hands back. _Avoid_: default value, zero value,
+empty value.
+
 **Raw input**: An action's value read before _trigger_ evaluation and ignoring
 _claims_ and _captures_ (`rawPressed`, `rawJustPressed`); modifiers still apply.
 The unarbitrated truth, distinct from the processed value most code reads.
