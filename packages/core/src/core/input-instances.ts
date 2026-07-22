@@ -2,6 +2,7 @@ import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { BindingLike } from "../types/bindings";
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
+import { requireContextConfig } from "./context-lookup";
 import { createBindingsForAction } from "./input-bindings";
 
 /**
@@ -81,9 +82,7 @@ export function createInputInstances({
 	const inputFolder = getOrCreateInputFolder(parent);
 
 	for (const contextName of contextNames) {
-		const contextConfig = contexts[contextName];
-		assert(contextConfig, `missing context config: ${contextName}`);
-
+		const contextConfig = requireContextConfig(contexts, contextName);
 		const inputContext = createContext({
 			actions,
 			actionsByContext,
@@ -192,6 +191,30 @@ export function adoptContextInstances(
 ): void {
 	data.inputContexts.set(contextName, inputContext);
 	indexContextActions(data.actionsByContext, contextName, inputContext, actions);
+}
+
+/**
+ * Finds an already-created `InputContext` instance for a context name under
+ * the handle's parent, if the hierarchy already holds one.
+ * @param contextName - The context to look for.
+ * @param data - The handle's input instance data.
+ * @returns The existing `InputContext`, or `undefined` when there is none.
+ */
+export function findExistingContext(
+	contextName: string,
+	data: InputInstanceData,
+): InputContext | undefined {
+	const folder = data.parent.FindFirstChild(INPUT_FOLDER_NAME);
+	if (folder === undefined || !classIs(folder, "Folder")) {
+		return undefined;
+	}
+
+	const existing = folder.FindFirstChild(contextName);
+	if (existing !== undefined && classIs(existing, "InputContext")) {
+		return existing;
+	}
+
+	return undefined;
 }
 
 /**

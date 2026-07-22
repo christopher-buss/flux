@@ -304,6 +304,18 @@ describe("createCore", () => {
 			expect(core.hasContext(handle, "ui")).toBeFalse();
 		});
 
+		it("should reject an unknown context name before checking activation", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const removeContext = () => {
+				core.removeContext(handle, fromAny("typo"));
+			};
+
+			expect(removeContext).toThrow("unknown context");
+		});
+
 		it("should throw when removing inactive context", () => {
 			expect.assertions(1);
 
@@ -1542,6 +1554,16 @@ describe("createCore", () => {
 			const bindings = core.getBindings(handle, "jump");
 
 			expect(bindings).toContain(Enum.KeyCode.Space);
+		});
+
+		it("should return a frozen array, since the read aliases core state", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const bindings = core.getBindings(handle, "jump", "gameplay");
+
+			expect(table.isfrozen(bindings)).toBeTrue();
 		});
 
 		it("should return overridden bindings after rebind", () => {

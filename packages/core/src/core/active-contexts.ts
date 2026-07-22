@@ -1,5 +1,6 @@
 import { DEFAULT_CONTEXT_PRIORITY } from "../types/contexts";
 import type { ContextConfig } from "../types/contexts";
+import { requireContextConfig } from "./context-lookup";
 
 /** Active context names in activation order, oldest first. */
 export type ActiveContexts = Array<string>;
@@ -101,8 +102,7 @@ function rankActiveContexts(
 	const ranked = new Array<RankedContext>();
 	let activationIndex = 0;
 	for (const name of activeContexts) {
-		const config = contexts[name];
-		assert(config, `missing context config: ${name}`);
+		const config = requireContextConfig(contexts, name);
 		ranked.push({
 			name,
 			activationIndex,

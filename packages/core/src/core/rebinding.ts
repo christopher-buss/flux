@@ -11,11 +11,11 @@ import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { HandleData } from "./handle-lifecycle";
 import { getHandleData } from "./handle-lifecycle";
-import { assertValidBindings, createBindingsForAction } from "./input-bindings";
+import { assertValidBindings } from "./input-bindings";
 import type { InputInstanceData } from "./input-instances";
 import type { PlatformOverrides } from "./platform-overrides";
 import { bucketByPlatform, composeBindings, PLATFORM_ORDER } from "./platform-overrides";
-import { destroyChildrenInto, pruneInstances, rebuildActionBindings } from "./rebuild-bindings";
+import { rebuildActionBindings, rebuildContextAction } from "./rebuild-bindings";
 import { getContextBindings } from "./resolve-bindings";
 
 /**
@@ -394,22 +394,17 @@ export function replayOverridesIntoContext<T extends ActionMap>({
 		return;
 	}
 
-	const actionInstances = handleData.instanceData.actionsByContext.get(contextName);
-	assert(actionInstances, `context not registered: ${contextName}`);
 	for (const [actionName, overrides] of handleData.bindingOverrides) {
-		const inputAction = actionInstances.get(actionName);
-		if (inputAction === undefined) {
-			continue;
-		}
-
-		const destroyed = new Set<Instance>();
-		destroyChildrenInto(inputAction, destroyed);
-		pruneInstances(handleData.instanceData.instances, destroyed);
 		const bindings = composeBindings(
 			overrides,
 			contextDefaults({ action: actionName, contextName, contexts }),
 		);
-		createBindingsForAction(bindings, inputAction, handleData.instanceData.instances);
+		rebuildContextAction({
+			actionName,
+			bindings,
+			contextName,
+			data: handleData.instanceData,
+		});
 	}
 }
 
@@ -443,8 +438,12 @@ function rebuildFromOverrides<T extends ActionMap>({
 	handleData,
 }: ActionScopedOptions<T>): void {
 	const overrides = handleData.bindingOverrides.get(action);
-	rebuildActionBindings(handleData.instanceData, action, (contextName) => {
-		return composeBindings(overrides, contextDefaults({ action, contextName, contexts }));
+	rebuildActionBindings({
+		actionName: action,
+		data: handleData.instanceData,
+		resolve: (contextName) => {
+			return composeBindings(overrides, contextDefaults({ action, contextName, contexts }));
+		},
 	});
 }
 

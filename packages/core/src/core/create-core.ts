@@ -53,6 +53,10 @@ export type {
 
 /**
  * Creates a Flux core instance for managing input actions and contexts.
+ *
+ * Freezes the binding arrays of the context config it is handed, in place. The
+ * config stays the caller's table, so the freeze is observable to the consumer
+ * — see {@link freezeContextBindings}.
  * @template T - The action map type.
  * @template C - The context configuration record type.
  * @param options - Core creation options with actions and contexts.
@@ -67,6 +71,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 	replication,
 }: CreateCoreOptions<T, C>): FluxCore<T, keyof C & string> {
 	type Contexts = keyof C & string;
+	freezeContextBindings(contexts);
 	const replicationTransport = replication?.transport;
 	const isDevelopmentMode = _G.__DEV__ && isDebug === true;
 	const factory = createHandleFactory();
@@ -220,6 +225,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			});
 		},
 		removeContext(handle: InputHandle, context: Contexts): void {
+			validateContextName(contexts, context);
 			const data = getHandleData(handles, handle);
 			deactivateContext(data.activeContexts, context);
 			setContextEnabled(data.instanceData, context, false);
@@ -298,4 +304,33 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 			}
 		},
 	};
+}
+
+/**
+ * Freezes every binding array the context config holds, in place.
+ *
+ * `getContextBindings` hands back the very table the consumer passed to
+ * {@link createCore}, and `composeBindings` passes it through by identity when
+ * the action carries no override — so without this, whether a binding read
+ * aliases core state would depend on whether the player has rebound.
+ * `ReadonlyArray` is erased by roblox-ts and enforces nothing at runtime; one
+ * pass at construction does, at no per-read cost.
+ *
+ * The mutation is of the caller's own table and is observable to them: a
+ * config passed to `createCore` can no longer be edited afterwards.
+ *
+ * Skips tables that are already frozen, because `table.freeze` errors on one
+ * and a context record is routinely shared between cores. That guard also
+ * silently accepts a table the consumer froze themselves, which is harmless
+ * here because the wanted end state is the same.
+ * @param contexts - The core's context config record.
+ */
+function freezeContextBindings(contexts: Record<string, ContextConfig>): void {
+	for (const [, contextConfig] of pairs(contexts)) {
+		for (const [, bindings] of pairs(contextConfig.bindings)) {
+			if (!table.isfrozen(bindings)) {
+				table.freeze(bindings);
+			}
+		}
+	}
 }

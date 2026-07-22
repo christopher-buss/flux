@@ -1,30 +1,4 @@
 import type { ContextConfig } from "../types/contexts";
-import type { InputInstanceData } from "./input-instances";
-import { INPUT_FOLDER_NAME } from "./input-instances";
-
-/**
- * Finds an already-created `InputContext` instance for a context name under
- * the handle's parent, if the hierarchy already holds one.
- * @param contextName - The context to look for.
- * @param data - The handle's input instance data.
- * @returns The existing `InputContext`, or `undefined` when there is none.
- */
-export function findExistingContext(
-	contextName: string,
-	data: InputInstanceData,
-): InputContext | undefined {
-	const folder = data.parent.FindFirstChild(INPUT_FOLDER_NAME);
-	if (folder === undefined || !classIs(folder, "Folder")) {
-		return undefined;
-	}
-
-	const existing = folder.FindFirstChild(contextName);
-	if (existing !== undefined && classIs(existing, "InputContext")) {
-		return existing;
-	}
-
-	return undefined;
-}
 
 /**
  * Throws if a context name is not declared in the core's context config.
@@ -45,6 +19,29 @@ export function validateContextName(
 		error(`unknown context: ${name}`);
 	}
 
+	return contextConfig;
+}
+
+/**
+ * Looks up a context config core itself is already carrying the name of.
+ *
+ * The internal-invariant flavour of {@link validateContextName}: that one
+ * validates a name a caller supplied, at the API boundary, and reports it as a
+ * recoverable mistake. This one states that a name core is holding — an active
+ * context, a registered context — must have a config, and is unreachable
+ * unless core state has gone inconsistent. The two stay separate because the
+ * distinction is what tells a consumer's typo apart from a core bug.
+ * @param contexts - The core's context config record.
+ * @param name - The context name to look up.
+ * @returns That context's config.
+ * @throws If the context has no config, which means core state is inconsistent.
+ */
+export function requireContextConfig(
+	contexts: Record<string, ContextConfig>,
+	name: string,
+): ContextConfig {
+	const contextConfig = contexts[name];
+	assert(contextConfig, `missing context config: ${name}`);
 	return contextConfig;
 }
 

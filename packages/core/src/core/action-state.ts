@@ -10,9 +10,9 @@ import type {
 import type { ActionEntry, ActionValueType } from "./action-entry";
 import {
 	claimAction,
+	consumeFrameClaim,
 	didAxisBecomeActive,
 	didAxisBecomeInactive,
-	expireBoundaryCancel,
 	getCurrentDuration,
 	getDefaultValue,
 	getEntry,
@@ -259,10 +259,7 @@ function endFrame(entries: Map<string, ActionEntry>): void {
 	for (const [, entry] of entries) {
 		entry.previousValue = entry.value;
 		entry.previousTriggerState = entry.triggerState;
-		// Ages the boundary cancel while this frame's claim is still set — a
-		// claimed frame consumes the cancel.
-		expireBoundaryCancel(entry);
-		entry.claimed = false;
+		consumeFrameClaim(entry);
 		settleDrain(entry);
 	}
 }
