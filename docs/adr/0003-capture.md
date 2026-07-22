@@ -5,7 +5,9 @@ at a session boundary and held until released. `state.capture(action, options?)`
 returns a token that _is_ a scoped reader (`token.pressed()`, `token.axis2d()`,
 `token.claim()`, `token.release()`); possessing the token is the read-through
 permission. Every other consumer reads the action as inert until release; `raw*`
-bypasses captures exactly as it bypasses claims.
+bypasses captures exactly as it bypasses claims. The value such a read reports
+is the action type's neutral value, available handle-free as
+`core.getNeutralValue(action)`.
 
 Flux had no way to say "this consumer owns this action for the next several
 frames". Consumers approximated it by re-claiming every frame from a step whose

@@ -204,6 +204,18 @@ describe("createCore", () => {
 		});
 	});
 
+	describe("getNeutralValue", () => {
+		it("should narrow to the action's value type", () => {
+			expectTypeOf(core.getNeutralValue("jump")).toEqualTypeOf<boolean>();
+			expectTypeOf(core.getNeutralValue("move")).toEqualTypeOf<Vector2>();
+		});
+
+		it("should reject an unknown action", () => {
+			// @ts-expect-error unknown action
+			core.getNeutralValue(INVALID);
+		});
+	});
+
 	describe("getContexts", () => {
 		it("should return typed context array", () => {
 			const handle = {} as InputHandle;

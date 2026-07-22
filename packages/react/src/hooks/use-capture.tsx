@@ -557,44 +557,11 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>({
 }
 
 /**
- * - Resolves the neutral value an uncaptured `getState()` reports.
- * - The action's kind is not carried by the hook's arguments, so the neutral
- *   value is derived from the shape of the action's current value.
- *
- * @template T - The action map type.
- * @template Contexts - Union of valid context name literals.
- * @param core - The core owning the action.
- * @param handle - The handle the capture is scoped to.
- * @param action - The captured action name.
- * @returns The action type's neutral value.
- */
-function inertStateFor<T extends ActionMap, Contexts extends string>(
-	core: FluxCore<T, Contexts>,
-	handle: InputHandle,
-	action: AllActions<T>,
-): CaptureValue {
-	const value = core.getState(handle).getState(action);
-	if (typeIs(value, "number")) {
-		return 0;
-	}
-
-	if (typeIs(value, "Vector2")) {
-		return Vector2.zero;
-	}
-
-	if (typeIs(value, "Vector3")) {
-		return Vector3.zero;
-	}
-
-	return false;
-}
-
-/**
  * - Resolves the part of a capture request that the triple alone decides,
  *   neutral value included.
- * - Built only when the triple changes, so the `getState()` lookup behind the
- *   neutral value costs nothing per render or per read, and an `enabled` that
- *   toggles at frame rate never triggers it.
+ * - Built only when the triple changes, so the core lookup behind the neutral
+ *   value costs nothing per render or per read, and an `enabled` that toggles
+ *   at frame rate never triggers it.
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
@@ -608,5 +575,5 @@ function makeCaptured<T extends ActionMap, Contexts extends string>(
 	handle: InputHandle,
 	action: AllActions<T>,
 ): Omit<CaptureRequest<T, Contexts>, "enabled"> {
-	return { action, core, handle, inert: inertStateFor(core, handle, action) };
+	return { action, core, handle, inert: core.getNeutralValue(action) };
 }

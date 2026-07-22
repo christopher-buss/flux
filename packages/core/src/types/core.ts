@@ -187,6 +187,26 @@ export interface FluxCore<Actions extends ActionMap = ActionMap, Contexts extend
 	getContexts(handle: InputHandle): ReadonlyArray<Contexts>;
 
 	/**
+	 * Returns the value an inert read of the action reports.
+	 *
+	 * The neutral value belongs to the action's declared type, not to any
+	 * handle, so no handle is taken: `false` for `Bool`, `0` for
+	 * `Direction1D`, `Vector2.zero` for `Direction2D` and `ViewportPosition`,
+	 * `Vector3.zero` for `Direction3D`.
+	 *
+	 * @template A - The action name, narrowing the returned value type.
+	 * @param action - The action to resolve.
+	 * @returns The action type's neutral value.
+	 * @throws If the action is not declared.
+	 * @example
+	 * ```ts
+	 * core.getNeutralValue("jump"); // false
+	 * core.getNeutralValue("move"); // Vector2.zero
+	 * ```
+	 */
+	getNeutralValue<A extends AllActions<Actions>>(action: A): ActionValue<Actions, A>;
+
+	/**
 	 * Returns the action state query interface for the given handle.
 	 * @param handle - The input consumer handle.
 	 * @returns The typed action state for querying input.
