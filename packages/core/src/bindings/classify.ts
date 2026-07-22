@@ -53,6 +53,52 @@ const KEYCODE_KEYS = [
 const TOUCH_KEYS = ["pointerIndex", "uiButton"] as const satisfies ReadonlyArray<BindingConfigKey>;
 
 /**
+ * The `BindingConfig` fields that are neither scanned as an input source nor
+ * accounted for as tuning — `never` while the buckets cover the config surface.
+ *
+ * The `satisfies ReadonlyArray<BindingConfigKey>` on the scan tuples is a
+ * subset check: it catches a renamed or removed field but says nothing about
+ * coverage, so a newly added source field would leave {@link hasInputSource}
+ * reporting `false` for a valid binding. A new field lands here instead, and
+ * fails the assertion below until it is deliberately routed to a bucket.
+ */
+export type UnclaimedBindingKey = Exclude<
+	BindingConfigKey,
+	(typeof KEYCODE_KEYS)[number] | (typeof TOUCH_KEYS)[number] | TuningKey
+>;
+
+/**
+ * Fails to compile while {@link UnclaimedBindingKey} is inhabited.
+ *
+ * Exported only so the assertion is not dead code to the linter; it is not
+ * re-exported from the package index.
+ */
+export type ClaimedBindingKeys = AssertClaimed<UnclaimedBindingKey>;
+
+/**
+ * Field names that shape what an input source produces rather than naming one.
+ *
+ * A type rather than a tuple because nothing reads these at runtime: they exist
+ * to account for the half of `BindingConfigKey` that {@link findPlatform} is
+ * right to skip, so {@link UnclaimedBindingKey} can hold the two halves to the
+ * whole.
+ */
+type TuningKey =
+	| "clampMagnitudeToOne"
+	| "pressedThreshold"
+	| "releasedThreshold"
+	| "responseCurve"
+	| "scale"
+	| "vector2Scale"
+	| "vector3Scale";
+
+/**
+ * Rejects any `BindingConfig` field that no bucket claims.
+ * @template T - The keys left over by the buckets.
+ */
+type AssertClaimed<T extends never> = T;
+
+/**
  * Narrows an unknown value to a `KeyCode`.
  *
  * Checks `EnumType` rather than trusting that any `EnumItem` is a `KeyCode`,
