@@ -2,7 +2,7 @@ import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import type { BindingLike } from "../types/bindings";
-import type { InputPlatform } from "./classify";
+import type { InputPlatform, UnclaimedBindingKey } from "./classify";
 import { classifyBinding, filterBindingsByPlatform } from "./classify";
 
 describe("classifyBinding", () => {
@@ -20,6 +20,12 @@ describe("classifyBinding", () => {
 
 	it("should have exactly three platform members", () => {
 		expectTypeOf<InputPlatform>().toEqualTypeOf<"gamepad" | "keyboard" | "touch">();
+	});
+});
+
+describe("UnclaimedBindingKey", () => {
+	it("should route every binding config field to a source or tuning bucket", () => {
+		expectTypeOf<UnclaimedBindingKey>().toEqualTypeOf<never>();
 	});
 });
 
