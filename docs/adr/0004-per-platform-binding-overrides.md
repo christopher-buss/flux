@@ -213,6 +213,14 @@ bucket read returns something.
   order rather than authored array order. It must be made deterministic —
   otherwise binding order is unstable across reloads, which is visible in any UI
   that lists bindings positionally.
+- `createCore` freezes the caller's own binding tables in place. Composition
+  passes a context's declared bindings through by identity when the action
+  carries no override, so without the freeze whether a read aliases core state
+  would depend on whether the player has rebound. The mutation is of the
+  consumer's table and is observable to them: a config handed to `createCore`
+  can no longer be edited. Already-frozen tables are skipped, because
+  `table.freeze` errors on one and a context record is routinely shared between
+  cores; that guard also silently accepts a table the consumer froze themselves.
 - Three platform buckets multiply the states an action's overrides can be in.
   The empty-versus-absent contract is now load-bearing in three places per
   action instead of one, which is why it is tested rather than assumed.

@@ -42,5 +42,13 @@ jecs. And `rbxtsc --build` does not track rojo project files: after any mount
 change, delete `out-test/` and rebuild, or compiled specs keep their old
 instance paths and the run hangs silently on `WaitForChild`.
 
+**`createCore` freezes the caller's binding tables in place.** Every binding
+array in the context config is `table.freeze`d at construction, because reads
+hand the consumer's own table back by identity and `ReadonlyArray` is erased at
+runtime. The config is the consumer's table, so this is observable to them: it
+cannot be edited after a core is built from it. Already-frozen tables are
+skipped — `table.freeze` errors on one, and a context record is routinely shared
+between cores (and across specs).
+
 **Core is ECS-agnostic — keep it that way.** Core speaks opaque `InputHandle`s;
 the entity ↔ handle mapping lives in the JECS wrapper, never in core.

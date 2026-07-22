@@ -56,30 +56,6 @@ interface ContextBindingOptions {
 }
 
 /**
- * Freezes every binding array the context config holds.
- *
- * {@link getContextBindings} hands back the very table the consumer passed to
- * `createCore`, and {@link composeBindings} passes it through by identity when
- * the action carries no override — so without this, whether a binding read
- * aliases core state would depend on whether the player has rebound.
- * `ReadonlyArray` is erased by roblox-ts and enforces nothing at runtime; one
- * pass at construction does, at no per-read cost.
- *
- * Skips tables that are already frozen, because `table.freeze` rejects one and
- * a context record is routinely shared between cores.
- * @param contexts - The core's context config record.
- */
-export function freezeContextBindings(contexts: Record<string, ContextConfig>): void {
-	for (const [, contextConfig] of pairs(contexts)) {
-		for (const [, bindings] of pairs(contextConfig.bindings)) {
-			if (!table.isfrozen(bindings)) {
-				table.freeze(bindings);
-			}
-		}
-	}
-}
-
-/**
  * Returns the default bindings for an action in a single context.
  * @param options - The context config, context name and action to read.
  * @returns The declared bindings or an empty array.
