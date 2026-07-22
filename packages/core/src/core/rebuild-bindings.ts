@@ -29,9 +29,9 @@ export interface RebuildActionOptions {
 }
 
 /**
- * Arguments for swapping one `InputAction`'s children for a new set.
+ * Arguments for writing one `InputAction`'s binding children.
  */
-interface ReplaceActionBindingsOptions {
+interface ActionBindingsOptions {
 	/** The replacement bindings. */
 	readonly bindings: ReadonlyArray<BindingLike>;
 	/** The handle's input instance data. */
@@ -72,17 +72,42 @@ export function rebuildContextAction({
  * resolver picks the replacement bindings per context, so callers can share
  * one set across contexts (for rebind) or restore per-context originals
  * (for reset).
+ *
+ * Every context is destroyed first and the flat tracking list is pruned once,
+ * rather than once per context: {@link pruneInstances} scans the whole list,
+ * which holds every instance the handle owns, so pruning per context would
+ * cost contexts × instances for what one pass does.
  * @param options - The handle's instance data, the action to rebuild and a
  * per-context resolver returning replacement bindings.
  */
 export function rebuildActionBindings({ actionName, data, resolve }: RebuildActionOptions): void {
+	const destroyed = new Set<Instance>();
+	const cleared = new Array<[string, InputAction]>();
 	for (const [contextName, actionInstances] of data.actionsByContext) {
 		const inputAction = actionInstances.get(actionName);
 		if (inputAction === undefined) {
 			continue;
 		}
 
-		replaceActionBindings({ bindings: resolve(contextName), data, inputAction });
+		destroyChildrenInto(inputAction, destroyed);
+		cleared.push([contextName, inputAction]);
+	}
+
+	pruneInstances(data.instances, destroyed);
+	for (const [contextName, inputAction] of cleared) {
+		createBindingsInto({ bindings: resolve(contextName), data, inputAction });
+	}
+}
+
+/**
+ * Creates an `InputBinding` child per replacement binding, tracking each on the
+ * handle's flat instance list.
+ * @param options - The handle's instance data, the instance to parent the
+ * bindings to and the bindings to create.
+ */
+function createBindingsInto({ bindings, data, inputAction }: ActionBindingsOptions): void {
+	for (const bindingLike of bindings) {
+		createInputBinding(bindingLike, inputAction, data.instances);
 	}
 }
 
@@ -118,11 +143,11 @@ function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): v
 }
 
 /**
- * Swaps an `InputAction`'s `InputBinding` children for a new set, keeping the
+ * Swaps one `InputAction`'s `InputBinding` children for a new set, keeping the
  * handle's flat tracking list in step.
  *
- * The primitive both rebuild paths are defined in terms of, so they differ only
- * in how they find the `InputAction`.
+ * The single-context form: {@link rebuildActionBindings} runs the same three
+ * steps batched across contexts so it prunes once.
  *
  * The destroy is unfiltered by design. A rebuild recomposes the action's full
  * binding list from its platform buckets plus the defaults for the platforms
@@ -131,15 +156,9 @@ function pruneInstances(instances: Array<Instance>, destroyed: Set<Instance>): v
  * @param options - The handle's instance data, the instance whose bindings to
  * replace and the replacement bindings.
  */
-function replaceActionBindings({
-	bindings,
-	data,
-	inputAction,
-}: ReplaceActionBindingsOptions): void {
+function replaceActionBindings({ bindings, data, inputAction }: ActionBindingsOptions): void {
 	const destroyed = new Set<Instance>();
 	destroyChildrenInto(inputAction, destroyed);
 	pruneInstances(data.instances, destroyed);
-	for (const bindingLike of bindings) {
-		createInputBinding(bindingLike, inputAction, data.instances);
-	}
+	createBindingsInto({ bindings, data, inputAction });
 }
