@@ -302,13 +302,6 @@ function updateUnprocessedActions(
 			continue;
 		}
 
-		handleData.durations.set(actionName, 0);
-		handleData.previousMagnitudes.set(actionName, 0);
-		handleData.internalState.updateAction({
-			action: actionName,
-			deltaTime,
-			triggerState: "none",
-			value: getDefaultValue(actionConfig.type),
-		});
+		resetAction(handleData, actionName, actionConfig, deltaTime);
 	}
 }
