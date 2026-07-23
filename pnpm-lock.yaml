@@ -146,7 +146,7 @@ catalogs:
       specifier: 7.0.0-dev.20260707.2
       version: 7.0.0-dev.20260707.2
     better-typescript-lib:
-      specifier: ^2.12.0
+      specifier: 2.12.0
       version: 2.12.0
     typescript:
       specifier: 6.0.3
