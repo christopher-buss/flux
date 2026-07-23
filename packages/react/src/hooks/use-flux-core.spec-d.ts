@@ -1,6 +1,7 @@
 import type { FluxCore, InputHandle } from "@rbxts/flux";
 import { bool, createCore, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { createFluxReact } from "../create-flux-react";
@@ -35,7 +36,7 @@ describe("FluxUseFluxCore", () => {
 
 	it("should reject unknown context names on addContext", () => {
 		const fluxCore = flux.useFluxCore();
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(0));
 
 		// valid — "gameplay" is in the Contexts union
 		fluxCore.addContext(handle, "gameplay");

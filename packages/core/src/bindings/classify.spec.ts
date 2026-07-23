@@ -6,7 +6,12 @@ import type {
 	Direction2dBindingConfig,
 	ViewportPositionBindingConfig,
 } from "../types/bindings";
-import { classifyBinding, filterBindingsByPlatform, hasInputSource } from "./classify";
+import {
+	classifyBinding,
+	filterBindingsByPlatform,
+	hasInputSource,
+	isInputPlatform,
+} from "./classify";
 
 describe("classifyBinding", () => {
 	it("should classify a keyboard KeyCode as keyboard", () => {
@@ -196,6 +201,28 @@ describe("hasInputSource", () => {
 		});
 
 		expect(hasInputSource(config)).toBeFalse();
+	});
+});
+
+describe("isInputPlatform", () => {
+	it("should accept every platform literal", () => {
+		expect.assertions(3);
+
+		expect(isInputPlatform("gamepad")).toBeTrue();
+		expect(isInputPlatform("keyboard")).toBeTrue();
+		expect(isInputPlatform("touch")).toBeTrue();
+	});
+
+	it("should reject a string that is not a platform", () => {
+		expect.assertions(1);
+
+		expect(isInputPlatform("jump")).toBeFalse();
+	});
+
+	it("should reject a non-string value", () => {
+		expect.assertions(1);
+
+		expect(isInputPlatform(Enum.KeyCode.Space)).toBeFalse();
 	});
 });
 

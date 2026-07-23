@@ -1,4 +1,5 @@
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { bool, defineActions, direction2d } from "../actions/define";
@@ -160,17 +161,17 @@ describe("createCore", () => {
 
 	describe("addContext", () => {
 		it("should constrain to known context names", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf<typeof core.addContext>().toBeCallableWith(handle, "ui");
 		});
 
 		it("should return cancel function", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf(core.addContext(handle, "ui")).toEqualTypeOf<() => void>();
 		});
 
 		it("should reject invalid context on addContext", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			// @ts-expect-error unknown context
 			core.addContext(handle, INVALID);
 		});
@@ -178,7 +179,7 @@ describe("createCore", () => {
 
 	describe("removeContext", () => {
 		it("should reject invalid context on removeContext", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			// @ts-expect-error unknown context
 			core.removeContext(handle, INVALID);
 		});
@@ -186,12 +187,12 @@ describe("createCore", () => {
 
 	describe("hasContext", () => {
 		it("should return boolean", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf(core.hasContext(handle, "gameplay")).toEqualTypeOf<boolean>();
 		});
 
 		it("should reject invalid context on hasContext", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			// @ts-expect-error unknown context
 			core.hasContext(handle, INVALID);
 		});
@@ -199,7 +200,7 @@ describe("createCore", () => {
 
 	describe("getState", () => {
 		it("should return typed ActionState", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf(core.getState(handle)).toEqualTypeOf<ActionState<typeof actions>>();
 		});
 	});
@@ -218,7 +219,7 @@ describe("createCore", () => {
 
 	describe("getContexts", () => {
 		it("should return typed context array", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf(core.getContexts(handle)).toEqualTypeOf<
 				ReadonlyArray<"gameplay" | "ui">
 			>();
@@ -227,7 +228,7 @@ describe("createCore", () => {
 
 	describe("simulateAction", () => {
 		it("should accept valid action names and matching values", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf<typeof core.simulateAction<"jump">>().toBeCallableWith(
 				handle,
 				"jump",
@@ -241,13 +242,13 @@ describe("createCore", () => {
 		});
 
 		it("should reject invalid action on simulateAction", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			// @ts-expect-error unknown action
 			core.simulateAction(handle, INVALID, true);
 		});
 
 		it("should reject wrong value type for action", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			// @ts-expect-error number is not valid for Bool action
 			core.simulateAction(handle, "jump", 42);
 		});
@@ -274,32 +275,32 @@ describe("createCore", () => {
 
 	describe("getBindings", () => {
 		it("should constrain action param to valid action names", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf<typeof core.getBindings>().toBeCallableWith(handle, "jump");
 			expectTypeOf<typeof core.getBindings>().toBeCallableWith(handle, "move");
 		});
 
 		it("should constrain context param to valid context names", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf<typeof core.getBindings>().toBeCallableWith(handle, "jump", "gameplay");
 			expectTypeOf<typeof core.getBindings>().toBeCallableWith(handle, "jump", "ui");
 		});
 
 		it("should return ReadonlyArray<BindingLike>", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf(core.getBindings(handle, "jump")).toEqualTypeOf<
 				ReadonlyArray<BindingLike>
 			>();
 		});
 
 		it("should reject invalid action names", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			// @ts-expect-error unknown action
 			core.getBindings(handle, INVALID);
 		});
 
 		it("should reject invalid context names", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			// @ts-expect-error unknown context
 			core.getBindings(handle, "jump", INVALID);
 		});
@@ -307,22 +308,20 @@ describe("createCore", () => {
 
 	describe("getAllBindings", () => {
 		it("should return correct record type", () => {
-			const handle = {} as InputHandle;
-			expectTypeOf(core.getAllBindings(handle)).toEqualTypeOf<
+			expectTypeOf(core.getAllBindings(fromAny({}))).toEqualTypeOf<
 				Record<"jump" | "move", ReadonlyArray<BindingLike>>
 			>();
 		});
 
 		it("should constrain context param to valid context names", () => {
-			const handle = {} as InputHandle;
+			const handle = fromPartial<InputHandle>(fromAny(1));
 			expectTypeOf<typeof core.getAllBindings>().toBeCallableWith(handle, "gameplay");
 			expectTypeOf<typeof core.getAllBindings>().toBeCallableWith(handle, "ui");
 		});
 
 		it("should reject invalid context names", () => {
-			const handle = {} as InputHandle;
 			// @ts-expect-error unknown context
-			core.getAllBindings(handle, INVALID);
+			core.getAllBindings(fromAny({}), INVALID);
 		});
 	});
 });

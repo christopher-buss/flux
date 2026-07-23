@@ -1,7 +1,14 @@
 import type { BindingConfigKey, BindingLike } from "../types/bindings";
 
+/**
+ * Runtime source of truth for {@link InputPlatform}. The type derives from
+ * this tuple, so {@link isInputPlatform} cannot drift from the union when a
+ * platform is added or removed.
+ */
+const INPUT_PLATFORMS = ["gamepad", "keyboard", "touch"] as const;
+
 /** The input platform a binding targets. */
-export type InputPlatform = "gamepad" | "keyboard" | "touch";
+export type InputPlatform = (typeof INPUT_PLATFORMS)[number];
 
 /**
  * A binding config read field-by-field rather than as one of its union members.
@@ -97,6 +104,28 @@ type TuningKey =
  * @template T - The keys left over by the buckets.
  */
 type AssertClaimed<T extends never> = T;
+
+/**
+ * Narrows an unknown value to an {@link InputPlatform}.
+ *
+ * Platforms are a closed set of literals, so this is a total runtime check —
+ * suitable for validating deserialized saves or argument slots whose static
+ * type is wider than the platform union.
+ * @param value - The value to test.
+ * @returns `true` when the value names an input platform.
+ * @example
+ * isInputPlatform("gamepad") // → true
+ * isInputPlatform("jump") // → false
+ */
+export function isInputPlatform(value: unknown): value is InputPlatform {
+	for (const platform of INPUT_PLATFORMS) {
+		if (value === platform) {
+			return true;
+		}
+	}
+
+	return false;
+}
 
 /**
  * Narrows an unknown value to a `KeyCode`.

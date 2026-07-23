@@ -16,12 +16,10 @@ import {
 	resolveProjectDirectory,
 	resolveRemoteBase,
 	runWorktreeCreate,
-	type SpawnFunc,
-	type SpawnResult,
-	type TrustDependencies,
 	trustWorktreePath,
 	worktrunkBinary,
 } from "./worktree-create.ts";
+import type { SpawnFunc, SpawnResult, TrustDependencies } from "./worktree-create.ts";
 
 function fakeSpawn(result: { error?: Error; status: null | number; stdout?: string }): SpawnFunc {
 	return () => result;
@@ -435,7 +433,7 @@ function asJsonObject(value: JsonValue | undefined): JsonObject {
 }
 
 function writtenConfig(dependencies: { writes: Array<{ contents: string }> }): JsonObject {
-	return asJsonObject(JSON.parse(dependencies.writes[0]!.contents) as JsonValue);
+	return asJsonObject(JSON.parse(dependencies.writes[0]!.contents));
 }
 
 function writtenProjects(dependencies: { writes: Array<{ contents: string }> }): JsonObject {

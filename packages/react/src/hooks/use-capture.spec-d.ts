@@ -10,6 +10,7 @@ import {
 	position2d,
 } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { createFluxReact } from "../create-flux-react";
@@ -85,7 +86,7 @@ describe("CaptureTokenSurface", () => {
 });
 
 describe("FluxUseCapture", () => {
-	const handle = {} as InputHandle;
+	const handle = fromPartial<InputHandle>(fromAny(0));
 
 	describe("single-arg overload", () => {
 		it("should return a token narrowed to the captured action", () => {

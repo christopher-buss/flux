@@ -117,7 +117,7 @@ function readString(object: JsonObject, key: string): string | undefined {
 
 function tryParseJson(raw: string): JsonValue | undefined {
 	try {
-		return JSON.parse(raw) as JsonValue;
+		return JSON.parse(raw);
 	} catch {
 		return undefined;
 	}

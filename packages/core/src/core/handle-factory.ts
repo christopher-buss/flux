@@ -28,6 +28,7 @@ export function createHandleFactory(): HandleFactory {
 
 	return {
 		allocate(): InputHandle {
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- InputHandle is an opaque brand over number; minting one from the counter is what this factory encapsulates
 			const handle = nextIdentifier as unknown as InputHandle;
 			nextIdentifier++;
 			return handle;

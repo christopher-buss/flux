@@ -3,7 +3,7 @@ import { afterThis, fromAny } from "@rbxts/jest-utils";
 
 import type { InputPlatform } from "../bindings/classify";
 import type { ActionMap } from "../types/actions";
-import type { BindingLike, BindingState } from "../types/bindings";
+import type { BindingLike, BindingState, Direction2dBindingConfig } from "../types/bindings";
 import type { ContextConfig } from "../types/contexts";
 import { createCore } from "./create-core";
 
@@ -504,12 +504,12 @@ const PATCHED_PLATFORM_CONTEXTS = {
 } satisfies Record<string, ContextConfig>;
 
 /** A `move` binding classifying to the gamepad platform. */
-const DpadMove = {
+const D_PAD_MOVE = {
 	down: Enum.KeyCode.DPadDown,
 	left: Enum.KeyCode.DPadLeft,
 	right: Enum.KeyCode.DPadRight,
 	up: Enum.KeyCode.DPadUp,
-} as const;
+} as const satisfies Direction2dBindingConfig;
 
 const TOUCH_BUTTON = new Instance("TextButton");
 
@@ -726,7 +726,7 @@ describe("resetAllBindingsForPlatform", () => {
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
 		core.rebindForPlatform(handle, "jump", "gamepad", [Enum.KeyCode.ButtonY]);
-		core.rebindForPlatform(handle, "move", "gamepad", [DpadMove]);
+		core.rebindForPlatform(handle, "move", "gamepad", [D_PAD_MOVE]);
 		core.resetAllBindingsForPlatform(handle, "gamepad");
 
 		expect(core.serializeBindings(handle).jump).toBeUndefined();
@@ -756,7 +756,7 @@ describe("resetAllBindingsForPlatform", () => {
 		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
 		const handle = core.register(parent, "gameplay");
 		core.rebindForPlatform(handle, "jump", "keyboard", [Enum.KeyCode.F]);
-		core.rebindForPlatform(handle, "move", "gamepad", [DpadMove]);
+		core.rebindForPlatform(handle, "move", "gamepad", [D_PAD_MOVE]);
 		core.resetAllBindingsForPlatform(handle, "gamepad");
 
 		expect(getPlatformBucket(core.serializeBindings(handle), "jump", "keyboard")).toStrictEqual(

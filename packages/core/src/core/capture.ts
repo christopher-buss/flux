@@ -69,8 +69,8 @@ export interface CreateCaptureTokenOptions {
 	readonly action: string;
 	/** The capture options supplied at acquisition. */
 	readonly captureOptions?: CaptureOptions | undefined;
-	/** The action entry map. */
-	readonly entries: Map<string, ActionEntry>;
+	/** The action entry record. */
+	readonly entries: Record<string, ActionEntry>;
 	/** Whether the owning state was created in debug mode. */
 	readonly isDebug: boolean;
 }
@@ -113,10 +113,14 @@ export function createCaptureToken({
 
 	return {
 		axis1d(): number {
-			return readEntryValue(entry, viewer) as number;
+			const value = readEntryValue(entry, viewer);
+			assert(typeIs(value, "number"), "axis1d read must be a number");
+			return value;
 		},
 		axis3d(): Vector3 {
-			return readEntryValue(entry, viewer) as Vector3;
+			const value = readEntryValue(entry, viewer);
+			assert(typeIs(value, "Vector3"), "axis3d read must be a Vector3");
+			return value;
 		},
 		axisBecameActive(): boolean {
 			return flagRead(didAxisBecomeActive);
@@ -134,7 +138,9 @@ export function createCaptureToken({
 			return durationRead(getCurrentDuration);
 		},
 		direction2d(): Vector2 {
-			return readEntryValue(entry, viewer) as Vector2;
+			const value = readEntryValue(entry, viewer);
+			assert(typeIs(value, "Vector2"), "direction2d read must be a Vector2");
+			return value;
 		},
 		getState(): ActionValueType {
 			return readEntryValue(entry, viewer);
@@ -149,7 +155,9 @@ export function createCaptureToken({
 			return flagRead(isOngoing);
 		},
 		position2d(): Vector2 {
-			return readEntryValue(entry, viewer) as Vector2;
+			const value = readEntryValue(entry, viewer);
+			assert(typeIs(value, "Vector2"), "position2d read must be a Vector2");
+			return value;
 		},
 		pressed(): boolean {
 			return flagRead(isTriggered);
@@ -172,12 +180,12 @@ export function createCaptureToken({
  * Callers gate on dev mode; this helper reports whatever metadata the holders
  * recorded at acquisition. The drain sentinel — a capture held by nobody — is
  * not a holder and is skipped.
- * @param entries - The action entry map.
+ * @param entries - The action entry record.
  * @param action - The action name.
  * @returns One entry per real holder, the last being the active holder.
  */
 export function listDebugCaptures(
-	entries: Map<string, ActionEntry>,
+	entries: Record<string, ActionEntry>,
 	action: string,
 ): Array<DebugCapture> {
 	return getEntry(entries, action)

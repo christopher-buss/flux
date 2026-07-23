@@ -348,7 +348,7 @@ export interface ContextConfig {
 
 **`packages/core/src/contexts/define.spec.ts`**
 
-```ts
+```ts filename="packages/core/src/contexts/define.spec.ts"
 import { describe, expect, it } from "@rbxts/jest-globals";
 
 import { defineContexts } from "./define";

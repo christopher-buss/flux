@@ -245,7 +245,7 @@ describe("createInputInstances", () => {
 		assert(binding);
 
 		expect(binding.PrimaryModifier).toBe(Enum.KeyCode.LeftControl);
-		expect(binding.SecondaryModifier).toBe(Enum.KeyCode.Unknown);
+		expect(binding.SecondaryModifier).toBe(Enum.KeyCode.None);
 	});
 
 	it("should throw on UserInputType bindings", () => {

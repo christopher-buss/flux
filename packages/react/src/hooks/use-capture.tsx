@@ -278,10 +278,9 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 
 		const hasStringFirst = typeIs(handleOrAction, "string");
 		const handle = hasStringFirst ? defaultHandle : handleOrAction;
-		const action = hasStringFirst ? handleOrAction : (actionOrOptions as AllActions<T>);
-		const options = hasStringFirst
-			? (actionOrOptions as undefined | UseCaptureOptions)
-			: maybeOptions;
+		const action = hasStringFirst ? handleOrAction : actionOrOptions;
+		assert(typeIs(action, "string"), "useCapture requires an action");
+		const options = typeIs(actionOrOptions, "table") ? actionOrOptions : maybeOptions;
 		const isEnabled = options?.enabled ?? true;
 		const debugLabel = options?.debugLabel;
 
@@ -345,6 +344,7 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 			}
 
 			const label = debugLabelRef.current;
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the generic per-action capture token is narrowed to the shared runtime surface the facade drives; the two are structurally the same object
 			const token = request.core.getState(request.handle).capture(request.action, {
 				...(label !== undefined ? { debugLabel: label } : {}),
 			}) as unknown as CaptureTokenSurface;
@@ -361,6 +361,7 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 			};
 		}, [request]);
 
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the facade implements the full read surface; the generic per-action token type only resolves once A is concrete
 		return facade as unknown as CaptureToken<T, A>;
 	}
 

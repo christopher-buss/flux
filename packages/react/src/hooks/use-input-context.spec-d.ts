@@ -1,6 +1,7 @@
 import type { AllActions, InputHandle } from "@rbxts/flux";
 import { bool, createCore, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { createFluxReact } from "../create-flux-react";
@@ -45,8 +46,8 @@ describe("FluxInputContextInfo", () => {
 });
 
 describe("FluxUseActiveContext", () => {
-	const handle = {} as InputHandle;
-	const useActiveContext = {} as FluxUseActiveContext<"gameplay" | "ui">;
+	const handle = fromPartial<InputHandle>(fromAny(0));
+	const useActiveContext = fromPartial<FluxUseActiveContext<"gameplay" | "ui">>(fromAny({}));
 
 	describe("single-arg overload", () => {
 		it("should accept a valid context name and return boolean", () => {
@@ -80,8 +81,10 @@ describe("FluxUseActiveContext", () => {
 });
 
 describe("FluxUseInputContext", () => {
-	const handle = {} as InputHandle;
-	const useInputContext = {} as FluxUseInputContext<typeof actions, "gameplay" | "ui">;
+	const handle = fromPartial<InputHandle>(fromAny(0));
+	const useInputContext = fromPartial<FluxUseInputContext<typeof actions, "gameplay" | "ui">>(
+		fromAny({}),
+	);
 
 	describe("single-arg overload", () => {
 		it("should return FluxInputContextInfo<T>", () => {

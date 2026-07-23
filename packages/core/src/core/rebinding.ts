@@ -238,7 +238,7 @@ export function applyRebindAll<T extends ActionMap>({
 	for (const [action, platformBindings] of pairs(bindings)) {
 		if (!isKnownAction(actions, action)) {
 			if (_G.__DEV__) {
-				warn(`[flux] dropping unknown action from loaded bindings: ${action}`);
+				warn(`[flux] dropping unknown action from loaded bindings: ${tostring(action)}`);
 			}
 
 			continue;

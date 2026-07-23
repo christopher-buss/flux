@@ -164,7 +164,7 @@ export function createCore<T extends ActionMap, C extends Record<string, Context
 		getNeutralValue<A extends keyof T & string>(action: A): ActionValue<T, A> {
 			const config = actions[action];
 			assert(config, `unknown action: ${action}`);
-			return getNeutralValue(config.type) as ActionValue<T, A>;
+			return getNeutralValue<T[A]["type"]>(config.type);
 		},
 		getState(handle: InputHandle): ActionState<T> {
 			return getHandleData(handles, handle).publicState;

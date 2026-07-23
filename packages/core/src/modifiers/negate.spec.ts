@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 
 import type { InputHandle } from "../types/core";
 import { negate } from "./negate";
@@ -7,7 +8,7 @@ import type { ModifierContext } from "./types";
 describe("negate", () => {
 	const context = {
 		deltaTime: 0.016,
-		handle: 0 as InputHandle,
+		handle: fromPartial<InputHandle>(fromAny(1)),
 	} satisfies ModifierContext;
 	const modifier = negate();
 

@@ -2145,6 +2145,26 @@ describe("createActionState", () => {
 		});
 	});
 
+	describe("updateAction", () => {
+		it("should reject a value that does not match the action's type", () => {
+			expect.assertions(1);
+
+			const [, internal] = createActionState(TEST_ACTIONS);
+			const updateWithWrongKind = () => {
+				internal.updateAction({
+					action: "jump",
+					deltaTime: 0.016,
+					triggerState: "triggered",
+					value: new Vector2(1, 0),
+				});
+			};
+
+			expect(updateWithWrongKind).toThrow(
+				'value written to "jump" does not match its action type "Bool"',
+			);
+		});
+	});
+
 	describe("getMagnitude", () => {
 		it("should return 1 for true and 0 for false", () => {
 			expect.assertions(2);

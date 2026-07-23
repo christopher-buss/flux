@@ -51,9 +51,10 @@ export function createUseAction<T extends ActionMap, Contexts extends string = s
 	): R {
 		const context = useFluxContext();
 
-		const handle =
-			maybeSelector !== undefined ? (handleOrSelector as InputHandle) : context.handle;
-		const selector = maybeSelector ?? (handleOrSelector as (state: ActionState<T>) => R);
+		const isSelectorFirst = typeIs(handleOrSelector, "function");
+		const handle = isSelectorFirst ? context.handle : handleOrSelector;
+		const selector = isSelectorFirst ? handleOrSelector : maybeSelector;
+		assert(selector !== undefined, "useAction requires a selector");
 
 		const state = context.core.getState(handle);
 		const [value, setValue] = useState(() => selector(state));

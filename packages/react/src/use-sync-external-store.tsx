@@ -146,8 +146,8 @@ export function useCachedSnapshot<T>(read: () => T, isEqual: (a: T, b: T) => boo
 	return useMemo(() => {
 		return (): T => {
 			const updated = read();
-			if (cache.hasValue && isEqual(cache.value as T, updated)) {
-				return cache.value as T;
+			if (cache.hasValue && cache.value !== undefined && isEqual(cache.value, updated)) {
+				return cache.value;
 			}
 
 			cache.hasValue = true;

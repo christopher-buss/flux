@@ -1,4 +1,4 @@
-import type { ModifierContext, ModifierValue } from "../modifiers/types";
+import type { ModifierContext } from "../modifiers/types";
 import type { TriggerInstance, TriggerState } from "../triggers/types";
 import type { ActionConfig } from "../types/actions";
 import { getMagnitude } from "./action-entry";
@@ -71,14 +71,16 @@ function applyModifiers(
 		return value;
 	}
 
+	assert(!typeIs(value, "boolean"), "Bool actions cannot have modifiers");
+
 	const { modifiers } = actionConfig;
 	if (modifiers === undefined || modifiers.size() === 0) {
 		return value;
 	}
 
-	let current = value as ModifierValue;
+	let current = value;
 	for (const modifier of modifiers) {
-		current = modifier.modify(current as never, modifierContext);
+		current = modifier.modify(current, modifierContext);
 	}
 
 	return current;

@@ -35,6 +35,7 @@
 		"@types/node": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
 		"@vitest/eslint-plugin": "catalog:lint",
+		"better-typescript-lib": "catalog:tsc",
 		"eslint": "catalog:lint",
 		"eslint-plugin-jest": "catalog:lint",
 		"eslint-plugin-jest-extended": "catalog:lint",

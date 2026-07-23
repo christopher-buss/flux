@@ -13,6 +13,6 @@ export default defineConfig({
 				},
 			},
 		],
-		setupFiles: ["@flux/test-utils/out/setup", "@flux/test-utils/loaders/react-setup"],
+		setupFiles: ["@flux/test-utils/loaders/react-setup"],
 	},
 });

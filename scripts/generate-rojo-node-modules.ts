@@ -40,12 +40,17 @@ function toRelative(absolute: string): string {
 }
 
 function assertPackageMap(value: unknown): asserts value is PackageMap {
-	const root = value as Partial<PackageMap> | undefined;
 	if (
-		root === undefined ||
-		typeof root !== "object" ||
-		typeof root.packages !== "object" ||
-		root.packages["."]?.url === undefined
+		typeof value !== "object" ||
+		value === null ||
+		!("packages" in value) ||
+		typeof value.packages !== "object" ||
+		value.packages === null ||
+		!("." in value.packages) ||
+		typeof value.packages["."] !== "object" ||
+		value.packages["."] === null ||
+		!("url" in value.packages["."]) ||
+		value.packages["."].url === undefined
 	) {
 		throw new Error(
 			`${PACKAGE_MAP} is malformed. pnpm generates it during install; run "pnpm install" to recreate it.`,
@@ -161,9 +166,15 @@ function resolveWinners(map: PackageMap): Map<string, string> {
 function packageInstanceName(absolute: string, fallback: string): string {
 	const projectFile = path.join(absolute, "default.project.json");
 	if (fs.existsSync(projectFile)) {
-		const parsed = JSON.parse(fs.readFileSync(projectFile, "utf8")) as { name?: unknown };
-		if (typeof parsed.name === "string" && parsed.name.length > 0) {
-			return parsed.name;
+		const parsed = JSON.parse(fs.readFileSync(projectFile, "utf8"));
+		if (
+			typeof parsed === "object" &&
+			parsed !== null &&
+			"name" in parsed &&
+			typeof parsed["name"] === "string" &&
+			parsed["name"].length > 0
+		) {
+			return parsed["name"];
 		}
 	}
 

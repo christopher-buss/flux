@@ -39,7 +39,9 @@ const PROPERTY_MAP = {
  */
 export function assertValidBinding(bindingLike: BindingLike, actionName: string): void {
 	if (isUserInputType(bindingLike)) {
-		error(`UserInputType bindings are not supported: ${bindingLike}. Use Enum.KeyCode instead`);
+		error(
+			`UserInputType bindings are not supported: ${tostring(bindingLike)}. Use Enum.KeyCode instead`,
+		);
 	}
 
 	if (!hasInputSource(bindingLike)) {

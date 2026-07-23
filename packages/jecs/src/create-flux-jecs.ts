@@ -28,18 +28,23 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 
 	const actionStateComponent = options.actionStateComponent ?? world.component<ActionState<T>>();
 
-	const contextTags = {} as Record<Contexts, Tag>;
-	for (const [name] of pairs(contexts)) {
-		contextTags[name as Contexts] = world.component();
+	const contextConfigs: Record<string, ContextConfig> = contexts;
+	const tagsByName: Record<string, Tag> = {};
+	const contextTags: Record<Contexts, Tag> = tagsByName;
+	const orderedTags: Array<Tag> = [];
+	for (const [name] of pairs(contextConfigs)) {
+		const tag = world.entity();
+		tagsByName[name] = tag;
+		orderedTags.push(tag);
 	}
 
 	const registeredEntities = new Set<Entity>();
 
 	function addContextTags(entity: Entity): void {
 		const activeContexts = core.getContexts(toHandle(entity));
-		for (const [name] of pairs(contextTags)) {
-			const tag = contextTags[name as Contexts];
-			if (activeContexts.includes(name as Contexts) && !world.has(entity, tag)) {
+		for (const name of activeContexts) {
+			const tag = contextTags[name];
+			if (!world.has(entity, tag)) {
 				world.add(entity, tag);
 			}
 		}
@@ -47,6 +52,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 
 	return {
 		ActionState: actionStateComponent,
+
 		addContext(entity: Entity, context: Contexts): () => void {
 			const cancel = core.addContext(toHandle(entity), context);
 			world.add(entity, contextTags[context]);
@@ -54,6 +60,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 		},
 
 		contexts: table.freeze(contextTags),
+
 		core,
 
 		destroy(): void {
@@ -62,8 +69,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 					world.remove(entity, actionStateComponent);
 				}
 
-				for (const [name] of pairs(contextTags)) {
-					const tag = contextTags[name as Contexts];
+				for (const tag of orderedTags) {
 					if (world.has(entity, tag)) {
 						world.remove(entity, tag);
 					}
@@ -133,8 +139,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			core.unregister(toHandle(entity));
 			registeredEntities.delete(entity);
 			world.remove(entity, actionStateComponent);
-			for (const [name] of pairs(contextTags)) {
-				const tag = contextTags[name as Contexts];
+			for (const tag of orderedTags) {
 				if (world.has(entity, tag)) {
 					world.remove(entity, tag);
 				}
@@ -148,5 +153,6 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 }
 
 function toHandle(entity: Entity): InputHandle {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Entity and InputHandle are both opaque brands over the same runtime id; this is the sanctioned ECS <-> core bridge
 	return entity as unknown as InputHandle;
 }

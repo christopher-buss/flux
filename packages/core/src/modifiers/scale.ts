@@ -1,3 +1,4 @@
+import { createModifier } from "./create-modifier";
 import type { Modifier, ModifierValue } from "./types";
 
 /**
@@ -7,17 +8,15 @@ import type { Modifier, ModifierValue } from "./types";
  * @returns A modifier that multiplies the value by `factor`.
  */
 export function scale(factor: number): Modifier {
-	return {
-		modify(value: ModifierValue): ModifierValue {
-			if (typeIs(value, "number")) {
-				return value * factor;
-			}
+	return createModifier((value: ModifierValue): ModifierValue => {
+		if (typeIs(value, "number")) {
+			return value * factor;
+		}
 
-			if (typeIs(value, "Vector2")) {
-				return value.mul(factor);
-			}
-
+		if (typeIs(value, "Vector2")) {
 			return value.mul(factor);
-		},
-	} as Modifier;
+		}
+
+		return value.mul(factor);
+	});
 }
