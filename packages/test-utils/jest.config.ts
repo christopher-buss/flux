@@ -14,7 +14,6 @@ export default defineConfig({
 				},
 			},
 		],
-		setupFiles: () => ["./out/setup.luau"],
 		setupFilesAfterEnv: () => ["./out/jest-extended.luau"],
 		testPathIgnorePatterns: ["/node_modules/", "/dist/"],
 	},

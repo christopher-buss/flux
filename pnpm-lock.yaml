@@ -26,8 +26,8 @@ catalogs:
       specifier: 3.1.0
       version: 3.1.0
     '@isentinel/eslint-config':
-      specifier: 6.0.0-beta.19
-      version: 6.0.0-beta.19
+      specifier: 6.0.0-beta.21
+      version: 6.0.0-beta.21
     '@isentinel/hooks':
       specifier: 1.5.3
       version: 1.5.3
@@ -184,7 +184,7 @@ importers:
         version: 3.1.0(eslint@10.7.0)(srvx@0.11.22)(typescript@6.0.3)
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 6.0.0-beta.19(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.23)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.2.2)(eslint-plugin-react-jsx@5.17.3)(eslint-plugin-react-naming-convention@5.17.3)(eslint-plugin-react-x@5.17.3)(eslint@10.7.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.75.0)(typescript@6.0.3)
+        version: 6.0.0-beta.21(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.23)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.2.2)(eslint-plugin-react-jsx@5.17.3)(eslint-plugin-react-naming-convention@5.17.3)(eslint-plugin-react-x@5.17.3)(eslint@10.7.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.75.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@isentinel/hooks':
         specifier: catalog:lint
         version: 1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
@@ -208,16 +208,10 @@ importers:
         version: 7.0.0-dev.20260707.2
       '@vitest/eslint-plugin':
         specifier: catalog:lint
-<<<<<<< HEAD
         version: 1.6.23(@typescript-eslint/eslint-plugin@8.64.0)(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.10)
-||||||| parent of 9539130 (style: update `@isentinel/eslint-config` to 6.0.0-beta.19)
-        version: 1.6.23(@typescript-eslint/eslint-plugin@8.64.0)(eslint@10.7.0)(typescript@6.0.3)(vitest@4.1.10)
-=======
-        version: 1.6.23(@typescript-eslint/eslint-plugin@8.64.0)(eslint@10.7.0)(typescript@6.0.3)(vitest@4.1.10)
       better-typescript-lib:
         specifier: catalog:tsc
         version: 2.12.0(typescript@6.0.3)
->>>>>>> 9539130 (style: update `@isentinel/eslint-config` to 6.0.0-beta.19)
       eslint:
         specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@10.2.2)
@@ -1291,8 +1285,8 @@ packages:
     resolution: {integrity: sha512-9vKzvWcnPGkD2qVzsOQEa3JQofcmEZR6iCxQurEl00BnafZteroSv5EnBRcoVcCP4lwPL2iOAmdC05H92YFM1g==}
     engines: {node: '>=20.18.0'}
 
-  '@isentinel/eslint-config@6.0.0-beta.19':
-    resolution: {integrity: sha512-ja4ETeInaWu3PuRPF0ICmrXYfTHQgJhhNt5DbUzHOAYOvwZTO6EQOG4sBo+lWyiZBM2XCmKYQS/z/gwEgLoFzg==}
+  '@isentinel/eslint-config@6.0.0-beta.21':
+    resolution: {integrity: sha512-sSsvoLlYa1brJyvFuDyvnsP1AhIotQqZoo1kzpRhn6UE9jvhxu+ZLlsaAiMxVlglm59ga3qT+nTBUatnCOQK9w==}
     engines: {node: '>=24.12.0'}
     hasBin: true
     peerDependencies:
@@ -3474,8 +3468,8 @@ packages:
     peerDependencies:
       eslint: '>=8'
 
-  eslint-plugin-flawless@1.1.0:
-    resolution: {integrity: sha512-TKOAwsbis5hC4/cCvY6TwYuSVjo+qYRG6SEfRZsf1qRQObSESFgBaF+vbqUis3HFlepTnNy4ozhstbbNeBc0gw==}
+  eslint-plugin-flawless@1.2.1:
+    resolution: {integrity: sha512-rBvFgirRIqs9A+4Uyt/Eu64HsBFpvHNeg+cT2jhatt+9ZH7fzxW6g5qbl8pMPQRN9kgpDQGMhTJaVA7Ivm01GA==}
     engines: {node: '>=24.12.0'}
     peerDependencies:
       eslint: '>=9.15.0'
@@ -5938,27 +5932,15 @@ snapshots:
       mdn-data: 2.28.1
       source-map-js: 1.2.1
 
-  '@eslint/markdown@8.0.3':
+  '@eslint/markdown@8.0.3(supports-color@10.2.2)':
     dependencies:
       '@eslint/core': 1.2.1
       '@eslint/plugin-kit': 0.7.2
       github-slugger: 2.0.0
-<<<<<<< HEAD
       mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
       mdast-util-frontmatter: 2.0.1(supports-color@10.2.2)
       mdast-util-gfm: 3.1.0(supports-color@10.2.2)
       mdast-util-math: 3.0.0(supports-color@10.2.2)
-||||||| parent of 9539130 (style: update `@isentinel/eslint-config` to 6.0.0-beta.19)
-      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
-      mdast-util-frontmatter: 2.0.1
-      mdast-util-gfm: 3.1.0
-      mdast-util-math: 3.0.0
-=======
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-frontmatter: 2.0.1
-      mdast-util-gfm: 3.1.0
-      mdast-util-math: 3.0.0
->>>>>>> 9539130 (style: update `@isentinel/eslint-config` to 6.0.0-beta.19)
       micromark-extension-frontmatter: 2.0.0
       micromark-extension-gfm: 3.0.0
       micromark-extension-math: 3.1.0
@@ -5993,29 +5975,21 @@ snapshots:
 
   '@isentinel/dict-roblox@1.0.7': {}
 
-  '@isentinel/eslint-config@6.0.0-beta.19(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.23)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.2.2)(eslint-plugin-react-jsx@5.17.3)(eslint-plugin-react-naming-convention@5.17.3)(eslint-plugin-react-x@5.17.3)(eslint@10.7.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.75.0)(typescript@6.0.3)':
+  '@isentinel/eslint-config@6.0.0-beta.21(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.23)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.2.2)(eslint-plugin-react-jsx@5.17.3)(eslint-plugin-react-naming-convention@5.17.3)(eslint-plugin-react-x@5.17.3)(eslint@10.7.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.75.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 1.7.0
       '@cspell/eslint-plugin': 10.0.1(eslint@10.7.0)
       '@e18e/eslint-plugin': 0.5.1(eslint@10.7.0)(oxlint@1.75.0)
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.7.0)
-      '@eslint/markdown': 8.0.3
+      '@eslint/markdown': 8.0.3(supports-color@10.2.2)
       '@isentinel/dict-rbxts': 1.0.14
       '@isentinel/dict-roblox': 1.0.7
       '@oxlint/plugins': 1.74.0
       '@pobammer-ts/small-rules': 2.7.0(typescript@6.0.3)
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.7.0)
-<<<<<<< HEAD
       '@typescript-eslint/eslint-plugin': 8.64.0(@typescript-eslint/parser@8.64.0)(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/parser': 8.64.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
-||||||| parent of 9539130 (style: update `@isentinel/eslint-config` to 6.0.0-beta.19)
-      '@typescript-eslint/eslint-plugin': 8.64.0(@typescript-eslint/parser@8.64.0)(eslint@10.7.0)(typescript@6.0.3)
-      '@typescript-eslint/parser': 8.64.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
-=======
-      '@typescript-eslint/eslint-plugin': 8.64.0(@typescript-eslint/parser@8.64.0)(eslint@10.7.0)(typescript@6.0.3)
-      '@typescript-eslint/parser': 8.64.0(eslint@10.7.0)(typescript@6.0.3)
->>>>>>> 9539130 (style: update `@isentinel/eslint-config` to 6.0.0-beta.19)
       ansis: 4.3.1
       concurrently: 10.0.3
       eslint: 10.7.0(jiti@2.7.0)(supports-color@10.2.2)
@@ -6027,20 +6001,20 @@ snapshots:
       eslint-plugin-better-max-params: 1.0.0(eslint@10.7.0)
       eslint-plugin-comment-length: 2.3.1(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-de-morgan: 2.1.3(eslint@10.7.0)
-      eslint-plugin-flawless: 1.1.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(eslint@10.7.0)(typescript@6.0.3)
+      eslint-plugin-flawless: 1.2.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-format-lua: 2.0.0(eslint@10.7.0)
       eslint-plugin-import-lite: 0.6.0(eslint@10.7.0)
-      eslint-plugin-jsdoc: 63.1.0(eslint@10.7.0)
+      eslint-plugin-jsdoc: 63.1.0(eslint@10.7.0)(supports-color@10.2.2)
       eslint-plugin-jsonc: 3.3.0(eslint@10.7.0)
       eslint-plugin-oxfmt: 0.14.0(eslint@10.7.0)(oxfmt@0.59.0)
       eslint-plugin-package-json: 1.6.0(@types/estree@1.0.9)(eslint@10.7.0)
       eslint-plugin-perfectionist: 5.10.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-pnpm: 1.6.1(eslint@10.7.0)
       eslint-plugin-promise: 7.3.0(eslint@10.7.0)
-      eslint-plugin-roblox-ts: 1.4.1(@typescript-eslint/parser@8.64.0)(eslint@10.7.0)(typescript@6.0.3)
+      eslint-plugin-roblox-ts: 1.4.1(@typescript-eslint/parser@8.64.0)(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-sentinel: 0.1.2(eslint@10.7.0)(typescript@6.0.3)
       eslint-plugin-sonarjs: 4.2.0(eslint@10.7.0)
-      eslint-plugin-toml: 1.4.0(eslint@10.7.0)
+      eslint-plugin-toml: 1.4.0(eslint@10.7.0)(supports-color@10.2.2)
       eslint-plugin-unicorn: 72.0.0(eslint@10.7.0)
       eslint-plugin-unused-imports: 4.4.1(@typescript-eslint/eslint-plugin@8.64.0)(eslint@10.7.0)
       eslint-plugin-yml: 3.5.0(eslint@10.7.0)
@@ -7236,7 +7210,7 @@ snapshots:
   '@typescript-eslint/eslint-plugin@8.64.0(@typescript-eslint/parser@8.64.0)(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
-      '@typescript-eslint/parser': 8.64.0(eslint@10.7.0)(typescript@6.0.3)
+      '@typescript-eslint/parser': 8.64.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/scope-manager': 8.64.0
       '@typescript-eslint/type-utils': 8.64.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/utils': 8.64.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
@@ -7249,7 +7223,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.64.0(eslint@10.7.0)(typescript@6.0.3)':
+  '@typescript-eslint/parser@8.64.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.64.0
       '@typescript-eslint/types': 8.64.0
@@ -7270,7 +7244,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/project-service@8.62.1(typescript@6.0.3)':
+  '@typescript-eslint/project-service@8.62.1(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.65.0(typescript@6.0.3)
       '@typescript-eslint/types': 8.65.0
@@ -7346,7 +7320,7 @@ snapshots:
     dependencies:
       typescript: 6.0.3
 
-  '@typescript-eslint/type-utils@8.56.0(eslint@10.7.0)(typescript@6.0.3)':
+  '@typescript-eslint/type-utils@8.56.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/types': 8.56.0
       '@typescript-eslint/typescript-estree': 8.56.0(supports-color@10.2.2)(typescript@6.0.3)
@@ -7405,9 +7379,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/typescript-estree@8.62.1(typescript@6.0.3)':
+  '@typescript-eslint/typescript-estree@8.62.1(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/project-service': 8.62.1(typescript@6.0.3)
+      '@typescript-eslint/project-service': 8.62.1(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/tsconfig-utils': 8.62.1(typescript@6.0.3)
       '@typescript-eslint/types': 8.62.1
       '@typescript-eslint/visitor-keys': 8.62.1
@@ -7476,12 +7450,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.62.1(eslint@10.7.0)(typescript@6.0.3)':
+  '@typescript-eslint/utils@8.62.1(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.7.0)
       '@typescript-eslint/scope-manager': 8.62.1
       '@typescript-eslint/types': 8.62.1
-      '@typescript-eslint/typescript-estree': 8.62.1(typescript@6.0.3)
+      '@typescript-eslint/typescript-estree': 8.62.1(supports-color@10.2.2)(typescript@6.0.3)
       eslint: 10.7.0(jiti@2.7.0)(supports-color@10.2.2)
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -8209,12 +8183,12 @@ snapshots:
       eslint: 10.7.0(jiti@2.7.0)(supports-color@10.2.2)
       eslint-compat-utils: 0.5.1(eslint@10.7.0)
 
-  eslint-plugin-flawless@1.1.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(eslint@10.7.0)(typescript@6.0.3):
+  eslint-plugin-flawless@1.2.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3):
     dependencies:
       '@eslint-react/core': 5.10.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@oxlint/plugins': 1.73.0
       '@typescript-eslint/scope-manager': 8.62.1
-      '@typescript-eslint/utils': 8.62.1(eslint@10.7.0)(typescript@6.0.3)
+      '@typescript-eslint/utils': 8.62.1(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       eslint: 10.7.0(jiti@2.7.0)(supports-color@10.2.2)
       jsonc-eslint-parser: 3.1.0
       oxc-parser: 0.112.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
@@ -8258,7 +8232,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-jsdoc@63.1.0(eslint@10.7.0):
+  eslint-plugin-jsdoc@63.1.0(eslint@10.7.0)(supports-color@10.2.2):
     dependencies:
       '@es-joy/jsdoccomment': 0.88.0
       '@es-joy/resolve.exports': 1.2.0
@@ -8420,22 +8394,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-roblox-ts@1.4.1(@typescript-eslint/parser@8.64.0)(eslint@10.7.0)(typescript@6.0.3):
+  eslint-plugin-roblox-ts@1.4.1(@typescript-eslint/parser@8.64.0)(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3):
     dependencies:
       '@roblox-ts/luau-ast': 2.0.1
-<<<<<<< HEAD
       '@typescript-eslint/parser': 8.64.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/type-utils': 8.56.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/utils': 8.56.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
-||||||| parent of 9539130 (style: update `@isentinel/eslint-config` to 6.0.0-beta.19)
-      '@typescript-eslint/parser': 8.64.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
-      '@typescript-eslint/type-utils': 8.56.0(eslint@10.7.0)(supports-color@10.2.2)(typescript@6.0.3)
-      '@typescript-eslint/utils': 8.56.0(eslint@10.7.0)(typescript@6.0.3)
-=======
-      '@typescript-eslint/parser': 8.64.0(eslint@10.7.0)(typescript@6.0.3)
-      '@typescript-eslint/type-utils': 8.56.0(eslint@10.7.0)(typescript@6.0.3)
-      '@typescript-eslint/utils': 8.56.0(eslint@10.7.0)(typescript@6.0.3)
->>>>>>> 9539130 (style: update `@isentinel/eslint-config` to 6.0.0-beta.19)
       eslint: 10.7.0(jiti@2.7.0)(supports-color@10.2.2)
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -8463,7 +8427,7 @@ snapshots:
       typescript: 6.0.3
       yaml: 2.9.0
 
-  eslint-plugin-toml@1.4.0(eslint@10.7.0):
+  eslint-plugin-toml@1.4.0(eslint@10.7.0)(supports-color@10.2.2):
     dependencies:
       '@eslint/core': 1.2.1
       '@eslint/plugin-kit': 0.7.2
@@ -9078,14 +9042,14 @@ snapshots:
       unist-util-is: 6.0.1
       unist-util-visit-parents: 6.0.2
 
-  mdast-util-from-markdown@2.0.3:
+  mdast-util-from-markdown@2.0.3(supports-color@10.2.2):
     dependencies:
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
       decode-named-character-reference: 1.3.0
       devlop: 1.1.0
       mdast-util-to-string: 4.0.0
-      micromark: 4.0.2
+      micromark: 4.0.2(supports-color@10.2.2)
       micromark-util-decode-numeric-character-reference: 2.0.2
       micromark-util-decode-string: 2.0.1
       micromark-util-normalize-identifier: 2.0.1
@@ -9100,7 +9064,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       escape-string-regexp: 5.0.0
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
       mdast-util-to-markdown: 2.1.2
       micromark-extension-frontmatter: 2.0.0
     transitivePeerDependencies:
@@ -9118,7 +9082,7 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
       mdast-util-to-markdown: 2.1.2
       micromark-util-normalize-identifier: 2.0.1
     transitivePeerDependencies:
@@ -9127,7 +9091,7 @@ snapshots:
   mdast-util-gfm-strikethrough@2.0.0(supports-color@10.2.2):
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
       mdast-util-to-markdown: 2.1.2
     transitivePeerDependencies:
       - supports-color
@@ -9137,7 +9101,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       markdown-table: 3.0.4
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
       mdast-util-to-markdown: 2.1.2
     transitivePeerDependencies:
       - supports-color
@@ -9146,14 +9110,14 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
       mdast-util-to-markdown: 2.1.2
     transitivePeerDependencies:
       - supports-color
 
   mdast-util-gfm@3.1.0(supports-color@10.2.2):
     dependencies:
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
       mdast-util-gfm-autolink-literal: 2.0.1
       mdast-util-gfm-footnote: 2.1.0(supports-color@10.2.2)
       mdast-util-gfm-strikethrough: 2.0.0(supports-color@10.2.2)
@@ -9169,7 +9133,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       longest-streak: 3.1.0
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
       mdast-util-to-markdown: 2.1.2
       unist-util-remove-position: 5.0.0
     transitivePeerDependencies:
@@ -9384,7 +9348,7 @@ snapshots:
 
   micromark-util-types@2.0.2: {}
 
-  micromark@4.0.2:
+  micromark@4.0.2(supports-color@10.2.2):
     dependencies:
       '@types/debug': 4.1.13
       debug: 4.4.3(supports-color@10.2.2)

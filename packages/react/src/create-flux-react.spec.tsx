@@ -1,7 +1,7 @@
 import type { ActionMap, ContextConfig } from "@rbxts/flux";
 import { createCore } from "@rbxts/flux";
 import { describe, expect, it } from "@rbxts/jest-globals";
-import React from "@rbxts/react";
+import { createElement } from "@rbxts/react";
 
 import { createFluxReact } from "./create-flux-react";
 
@@ -40,7 +40,7 @@ describe("createFluxReact", () => {
 		const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
 		const flux = createFluxReact<typeof TEST_ACTIONS, TestContexts>();
 		const handle = core.register(new Instance("Folder"), "gameplay");
-		const element = React.createElement(flux.FluxProvider, { core, handle });
+		const element = createElement(flux.FluxProvider, { core, handle });
 
 		expect(element.props.core).toBe(core);
 	});

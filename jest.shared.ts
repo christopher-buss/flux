@@ -18,7 +18,6 @@ export default defineConfig({
 			lines: 100,
 			statements: 100,
 		},
-		setupFiles: ["@flux/test-utils/out/setup"],
 		setupFilesAfterEnv: ["@flux/test-utils/loaders/jest-extended"],
 		testTimeout: 5000,
 		typecheck: {
