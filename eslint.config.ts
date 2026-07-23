@@ -81,7 +81,6 @@ export default isentinel(
 		name: "project/markdown",
 		files: [GLOB_MARKDOWN_CODE],
 		rules: {
-			"flawless/max-lines-per-function": "off",
 			"ts/no-unused-private-class-members": "off",
 		},
 	},

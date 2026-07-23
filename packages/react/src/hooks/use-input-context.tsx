@@ -91,9 +91,10 @@ export function createUseActiveContext<T extends ActionMap, Contexts extends str
 	): boolean {
 		const { core, handle: defaultHandle, subscribe } = useFluxContext();
 
-		const handle =
-			maybeContext !== undefined ? (handleOrContext as InputHandle) : defaultHandle;
-		const context = maybeContext ?? (handleOrContext as Contexts);
+		const isContextFirst = typeIs(handleOrContext, "string");
+		const handle = isContextFirst ? defaultHandle : handleOrContext;
+		const context = isContextFirst ? handleOrContext : maybeContext;
+		assert(context !== undefined, "a context is required when a handle is provided");
 
 		const getActive = useMemo(
 			() => (): boolean => core.hasContext(handle, context),
@@ -130,9 +131,10 @@ export function createUseInputContext<T extends ActionMap, Contexts extends stri
 	): FluxInputContextInfo<T> {
 		const { core, handle: defaultHandle, subscribe } = useFluxContext();
 
-		const handle =
-			maybeContext !== undefined ? (handleOrContext as InputHandle) : defaultHandle;
-		const context = maybeContext ?? (handleOrContext as Contexts);
+		const isContextFirst = typeIs(handleOrContext, "string");
+		const handle = isContextFirst ? defaultHandle : handleOrContext;
+		const context = isContextFirst ? handleOrContext : maybeContext;
+		assert(context !== undefined, "a context is required when a handle is provided");
 
 		const staticSlice = useMemo(() => {
 			const sourceInfo = core.getContextInfo(handle, context);

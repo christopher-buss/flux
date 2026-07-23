@@ -1,4 +1,5 @@
 import type { ActionMap, AllActions, BindingLike, InputHandle, InputPlatform } from "@rbxts/flux";
+import { isInputPlatform } from "@rbxts/flux";
 import { useMemo } from "@rbxts/react";
 
 import type { FluxContextValue } from "../flux-context";
@@ -70,10 +71,9 @@ export function createUseBindings<T extends ActionMap, Contexts extends string =
 
 		const hasStringFirst = typeIs(handleOrAction, "string");
 		const handle = hasStringFirst ? defaultHandle : handleOrAction;
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- when a handle leads, arity puts the action in the second slot; action and platform are both string unions, so no runtime guard can recover it
 		const action = hasStringFirst ? handleOrAction : (actionOrPlatform as AllActions<T>);
-		const platform = hasStringFirst
-			? (actionOrPlatform as InputPlatform | undefined)
-			: maybePlatform;
+		const platform = hasStringFirst ? toPlatformSlot(actionOrPlatform) : maybePlatform;
 
 		const getBindingsValue = useMemo(() => {
 			return (): ReadonlyArray<BindingLike> => {
@@ -94,6 +94,20 @@ export function createUseBindings<T extends ActionMap, Contexts extends string =
 	}
 
 	return useBindings;
+}
+
+/**
+ * - Resolves the platform slot of the action-first overload.
+ * - The merged implementation signature types the slot as an action/platform
+ *   union; platforms are a closed literal set, so the guard recovers the
+ *   platform side soundly. Typed callers can only pass a platform or nothing
+ *   here.
+ *
+ * @param value - The argument occupying the platform slot.
+ * @returns The platform, or `undefined` when the slot was empty.
+ */
+function toPlatformSlot(value: string | undefined): InputPlatform | undefined {
+	return value !== undefined && isInputPlatform(value) ? value : undefined;
 }
 
 function shallowArrayEqual<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>): boolean {

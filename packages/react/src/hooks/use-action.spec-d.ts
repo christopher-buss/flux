@@ -1,6 +1,7 @@
 import type { ActionState, InputHandle } from "@rbxts/flux";
 import { bool, createCore, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { createFluxReact } from "../create-flux-react";
@@ -20,7 +21,7 @@ const flux = createFluxReact<typeof actions, keyof typeof contexts>();
 const INVALID = "nonexistent";
 
 describe("FluxUseAction", () => {
-	const handle = {} as InputHandle;
+	const handle = fromPartial<InputHandle>(fromAny(0));
 
 	describe("single-arg overload", () => {
 		it("should return concrete type from selector", () => {

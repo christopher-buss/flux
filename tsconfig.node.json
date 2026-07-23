@@ -2,7 +2,9 @@
 	"extends": ["@isentinel/tsconfig/typescript", "./tsconfig.json"],
 	"compilerOptions": {
 		"tsBuildInfoFile": "${configDir}/tsconfig.node.tsbuildinfo",
+		"lib": ["esnext"],
 		"noLib": false,
+		"libReplacement": true,
 		"rootDir": "${configDir}",
 		"typeRoots": ["./node_modules/@types"],
 		"types": ["node"]

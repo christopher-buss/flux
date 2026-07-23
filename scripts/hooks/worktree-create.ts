@@ -340,7 +340,7 @@ function isJsonObject(value: JsonValue | undefined): value is JsonObject {
 
 function tryParseJson(raw: string): JsonValue | undefined {
 	try {
-		return JSON.parse(raw) as JsonValue;
+		return JSON.parse(raw);
 	} catch {
 		return undefined;
 	}
@@ -400,7 +400,7 @@ function readJsonStringField(raw: string, key: string): string | undefined {
 // `.claude/settings.json`; the unit tests cover runWorktreeCreate directly
 // with injected dependencies.
 
-async function readStdin(): Promise<string> {
+async function readStdinAsync(): Promise<string> {
 	let data = "";
 	process.stdin.setEncoding("utf8");
 	for await (const chunk of process.stdin) {
@@ -491,7 +491,7 @@ async function main(): Promise<void> {
 		env: process.env,
 		platform: process.platform,
 		spawn: spawnWt,
-		stdin: await readStdin(),
+		stdin: await readStdinAsync(),
 		trust: trustInClaudeConfig,
 	});
 	if (result.stdout !== undefined) {

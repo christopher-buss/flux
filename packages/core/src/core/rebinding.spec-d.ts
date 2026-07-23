@@ -1,4 +1,5 @@
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { bool, defineActions, direction2d } from "../actions/define";
@@ -24,12 +25,12 @@ const INVALID = "nonexistent";
 
 describe("rebind", () => {
 	it("should constrain action to AllActions", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf<typeof core.rebind>().toBeCallableWith(handle, "jump", []);
 	});
 
 	it("should accept correct binding config for action type", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		core.rebind(handle, "move", [
 			{
 				down: Enum.KeyCode.S,
@@ -42,7 +43,7 @@ describe("rebind", () => {
 	});
 
 	it("should reject invalid action on rebind", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error unknown action
 		core.rebind(handle, INVALID, []);
 	});
@@ -50,7 +51,7 @@ describe("rebind", () => {
 
 describe("rebindAll", () => {
 	it("should accept typed BindingState", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		const bindings: BindingState<typeof actions> = {};
 		expectTypeOf<typeof core.rebindAll>().toBeCallableWith(handle, bindings);
 	});
@@ -58,12 +59,12 @@ describe("rebindAll", () => {
 
 describe("resetBindings", () => {
 	it("should constrain action to AllActions", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf<typeof core.resetBindings>().toBeCallableWith(handle, "move");
 	});
 
 	it("should reject invalid action on resetBindings", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error unknown action
 		core.resetBindings(handle, INVALID);
 	});
@@ -77,7 +78,7 @@ describe("resetAllBindings", () => {
 
 describe("loadBindings", () => {
 	it("should accept typed BindingState", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		const bindings: BindingState<typeof actions> = {};
 		expectTypeOf<typeof core.loadBindings>().toBeCallableWith(handle, bindings);
 	});
@@ -85,14 +86,14 @@ describe("loadBindings", () => {
 
 describe("serializeBindings", () => {
 	it("should return typed BindingState", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf(core.serializeBindings(handle)).toEqualTypeOf<BindingState<typeof actions>>();
 	});
 });
 
 describe("rebindForPlatform", () => {
 	it("should accept keyboard and gamepad", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf<typeof core.rebindForPlatform>().toBeCallableWith(handle, "jump", "keyboard", [
 			Enum.KeyCode.Space,
 		]);
@@ -102,13 +103,13 @@ describe("rebindForPlatform", () => {
 	});
 
 	it("should reject touch", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error touch cannot be rebound per platform
 		core.rebindForPlatform(handle, "jump", "touch", []);
 	});
 
 	it("should reject invalid action", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error unknown action
 		core.rebindForPlatform(handle, INVALID, "keyboard", []);
 	});
@@ -116,7 +117,7 @@ describe("rebindForPlatform", () => {
 
 describe("resetBindingsForPlatform", () => {
 	it("should accept keyboard and gamepad", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf<typeof core.resetBindingsForPlatform>().toBeCallableWith(
 			handle,
 			"move",
@@ -125,7 +126,7 @@ describe("resetBindingsForPlatform", () => {
 	});
 
 	it("should reject touch", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error touch cannot be reset per platform
 		core.resetBindingsForPlatform(handle, "jump", "touch");
 	});
@@ -133,12 +134,12 @@ describe("resetBindingsForPlatform", () => {
 
 describe("resetAllBindingsForPlatform", () => {
 	it("should accept a writable platform", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf<typeof core.resetAllBindingsForPlatform>().toBeCallableWith(handle, "gamepad");
 	});
 
 	it("should reject the touch platform", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error touch cannot be reset per platform
 		core.resetAllBindingsForPlatform(handle, "touch");
 	});
@@ -146,19 +147,19 @@ describe("resetAllBindingsForPlatform", () => {
 
 describe("getBindingOrigin", () => {
 	it("should return a BindingOrigin", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf(
 			core.getBindingOrigin(handle, "jump", "keyboard"),
 		).toEqualTypeOf<BindingOrigin>();
 	});
 
 	it("should accept touch, which cannot be written per platform", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf<typeof core.getBindingOrigin>().toBeCallableWith(handle, "jump", "touch");
 	});
 
 	it("should accept an optional context", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf<typeof core.getBindingOrigin>().toBeCallableWith(
 			handle,
 			"jump",
@@ -168,13 +169,13 @@ describe("getBindingOrigin", () => {
 	});
 
 	it("should reject an unknown action", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error unknown action
 		core.getBindingOrigin(handle, INVALID, "keyboard");
 	});
 
 	it("should reject an unknown platform", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error unknown platform
 		core.getBindingOrigin(handle, "jump", "mouse");
 	});
@@ -182,14 +183,14 @@ describe("getBindingOrigin", () => {
 
 describe("getBindingsForPlatform", () => {
 	it("should return the bindings for one platform", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		expectTypeOf(core.getBindingsForPlatform(handle, "jump", "touch")).toEqualTypeOf<
 			ReadonlyArray<BindingLike>
 		>();
 	});
 
 	it("should reject an unknown context", () => {
-		const handle = {} as InputHandle;
+		const handle = fromPartial<InputHandle>(fromAny(1));
 		// @ts-expect-error unknown context
 		core.getBindingsForPlatform(handle, "jump", "keyboard", INVALID);
 	});

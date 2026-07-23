@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 
 import type { PipelineOptions } from "#src/core/pipeline";
 import { processPipeline } from "#src/core/pipeline";
@@ -9,7 +10,7 @@ import type { InputHandle } from "../types/core";
 
 const modifierContext = {
 	deltaTime: 0.016,
-	handle: 0 as InputHandle,
+	handle: fromPartial<InputHandle>(fromAny(1)),
 } satisfies ModifierContext;
 
 describe("pipeline integration: deadZone + hold trigger", () => {

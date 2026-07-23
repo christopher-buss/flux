@@ -1,3 +1,4 @@
+import { createModifier } from "./create-modifier";
 import type { Modifier, ModifierValue } from "./types";
 
 /**
@@ -6,17 +7,15 @@ import type { Modifier, ModifierValue } from "./types";
  * @returns A modifier that multiplies the value by -1.
  */
 export function negate(): Modifier {
-	return {
-		modify(value: ModifierValue): ModifierValue {
-			if (typeIs(value, "number")) {
-				return -value;
-			}
+	return createModifier((value): ModifierValue => {
+		if (typeIs(value, "number")) {
+			return -value;
+		}
 
-			if (typeIs(value, "Vector2")) {
-				return value.mul(-1);
-			}
-
+		if (typeIs(value, "Vector2")) {
 			return value.mul(-1);
-		},
-	} as Modifier;
+		}
+
+		return value.mul(-1);
+	});
 }

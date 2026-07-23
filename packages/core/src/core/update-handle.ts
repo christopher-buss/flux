@@ -1,11 +1,11 @@
 import type { ModifierContext } from "../modifiers/types";
 import { resetTriggers } from "../triggers/instantiate";
 import type { TriggerInstance } from "../triggers/types";
-import type { ActionConfig, ActionMap } from "../types/actions";
+import type { ActionConfig, ActionMap, ActionType } from "../types/actions";
 import type { ContextConfig } from "../types/contexts";
 import type { InputHandle } from "../types/core";
 import type { ActionValueType } from "./action-entry";
-import { getMagnitude, getNeutralValue } from "./action-entry";
+import { getMagnitude, getNeutralValue, isActionValueOfKind } from "./action-entry";
 import type { InternalActionState } from "./action-state";
 import type { ActiveContexts } from "./active-contexts";
 import { resolveContextOrder } from "./active-contexts";
@@ -119,15 +119,26 @@ export function updateHandle({
 function getRawValue(
 	handleData: CoreHandleData,
 	actionName: string,
+	kind: ActionType,
 	inputAction: InputAction | undefined,
 ): ActionValueType {
 	const simulated = handleData.simulatedValues.get(actionName);
 	if (simulated !== undefined) {
+		assert(
+			isActionValueOfKind(kind, simulated),
+			`simulated value for "${actionName}" does not match its action type "${kind}"`,
+		);
 		return simulated;
 	}
 
 	assert(inputAction, `missing InputAction instance for: ${actionName}`);
-	return inputAction.GetState() as ActionValueType;
+	const rawValue = inputAction.GetState();
+	assert(
+		isActionValueOfKind(kind, rawValue),
+		`InputAction "${actionName}" returned an unexpected value type: ${typeOf(rawValue)} (expected ${kind})`,
+	);
+
+	return rawValue;
 }
 
 function updateDuration(
@@ -166,7 +177,7 @@ function processAction({
 	handleData,
 	inputAction,
 }: ActionUpdateOptions): void {
-	const rawValue = getRawValue(handleData, actionName, inputAction);
+	const rawValue = getRawValue(handleData, actionName, actionConfig.type, inputAction);
 	const duration = updateDuration(handleData, actionName, rawValue, deltaTime);
 	const modifierContext: ModifierContext = { deltaTime, handle };
 	const result = processPipeline({

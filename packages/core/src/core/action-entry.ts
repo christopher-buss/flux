@@ -1,9 +1,37 @@
 import type { TriggerState } from "../triggers/types";
-import type { ActionType } from "../types/actions";
-import type { ActionState } from "../types/state";
+import type { ActionMap, ActionType } from "../types/actions";
+import type { ActionState, ActionValueMap } from "../types/state";
 
 /** Union of all possible action value types at runtime. */
 export type ActionValueType = boolean | number | Vector2 | Vector3;
+
+/**
+ * The neutral value for each action kind — what suppressed reads report and
+ * what an entry rests at before any input.
+ *
+ * A mapped record rather than a switch so that a lookup keyed by a generic
+ * `K extends ActionType` resolves to `ActionValueMap[K]` — the per-kind value
+ * type survives generic code with no cast.
+ */
+const NEUTRAL_VALUES = {
+	Bool: false,
+	Direction1D: 0,
+	Direction2D: Vector2.zero,
+	Direction3D: Vector3.zero,
+	ViewportPosition: Vector2.zero,
+} satisfies { [K in ActionType]: ActionValueMap[K] };
+
+/**
+ * One runtime type guard per action kind, keyed so a lookup with a generic
+ * `K extends ActionType` yields a guard for exactly `ActionValueMap[K]`.
+ */
+const KIND_VALIDATORS = {
+	Bool: (value): value is boolean => typeIs(value, "boolean"),
+	Direction1D: (value): value is number => typeIs(value, "number"),
+	Direction2D: (value): value is Vector2 => typeIs(value, "Vector2"),
+	Direction3D: (value): value is Vector3 => typeIs(value, "Vector3"),
+	ViewportPosition: (value): value is Vector2 => typeIs(value, "Vector2"),
+} satisfies { [K in ActionType]: (value: unknown) => value is ActionValueMap[K] };
 
 /**
  * The identity a processed read is performed as. Capture tokens read as their
@@ -20,8 +48,18 @@ export interface CaptureViewer {
 	readonly traceback?: string | undefined;
 }
 
-/** Per-action mutable state driven by the pipeline and read by consumers. */
-export interface ActionEntry {
+/**
+ * Per-action mutable state driven by the pipeline and read by consumers.
+ *
+ * Generic over the action's kind, so the value fields carry the kind's exact
+ * value type. Internal code that handles actions of any kind uses the default
+ * instantiation `ActionEntry` — there the value fields are the full
+ * {@link ActionValueType} union, and the `kind` discriminant plus the write
+ * gate in `updateAction` maintain the invariant that a stored value always
+ * matches its entry's kind.
+ * @template K - The action kind this entry stores values for.
+ */
+export interface ActionEntry<K extends ActionType = ActionType> {
 	/**
 	 * Whether the pending boundary cancel has had its one exposure — either
 	 * read by the displaced viewer or carried across one frame reset. The next
@@ -45,18 +83,20 @@ export interface ActionEntry {
 	duration: number;
 	/** Whether the action is enabled. */
 	enabled: boolean;
+	/** The action kind this entry stores values for; fixed at creation. */
+	readonly kind: K;
 	/** The value suppressed reads report, per the action's type. */
-	neutralValue: ActionValueType;
+	neutralValue: ActionValueMap[K];
 	/** How long the previous trigger state lasted in seconds. */
 	previousDuration: number;
 	/** The trigger state at the end of the previous frame. */
 	previousTriggerState: TriggerState;
 	/** The value at the end of the previous frame. */
-	previousValue: ActionValueType;
+	previousValue: ActionValueMap[K];
 	/** The current trigger state. */
 	triggerState: TriggerState;
 	/** The current post-pipeline value. */
-	value: ActionValueType;
+	value: ActionValueMap[K];
 	/**
 	 * Whether this action's value rests at zero when nobody is interacting.
 	 *
@@ -68,16 +108,29 @@ export interface ActionEntry {
 }
 
 /**
+ * The action entry record keyed by an action map, preserving each action's
+ * exact entry kind: `entries[action]` resolves to
+ * `ActionEntry<T[A]["type"]>`, so a generic read of `entries[action].value`
+ * types as that action's own value with no cast at the read site.
+ * @template T - The action map the entries were built from.
+ */
+export type ActionEntries<T extends ActionMap> = {
+	[A in keyof T]: ActionEntry<T[A]["type"]>;
+};
+
+/**
  * A processed read against an already-resolved entry.
  * @template V - The value type the read reports.
+ * @template E - The entry instantiation read from; kind-specific entries
+ * yield kind-specific picks.
  */
-export interface ReadEntryOptions<V> {
+export interface ReadEntryOptions<V, E extends ActionEntry = ActionEntry> {
 	/** Computes the unsuppressed result from the entry. */
-	readonly pick: (entry: ActionEntry) => V;
+	readonly pick: (entry: E) => V;
 	/** The identity reading; omitted for plain {@link ActionState} reads. */
 	readonly viewer?: CaptureViewer | undefined;
 	/** Computes the result the read reports while suppressed. */
-	readonly whenSuppressed: (entry: ActionEntry) => V;
+	readonly whenSuppressed: (entry: E) => V;
 }
 
 /**
@@ -87,8 +140,28 @@ export interface ReadEntryOptions<V> {
 export interface ReadOptions<V> extends ReadEntryOptions<V> {
 	/** The action name. */
 	readonly action: string;
-	/** The action entry map. */
-	readonly entries: Map<string, ActionEntry>;
+	/** The action entry record. */
+	readonly entries: Record<string, ActionEntry>;
+}
+
+/**
+ * Narrows an unknown value — an engine `GetState()` result, a simulated
+ * value, or a post-pipeline value — to exactly the given kind's value type.
+ *
+ * The honest replacement for a union-membership check: because the guard is
+ * looked up per kind, a passing check genuinely proves the value has the
+ * kind's own value type, so generic callers recover `ActionValueMap[K]`
+ * without a cast.
+ * @param kind - The action kind the value must match.
+ * @param value - The value to test.
+ * @returns Whether `value` is the kind's exact value type.
+ * @template K - The action kind literal.
+ */
+export function isActionValueOfKind<K extends ActionType>(
+	kind: K,
+	value: unknown,
+): value is ActionValueMap[K] {
+	return KIND_VALIDATORS[kind](value);
 }
 
 /**
@@ -116,25 +189,15 @@ const GAMEPLAY_READER: CaptureViewer = {};
 
 /**
  * Returns the neutral value for an action type.
+ *
+ * Generic over the kind, so a caller that knows the kind statically — for
+ * example `T[A]["type"]` — gets the kind's exact value type back.
  * @param actionType - Bool, Direction1D, Direction2D, Direction3D, or ViewportPosition.
  * @returns The corresponding neutral value.
+ * @template K - The action kind literal.
  */
-export function getNeutralValue(actionType: ActionType): ActionValueType {
-	switch (actionType) {
-		case "Bool": {
-			return false;
-		}
-		case "Direction1D": {
-			return 0;
-		}
-		case "Direction2D":
-		case "ViewportPosition": {
-			return Vector2.zero;
-		}
-		case "Direction3D": {
-			return Vector3.zero;
-		}
-	}
+export function getNeutralValue<K extends ActionType>(actionType: K): ActionValueMap[K] {
+	return NEUTRAL_VALUES[actionType];
 }
 
 /**
@@ -265,12 +328,12 @@ export function isRealHolder(viewer: CaptureViewer): boolean {
 
 /**
  * Looks up an action's entry, erroring on unknown action names.
- * @param entries - The action entry map.
+ * @param entries - The action entry record.
  * @param action - The action name.
  * @returns The action's entry.
  */
-export function getEntry(entries: Map<string, ActionEntry>, action: string): ActionEntry {
-	const entry = entries.get(action);
+export function getEntry(entries: Record<string, ActionEntry>, action: string): ActionEntry {
+	const entry = entries[action];
 	assert(entry, `unknown action: ${action}`);
 	return entry;
 }
@@ -286,8 +349,9 @@ export function getEntry(entries: Map<string, ActionEntry>, action: string): Act
  * @returns The suppressed result if the read is suppressed for the viewer,
  * otherwise the picked value.
  * @template V - The value type the read reports.
+ * @template E - The entry instantiation being read.
  */
-export function readEntry<V>(entry: ActionEntry, options: ReadEntryOptions<V>): V {
+export function readEntry<V, E extends ActionEntry>(entry: E, options: ReadEntryOptions<V, E>): V {
 	return isSuppressedFor(entry, options.viewer)
 		? options.whenSuppressed(entry)
 		: options.pick(entry);
@@ -367,32 +431,39 @@ export function consumeFrameClaim(entry: ActionEntry): void {
 /**
  * Reads an entry's value, suppressed to its neutral value while claimed or
  * captured by another viewer.
+ *
+ * Generic over the entry's kind: a kind-specific entry — one resolved
+ * through {@link ActionEntries} — yields the action's exact value type.
  * @param entry - The action entry to read.
  * @param viewer - The identity reading; undefined for plain state reads.
  * @returns The neutral value if suppressed, otherwise the current value.
+ * @template K - The entry's action kind.
  */
-export function readEntryValue(entry: ActionEntry, viewer?: CaptureViewer): ActionValueType {
+export function readEntryValue<K extends ActionType>(
+	entry: ActionEntry<K>,
+	viewer?: CaptureViewer,
+): ActionValueMap[K] {
 	return readEntry(entry, { pick: getValue, viewer, whenSuppressed: getEntryNeutralValue });
 }
 
 /**
  * Reads an action's value by name, with no viewer identity.
- * @param entries - The action entry map.
+ * @param entries - The action entry record.
  * @param action - The action name.
  * @returns The neutral value if claimed or captured, otherwise the current
  * value.
  */
-export function readValue(entries: Map<string, ActionEntry>, action: string): ActionValueType {
+export function readValue(entries: Record<string, ActionEntry>, action: string): ActionValueType {
 	return readEntryValue(getEntry(entries, action));
 }
 
 /**
  * Claims an action for the rest of the frame.
- * @param entries - The action entry map.
+ * @param entries - The action entry record.
  * @param action - The action name.
  * @returns True if the claim succeeded (not already claimed this frame).
  */
-export function claimAction(entries: Map<string, ActionEntry>, action: string): boolean {
+export function claimAction(entries: Record<string, ActionEntry>, action: string): boolean {
 	const entry = getEntry(entries, action);
 	if (entry.claimed) {
 		return false;
@@ -591,10 +662,10 @@ function expireBoundaryCancel(entry: ActionEntry): void {
 	entry.canceledConsumed = false;
 }
 
-function getValue(entry: ActionEntry): ActionValueType {
+function getValue<K extends ActionType>(entry: ActionEntry<K>): ActionValueMap[K] {
 	return entry.value;
 }
 
-function getEntryNeutralValue(entry: ActionEntry): ActionValueType {
+function getEntryNeutralValue<K extends ActionType>(entry: ActionEntry<K>): ActionValueMap[K] {
 	return entry.neutralValue;
 }

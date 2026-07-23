@@ -19,4 +19,10 @@ export interface Modifier {
 	modify(value: Vector2, context: ModifierContext): Vector2;
 	/** Transforms a 3D vector value. */
 	modify(value: Vector3, context: ModifierContext): Vector3;
+	/**
+	 * Transforms a value of statically-unknown kind, preserving the union. Lets
+	 * the pipeline apply a modifier to a {@link ModifierValue} it has not
+	 * narrowed to a concrete kind.
+	 */
+	modify(value: ModifierValue, context: ModifierContext): ModifierValue;
 }

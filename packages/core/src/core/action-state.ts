@@ -7,7 +7,7 @@ import type {
 	CaptureToken,
 	DebugCapture,
 } from "../types/state";
-import type { ActionEntry, ActionValueType } from "./action-entry";
+import type { ActionEntries, ActionEntry, ActionValueType } from "./action-entry";
 import {
 	claimAction,
 	consumeFrameClaim,
@@ -17,10 +17,12 @@ import {
 	getEntry,
 	getNeutralValue,
 	getPreviousDuration,
+	isActionValueOfKind,
 	isOngoing,
 	isTriggered,
 	read,
 	readEntryCanceled,
+	readEntryValue,
 	readValue,
 	settleDrain,
 	suppressedFalse,
@@ -96,6 +98,7 @@ function createEntry(config: ActionConfig): ActionEntry {
 		claimed: false,
 		duration: 0,
 		enabled: config.enabled ?? true,
+		kind: config.type,
 		neutralValue,
 		previousDuration: 0,
 		previousTriggerState: "none",
@@ -106,35 +109,35 @@ function createEntry(config: ActionConfig): ActionEntry {
 	};
 }
 
-function initializeEntries(actions: ActionMap): Map<string, ActionEntry> {
-	const entries = new Map<string, ActionEntry>();
+function initializeEntries(actions: ActionMap): Record<string, ActionEntry> {
+	const entries: Record<string, ActionEntry> = {};
 
 	for (const [name, config] of pairs(actions)) {
-		entries.set(name, createEntry(config));
+		entries[name] = createEntry(config);
 	}
 
 	return entries;
 }
 
-function isActionClaimed(entries: Map<string, ActionEntry>, action: string): boolean {
+function isActionClaimed(entries: Record<string, ActionEntry>, action: string): boolean {
 	return getEntry(entries, action).claimed;
 }
 
-function isActionAvailable(entries: Map<string, ActionEntry>, action: string): boolean {
+function isActionAvailable(entries: Record<string, ActionEntry>, action: string): boolean {
 	const entry = getEntry(entries, action);
 
 	return entry.enabled && !entry.claimed;
 }
 
-function isActionEnabled(entries: Map<string, ActionEntry>, action: string): boolean {
+function isActionEnabled(entries: Record<string, ActionEntry>, action: string): boolean {
 	return getEntry(entries, action).enabled;
 }
 
-function isRawPressed(entries: Map<string, ActionEntry>, action: string): boolean {
+function isRawPressed(entries: Record<string, ActionEntry>, action: string): boolean {
 	return getEntry(entries, action).value === true;
 }
 
-function wasRawJustPressed(entries: Map<string, ActionEntry>, action: string): boolean {
+function wasRawJustPressed(entries: Record<string, ActionEntry>, action: string): boolean {
 	const entry = getEntry(entries, action);
 
 	return entry.value === true && entry.previousValue === false;
@@ -142,15 +145,29 @@ function wasRawJustPressed(entries: Map<string, ActionEntry>, action: string): b
 
 // eslint-disable-next-line flawless/max-lines-per-function -- thin delegation methods
 function buildPublicState<T extends ActionMap>(
-	entries: Map<string, ActionEntry>,
+	entries: Record<string, ActionEntry>,
 	isDebug: boolean,
 ): ActionState<T> {
+	// The single sanctioned bridge between runtime entries and per-action
+	// types: `entries` was built from the same `actions: T` the caller passed
+	// in — one entry per action, kind taken from that action's config — so
+	// viewing it as `ActionEntries<T>` states an invariant construction just
+	// established. Typed reads (`getState`) resolve through this view with no
+	// per-read cast, and the write gate in `updateAction` keeps the invariant
+	// true across every later write.
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- see comment above; the per-action entry kinds are not expressible on the runtime record
+	const typedEntries = entries as ActionEntries<T>;
+
 	return {
 		axis1d(action) {
-			return readValue(entries, action) as number;
+			const value = readValue(entries, action);
+			assert(typeIs(value, "number"), "axis1d read must be a number");
+			return value;
 		},
 		axis3d(action) {
-			return readValue(entries, action) as Vector3;
+			const value = readValue(entries, action);
+			assert(typeIs(value, "Vector3"), "axis3d read must be a Vector3");
+			return value;
 		},
 		axisBecameActive(action) {
 			return read({
@@ -175,6 +192,7 @@ function buildPublicState<T extends ActionMap>(
 			// The runtime token carries the full read surface; the public type
 			// narrows it to the action's kind, which only resolves once `A` is
 			// a concrete action name.
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- see comment above; the generic per-action token type is not runtime-checkable
 			return createCaptureToken({
 				action,
 				captureOptions: options,
@@ -201,10 +219,19 @@ function buildPublicState<T extends ActionMap>(
 			return NO_DEBUG_CAPTURES;
 		},
 		direction2d(action) {
-			return readValue(entries, action) as Vector2;
+			const value = readValue(entries, action);
+			assert(typeIs(value, "Vector2"), "direction2d read must be a Vector2");
+			return value;
 		},
 		getState<A extends keyof T & string>(action: A): ActionValue<T, A> {
-			return readValue(entries, action) as ActionValue<T, A>;
+			if (isDebug && _G.__DEV__) {
+				// Dev-mode friendly error for an untyped caller passing a bogus
+				// action name; asserts are stripped from production builds,
+				// where the bad name surfaces as an index-nil error instead.
+				getEntry(entries, action);
+			}
+
+			return readEntryValue(typedEntries[action]);
 		},
 		isAvailable(action) {
 			return isActionAvailable(entries, action);
@@ -230,7 +257,9 @@ function buildPublicState<T extends ActionMap>(
 			return read({ action, entries, pick: isOngoing, whenSuppressed: suppressedFalse });
 		},
 		position2d(action) {
-			return readValue(entries, action) as Vector2;
+			const value = readValue(entries, action);
+			assert(typeIs(value, "Vector2"), "position2d read must be a Vector2");
+			return value;
 		},
 		pressed(action) {
 			return read({ action, entries, pick: isTriggered, whenSuppressed: suppressedFalse });
@@ -255,8 +284,8 @@ function buildPublicState<T extends ActionMap>(
 	} as const satisfies ActionState<T>;
 }
 
-function endFrame(entries: Map<string, ActionEntry>): void {
-	for (const [, entry] of entries) {
+function endFrame(entries: Record<string, ActionEntry>): void {
+	for (const [, entry] of pairs(entries)) {
 		entry.previousValue = entry.value;
 		entry.previousTriggerState = entry.triggerState;
 		consumeFrameClaim(entry);
@@ -264,12 +293,21 @@ function endFrame(entries: Map<string, ActionEntry>): void {
 	}
 }
 
-function setEnabled(entries: Map<string, ActionEntry>, action: string, enabled: boolean): void {
+function setEnabled(entries: Record<string, ActionEntry>, action: string, enabled: boolean): void {
 	getEntry(entries, action).enabled = enabled;
 }
 
-function updateAction(entries: Map<string, ActionEntry>, options: UpdateActionOptions): void {
+function updateAction(entries: Record<string, ActionEntry>, options: UpdateActionOptions): void {
 	const entry = getEntry(entries, options.action);
+
+	// The write gate maintaining the entry invariant every typed read relies
+	// on: a stored value always matches its entry's kind. Values arrive here
+	// from the engine, from `simulateAction`, and from user modifiers — all
+	// of which the compiler cannot vouch for at this boundary.
+	assert(
+		isActionValueOfKind(entry.kind, options.value),
+		`value written to "${options.action}" does not match its action type "${entry.kind}"`,
+	);
 	entry.value = options.value;
 
 	if (options.triggerState !== entry.triggerState) {
@@ -282,7 +320,7 @@ function updateAction(entries: Map<string, ActionEntry>, options: UpdateActionOp
 	entry.triggerState = options.triggerState;
 }
 
-function buildInternalState(entries: Map<string, ActionEntry>): InternalActionState {
+function buildInternalState(entries: Record<string, ActionEntry>): InternalActionState {
 	return {
 		endFrame() {
 			endFrame(entries);

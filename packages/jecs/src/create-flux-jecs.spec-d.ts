@@ -31,7 +31,7 @@ const contexts = defineContexts({
 
 const world = Jecs.world();
 const flux = createFluxJecs(world, { actions, contexts });
-const entity = {} as Entity;
+const entity = world.entity();
 const INVALID = "nonexistent";
 const GAMEPLAY = "gameplay";
 const UI = "ui";

@@ -5,9 +5,9 @@ import {
 	parseWorktreePath,
 	removeWorktree,
 	runWorktreeRemove,
-	type SpawnFunc,
 	worktrunkBinary,
 } from "./worktree-remove.ts";
+import type { SpawnFunc } from "./worktree-remove.ts";
 
 function fakeSpawn(result: { error?: Error; status: null | number; stdout?: string }): SpawnFunc {
 	return () => result;

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 
 import type { InputHandle } from "../types/core";
 import { deadZone } from "./dead-zone";
@@ -7,7 +8,7 @@ import type { ModifierContext } from "./types";
 describe("deadZone", () => {
 	const context = {
 		deltaTime: 0.016,
-		handle: 0 as InputHandle,
+		handle: fromPartial<InputHandle>(fromAny(0)),
 	} satisfies ModifierContext;
 	const modifier = deadZone(0.2);
 

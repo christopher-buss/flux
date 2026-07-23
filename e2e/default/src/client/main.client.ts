@@ -10,7 +10,9 @@ const player = Players.LocalPlayer;
 const core = createCore({ actions, contexts });
 const [handle] = core.subscribe(player, "gameplay");
 
-const interactable = Workspace.WaitForChild("Interactable") as Part;
+const interactable = Workspace.WaitForChild("Interactable");
+assert(interactable.IsA("BasePart"), "Interactable must be a BasePart");
+
 const defaultColor = interactable.Color;
 
 const billboardGui = new Instance("BillboardGui");
@@ -61,11 +63,12 @@ function isNearInteractable(): boolean {
 		return false;
 	}
 
-	const root = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
-	if (root === undefined) {
+	const root = character.FindFirstChild("HumanoidRootPart");
+	if (root === undefined || !root.IsA("BasePart")) {
 		return false;
 	}
 
+	assert(interactable.IsA("BasePart"), "Interactable must be a BasePart");
 	return root.Position.sub(interactable.Position).Magnitude < INTERACT_RANGE;
 }
 

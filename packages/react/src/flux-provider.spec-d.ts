@@ -1,6 +1,7 @@
 import type { FluxCore, InputHandle } from "@rbxts/flux";
 import { bool, defineActions } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 import type React from "@rbxts/react";
 
@@ -35,17 +36,17 @@ describe("FluxProviderProps", () => {
 
 	it("should reject missing core", () => {
 		// @ts-expect-error missing core
-		const _props: Props = { handle: {} as InputHandle };
+		const _props: Props = { handle: fromPartial<InputHandle>(fromAny(1)) };
 	});
 
 	it("should reject missing handle", () => {
 		// @ts-expect-error missing handle
-		const _props: Props = { core: {} as FluxCore<Actions, "gameplay"> };
+		const _props: Props = { core: fromAny({}) };
 	});
 
 	it("should reject wrong handle type", () => {
 		const _props: Props = {
-			core: {} as FluxCore<Actions, "gameplay">,
+			core: fromAny({}),
 			// @ts-expect-error handle must be InputHandle
 			handle: 42,
 		};

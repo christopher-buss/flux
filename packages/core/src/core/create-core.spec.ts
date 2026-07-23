@@ -22,7 +22,7 @@ const TEST_ACTIONS = {
 const TEST_CONTEXTS = {
 	gameplay: {
 		bindings: {
-			cursor: [Enum.KeyCode.Unknown],
+			cursor: [Enum.KeyCode.None],
 			jump: [Enum.KeyCode.Space],
 			look: [Enum.KeyCode.E],
 			move: [Enum.KeyCode.W],
@@ -961,6 +961,21 @@ describe("createCore", () => {
 			expect(result.X).toBeCloseTo(0.5);
 			expect(result.Y).toBeCloseTo(-0.3);
 		});
+
+		it("should reject a simulated value that does not match the action's type", () => {
+			expect.assertions(1);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			core.simulateAction(handle, "jump", fromAny<boolean, Vector2>(new Vector2(1, 0)));
+			const update = () => {
+				core.update(0.016);
+			};
+
+			expect(update).toThrow(
+				'simulated value for "jump" does not match its action type "Bool"',
+			);
+		});
 	});
 
 	describe("destroy", () => {
@@ -1512,6 +1527,33 @@ describe("createCore", () => {
 			core.update(0.016);
 
 			expect(core.getState(handle).pressed("jump")).toBeTrue();
+		});
+
+		it("should reject a replicated value that does not match the action's type", () => {
+			expect.assertions(1);
+
+			const parent = new Instance("Folder");
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			core.subscribe(parent, "gameplay");
+
+			// The server disagrees with the client about jump's kind, so the
+			// replicated InputAction's GetState() reports a Vector2 where the
+			// client's config promises a boolean.
+			const serverCore = createCore({
+				actions: { jump: { type: "Direction2D" as const } },
+				contexts: { gameplay: { bindings: { jump: [Enum.KeyCode.Space] } } },
+			});
+			serverCore.register(parent, "gameplay");
+			awaitDefer();
+			awaitDefer();
+
+			const update = () => {
+				core.update(0.016);
+			};
+
+			expect(update).toThrow(
+				'InputAction "jump" returned an unexpected value type: Vector2 (expected Bool)',
+			);
 		});
 
 		it("should allow simulateAction before replication", () => {

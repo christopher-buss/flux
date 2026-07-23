@@ -1,4 +1,5 @@
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import type { InputHandle } from "../types/core";
@@ -41,7 +42,10 @@ describe("scale", () => {
 describe("Modifier", () => {
 	it("should have overloaded modify accepting number, Vector2, Vector3", () => {
 		const modifier = deadZone(0.1);
-		const context: ModifierContext = { deltaTime: 0.016, handle: {} as InputHandle };
+		const context: ModifierContext = {
+			deltaTime: 0.016,
+			handle: fromPartial<InputHandle>(fromAny(1)),
+		};
 
 		expectTypeOf(modifier.modify(0.5, context)).toBeNumber();
 		expectTypeOf(modifier.modify(Vector2.zero, context)).toEqualTypeOf<Vector2>();
@@ -50,7 +54,10 @@ describe("Modifier", () => {
 
 	it("should reject boolean values", () => {
 		const modifier = negate();
-		const context: ModifierContext = { deltaTime: 0.016, handle: {} as InputHandle };
+		const context: ModifierContext = {
+			deltaTime: 0.016,
+			handle: fromPartial<InputHandle>(fromAny(1)),
+		};
 
 		// @ts-expect-error boolean is not a valid ModifierValue
 		modifier.modify(true, context);

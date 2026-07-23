@@ -1,6 +1,7 @@
 import type { FluxCore, InputHandle } from "@rbxts/flux";
 import { bool, createCore, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import { describe, it } from "@rbxts/jest-globals";
+import { fromAny, fromPartial } from "@rbxts/jest-utils";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 import type React from "@rbxts/react";
 
@@ -79,7 +80,7 @@ describe("FluxReact", () => {
 	it("should type FluxProvider as callable with core and handle", () => {
 		expectTypeOf<typeof flux.FluxProvider>().toBeCallableWith({
 			core: runtimeCore,
-			handle: {} as InputHandle,
+			handle: fromPartial<InputHandle>(fromAny(0)),
 		});
 	});
 
