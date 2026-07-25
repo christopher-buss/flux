@@ -47,8 +47,8 @@ catalogs:
       specifier: 18.2.2
       version: 18.2.2
     eslint-plugin-pnpm:
-      specifier: 1.6.1
-      version: 1.6.1
+      specifier: 1.7.0
+      version: 1.7.0
     eslint-plugin-react-hooks:
       specifier: 7.1.1
       version: 7.1.1
@@ -226,7 +226,7 @@ importers:
         version: 18.2.2(eslint@10.7.0)(typescript@6.0.3)
       eslint-plugin-pnpm:
         specifier: catalog:lint
-        version: 1.6.1(eslint@10.7.0)
+        version: 1.7.0(eslint@10.7.0)
       eslint-plugin-react-hooks:
         specifier: catalog:lint
         version: 7.1.1(eslint@10.7.0)(supports-color@10.2.2)
@@ -3565,6 +3565,11 @@ packages:
     peerDependencies:
       eslint: ^9.0.0 || ^10.0.0
 
+  eslint-plugin-pnpm@1.7.0:
+    resolution: {integrity: sha512-SZaPARN1+NMqAjQOlQjHu59SnN/o299N5Z4HTyhwWYnfkQkjdiydayHBegwXER3VecRF/Rf7eHw3sGcTF+uLOQ==}
+    peerDependencies:
+      eslint: ^9.0.0 || ^10.0.0
+
   eslint-plugin-promise@7.3.0:
     resolution: {integrity: sha512-6uGiOR0INuujr6PEQmeSSP7GbIMJ/ebEXXiEzb/nOj68LknH5Pxzb/AbZivmr6VE6TkTE8rTjRK9zhKpK6HsRA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -4608,6 +4613,9 @@ packages:
 
   pnpm-workspace-yaml@1.6.1:
     resolution: {integrity: sha512-yTeZntGWi8m9WNuhoVsP0DpFc4sC1U0+rr/qR6Zi9n2g3sxXY+JfccjXjjruNz96tM8I09yaJUA86doRnNLkbg==}
+
+  pnpm-workspace-yaml@1.7.0:
+    resolution: {integrity: sha512-cgjaozHkjWL4H8oKZydEWE4mg31XydK3/1cLKjHvwnFAXutp45yAlMKljpOdZEq4TtLuzYAMvy9j05wRm3aoPw==}
 
   postcss-values-parser@6.0.2:
     resolution: {integrity: sha512-YLJpK0N1brcNJrs9WatuJFtHaV9q5aAOj+S4DI5S7jgHlRfm0PIbDCAFRYMQD5SHq7Fy6xsDhyutgS0QOAs0qw==}
@@ -8328,6 +8336,17 @@ snapshots:
       yaml: 2.9.0
       yaml-eslint-parser: 2.1.0
 
+  eslint-plugin-pnpm@1.7.0(eslint@10.7.0):
+    dependencies:
+      empathic: 2.0.1
+      eslint: 10.7.0(jiti@2.7.0)(supports-color@10.2.2)
+      jsonc-eslint-parser: 3.1.0
+      pathe: 2.0.3
+      pnpm-workspace-yaml: 1.7.0
+      tinyglobby: 0.2.17
+      yaml: 2.9.0
+      yaml-eslint-parser: 2.1.0
+
   eslint-plugin-promise@7.3.0(eslint@10.7.0):
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.7.0)
@@ -9722,6 +9741,10 @@ snapshots:
       unconfig: 7.5.0
 
   pnpm-workspace-yaml@1.6.1:
+    dependencies:
+      yaml: 2.9.0
+
+  pnpm-workspace-yaml@1.7.0:
     dependencies:
       yaml: 2.9.0
 
