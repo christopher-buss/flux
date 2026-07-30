@@ -71,7 +71,7 @@ catalogs:
     file-entry-cache: 11.1.5
     get-tsconfig: 4.14.0
     madge: 8.0.0
-    oxlint: 1.75.0
+    oxlint: 1.76.0
     oxlint-tsgolint: 7.0.2001
   node:
     rimraf: 6.1.3
