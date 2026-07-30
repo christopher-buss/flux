@@ -140,8 +140,8 @@ catalogs:
       version: 4.1.10
   tsc:
     '@isentinel/tsconfig':
-      specifier: 1.2.0
-      version: 1.2.0
+      specifier: 2.0.0
+      version: 2.0.0
     '@typescript/native-preview':
       specifier: 7.0.0-dev.20260707.2
       version: 7.0.0-dev.20260707.2
@@ -196,7 +196,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@roblox-ts/rojo-resolver':
         specifier: catalog:test
         version: '@isentinel/rojo-utils@0.1.0'
@@ -293,7 +293,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
@@ -330,7 +330,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
@@ -370,7 +370,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
@@ -401,7 +401,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
@@ -435,7 +435,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
@@ -483,7 +483,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
@@ -537,7 +537,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@rbxts-js/dom-testing-library-lua':
         specifier: catalog:test
         version: 8.16.0-ts.3
@@ -597,7 +597,7 @@ importers:
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
       '@isentinel/tsconfig':
         specifier: catalog:tsc
-        version: 1.2.0(typescript@6.0.3)
+        version: 2.0.0(typescript@6.0.3)
       '@rbxts-js/dom-testing-library-lua':
         specifier: catalog:test
         version: 8.16.0-ts.3
@@ -1345,8 +1345,8 @@ packages:
     resolution: {integrity: sha512-Yewz2hDiehPuoQPMFT2DxcQU8jhiu1l/V/xsVu7zVkf1kJMuw5t1h+w/T01NedWD2hKXfVCpv8TfExns0d/wpw==}
     engines: {node: '>=24.12.0'}
 
-  '@isentinel/tsconfig@1.2.0':
-    resolution: {integrity: sha512-MTsDJjte6XV+t3UtbE93UOStGgJ6jw5XG8UoGcyuI8E9mEAOZFhqmdKT8LVXgqncM5Knbe4H/lAUVvRHO+l6tA==}
+  '@isentinel/tsconfig@2.0.0':
+    resolution: {integrity: sha512-sdYI9atuVNp8SC/qWYC/3LNK9rCYVsiUNgfF+O/h3a2/0Bmn6RZUlhGzhS0J5iwK1AifRXS6cWZPo2RerwOAAw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       typescript: ^5.5.0
@@ -6083,7 +6083,7 @@ snapshots:
     dependencies:
       arktype: 2.2.0
 
-  '@isentinel/tsconfig@1.2.0(typescript@6.0.3)':
+  '@isentinel/tsconfig@2.0.0(typescript@6.0.3)':
     dependencies:
       typescript: 6.0.3
 
