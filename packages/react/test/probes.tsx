@@ -1,5 +1,7 @@
 import type { ActionState } from "@rbxts/flux";
+import { afterThis } from "@rbxts/jest-utils";
 import React from "@rbxts/react";
+import ReactRoblox from "@rbxts/react-roblox";
 
 import type { FluxReact } from "#src/create-flux-react";
 import type { TEST_ACTIONS } from "./fixtures";
@@ -22,6 +24,24 @@ export interface Log<T extends defined> {
 	readonly push: (value: T) => void;
 }
 
+/**
+ * Minimal external store for driving `useSyncExternalStore`, mirroring the
+ * `createExternalStore` helper in React's own tests: a mutable cell plus a
+ * listener set fired synchronously on every write.
+ *
+ * @template T - The stored snapshot type.
+ */
+export interface ExternalStore<T extends defined> {
+	/** Reads the current snapshot. */
+	readonly getState: () => T;
+	/** Number of live listeners, for asserting subscribe/unsubscribe. */
+	readonly getSubscriberCount: () => number;
+	/** Writes a new snapshot and notifies every listener. */
+	readonly setState: (next: T) => void;
+	/** Registers a listener; returns a disconnect. */
+	readonly subscribe: (onStoreChange: () => void) => () => void;
+}
+
 /** Closure-private counter with `tick`/`get` accessors. */
 export interface RenderCounter {
 	/** Returns the current count. */
@@ -36,6 +56,14 @@ export interface CountingProbe {
 	readonly component: () => React.ReactNode;
 	/** Returns the number of times the probe has rendered. */
 	readonly getRenderCount: () => number;
+}
+
+/** A concurrent root mounted for the duration of one test. */
+export interface ConcurrentRoot {
+	/**
+	 * Renders again outside `act`, so the work loop can be stopped part-way.
+	 */
+	readonly render: (element: React.ReactElement) => void;
 }
 
 /** Props for {@link createLabeledJumpProbe} components. */
@@ -57,6 +85,69 @@ export function makeLog<T extends defined>(): Log<T> {
 		entries: () => entries,
 		push: (value: T) => {
 			entries.push(value);
+		},
+	};
+}
+
+/**
+ * Builds an {@link ExternalStore} backed by a private closure.
+ *
+ * @template T - The stored snapshot type.
+ * @param initial - The starting snapshot.
+ * @returns A store whose `subscribe`/`getState` plug straight into the shim.
+ */
+export function createExternalStore<T extends defined>(initial: T): ExternalStore<T> {
+	const listeners = new Set<() => void>();
+	let state = initial;
+	return {
+		getState: () => state,
+		getSubscriberCount: () => listeners.size(),
+		setState: (updated: T) => {
+			state = updated;
+			for (const listener of listeners) {
+				listener();
+			}
+		},
+		subscribe: (onStoreChange: () => void) => {
+			listeners.add(onStoreChange);
+			return () => {
+				listeners.delete(onStoreChange);
+			};
+		},
+	};
+}
+
+/**
+ * - Mounts `element` on a concurrent root and unmounts it when the test ends.
+ * - RTL's `render` builds a legacy root, which flushes every update
+ *   synchronously and so hides anything lane-dependent. Tests about lanes need
+ *   this instead.
+ *
+ * @param element - The tree to mount.
+ * @returns A handle for re-rendering the same root.
+ * @example
+ * ```tsx
+ * const root = mountConcurrent(<App store={store} />);
+ * root.render(<App store={store} />);
+ * unstable_flushNumberOfYields(2);
+ * ```
+ */
+export function mountConcurrent(element: React.ReactElement): ConcurrentRoot {
+	const root = ReactRoblox.createRoot(new Instance("Folder"));
+
+	afterThis(() => {
+		ReactRoblox.act(() => {
+			root.unmount();
+		});
+	});
+
+	ReactRoblox.act(() => {
+		root.render(element);
+	});
+
+	return {
+		render: (updated: React.ReactElement) => {
+			root.render(updated);
 		},
 	};
 }
