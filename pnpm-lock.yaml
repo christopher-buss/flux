@@ -157,7 +157,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.940
+      version: 1.0.941
     '@types/node':
       specifier: 24.13.3
       version: 24.13.3
@@ -299,7 +299,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.940
+        version: 1.0.941
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -336,7 +336,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.940
+        version: 1.0.941
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -376,7 +376,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.940
+        version: 1.0.941
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -407,7 +407,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.940
+        version: 1.0.941
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -456,7 +456,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.940
+        version: 1.0.941
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -510,7 +510,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.940
+        version: 1.0.941
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -573,7 +573,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.940
+        version: 1.0.941
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -618,7 +618,7 @@ importers:
         version: 0.1.3(@rbxts/jest-globals@3.16.0-ts.1)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.940
+        version: 1.0.941
       rimraf:
         specifier: catalog:node
         version: 6.1.3
@@ -630,7 +630,7 @@ importers:
     devDependencies:
       '@isentinel/hooks':
         specifier: catalog:lint
-        version: 1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@5.9.3)
+        version: 1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@types/node':
         specifier: catalog:types
         version: 24.13.3
@@ -2409,8 +2409,8 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.940':
-    resolution: {integrity: sha512-F5kSGN/V005xtTSI7+JYJB4NAGU7GJnYEm3I8XquB42ldIrphiFhQypuWOPU5ke0xqNKVK8y1EI9gAxylzbuew==}
+  '@rbxts/types@1.0.941':
+    resolution: {integrity: sha512-3i5UopxSP29giYWlgDIqa8pGwgqcKl/e2n/h2syCWpubB9wE30qiVWepXHTVLYXwdEGbj57eQl0t0lWbZfb5OA==}
 
   '@roblox-ts/luau-ast@2.0.1':
     resolution: {integrity: sha512-jej2mzRGwhR9wu4woAtgTwqsKADlegZYlQ+M5qVHRojvjoyJVFkLrSbhBKRr8HR+fVW5nCz0qX7kNa0tSpAY+A==}
@@ -6010,19 +6010,6 @@ snapshots:
       - typescript
       - vite-plus
 
-  '@isentinel/hooks@1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@5.9.3)':
-    dependencies:
-      eslint_d: 15.0.2(jiti@2.7.0)
-      file-entry-cache: 11.1.5
-      get-tsconfig: 4.14.0
-      madge: 8.0.0(supports-color@10.2.2)(typescript@5.9.3)
-    optionalDependencies:
-      '@typescript/native-preview': 7.0.0-dev.20260707.2
-    transitivePeerDependencies:
-      - jiti
-      - supports-color
-      - typescript
-
   '@isentinel/hooks@1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       eslint_d: 15.0.2(jiti@2.7.0)
@@ -7019,7 +7006,7 @@ snapshots:
 
   '@rbxts/services@1.6.0': {}
 
-  '@rbxts/types@1.0.940': {}
+  '@rbxts/types@1.0.941': {}
 
   '@roblox-ts/luau-ast@2.0.1': {}
 
@@ -8871,25 +8858,6 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
-
-  madge@8.0.0(supports-color@10.2.2)(typescript@5.9.3):
-    dependencies:
-      chalk: 4.1.2
-      commander: 7.2.0
-      commondir: 1.0.1
-      debug: 4.4.3(supports-color@10.2.2)
-      dependency-tree: 11.5.0(supports-color@10.2.2)
-      ora: 5.4.1
-      pluralize: 8.0.0
-      pretty-ms: 7.0.1
-      rc: 1.2.8
-      stream-to-array: 2.3.0
-      ts-graphviz: 2.1.6
-      walkdir: 0.4.1
-    optionalDependencies:
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
 
   madge@8.0.0(supports-color@10.2.2)(typescript@6.0.3):
     dependencies:
