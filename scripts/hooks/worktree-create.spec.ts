@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
 import type { JsonObject, JsonValue } from "type-fest";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 
 import {
 	buildWtArgs,
@@ -64,6 +64,45 @@ function commandRecordingSpawn(captured: { command: string }): SpawnFunc {
 
 		return { status: 0, stdout: '{"path":"/repo/foo"}' };
 	};
+}
+
+/**
+ * Creates a temp directory removed once the running test finishes.
+ *
+ * Cleanup hangs off the test rather than a `finally`, so a body can end on its
+ * assertions.
+ * @returns The directory path.
+ */
+function makeTemporaryDirectory(): string {
+	const directory = mkdtempSync(join(tmpdir(), "wt-create-spec-"));
+
+	onTestFinished(() => {
+		try {
+			rmSync(directory, { force: true, recursive: true });
+		} catch {
+			// A detached child may still hold a file in here open on Windows.
+		}
+	});
+
+	return directory;
+}
+
+/**
+ * Runs `run` with `console.error` silenced.
+ *
+ * The sibling of {@link captureConsoleError} for tests asserting on the return
+ * value rather than on what was logged.
+ * @param run - Runs immediately.
+ * @returns Whatever `run` returned.
+ * @template T - The return type.
+ */
+function withSilencedConsoleError<T>(run: () => T): T {
+	const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+	try {
+		return run();
+	} finally {
+		spy.mockRestore();
+	}
 }
 
 function captureConsoleError(run: () => void): string {
@@ -240,7 +279,7 @@ describe(captureStdout, () => {
 	it("should return promptly when the command backgrounds a child that inherits stdout", () => {
 		expect.assertions(2);
 
-		const directory = mkdtempSync(join(tmpdir(), "wt-create-spec-"));
+		const directory = makeTemporaryDirectory();
 		const fakeWt = join(directory, "fake-wt.mjs");
 		const outFile = join(directory, "stdout");
 		// Mimic worktrunk: print the JSON path, then leave a detached child that
@@ -259,42 +298,24 @@ describe(captureStdout, () => {
 			].join("\n"),
 		);
 
-		try {
-			const startedAt = Date.now();
-			const result = captureStdout(process.execPath, [fakeWt], directory, outFile);
-			const elapsedMs = Date.now() - startedAt;
+		const startedAt = Date.now();
+		const result = captureStdout(process.execPath, [fakeWt], directory, outFile);
+		const elapsedMs = Date.now() - startedAt;
 
-			expect(result.stdout).toContain("/repo/wt/foo");
-			expect(elapsedMs).toBeLessThan(8000);
-		} finally {
-			try {
-				rmSync(directory, { force: true, recursive: true });
-			} catch {
-				// The detached child may still hold the temp file open on
-				// Windows.
-			}
-		}
+		expect(result.stdout).toContain("/repo/wt/foo");
+		expect(elapsedMs).toBeLessThan(8000);
 	}, 10000);
 
 	it("should surface a spawn error and empty stdout for a missing command", () => {
 		expect.assertions(2);
 
-		const directory = mkdtempSync(join(tmpdir(), "wt-create-spec-"));
+		const directory = makeTemporaryDirectory();
 		const outFile = join(directory, "stdout");
 
-		try {
-			const result = captureStdout(
-				"definitely-not-a-real-binary-xyz",
-				[],
-				directory,
-				outFile,
-			);
+		const result = captureStdout("definitely-not-a-real-binary-xyz", [], directory, outFile);
 
-			expect(result.error).toBeDefined();
-			expect(result.stdout).toBe("");
-		} finally {
-			rmSync(directory, { force: true, recursive: true });
-		}
+		expect(result.error).toBeDefined();
+		expect(result.stdout).toBe("");
 	});
 });
 
@@ -324,9 +345,7 @@ describe(createWorktree, () => {
 
 		const spawn = fakeSpawn({ status: 1, stdout: "" });
 
-		captureConsoleError(() => {
-			expect(createWorktree(spawn, "wt", "foo")).toBeUndefined();
-		});
+		expect(withSilencedConsoleError(() => createWorktree(spawn, "wt", "foo"))).toBeUndefined();
 	});
 
 	it("should treat undefined stdout (real spawnSync on ENOENT) as empty", () => {
@@ -334,9 +353,7 @@ describe(createWorktree, () => {
 
 		const spawn = fakeSpawn({ error: new Error("ENOENT"), status: null });
 
-		captureConsoleError(() => {
-			expect(createWorktree(spawn, "wt", "foo")).toBeUndefined();
-		});
+		expect(withSilencedConsoleError(() => createWorktree(spawn, "wt", "foo"))).toBeUndefined();
 	});
 
 	it("should return undefined when wt succeeds but stdout has no parseable path", () => {
@@ -344,9 +361,7 @@ describe(createWorktree, () => {
 
 		const spawn = fakeSpawn({ status: 0 });
 
-		captureConsoleError(() => {
-			expect(createWorktree(spawn, "wt", "foo")).toBeUndefined();
-		});
+		expect(withSilencedConsoleError(() => createWorktree(spawn, "wt", "foo"))).toBeUndefined();
 	});
 
 	it("should log a truncated stdout preview when the path is missing", () => {
