@@ -3,28 +3,11 @@ import { describe, expect, it } from "@rbxts/jest-globals";
 import { afterThis } from "@rbxts/jest-utils";
 import React, { useEffect, useLayoutEffect, useState } from "@rbxts/react";
 
-import { makeRenderCounter } from "#test/probes";
+import type { ExternalStore } from "#test/probes";
+import { createExternalStore, makeRenderCounter } from "#test/probes";
 import { useCachedSnapshot, useSyncExternalStore } from "./use-sync-external-store";
 
 _G.__DEV__ = true;
-
-/**
- * Minimal external store used to drive the shim, mirroring the
- * `createExternalStore` helper in React's own `useSyncExternalStore` tests: a
- * mutable cell plus a listener set fired synchronously on every write.
- *
- * @template T - The stored snapshot type.
- */
-interface ExternalStore<T extends defined> {
-	/** Reads the current snapshot. */
-	readonly getState: () => T;
-	/** Number of live listeners, for asserting subscribe/unsubscribe. */
-	readonly getSubscriberCount: () => number;
-	/** Writes a new snapshot and notifies every listener. */
-	readonly setState: (next: T) => void;
-	/** Registers a listener; returns a disconnect. */
-	readonly subscribe: (onStoreChange: () => void) => () => void;
-}
 
 /** A passive or layout effect hook, injected to pick the commit phase. */
 type CommitEffect = typeof useEffect;
@@ -33,34 +16,6 @@ type CommitEffect = typeof useEffect;
 interface CommitRaceProps {
 	/** `useEffect` or `useLayoutEffect`, deciding when the child writes. */
 	readonly useCommitEffect: CommitEffect;
-}
-
-/**
- * Builds an {@link ExternalStore} backed by a private closure.
- *
- * @template T - The stored snapshot type.
- * @param initial - The starting snapshot.
- * @returns A store whose `subscribe`/`getState` plug straight into the shim.
- */
-function createExternalStore<T extends defined>(initial: T): ExternalStore<T> {
-	const listeners = new Set<() => void>();
-	let state = initial;
-	return {
-		getState: () => state,
-		getSubscriberCount: () => listeners.size(),
-		setState: (updated: T) => {
-			state = updated;
-			for (const listener of listeners) {
-				listener();
-			}
-		},
-		subscribe: (onStoreChange: () => void) => {
-			listeners.add(onStoreChange);
-			return () => {
-				listeners.delete(onStoreChange);
-			};
-		},
-	};
 }
 
 /**

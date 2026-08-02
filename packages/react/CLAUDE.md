@@ -13,6 +13,8 @@ shared module that never touches a world or core at import time.
 - `flux-context.tsx` — internal `FluxContextValue` + `createUseFluxContext`.
 - `flux-provider.tsx` — `FluxProviderProps` + Provider factory.
 - `update-signal.ts` — subscribe/fire plumbing the wrapper drives.
+- `use-sync-external-store.tsx` — store shim react-lua 17 does not ship.
+- `batch-sync.ts` — re-entrant `flushSync` the signal and the shim share.
 - `hooks/` — one hook per file: `use-action`, `use-bindings`, `use-capture`
   (exports `useCapture` + `useCaptureAction`), `use-flux-core`,
   `use-input-context` (exports `useActiveContext` + `useInputContext`),
@@ -60,6 +62,22 @@ capture boundary and core records the cancel against that very viewer. A child
 handed the token never sees `enabled`, so swallowing it would leave a falling
 edge with no verb — the charge-fired-because-a-menu-opened failure. A changed
 action still swallows, because that cancel belongs to a different action.
+
+**`useSyncExternalStore` subscribes once per store, not once per consumer.**
+Don't "simplify" to a `subscribe` call per consumer: each would get its own
+flush, so every flush but the last commits a partial update. Sharing alone is
+not enough either — without the synchronous flush the tearing spec still fails.
+Rationale is on `registerStore`; locked by
+`src/use-sync-external-store.tearing.spec.tsx`, the only spec rendering on a
+concurrent root rather than through RTL's legacy one.
+
+**Batch through `batchSync`, never `flushSync` directly.** react-lua drains the
+sync queue in every `flushSync`'s finally block, including one nested inside
+another (`ReactFiberWorkLoop.new.lua:1471`). A second `flushSync` therefore
+commits whatever the listener set scheduled before it, splitting one `flush()`
+in two: shim consumers first at sync lane, `useAction`/`useCaptureAction` after
+at default lane. `batchSync` runs nested calls inline, so one `flush()` stays
+one commit. Locked by `src/flush-batching.spec.tsx`.
 
 **JSX intrinsics exclude `Name` and `Parent`.** `InstanceAttributes` in
 `@rbxts/react` omits them. Distinguish test probes by `Text` + `queryByText`,

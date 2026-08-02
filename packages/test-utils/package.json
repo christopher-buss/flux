@@ -27,6 +27,11 @@
 			"source": "./src/react-testing-library-lua/index.d.ts",
 			"import": "./out/react-testing-library-lua/init.luau",
 			"types": "./src/react-testing-library-lua/index.d.ts"
+		},
+		"./scheduler": {
+			"source": "./src/scheduler/index.d.ts",
+			"import": "./out/scheduler/init.luau",
+			"types": "./src/scheduler/index.d.ts"
 		}
 	},
 	"main": "./dist/init.luau",
@@ -43,6 +48,7 @@
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts-js/dom-testing-library-lua": "catalog:test",
 		"@rbxts-js/react-testing-library-lua": "catalog:test",
+		"@rbxts-js/scheduler": "catalog:test",
 		"@rbxts/compiler-types": "catalog:types",
 		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",

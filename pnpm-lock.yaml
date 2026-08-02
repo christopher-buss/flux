@@ -111,6 +111,9 @@ catalogs:
     '@rbxts-js/react-testing-library-lua':
       specifier: 12.3.4-ts.3
       version: 12.3.4-ts.3
+    '@rbxts-js/scheduler':
+      specifier: 17.3.7-ts.1
+      version: 17.3.7-ts.1
     '@rbxts/jest':
       specifier: 3.16.0-ts.1
       version: 3.16.0-ts.1
@@ -604,6 +607,9 @@ importers:
       '@rbxts-js/react-testing-library-lua':
         specifier: catalog:test
         version: 12.3.4-ts.3
+      '@rbxts-js/scheduler':
+        specifier: catalog:test
+        version: 17.3.7-ts.1
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
