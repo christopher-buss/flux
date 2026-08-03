@@ -29,8 +29,8 @@ catalogs:
       specifier: 6.0.0-beta.22
       version: 6.0.0-beta.22
     '@isentinel/hooks':
-      specifier: 1.5.3
-      version: 1.5.3
+      specifier: 1.6.0
+      version: 1.6.0
     '@vitest/eslint-plugin':
       specifier: 1.6.24
       version: 1.6.24
@@ -190,7 +190,7 @@ importers:
         version: 6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.24)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.2.2)(eslint-plugin-react-jsx@5.18.1)(eslint-plugin-react-naming-convention@5.18.1)(eslint-plugin-react-x@5.18.0)(eslint@10.8.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.76.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@isentinel/hooks':
         specifier: catalog:lint
-        version: 1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
+        version: 1.6.0(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
         version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
@@ -636,7 +636,7 @@ importers:
     devDependencies:
       '@isentinel/hooks':
         specifier: catalog:lint
-        version: 1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
+        version: 1.6.0(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@types/node':
         specifier: catalog:types
         version: 24.13.3
@@ -1371,8 +1371,8 @@ packages:
       oxlint-tsgolint:
         optional: true
 
-  '@isentinel/hooks@1.5.3':
-    resolution: {integrity: sha512-r8Ashi0ZyI8XSd5xhQwueio1nBITckeZ8UjBYtApDwfN0Y9aKKiJInQm2WM3w5sV3GpT1eu7cxpGQ9V6i1PmHw==}
+  '@isentinel/hooks@1.6.0':
+    resolution: {integrity: sha512-+N1INrc5wZz3ZstxRO9oNx0o24nQUvtnfffPP6Yf/4p57iON/8jtEDKecHnDRu/5rbZOMRPnWtIiaBqkS+OTQA==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       '@typescript/native-preview': '>=7'
@@ -6133,7 +6133,7 @@ snapshots:
       - typescript
       - vite-plus
 
-  '@isentinel/hooks@1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)':
+  '@isentinel/hooks@1.6.0(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       eslint_d: 15.0.3(jiti@2.7.0)
       file-entry-cache: 11.1.5
