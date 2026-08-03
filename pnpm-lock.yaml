@@ -62,8 +62,8 @@ catalogs:
       specifier: 5.18.0
       version: 5.18.0
     eslint_d:
-      specifier: 15.0.2
-      version: 15.0.2
+      specifier: 15.0.3
+      version: 15.0.3
     file-entry-cache:
       specifier: 11.1.5
       version: 11.1.5
@@ -244,7 +244,7 @@ importers:
         version: 5.18.0(eslint@10.8.0)(supports-color@10.2.2)(typescript@6.0.3)
       eslint_d:
         specifier: catalog:lint
-        version: 15.0.2(jiti@2.7.0)
+        version: 15.0.3(jiti@2.7.0)
       file-entry-cache:
         specifier: catalog:lint
         version: 11.1.5
@@ -3678,8 +3678,8 @@ packages:
       jiti:
         optional: true
 
-  eslint_d@15.0.2:
-    resolution: {integrity: sha512-08qxnTNAHi6gaOJdixu/5gliLFRQzTAeX/aXxcFK78FPK9RQuCNnvwq2tDzlSmXc/dkK/Q2n3P4nvPhvTQJa2Q==}
+  eslint_d@15.0.3:
+    resolution: {integrity: sha512-bCS3HTNhIZLTaOXmJ7Xp63itEfwGWjmHfZh5CtvCZ2Re4UVOSwSZTdvOiqMQ7ceXDGJDgty3HlL3fCfFH/Rl6g==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -6135,7 +6135,7 @@ snapshots:
 
   '@isentinel/hooks@1.5.3(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
-      eslint_d: 15.0.2(jiti@2.7.0)
+      eslint_d: 15.0.3(jiti@2.7.0)
       file-entry-cache: 11.1.5
       get-tsconfig: 4.14.0
       madge: 8.0.0(supports-color@10.2.2)(typescript@6.0.3)
@@ -8537,7 +8537,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint_d@15.0.2(jiti@2.7.0):
+  eslint_d@15.0.3(jiti@2.7.0):
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       eslint: 10.8.0(jiti@2.7.0)(supports-color@10.2.2)
