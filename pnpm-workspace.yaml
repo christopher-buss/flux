@@ -55,7 +55,7 @@ catalogs:
     std-env: 4.2.0
   lint:
     "@eslint/config-inspector": 3.2.0
-    "@isentinel/eslint-config": 6.0.0-beta.22
+    "@isentinel/eslint-config": 6.0.0-beta.38
     "@isentinel/hooks": 1.6.0
     "@vitest/eslint-plugin": 1.6.26
     eslint: 10.8.0
