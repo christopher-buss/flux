@@ -119,9 +119,9 @@ export function createExternalStore<T extends defined>(initial: T): ExternalStor
 
 /**
  * - Mounts `element` on a concurrent root and unmounts it when the test ends.
- * - RTL's `render` builds a legacy root, which flushes every update
- *   synchronously and so hides anything lane-dependent. Tests about lanes need
- *   this instead.
+ * - RTL renders on a concurrent root too, but wraps every render in `act`,
+ *   which drains the work loop before returning. A test that has to stop the
+ *   loop part-way needs a root it can render on outside `act`.
  *
  * @param element - The tree to mount.
  * @returns A handle for re-rendering the same root.

@@ -138,12 +138,17 @@ it by cloning the repo.
 The core has no framework dependencies. Integration packages like flux-jecs
 connect it to whatever you're using.
 
+flux-react requires a concurrent root — mount with `ReactRoblox.createRoot`, not
+`createLegacyRoot`.
+
 ## Documentation
 
 Docs are in progress. These cover the current design:
 
 - [Core API Proposal](docs/core-api-proposal.md) — API design and usage patterns
 - [PRD](docs/PRD-flux-core.md) — Requirements and user stories
+- [ADR 0007](docs/adr/0007-native-store-hook-on-a-concurrent-root.md) — why
+  flux-react needs a concurrent root
 
 ## Contributing
 

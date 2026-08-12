@@ -41,6 +41,7 @@ patchedDependencies:
   "@rbxts-js/expect@3.16.0-ts.1": patches/@rbxts-js__expect@3.16.0-ts.1.patch
   "@rbxts-js/jest-mock@3.16.0-ts.1": patches/@rbxts-js__jest-mock@3.16.0-ts.1.patch
   "@rbxts-js/jest-runner@3.16.0-ts.1": patches/@rbxts-js__jest-runner@3.16.0-ts.1.patch
+  "@rbxts-js/react-testing-library-lua@12.3.4-ts.3": patches/@rbxts-js__react-testing-library-lua@12.3.4-ts.3.patch
   "@rbxts/compiler-types": patches/@rbxts__compiler-types@3.0.0-types.0.patch
   "@rbxts/jest-globals@3.16.0-ts.1": patches/@rbxts__jest-globals@3.16.0-ts.1.patch
   eslint-plugin-jest@29.15.5: patches/eslint-plugin-jest@29.15.5.patch

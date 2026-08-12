@@ -6,9 +6,10 @@
 // therefore hands back the very module instance the reconciler schedules
 // against. Every function here throws outside that mocked environment.
 //
-// Only the yield-log helpers are declared — what a test needs to interrupt a
-// concurrent render partway through and inspect what rendered before the work
-// loop bailed. Add the rest when something wants them.
+// Only the yield-log helpers and enough of the scheduling surface to queue one
+// callback are declared — what a test needs to interrupt a concurrent render
+// partway through, inspect what rendered before the work loop bailed, and check
+// that scheduled work was drained. Add the rest when something wants them.
 
 /**
  * Records a value in the yield log from inside a render body.
@@ -45,3 +46,24 @@ export declare function unstable_flushNumberOfYields(count: number): void;
  * @returns Everything recorded since the last drain, in order.
  */
 export declare function unstable_clearYields(): Array<unknown>;
+
+/** The priority ordinary work is scheduled at. */
+export declare const unstable_NormalPriority: number;
+
+/**
+ * Queues `callback` on the scheduler the reconciler shares, so a test can ask
+ * whether something drained the queue.
+ *
+ * @param priorityLevel - One of the scheduler's priority ordinals.
+ * @param callback - Runs when the queue is drained.
+ * @example
+ * ```tsx
+ * unstable_scheduleCallback(unstable_NormalPriority, () => {
+ * 	setStatus("drained");
+ * });
+ * ```
+ */
+export declare function unstable_scheduleCallback(
+	priorityLevel: number,
+	callback: () => void,
+): void;

@@ -13,7 +13,8 @@ shared module that never touches a world or core at import time.
 - `flux-context.tsx` — internal `FluxContextValue` + `createUseFluxContext`.
 - `flux-provider.tsx` — `FluxProviderProps` + Provider factory.
 - `update-signal.ts` — subscribe/fire plumbing the wrapper drives.
-- `use-sync-external-store.tsx` — store shim react-lua 17 does not ship.
+- `use-sync-external-store.tsx` — React's store hook when the running react-lua
+  has one, else the ported shim. `selectStoreHook` picks, once, at module load.
 - `batch-sync.ts` — re-entrant `flushSync` the signal and the shim share.
 - `hooks/` — one hook per file: `use-action`, `use-bindings`, `use-capture`
   (exports `useCapture` + `useCaptureAction`), `use-flux-core`,
@@ -63,13 +64,21 @@ handed the token never sees `enabled`, so swallowing it would leave a falling
 edge with no verb — the charge-fired-because-a-menu-opened failure. A changed
 action still swallows, because that cancel belongs to a different action.
 
-**`useSyncExternalStore` subscribes once per store, not once per consumer.**
-Don't "simplify" to a `subscribe` call per consumer: each would get its own
-flush, so every flush but the last commits a partial update. Sharing alone is
-not enough either — without the synchronous flush the tearing spec still fails.
-Rationale is on `registerStore`; locked by
-`src/use-sync-external-store.tearing.spec.tsx`, the only spec rendering on a
-concurrent root rather than through RTL's legacy one.
+**Flux requires a concurrent root**, in production and in specs.
+`ReactRoblox.createRoot`, never `createLegacyRoot`. The RTL patch under
+`patches/` buys the same for specs — `createRoot` plus renderer-owned `act`,
+which the root switch does not work without. Locked by
+`src/react-testing-library-root.spec.tsx`, the one spec that fails if either
+hunk is dropped; everything else passes on both root types. Reasoning in
+`docs/adr/0007-native-store-hook-on-a-concurrent-root.md`.
+
+**The shim subscribes once per store, not once per consumer, and the concurrent
+root does not make that redundant.** Don't "simplify" to a `subscribe` call per
+consumer: each would get its own flush, so every flush but the last commits a
+partial update. Rationale is on `registerStore` and in ADR 0007; locked by
+`src/use-sync-external-store.tearing.spec.tsx`, which names the shim rather than
+the selected hook and mounts through `mountConcurrent` because it renders
+outside `act` on purpose.
 
 **Batch through `batchSync`, never `flushSync` directly.** react-lua drains the
 sync queue in every `flushSync`'s finally block, including one nested inside
