@@ -10,6 +10,21 @@
 			},
 			"rbxts_include": {
 				"$path": "include",
+				"native_store_hook": {
+					"$className": "Folder",
+					"node_modules": {
+						"$className": "Folder",
+						"@rbxts": {
+							"$path": "../../node_modules/@rbxts-native.project.json",
+							"flux-react": {
+								"$path": "out"
+							}
+						},
+						"@rbxts-js": {
+							"$path": "../../node_modules/@rbxts-js-native.project.json"
+						}
+					}
+				},
 				"node_modules": {
 					"$className": "Folder",
 					"@flux": {

@@ -1,0 +1,16 @@
+diff --git a/src/ReactSharedInternals/ReactCurrentDispatcher.lua b/src/ReactSharedInternals/ReactCurrentDispatcher.lua
+index 1ca4bdcf..9dce5350 100644
+--- a/src/ReactSharedInternals/ReactCurrentDispatcher.lua
++++ b/src/ReactSharedInternals/ReactCurrentDispatcher.lua
+@@ -85,6 +85,11 @@ export type Dispatcher = {
+ 		getSnapshot: MutableSourceGetSnapshotFn<Source, Snapshot>,
+ 		subscribe: MutableSourceSubscribeFn<Source, Snapshot>
+ 	) -> Snapshot,
++	useSyncExternalStore: <T>(
++		subscribe: (() -> ()) -> () -> (),
++		getSnapshot: () -> T,
++		getServerSnapshot: (() -> T)?
++	) -> T,
+ 	useOpaqueIdentifier: () -> any,
+ 
+ 	unstable_isNewReconciler: boolean?,

@@ -29,6 +29,9 @@
 		"#test/fixtures": {
 			"source": "./test/fixtures.ts"
 		},
+		"#test/native-stack": {
+			"source": "./test/native-stack/index.d.ts"
+		},
 		"#test/probes": {
 			"source": "./test/probes.tsx"
 		}

@@ -80,6 +80,32 @@ partial update. Rationale is on `registerStore` and in ADR 0007; locked by
 the selected hook and mounts through `mountConcurrent` because it renders
 outside `act` on purpose.
 
+**Both store-hook paths run in one pass, from one place.** The install is stock,
+so `selectStoreHook` answers with the shim exactly as it does for a consumer. A
+second, patched react-lua is mounted beside it at
+`rbxts_include.native_store_hook` — built at postinstall by
+`scripts/generate-native-store-hook.ts` from the `patches/@rbxts-js__*` files —
+and reached through `#test/native-stack`. `src/native-store-hook.spec.tsx` is
+the only spec that uses it. See
+`docs/adr/0007-native-store-hook-on-a-concurrent-root.md`.
+
+**Native-leg specs build elements with `NativeStack.React.createElement`, not
+JSX,** and render through `NativeStack.ReactRoblox`. A component mixing the two
+stacks throws: `ReactCurrentDispatcher` lives in each stack's own `shared` copy,
+so stock `useState` inside a natively-rendered tree finds no dispatcher.
+
+**Anything mounted twice must be two directories on disk.** roblox-ts maps a
+source path back to a single instance path, so mounting one package directory at
+two places in `test.project.json` makes that specifier ambiguous and specs start
+compiling against whichever mount wins — silently. The generator copies the
+`@rbxts` wrappers for that reason rather than pointing at the store again.
+
+**A store change is only synchronous on the shim path.** React's own hook
+schedules sync-lane work and lets the reconciler drain it once the stack
+unwinds; the shim commits inside its own `batchSync`. Locked by the
+`should defer a store change` case in `src/native-store-hook.spec.tsx`. Not a
+Flux bug — it is React 18's own timing, and neither path shows a torn tree.
+
 **Batch through `batchSync`, never `flushSync` directly.** react-lua drains the
 sync queue in every `flushSync`'s finally block, including one nested inside
 another (`ReactFiberWorkLoop.new.lua:1471`). A second `flushSync` therefore
