@@ -32,8 +32,8 @@ catalogs:
       specifier: 1.6.0
       version: 1.6.0
     '@vitest/eslint-plugin':
-      specifier: 1.6.26
-      version: 1.6.26
+      specifier: 1.6.27
+      version: 1.6.27
     eslint:
       specifier: 10.8.1
       version: 10.8.1
@@ -188,7 +188,7 @@ importers:
         version: 3.2.0(eslint@10.8.1)(srvx@0.12.5)
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.26)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)
+        version: 6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.27)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@isentinel/hooks':
         specifier: catalog:lint
         version: 1.6.0(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
@@ -212,7 +212,7 @@ importers:
         version: 7.0.0-dev.20260707.2
       '@vitest/eslint-plugin':
         specifier: catalog:lint
-        version: 1.6.26(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.10)
+        version: 1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.10)
       better-typescript-lib:
         specifier: catalog:tsc
         version: 2.12.0(typescript@6.0.3)
@@ -2861,8 +2861,8 @@ packages:
       '@vitest/browser':
         optional: true
 
-  '@vitest/eslint-plugin@1.6.26':
-    resolution: {integrity: sha512-2eawZk4MZvkEtMZFdScmCE0R1Rti85uRZpmbe9eAv5Q3blDZ5OxlrC9IHlSnxhDCqOO2xKNaD3oufl9BUlI0yA==}
+  '@vitest/eslint-plugin@1.6.27':
+    resolution: {integrity: sha512-X1RCAfwbatG4GFbJ/1PIHP9MSZMt0JJThqbYID+vS4L783k6QGlLPe421wQE8dHXuGCcenVLsydiM4qzsYWxhg==}
     engines: {node: '>=18'}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': '*'
@@ -5982,7 +5982,7 @@ snapshots:
 
   '@isentinel/dict-roblox@1.0.11': {}
 
-  '@isentinel/eslint-config@6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.26)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)':
+  '@isentinel/eslint-config@6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.27)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@antfu/install-pkg': 2.0.1
       '@clack/prompts': 1.7.0
@@ -6039,7 +6039,7 @@ snapshots:
       yaml-eslint-parser: 2.1.0
       yargs: 18.0.0
     optionalDependencies:
-      '@vitest/eslint-plugin': 1.6.26(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.10)
+      '@vitest/eslint-plugin': 1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.10)
       eslint-plugin-jest: 29.15.5(patch_hash=8469da233ba2db97c9b0224be8b3ece95e63e8f96417ffba6c1f2c03bd2f0eec)(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-jest-extended: 3.0.1(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-n: 18.3.0(eslint@10.8.1)(typescript@6.0.3)
@@ -7542,10 +7542,10 @@ snapshots:
       tinyrainbow: 3.1.0
       vitest: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(vite@8.1.5)
 
-  '@vitest/eslint-plugin@1.6.26(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.10)':
+  '@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.10)':
     dependencies:
-      '@typescript-eslint/scope-manager': 8.65.0
-      '@typescript-eslint/utils': 8.65.0(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
+      '@typescript-eslint/scope-manager': 8.66.0
+      '@typescript-eslint/utils': 8.66.0(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint: 10.8.1(jiti@2.7.0)(supports-color@10.2.2)
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.65.0(@typescript-eslint/parser@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
@@ -8155,7 +8155,7 @@ snapshots:
 
   eslint-plugin-comment-length@2.3.1(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3):
     dependencies:
-      '@typescript-eslint/utils': 8.65.0(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
+      '@typescript-eslint/utils': 8.66.0(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint: 10.8.1(jiti@2.7.0)(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
@@ -8299,7 +8299,7 @@ snapshots:
 
   eslint-plugin-perfectionist@5.10.0(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3):
     dependencies:
-      '@typescript-eslint/utils': 8.65.0(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
+      '@typescript-eslint/utils': 8.66.0(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint: 10.8.1(jiti@2.7.0)(supports-color@10.2.2)
       natural-orderby: 5.0.0
     transitivePeerDependencies:
