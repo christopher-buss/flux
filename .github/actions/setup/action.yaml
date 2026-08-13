@@ -25,5 +25,7 @@ runs:
       shell: bash
 
     - name: Generate Rojo node_modules projects
-      run: node scripts/generate-rojo-node-modules.ts
+      run: |
+        node scripts/generate-rojo-node-modules.ts
+        node scripts/generate-native-store-hook.ts
       shell: bash
