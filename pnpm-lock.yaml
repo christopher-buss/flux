@@ -44,8 +44,8 @@ catalogs:
       specifier: 3.0.1
       version: 3.0.1
     eslint-plugin-n:
-      specifier: 18.2.2
-      version: 18.2.2
+      specifier: 18.3.0
+      version: 18.3.0
     eslint-plugin-pnpm:
       specifier: 1.7.0
       version: 1.7.0
@@ -160,7 +160,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.942
+      version: 1.0.943
     '@types/node':
       specifier: 24.13.3
       version: 24.13.3
@@ -187,7 +187,7 @@ importers:
         version: 3.2.0(eslint@10.8.1)(srvx@0.12.5)
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.26)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.2.2)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)
+        version: 6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.26)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@isentinel/hooks':
         specifier: catalog:lint
         version: 1.6.0(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
@@ -226,7 +226,7 @@ importers:
         version: 3.0.1(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-n:
         specifier: catalog:lint
-        version: 18.2.2(eslint@10.8.1)(typescript@6.0.3)
+        version: 18.3.0(eslint@10.8.1)(typescript@6.0.3)
       eslint-plugin-pnpm:
         specifier: catalog:lint
         version: 1.7.0(eslint@10.8.1)
@@ -302,7 +302,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -339,7 +339,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -379,7 +379,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -410,7 +410,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -459,7 +459,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -513,7 +513,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -576,7 +576,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -624,7 +624,7 @@ importers:
         version: 0.1.3(@rbxts/jest-globals@3.16.0-ts.1)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       rimraf:
         specifier: catalog:node
         version: 6.1.3
@@ -1283,12 +1283,12 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@isentinel/dict-rbxts@1.0.17':
-    resolution: {integrity: sha512-qIqhILOwiMfDT42H1Do07DsXipUKzVI2AdPznMxPJohtySdQmFIzXrApTj6zSgXv9IQGYS5WB0bprBqtapjj/Q==}
+  '@isentinel/dict-rbxts@1.0.18':
+    resolution: {integrity: sha512-a48j+zwvpQ0xuB6EVhbhfP4Fk8+Fy+I9PhOg+Sh5IpWH61Nl2j9Lznkn4gLHSSDwFoYOTMzloPGhfeqIKdYzfw==}
     engines: {node: '>=22'}
 
-  '@isentinel/dict-roblox@1.0.10':
-    resolution: {integrity: sha512-We84lknBpnMVtR4S5MDc8f06RXcNosPZGLha9oTHOc1aCEmtFxTf5dhrT2j+loBGQAgxnn9JioM/8+P2stWMNg==}
+  '@isentinel/dict-roblox@1.0.11':
+    resolution: {integrity: sha512-FZlMG5EiSdZqkYRrRLkTAn98ELUlBI0F07LlBa8ViI5tviy4AObP/WApixTqdXXoZalPEDLOedlrz51E3sBSnw==}
     engines: {node: '>=20.18.0'}
 
   '@isentinel/eslint-config@6.0.0-beta.22':
@@ -2415,8 +2415,8 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.942':
-    resolution: {integrity: sha512-Jrry6cRbFHMPRsgmOVGePfqkRfXWmLxO3whUeXUJQpilmAY7yJv4iIBIqfxWC4dHx1O65/JJyLonk6gZjc6+OA==}
+  '@rbxts/types@1.0.943':
+    resolution: {integrity: sha512-RvTlBEbdp8cTy3YyRJhKcmH31bMG96rg4tksNHs3BWrgbNohH9yacsj9+5/7lnxZAL2usJdeDEt5oLneVrKjqg==}
 
   '@roblox-ts/luau-ast@2.0.1':
     resolution: {integrity: sha512-jej2mzRGwhR9wu4woAtgTwqsKADlegZYlQ+M5qVHRojvjoyJVFkLrSbhBKRr8HR+fVW5nCz0qX7kNa0tSpAY+A==}
@@ -3528,8 +3528,8 @@ packages:
     peerDependencies:
       eslint: '>=9.38.0'
 
-  eslint-plugin-n@18.2.2:
-    resolution: {integrity: sha512-gOO0lIqwEjZ750kv9/SptCWArUoAZXJoBr0vYWTO2dCBxctHUXlBIigiC8xuxxr/NKqgIT6Ehz1xRcilj8a5cA==}
+  eslint-plugin-n@18.3.0:
+    resolution: {integrity: sha512-cPVguuDe6DrIPb/qUXHf8P89MaVTUmiYWwpt5gX5AILsvRIiZAxMFXcFR6QHYBksqKJpjfUBlL/RleCJUWcD7w==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
     peerDependencies:
       eslint: '>=8.57.1'
@@ -5977,11 +5977,11 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@isentinel/dict-rbxts@1.0.17': {}
+  '@isentinel/dict-rbxts@1.0.18': {}
 
-  '@isentinel/dict-roblox@1.0.10': {}
+  '@isentinel/dict-roblox@1.0.11': {}
 
-  '@isentinel/eslint-config@6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.26)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.2.2)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)':
+  '@isentinel/eslint-config@6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.26)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@antfu/install-pkg': 2.0.1
       '@clack/prompts': 1.7.0
@@ -5989,8 +5989,8 @@ snapshots:
       '@e18e/eslint-plugin': 0.5.1(eslint@10.8.1)(oxlint@1.77.0)
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.8.1)
       '@eslint/markdown': 8.0.3(supports-color@10.2.2)
-      '@isentinel/dict-rbxts': 1.0.17
-      '@isentinel/dict-roblox': 1.0.10
+      '@isentinel/dict-rbxts': 1.0.18
+      '@isentinel/dict-roblox': 1.0.11
       '@oxlint/plugins': 1.74.0
       '@pobammer-ts/small-rules': 2.7.0(typescript@6.0.3)
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.8.1)
@@ -6041,7 +6041,7 @@ snapshots:
       '@vitest/eslint-plugin': 1.6.26(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.10)
       eslint-plugin-jest: 29.15.5(patch_hash=8469da233ba2db97c9b0224be8b3ece95e63e8f96417ffba6c1f2c03bd2f0eec)(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-jest-extended: 3.0.1(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
-      eslint-plugin-n: 18.2.2(eslint@10.8.1)(typescript@6.0.3)
+      eslint-plugin-n: 18.3.0(eslint@10.8.1)(typescript@6.0.3)
       eslint-plugin-react-jsx: 5.18.3(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-react-naming-convention: 5.18.3(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-react-x: 5.18.3(eslint@10.8.1)(supports-color@10.2.2)(typescript@6.0.3)
@@ -7053,7 +7053,7 @@ snapshots:
 
   '@rbxts/services@1.6.0': {}
 
-  '@rbxts/types@1.0.942': {}
+  '@rbxts/types@1.0.943': {}
 
   '@roblox-ts/luau-ast@2.0.1': {}
 
@@ -8255,7 +8255,7 @@ snapshots:
     transitivePeerDependencies:
       - '@eslint/json'
 
-  eslint-plugin-n@18.2.2(eslint@10.8.1)(typescript@6.0.3):
+  eslint-plugin-n@18.3.0(eslint@10.8.1)(typescript@6.0.3):
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.8.1)
       enhanced-resolve: 5.24.3
