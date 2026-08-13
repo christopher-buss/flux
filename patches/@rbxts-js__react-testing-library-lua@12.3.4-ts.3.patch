@@ -1,0 +1,16 @@
+diff --git a/src/act-compat.lua b/src/act-compat.lua
+index 89cf0a2e7fb0160a2535d1d1f36010cd7878e880..6f60baf196a8aa9f51982e092745ad99b2851ef8 100644
+--- a/src/act-compat.lua
++++ b/src/act-compat.lua
+@@ -14,2 +14,2 @@
+-local testUtils = require(script.Parent.jsHelpers["react-dom"]["test-utils"])
+-local reactAct = testUtils.act
++local ReactRoblox = require(Packages.ReactRoblox)
++local reactAct = ReactRoblox.act
+diff --git a/src/pure.lua b/src/pure.lua
+index 667603a2a8df55d3d4ca6ee64baad5b6c2a69636..b4e920db22672cbf5f03377c7f7dec8872a6afa3 100644
+--- a/src/pure.lua
++++ b/src/pure.lua
+@@ -80 +80 @@
+-		root = ReactRoblox.createLegacyRoot(container)
++		root = ReactRoblox.createRoot(container)

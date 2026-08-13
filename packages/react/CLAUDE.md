@@ -13,7 +13,8 @@ shared module that never touches a world or core at import time.
 - `flux-context.tsx` — internal `FluxContextValue` + `createUseFluxContext`.
 - `flux-provider.tsx` — `FluxProviderProps` + Provider factory.
 - `update-signal.ts` — subscribe/fire plumbing the wrapper drives.
-- `use-sync-external-store.tsx` — store shim react-lua 17 does not ship.
+- `use-sync-external-store.tsx` — React's store hook when the running react-lua
+  has one, else the ported shim. `selectStoreHook` picks, once, at module load.
 - `batch-sync.ts` — re-entrant `flushSync` the signal and the shim share.
 - `hooks/` — one hook per file: `use-action`, `use-bindings`, `use-capture`
   (exports `useCapture` + `useCaptureAction`), `use-flux-core`,
@@ -63,13 +64,47 @@ handed the token never sees `enabled`, so swallowing it would leave a falling
 edge with no verb — the charge-fired-because-a-menu-opened failure. A changed
 action still swallows, because that cancel belongs to a different action.
 
-**`useSyncExternalStore` subscribes once per store, not once per consumer.**
-Don't "simplify" to a `subscribe` call per consumer: each would get its own
-flush, so every flush but the last commits a partial update. Sharing alone is
-not enough either — without the synchronous flush the tearing spec still fails.
-Rationale is on `registerStore`; locked by
-`src/use-sync-external-store.tearing.spec.tsx`, the only spec rendering on a
-concurrent root rather than through RTL's legacy one.
+**Flux requires a concurrent root**, in production and in specs.
+`ReactRoblox.createRoot`, never `createLegacyRoot`. The RTL patch under
+`patches/` buys the same for specs — `createRoot` plus renderer-owned `act`,
+which the root switch does not work without. Locked by
+`src/react-testing-library-root.spec.tsx`, the one spec that fails if either
+hunk is dropped; everything else passes on both root types. Reasoning in
+`docs/adr/0007-native-store-hook-on-a-concurrent-root.md`.
+
+**The shim subscribes once per store, not once per consumer, and the concurrent
+root does not make that redundant.** Don't "simplify" to a `subscribe` call per
+consumer: each would get its own flush, so every flush but the last commits a
+partial update. Rationale is on `registerStore` and in ADR 0007; locked by
+`src/use-sync-external-store.tearing.spec.tsx`, which names the shim rather than
+the selected hook and mounts through `mountConcurrent` because it renders
+outside `act` on purpose.
+
+**Both store-hook paths run in one pass, from one place.** The install is stock,
+so `selectStoreHook` answers with the shim exactly as it does for a consumer. A
+second, patched react-lua is mounted beside it at
+`rbxts_include.native_store_hook` — built at postinstall by
+`scripts/generate-native-store-hook.ts` from the `patches/@rbxts-js__*` files —
+and reached through `#test/native-stack`. `src/native-store-hook.spec.tsx` is
+the only spec that uses it. See
+`docs/adr/0007-native-store-hook-on-a-concurrent-root.md`.
+
+**Native-leg specs build elements with `NativeStack.React.createElement`, not
+JSX,** and render through `NativeStack.ReactRoblox`. A component mixing the two
+stacks throws: `ReactCurrentDispatcher` lives in each stack's own `shared` copy,
+so stock `useState` inside a natively-rendered tree finds no dispatcher.
+
+**Anything mounted twice must be two directories on disk.** roblox-ts maps a
+source path back to a single instance path, so mounting one package directory at
+two places in `test.project.json` makes that specifier ambiguous and specs start
+compiling against whichever mount wins — silently. The generator copies the
+`@rbxts` wrappers for that reason rather than pointing at the store again.
+
+**A store change is only synchronous on the shim path.** React's own hook
+schedules sync-lane work and lets the reconciler drain it once the stack
+unwinds; the shim commits inside its own `batchSync`. Locked by the
+`should defer a store change` case in `src/native-store-hook.spec.tsx`. Not a
+Flux bug — it is React 18's own timing, and neither path shows a torn tree.
 
 **Batch through `batchSync`, never `flushSync` directly.** react-lua drains the
 sync queue in every `flushSync`'s finally block, including one nested inside

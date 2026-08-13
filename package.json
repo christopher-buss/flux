@@ -15,7 +15,7 @@
 		"clean": "turbo run clean && rimraf .jest-roblox/",
 		"dev:build": "rbxtsc --build tsconfig.build.json --type=game",
 		"eslint-config": "npx @eslint/config-inspector",
-		"postinstall": "node scripts/generate-rojo-node-modules.ts",
+		"postinstall": "node scripts/generate-rojo-node-modules.ts && node scripts/generate-native-store-hook.ts",
 		"lint": "pnpm exec isentinel-lint",
 		"test": "FORCE_COLOR=1 turbo run test:run",
 		"test:all": "FORCE_COLOR=1 turbo run test:run:all",

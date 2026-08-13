@@ -1,4 +1,4 @@
-import {
+import React, {
 	useDebugValue,
 	useEffect,
 	useLayoutEffect,
@@ -9,8 +9,22 @@ import {
 
 import { batchSync } from "./batch-sync";
 
+/** Subscribes to an external store and returns its current snapshot. */
+export type StoreHook = <T>(subscribe: Subscribe, getSnapshot: () => T) => T;
+
 /** Registers a store-change listener; returns a disconnect. */
 type Subscribe = (onStoreChange: () => void) => () => void;
+
+/** The React module, which may or may not carry the hook itself. */
+interface MaybeStoreReact {
+	/**
+	 * A hook every react-lua has. Present so this is not a type of purely
+	 * optional members, which nothing would fail to satisfy.
+	 */
+	readonly useState: typeof useState;
+	/** Present only on a React whose reconciler backports React 18's hook. */
+	readonly useSyncExternalStore?: StoreHook;
+}
 
 /**
  * Mutable cell the shim threads between render, the layout effect and the
@@ -46,26 +60,21 @@ interface SnapshotCache<T> {
 }
 
 /**
- * - Subscribes to an external store and returns its current snapshot.
- * - Ports React's `useSyncExternalStore` shim, which react-lua 17.3.7 does not
- *   ship: the built-in hook only exists in versions that also have concurrent
- *   rendering.
+ * - Ports React's `useSyncExternalStore` shim, for a react-lua that does not
+ *   ship the hook itself.
+ * - Not a call site: reach it through {@link useSyncExternalStore}, which is
+ *   this or React's own hook depending on the react-lua in play.
  *
- * `getSnapshot` must be reference-cached — two calls with an unchanged store
- * have to return the same value, or every render reports a change and the
- * component loops. Readers that build a fresh array or object per call need
- * {@link useCachedSnapshot} in front.
- *
- * `subscribe` must be referentially stable per store: it is the key consumers
- * are grouped under, so an inline arrow gives every consumer its own group and
- * silently drops the guarantee below.
+ * `subscribe` is the key consumers are grouped under here, so an inline arrow
+ * gives every consumer its own group and silently drops the guarantee below.
  *
  * @template T - The snapshot type.
  * @param subscribe - Registers a store-change listener; returns a disconnect.
  *   One stable reference per store.
  * @param getSnapshot - Reads the store's current snapshot.
  * @returns The current snapshot.
- * @throws In dev only, if `getSnapshot` returns a fresh value per call.
+ * @throws In dev only, if `getSnapshot` returns a fresh value per call. React's
+ *   own hook only warns.
  * @remarks
  * Safe under a concurrent root for a mounted consumer, because a store change
  * renders synchronously and React discards whatever pass was in flight. It is
@@ -73,14 +82,10 @@ interface SnapshotCache<T> {
  * that consumer has no earlier snapshot to hold on to, so it commits the new
  * one beside siblings still showing the old, until the layout effect below
  * heals it on the next commit. Closing that window needs the pre-commit
- * consistency check React 18 keeps in the reconciler, which react-lua has no
- * equivalent of.
- * @example
- * ```tsx
- * const platform = useSyncExternalStore(onInputPlatformChanged, getInputPlatform);
- * ```
+ * consistency check React 18 keeps in the reconciler, which a react-lua without
+ * the hook has no equivalent of.
  */
-export function useSyncExternalStore<T>(subscribe: Subscribe, getSnapshot: () => T): T {
+export function useSyncExternalStoreShim<T>(subscribe: Subscribe, getSnapshot: () => T): T {
 	// Read on every render rather than from state, so a re-render for any other
 	// reason still picks the store up. Holds because a store change forces a
 	// synchronous render that no other pass can interleave with.
@@ -138,6 +143,50 @@ export function useSyncExternalStore<T>(subscribe: Subscribe, getSnapshot: () =>
 
 	return value;
 }
+
+/**
+ * Reads the store hook off a React module, falling back to the shim.
+ *
+ * Exported for its own spec: Flux resolves this once at module load, so from a
+ * rendered component neither branch is reachable.
+ *
+ * @param react - The React module to read the hook off.
+ * @returns The store hook every Flux consumer reads through.
+ */
+export function selectStoreHook(react: MaybeStoreReact): StoreHook {
+	return react.useSyncExternalStore ?? useSyncExternalStoreShim;
+}
+
+/**
+ * - Subscribes to an external store and returns its current snapshot.
+ * - React's own hook when the running react-lua has it, else
+ *   {@link useSyncExternalStoreShim}.
+ *
+ * `getSnapshot` must be reference-cached — two calls with an unchanged store
+ * have to return the same value, or every render reports a change and the
+ * component loops. Readers that build a fresh array or object per call need
+ * {@link useCachedSnapshot} in front.
+ *
+ * `subscribe` must be referentially stable per store. On the shim path it is
+ * the key consumers are grouped under; on React's it only decides when a
+ * consumer resubscribes.
+ *
+ * Flux mounts on `ReactRoblox.createRoot` and nothing else, because React's
+ * hook takes `subscribe` straight through and a listener loop is only atomic on
+ * a concurrent fiber. See
+ * `docs/adr/0007-native-store-hook-on-a-concurrent-root.md`.
+ *
+ * @template T - The snapshot type.
+ * @param subscribe - Registers a store-change listener; returns a disconnect.
+ *   One stable reference per store.
+ * @param getSnapshot - Reads the store's current snapshot.
+ * @returns The current snapshot.
+ * @example
+ * ```tsx
+ * const platform = useSyncExternalStore(onInputPlatformChanged, getInputPlatform);
+ * ```
+ */
+export const useSyncExternalStore: StoreHook = selectStoreHook(React);
 
 /**
  * - Wraps a reader that builds a fresh value per call in an identity cache.

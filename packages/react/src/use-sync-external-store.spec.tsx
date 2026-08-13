@@ -5,7 +5,13 @@ import React, { useEffect, useLayoutEffect, useState } from "@rbxts/react";
 
 import type { ExternalStore } from "#test/probes";
 import { createExternalStore, makeRenderCounter } from "#test/probes";
-import { useCachedSnapshot, useSyncExternalStore } from "./use-sync-external-store";
+import type { StoreHook } from "./use-sync-external-store";
+import {
+	selectStoreHook,
+	useCachedSnapshot,
+	useSyncExternalStore,
+	useSyncExternalStoreShim,
+} from "./use-sync-external-store";
 
 _G.__DEV__ = true;
 
@@ -118,7 +124,9 @@ describe("useSyncExternalStore", () => {
 		const storeA = createExternalStore("a");
 		const storeB = createExternalStore("b");
 		function Probe({ store }: { readonly store: ExternalStore<string> }): React.ReactNode {
-			const value = useSyncExternalStore(store.subscribe, store.getState);
+			// The shim by name: the counts below are its shared registration,
+			// which React's own hook keeps per consumer instead.
+			const value = useSyncExternalStoreShim(store.subscribe, store.getState);
 			return <textlabel Text={`value:${value}`} />;
 		}
 
@@ -194,13 +202,31 @@ describe("useSyncExternalStore", () => {
 		function Probe(): React.ReactNode {
 			// A fresh table per call is never `===` to the last, so the shim's
 			// dev guard fires rather than letting the component loop forever.
-			const value = useSyncExternalStore(store.subscribe, () => ({ label: "fresh" }));
+			// Read through the shim directly: React's own hook only warns here,
+			// so this would not hold for a consumer whose React ships one.
+			const value = useSyncExternalStoreShim(store.subscribe, () => ({ label: "fresh" }));
 			return <textlabel Text={`value:${value.label}`} />;
 		}
 
 		expect(() => render(<Probe />)).toThrow(
 			"the result of getSnapshot must be cached, or the component re-renders forever",
 		);
+	});
+});
+
+describe("selectStoreHook", () => {
+	it("should fall back to the shim when React ships no store hook", () => {
+		expect.assertions(1);
+
+		expect(selectStoreHook({ useState })).toBe(useSyncExternalStoreShim);
+	});
+
+	it("should prefer React's own store hook when it exists", () => {
+		expect.assertions(1);
+
+		const native: StoreHook = (_subscribe, getSnapshot) => getSnapshot();
+
+		expect(selectStoreHook({ useState, useSyncExternalStore: native })).toBe(native);
 	});
 });
 

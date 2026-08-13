@@ -160,7 +160,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.942
+      version: 1.0.943
     '@types/node':
       specifier: 24.13.3
       version: 24.13.3
@@ -174,6 +174,7 @@ patchedDependencies:
   '@rbxts-js/expect@3.16.0-ts.1': 0b057609d0c4eabd5a55bc3b84d4ad03d8ad99b10764d0843d17a0f470c90ff3
   '@rbxts-js/jest-mock@3.16.0-ts.1': 29ab8511121e7a1c1e57c1f21e5a30f921bdfa31a96e4a7fb2c6c7157c74404e
   '@rbxts-js/jest-runner@3.16.0-ts.1': 8e9687762b0ea516c5c4ab0f396cb7160d1baabcc3a31cff81ee578112013085
+  '@rbxts-js/react-testing-library-lua@12.3.4-ts.3': 3837ab5e3d6cb080000d87cc80f6bf2ac0ecac7945561016d963c33c4640dd7e
   '@rbxts/compiler-types': 0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def
   '@rbxts/jest-globals@3.16.0-ts.1': d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0
   eslint-plugin-jest@29.15.5: 8469da233ba2db97c9b0224be8b3ece95e63e8f96417ffba6c1f2c03bd2f0eec
@@ -302,7 +303,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -339,7 +340,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -379,7 +380,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -410,7 +411,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -459,7 +460,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -513,7 +514,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -546,7 +547,7 @@ importers:
         version: 8.16.0-ts.3
       '@rbxts-js/react-testing-library-lua':
         specifier: catalog:test
-        version: 12.3.4-ts.3
+        version: 12.3.4-ts.3(patch_hash=3837ab5e3d6cb080000d87cc80f6bf2ac0ecac7945561016d963c33c4640dd7e)
       '@rbxts/compiler-types':
         specifier: catalog:types
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
@@ -576,7 +577,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -606,7 +607,7 @@ importers:
         version: 8.16.0-ts.3
       '@rbxts-js/react-testing-library-lua':
         specifier: catalog:test
-        version: 12.3.4-ts.3
+        version: 12.3.4-ts.3(patch_hash=3837ab5e3d6cb080000d87cc80f6bf2ac0ecac7945561016d963c33c4640dd7e)
       '@rbxts-js/scheduler':
         specifier: catalog:test
         version: 17.3.7-ts.1
@@ -624,7 +625,7 @@ importers:
         version: 0.1.3(@rbxts/jest-globals@3.16.0-ts.1)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.942
+        version: 1.0.943
       rimraf:
         specifier: catalog:node
         version: 6.1.3
@@ -1283,12 +1284,12 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@isentinel/dict-rbxts@1.0.17':
-    resolution: {integrity: sha512-qIqhILOwiMfDT42H1Do07DsXipUKzVI2AdPznMxPJohtySdQmFIzXrApTj6zSgXv9IQGYS5WB0bprBqtapjj/Q==}
+  '@isentinel/dict-rbxts@1.0.18':
+    resolution: {integrity: sha512-a48j+zwvpQ0xuB6EVhbhfP4Fk8+Fy+I9PhOg+Sh5IpWH61Nl2j9Lznkn4gLHSSDwFoYOTMzloPGhfeqIKdYzfw==}
     engines: {node: '>=22'}
 
-  '@isentinel/dict-roblox@1.0.10':
-    resolution: {integrity: sha512-We84lknBpnMVtR4S5MDc8f06RXcNosPZGLha9oTHOc1aCEmtFxTf5dhrT2j+loBGQAgxnn9JioM/8+P2stWMNg==}
+  '@isentinel/dict-roblox@1.0.11':
+    resolution: {integrity: sha512-FZlMG5EiSdZqkYRrRLkTAn98ELUlBI0F07LlBa8ViI5tviy4AObP/WApixTqdXXoZalPEDLOedlrz51E3sBSnw==}
     engines: {node: '>=20.18.0'}
 
   '@isentinel/eslint-config@6.0.0-beta.22':
@@ -2415,8 +2416,8 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.942':
-    resolution: {integrity: sha512-Jrry6cRbFHMPRsgmOVGePfqkRfXWmLxO3whUeXUJQpilmAY7yJv4iIBIqfxWC4dHx1O65/JJyLonk6gZjc6+OA==}
+  '@rbxts/types@1.0.943':
+    resolution: {integrity: sha512-RvTlBEbdp8cTy3YyRJhKcmH31bMG96rg4tksNHs3BWrgbNohH9yacsj9+5/7lnxZAL2usJdeDEt5oLneVrKjqg==}
 
   '@roblox-ts/luau-ast@2.0.1':
     resolution: {integrity: sha512-jej2mzRGwhR9wu4woAtgTwqsKADlegZYlQ+M5qVHRojvjoyJVFkLrSbhBKRr8HR+fVW5nCz0qX7kNa0tSpAY+A==}
@@ -5977,9 +5978,9 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@isentinel/dict-rbxts@1.0.17': {}
+  '@isentinel/dict-rbxts@1.0.18': {}
 
-  '@isentinel/dict-roblox@1.0.10': {}
+  '@isentinel/dict-roblox@1.0.11': {}
 
   '@isentinel/eslint-config@6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.26)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.2.2)(eslint-plugin-react-jsx@5.18.3)(eslint-plugin-react-naming-convention@5.18.3)(eslint-plugin-react-x@5.18.3)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.77.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
@@ -5989,8 +5990,8 @@ snapshots:
       '@e18e/eslint-plugin': 0.5.1(eslint@10.8.1)(oxlint@1.77.0)
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.8.1)
       '@eslint/markdown': 8.0.3(supports-color@10.2.2)
-      '@isentinel/dict-rbxts': 1.0.17
-      '@isentinel/dict-roblox': 1.0.10
+      '@isentinel/dict-rbxts': 1.0.18
+      '@isentinel/dict-roblox': 1.0.11
       '@oxlint/plugins': 1.74.0
       '@pobammer-ts/small-rules': 2.7.0(typescript@6.0.3)
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.8.1)
@@ -6932,7 +6933,7 @@ snapshots:
       '@rbxts-js/scheduler': 17.3.7-ts.1
       '@rbxts-js/shared': 17.3.7-ts.1
 
-  '@rbxts-js/react-testing-library-lua@12.3.4-ts.3':
+  '@rbxts-js/react-testing-library-lua@12.3.4-ts.3(patch_hash=3837ab5e3d6cb080000d87cc80f6bf2ac0ecac7945561016d963c33c4640dd7e)':
     dependencies:
       '@rbxts-js/dom-testing-library-lua': 8.16.0-ts.3
       '@rbxts-js/jest-globals': 3.16.0-ts.1
@@ -7053,7 +7054,7 @@ snapshots:
 
   '@rbxts/services@1.6.0': {}
 
-  '@rbxts/types@1.0.942': {}
+  '@rbxts/types@1.0.943': {}
 
   '@roblox-ts/luau-ast@2.0.1': {}
 

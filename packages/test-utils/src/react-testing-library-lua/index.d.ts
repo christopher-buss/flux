@@ -126,7 +126,9 @@ export function render(
 export function cleanup(): void;
 
 /**
- * Simply calls ReactDOMTestUtils.act(cb) If that's not available (older version
- * of react) then it simply calls the given callback immediately.
+ * - Runs `cb` and drains everything it schedules before returning.
+ * - `ReactRoblox.act`, not react-dom's: the workspace patches `act-compat.lua`
+ *   so it drives the renderer that mounts the tree, which react-dom's cannot
+ *   do for a concurrent root.
  */
 export const act: typeof Act;

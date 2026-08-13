@@ -9,7 +9,7 @@ import ReactRoblox from "@rbxts/react-roblox";
 
 import type { ExternalStore, Log } from "#test/probes";
 import { createExternalStore, makeLog, mountConcurrent } from "#test/probes";
-import { useSyncExternalStore } from "./use-sync-external-store";
+import { useSyncExternalStoreShim } from "./use-sync-external-store";
 
 _G.__DEV__ = true;
 
@@ -38,7 +38,9 @@ interface ReaderProps {
  * @returns A label rendering the snapshot.
  */
 function Reader({ committed, label, store }: ReaderProps): React.ReactNode {
-	const value = useSyncExternalStore(store.subscribe, store.getState);
+	// The shim by name, not the selected hook: what this file locks is the
+	// shim's own once-per-store registration, which React's hook does not have.
+	const value = useSyncExternalStoreShim(store.subscribe, store.getState);
 	unstable_yieldValue(`${label}${value}`);
 
 	useLayoutEffect(() => {
@@ -78,7 +80,7 @@ function App({
 	);
 }
 
-describe("useSyncExternalStore under a concurrent root", () => {
+describe("useSyncExternalStoreShim under a concurrent root", () => {
 	it("should never commit a snapshot one reader disagrees with", () => {
 		expect.assertions(2);
 
