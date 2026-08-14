@@ -15,8 +15,8 @@ catalogs:
       version: 2.10.9
   cli:
     pncat:
-      specifier: 0.13.0
-      version: 0.13.0
+      specifier: 0.13.2
+      version: 0.13.2
   dev:
     std-env:
       specifier: 4.2.0
@@ -266,7 +266,7 @@ importers:
         version: 7.0.2001
       pncat:
         specifier: catalog:cli
-        version: 0.13.0
+        version: 0.13.2
       rbxts-transformer-jest:
         specifier: catalog:test
         version: 0.0.8(@isentinel/rojo-utils@0.1.0)(@roblox-ts/path-translator@1.1.0)
@@ -4565,6 +4565,9 @@ packages:
   package-manager-detector@1.7.0:
     resolution: {integrity: sha512-xg1eHpwYL/D/HEdWw2goFZP6vV0FH7W+PZ5rFkGjdIDLtxq7EkzBUeT3m+lndYCt8wKbmofUu1MUdMCXkCk9ZQ==}
 
+  package-manager-detector@1.8.0:
+    resolution: {integrity: sha512-yQA4H19AmPEoMUeavPMDIe1higySl/gH/yaQrkT/s07Qp+7pp2hYz30N3z2l5BkjVkF9Ow6o0wjJamm2y7Sn0A==}
+
   parse-imports-exports@0.2.4:
     resolution: {integrity: sha512-4s6vd6dx1AotCx/RCI2m7t7GCh5bDRUtGNvRfHSP2wbBQdMi67pPe7mtzmgwcaQ8VKK/6IB7Glfyu3qdZJPybQ==}
 
@@ -4614,12 +4617,9 @@ packages:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
 
-  pncat@0.13.0:
-    resolution: {integrity: sha512-1ZVTH5yvuO+RbOJLFvfJVvQsOgEGh+ZYvpgjD0+/RaFSl8fIXsG8eSAuKZOBjMEjNeUfpSkPcYbXfUlkYS+NgA==}
+  pncat@0.13.2:
+    resolution: {integrity: sha512-dYj+VaccFic6szLmrt7n7aPDhzfAVMdQS247C90q9zaO0FSa0A8KCvSI1MxzXtmdhAGU4PcPxNlQni7Rc8q3pw==}
     hasBin: true
-
-  pnpm-workspace-yaml@1.6.1:
-    resolution: {integrity: sha512-yTeZntGWi8m9WNuhoVsP0DpFc4sC1U0+rr/qR6Zi9n2g3sxXY+JfccjXjjruNz96tM8I09yaJUA86doRnNLkbg==}
 
   pnpm-workspace-yaml@1.7.0:
     resolution: {integrity: sha512-cgjaozHkjWL4H8oKZydEWE4mg31XydK3/1cLKjHvwnFAXutp45yAlMKljpOdZEq4TtLuzYAMvy9j05wRm3aoPw==}
@@ -4947,6 +4947,10 @@ packages:
 
   tinyexec@1.2.4:
     resolution: {integrity: sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg==}
+    engines: {node: '>=18'}
+
+  tinyexec@1.3.0:
+    resolution: {integrity: sha512-QKAl9m8gWWGHV8jZcPeym6j+XULi6tOf1mT83WYJ4Lk2ytW/uwAWkrP0uFsdoYMdueVJ0qs26wZ+23xeB4ibNQ==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.17:
@@ -9642,6 +9646,8 @@ snapshots:
 
   package-manager-detector@1.7.0: {}
 
+  package-manager-detector@1.8.0: {}
+
   parse-imports-exports@0.2.4:
     dependencies:
       parse-statements: 1.0.11
@@ -9683,22 +9689,18 @@ snapshots:
 
   pluralize@8.0.0: {}
 
-  pncat@0.13.0:
+  pncat@0.13.2:
     dependencies:
       '@clack/prompts': 1.7.0
       ansis: 4.3.1
       cac: 7.0.0
       find-up: 8.0.0
-      package-manager-detector: 1.7.0
+      package-manager-detector: 1.8.0
       pathe: 2.0.3
-      pnpm-workspace-yaml: 1.6.1
-      tinyexec: 1.2.4
+      pnpm-workspace-yaml: 1.7.0
+      tinyexec: 1.3.0
       tinyglobby: 0.2.17
       unconfig: 7.5.0
-
-  pnpm-workspace-yaml@1.6.1:
-    dependencies:
-      yaml: 2.9.0
 
   pnpm-workspace-yaml@1.7.0:
     dependencies:
@@ -10012,6 +10014,8 @@ snapshots:
   tinybench@2.9.0: {}
 
   tinyexec@1.2.4: {}
+
+  tinyexec@1.3.0: {}
 
   tinyglobby@0.2.17:
     dependencies:
