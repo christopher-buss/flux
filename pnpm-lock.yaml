@@ -68,8 +68,8 @@ catalogs:
       specifier: 11.1.5
       version: 11.1.5
     get-tsconfig:
-      specifier: 4.14.1
-      version: 4.14.1
+      specifier: 4.14.2
+      version: 4.14.2
     madge:
       specifier: 8.0.0
       version: 8.0.0
@@ -251,7 +251,7 @@ importers:
         version: 11.1.5
       get-tsconfig:
         specifier: catalog:lint
-        version: 4.14.1
+        version: 4.14.2
       jiti:
         specifier: catalog:script
         version: 2.7.0
@@ -3857,8 +3857,8 @@ packages:
   get-tsconfig@4.14.0:
     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
 
-  get-tsconfig@4.14.1:
-    resolution: {integrity: sha512-Dz/6HxkrxgNehhxLVeyv8sad9UzF2xBVeaKBQNDfJ5XiSXmp2gTR0eO0RWiT2NCKS5aGP9jjkOMggTN90qU50A==}
+  get-tsconfig@4.14.2:
+    resolution: {integrity: sha512-XpwZALwwl/BaKTAyC6+c5T8y6kCg2jk+XGqOVrKIQmW49pNypYLMRjCUXqa28tQgJlhS2RlzP7sc+Rx7W6qsfw==}
 
   git-hooks-list@4.2.1:
     resolution: {integrity: sha512-WNvqJjOxxs/8ZP9+DWdwWJ7cDsd60NHf39XnD82pDVrKO5q7xfPqpkK6hwEAmBa/ZSEE4IOoR75EzbbIuwGlMw==}
@@ -6062,7 +6062,7 @@ snapshots:
     dependencies:
       eslint_d: 15.0.3(jiti@2.7.0)
       file-entry-cache: 11.1.5
-      get-tsconfig: 4.14.1
+      get-tsconfig: 4.14.2
       madge: 8.0.0(supports-color@10.2.2)(typescript@6.0.3)
     optionalDependencies:
       '@typescript/native-preview': 7.0.0-dev.20260707.2
@@ -8262,7 +8262,7 @@ snapshots:
       enhanced-resolve: 5.24.3
       eslint: 10.8.1(jiti@2.7.0)(supports-color@10.2.2)
       eslint-plugin-es-x: 7.8.0(eslint@10.8.1)
-      get-tsconfig: 4.14.1
+      get-tsconfig: 4.14.2
       globals: 15.15.0
       globrex: 0.1.2
       ignore: 5.3.2
@@ -8684,7 +8684,7 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
-  get-tsconfig@4.14.1:
+  get-tsconfig@4.14.2:
     dependencies:
       resolve-pkg-maps: 1.0.0
 

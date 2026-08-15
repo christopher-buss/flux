@@ -70,7 +70,7 @@ catalogs:
     eslint-plugin-react-x: 5.18.4
     eslint_d: 15.0.3
     file-entry-cache: 11.1.5
-    get-tsconfig: 4.14.1
+    get-tsconfig: 4.14.2
     madge: 8.0.0
     oxlint: 1.78.0
     oxlint-tsgolint: 7.0.2001
