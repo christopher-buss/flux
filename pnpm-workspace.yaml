@@ -65,7 +65,7 @@ catalogs:
     eslint-plugin-n: 18.3.0
     eslint-plugin-pnpm: 1.7.0
     eslint-plugin-react-hooks: 7.1.1
-    eslint-plugin-react-jsx: 5.18.3
+    eslint-plugin-react-jsx: 5.18.4
     eslint-plugin-react-naming-convention: 5.18.3
     eslint-plugin-react-x: 5.18.3
     eslint_d: 15.0.3
