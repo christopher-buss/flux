@@ -85,7 +85,7 @@ catalogs:
   script:
     jiti: 2.7.0
   test:
-    "@isentinel/jest-roblox": 0.3.10
+    "@isentinel/jest-roblox": 0.3.15
     "@rbxts-js/dom-testing-library-lua": 8.16.0-ts.3
     "@rbxts-js/react-testing-library-lua": 12.3.4-ts.3
     "@rbxts-js/scheduler": 17.3.7-ts.1
