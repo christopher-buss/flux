@@ -1284,12 +1284,12 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@isentinel/dict-rbxts@1.0.18':
-    resolution: {integrity: sha512-a48j+zwvpQ0xuB6EVhbhfP4Fk8+Fy+I9PhOg+Sh5IpWH61Nl2j9Lznkn4gLHSSDwFoYOTMzloPGhfeqIKdYzfw==}
+  '@isentinel/dict-rbxts@1.0.19':
+    resolution: {integrity: sha512-W2KAplWdenIM2x3ZNFVWsf5BA6bfD047fVHHoSiTM8orwikK7bVxcI5Usl97+a8QaK5TDaCeIpTLR8UtKkaS5A==}
     engines: {node: '>=22'}
 
-  '@isentinel/dict-roblox@1.0.11':
-    resolution: {integrity: sha512-FZlMG5EiSdZqkYRrRLkTAn98ELUlBI0F07LlBa8ViI5tviy4AObP/WApixTqdXXoZalPEDLOedlrz51E3sBSnw==}
+  '@isentinel/dict-roblox@1.0.12':
+    resolution: {integrity: sha512-2eN4iHQYow3TTTFOpGQ5rixo3efNxztGVrESNaxQVwOf/sw7paevv20XN/NBWrSulAHnpR9RCn371n4Eto4wnQ==}
     engines: {node: '>=20.18.0'}
 
   '@isentinel/eslint-config@6.0.0-beta.22':
@@ -6031,9 +6031,9 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@isentinel/dict-rbxts@1.0.18': {}
+  '@isentinel/dict-rbxts@1.0.19': {}
 
-  '@isentinel/dict-roblox@1.0.11': {}
+  '@isentinel/dict-roblox@1.0.12': {}
 
   '@isentinel/eslint-config@6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.27)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.6)(eslint-plugin-react-naming-convention@5.18.6)(eslint-plugin-react-x@5.18.6)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.78.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
@@ -6043,8 +6043,8 @@ snapshots:
       '@e18e/eslint-plugin': 0.5.1(eslint@10.8.1)(oxlint@1.78.0)
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.8.1)
       '@eslint/markdown': 8.0.3(supports-color@10.2.2)
-      '@isentinel/dict-rbxts': 1.0.18
-      '@isentinel/dict-roblox': 1.0.11
+      '@isentinel/dict-rbxts': 1.0.19
+      '@isentinel/dict-roblox': 1.0.12
       '@oxlint/plugins': 1.74.0
       '@pobammer-ts/small-rules': 2.7.0(typescript@6.0.3)
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.8.1)
