@@ -49,7 +49,7 @@ patchedDependencies:
 catalogs:
   build:
     "@isentinel/roblox-ts": 4.0.11
-    turbo: 2.10.10
+    turbo: 2.10.11
   cli:
     pncat: 0.13.0
   dev:
