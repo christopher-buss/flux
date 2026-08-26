@@ -136,8 +136,8 @@ catalogs:
       specifier: 4.1.11
       version: 4.1.11
     rbxts-transformer-jest:
-      specifier: 0.0.8
-      version: 0.0.8
+      specifier: 0.0.9
+      version: 0.0.9
     vitest:
       specifier: 4.1.11
       version: 4.1.11
@@ -160,7 +160,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.945
+      version: 1.0.946
     '@types/node':
       specifier: 24.13.3
       version: 24.13.3
@@ -269,7 +269,7 @@ importers:
         version: 0.13.0
       rbxts-transformer-jest:
         specifier: catalog:test
-        version: 0.0.8(@isentinel/rojo-utils@0.1.0)(@roblox-ts/path-translator@1.1.0)
+        version: 0.0.9(@isentinel/rojo-utils@0.1.0)(@roblox-ts/path-translator@1.1.0)
       rimraf:
         specifier: catalog:node
         version: 6.1.3
@@ -303,7 +303,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.945
+        version: 1.0.946
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -340,7 +340,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.945
+        version: 1.0.946
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -380,7 +380,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.945
+        version: 1.0.946
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -411,7 +411,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.945
+        version: 1.0.946
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -460,7 +460,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.945
+        version: 1.0.946
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -514,7 +514,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.945
+        version: 1.0.946
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -577,7 +577,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.945
+        version: 1.0.946
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -625,7 +625,7 @@ importers:
         version: 0.1.3(@rbxts/jest-globals@3.16.0-ts.1)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.945
+        version: 1.0.946
       rimraf:
         specifier: catalog:node
         version: 6.1.3
@@ -1284,12 +1284,12 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@isentinel/dict-rbxts@1.0.19':
-    resolution: {integrity: sha512-W2KAplWdenIM2x3ZNFVWsf5BA6bfD047fVHHoSiTM8orwikK7bVxcI5Usl97+a8QaK5TDaCeIpTLR8UtKkaS5A==}
+  '@isentinel/dict-rbxts@1.0.20':
+    resolution: {integrity: sha512-G/CgNX00foLRvj3hm3lks94cV39dxfrdWc7hHi2i4E4acJqTzSxJLb6rtXPPs49Q538Ji13RJ2GOlRtimNXYOg==}
     engines: {node: '>=22'}
 
-  '@isentinel/dict-roblox@1.0.12':
-    resolution: {integrity: sha512-2eN4iHQYow3TTTFOpGQ5rixo3efNxztGVrESNaxQVwOf/sw7paevv20XN/NBWrSulAHnpR9RCn371n4Eto4wnQ==}
+  '@isentinel/dict-roblox@1.0.13':
+    resolution: {integrity: sha512-t66E0JBi+2+aIN3uhxhW+iYB+Qdgw2FR9rjz2qbUsiZ/VzGNkvWxewOGtGuk5RAdhwIHORg9lMod8R6e4BhnBQ==}
     engines: {node: '>=20.18.0'}
 
   '@isentinel/eslint-config@6.0.0-beta.22':
@@ -2416,8 +2416,8 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.945':
-    resolution: {integrity: sha512-pBEwAcFi9h1fzIHVFyVRiDAX8rWAWnSQKIrQ4KITF+lfRdPTTBpm16bu/dTO5oZkiyW6dxELe8iR1vQAqzPGow==}
+  '@rbxts/types@1.0.946':
+    resolution: {integrity: sha512-pTFkR63kNvx3pd9thpu9Q20olhHWM5lYXXPifA1wmbfS4hgIfOfeLyjJRc39vjpY3sOgDM2FQnJaNCmrsTh+XA==}
 
   '@roblox-ts/luau-ast@2.0.1':
     resolution: {integrity: sha512-jej2mzRGwhR9wu4woAtgTwqsKADlegZYlQ+M5qVHRojvjoyJVFkLrSbhBKRr8HR+fVW5nCz0qX7kNa0tSpAY+A==}
@@ -4730,8 +4730,8 @@ packages:
   quote-unquote@1.0.0:
     resolution: {integrity: sha512-twwRO/ilhlG/FIgYeKGFqyHhoEhqgnKVkcmqMKi2r524gz3ZbDTcyFt38E9xjJI2vT+KbRNHVbnJ/e0I25Azwg==}
 
-  rbxts-transformer-jest@0.0.8:
-    resolution: {integrity: sha512-EjJ9++ranlaD9Bk33uqY+ma/OsAmP1fXOjyaPz70bNERH5wuZoHpAtVQQAlTiSQEmd69F+ldgIOq+M7Cre3n4Q==}
+  rbxts-transformer-jest@0.0.9:
+    resolution: {integrity: sha512-GuKXEJ7KcTLCCQuaE0H+o6v2WrBHnYdMROTLciH/OfAZCH8waHPGBQLlpezLOFNuNk1cxRbV62MpGH8EFX+Sxg==}
     engines: {node: '>=v24.12.0'}
     peerDependencies:
       '@roblox-ts/path-translator': ^1.1.0
@@ -6031,9 +6031,9 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@isentinel/dict-rbxts@1.0.19': {}
+  '@isentinel/dict-rbxts@1.0.20': {}
 
-  '@isentinel/dict-roblox@1.0.12': {}
+  '@isentinel/dict-roblox@1.0.13': {}
 
   '@isentinel/eslint-config@6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.27)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.6)(eslint-plugin-react-naming-convention@5.18.6)(eslint-plugin-react-x@5.18.6)(eslint@10.8.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.78.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
@@ -6043,8 +6043,8 @@ snapshots:
       '@e18e/eslint-plugin': 0.5.1(eslint@10.8.1)(oxlint@1.78.0)
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.8.1)
       '@eslint/markdown': 8.0.3(supports-color@10.2.2)
-      '@isentinel/dict-rbxts': 1.0.19
-      '@isentinel/dict-roblox': 1.0.12
+      '@isentinel/dict-rbxts': 1.0.20
+      '@isentinel/dict-roblox': 1.0.13
       '@oxlint/plugins': 1.74.0
       '@pobammer-ts/small-rules': 2.7.0(typescript@6.0.3)
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.8.1)
@@ -7107,7 +7107,7 @@ snapshots:
 
   '@rbxts/services@1.6.0': {}
 
-  '@rbxts/types@1.0.945': {}
+  '@rbxts/types@1.0.946': {}
 
   '@roblox-ts/luau-ast@2.0.1': {}
 
@@ -9898,7 +9898,7 @@ snapshots:
 
   quote-unquote@1.0.0: {}
 
-  rbxts-transformer-jest@0.0.8(@isentinel/rojo-utils@0.1.0)(@roblox-ts/path-translator@1.1.0):
+  rbxts-transformer-jest@0.0.9(@isentinel/rojo-utils@0.1.0)(@roblox-ts/path-translator@1.1.0):
     optionalDependencies:
       '@roblox-ts/path-translator': 1.1.0
       '@roblox-ts/rojo-resolver': '@isentinel/rojo-utils@0.1.0'
