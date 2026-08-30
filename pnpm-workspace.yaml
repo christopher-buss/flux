@@ -96,7 +96,7 @@ catalogs:
     "@rbxts/regexp": 0.2.1-ts.4
     "@roblox-ts/rojo-resolver": npm:@isentinel/rojo-utils@0.1.0
     "@vitest/coverage-v8": 4.1.11
-    rbxts-transformer-jest: 0.0.8
+    rbxts-transformer-jest: 0.0.9
     vitest: 4.1.11
   tsc:
     "@isentinel/tsconfig": 1.2.0
