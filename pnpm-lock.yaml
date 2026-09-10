@@ -133,14 +133,14 @@ catalogs:
       specifier: npm:@isentinel/rojo-utils@0.1.0
       version: 0.1.0
     '@vitest/coverage-v8':
-      specifier: 4.1.11
-      version: 4.1.11
+      specifier: 5.0.0
+      version: 5.0.0
     rbxts-transformer-jest:
       specifier: 0.0.9
       version: 0.0.9
     vitest:
-      specifier: 4.1.11
-      version: 4.1.11
+      specifier: 5.0.0
+      version: 5.0.0
   tsc:
     '@isentinel/tsconfig':
       specifier: 1.2.0
@@ -160,7 +160,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.948
+      version: 1.0.951
     '@types/node':
       specifier: 24.13.3
       version: 24.13.3
@@ -194,7 +194,7 @@ importers:
         version: 1.6.0(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.4)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -212,7 +212,7 @@ importers:
         version: 7.0.0-dev.20260707.2
       '@vitest/eslint-plugin':
         specifier: catalog:lint
-        version: 1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.11)
+        version: 1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@5.0.0)
       better-typescript-lib:
         specifier: catalog:tsc
         version: 2.12.0(typescript@6.0.3)
@@ -303,7 +303,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.948
+        version: 1.0.951
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -340,7 +340,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.948
+        version: 1.0.951
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -380,7 +380,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.948
+        version: 1.0.951
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -411,7 +411,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.948
+        version: 1.0.951
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -433,7 +433,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.4)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -460,7 +460,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.948
+        version: 1.0.951
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -481,7 +481,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.4)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -514,7 +514,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.948
+        version: 1.0.951
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -535,7 +535,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.4)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -577,7 +577,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.948
+        version: 1.0.951
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -595,7 +595,7 @@ importers:
     devDependencies:
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+        version: 0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.4)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -625,7 +625,7 @@ importers:
         version: 0.1.3(@rbxts/jest-globals@3.16.0-ts.1)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.948
+        version: 1.0.951
       rimraf:
         specifier: catalog:node
         version: 6.1.3
@@ -643,7 +643,7 @@ importers:
         version: 24.13.3
       '@vitest/coverage-v8':
         specifier: catalog:test
-        version: 4.1.11(vitest@4.1.11)
+        version: 5.0.0(vitest@5.0.0)
       std-env:
         specifier: catalog:dev
         version: 4.2.0
@@ -652,7 +652,7 @@ importers:
         version: 5.9.0
       vitest:
         specifier: catalog:test
-        version: 4.1.11(@types/node@24.13.3)(@vitest/coverage-v8@4.1.11)(vite@8.1.5)
+        version: 5.0.0(@types/node@24.13.3)(@vitest/coverage-v8@5.0.0)(vite@8.1.5)
 
 packages:
 
@@ -1284,12 +1284,12 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@isentinel/dict-rbxts@1.0.21':
-    resolution: {integrity: sha512-I5gO11EBTNF4Zbi3S6sPRy9RkcuAqaf8DE6g8G0iDLdJxcPCxjFsGFJeeEJz9R/yklyiMSyM7Pz2GwgHrxH0/g==}
+  '@isentinel/dict-rbxts@1.0.22':
+    resolution: {integrity: sha512-df4xpwV0nX9dEcpsYldRz0cYCxjLIi/4ATC6oVuTZ/2JJjcWfj+bciKJV71T9MtiUF6tTF7tL/gFUKHwB7VzBQ==}
     engines: {node: '>=22'}
 
-  '@isentinel/dict-roblox@1.0.14':
-    resolution: {integrity: sha512-fMH9b0NHjf6rTbOtE0HMRHv/T1Oa1blSjSXR/z0h30FTcG0jwZDXDYPj7bmbJXutUptUa88gq0f7p9RKbS0z3Q==}
+  '@isentinel/dict-roblox@1.0.15':
+    resolution: {integrity: sha512-YCX8PRL2y63fAvm1VsshGLXAwxpocyfVaHNqwKZREZNiTMPTMEbVDpjbaoU+iCAf8e8GY/SLQp9XC0RwTWCcJA==}
     engines: {node: '>=20.18.0'}
 
   '@isentinel/eslint-config@6.0.0-beta.22':
@@ -2424,8 +2424,8 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.948':
-    resolution: {integrity: sha512-ecz1FgEevO4TcOJFf3JX8j8rJF3cSZHzmZ7LYGwAEc9MUO9aX35lN4EgjydjC/j7UpZk7UbAgHdbonBmbV/E4A==}
+  '@rbxts/types@1.0.951':
+    resolution: {integrity: sha512-Reov2/jjm1wBO/sk/m7WLb1VKKHG2kafjmbYZZEDgeUuqdfZPZaciGK7NZ+dLmRSvxEfJQWYFM+FxILY3NecIw==}
 
   '@roblox-ts/luau-ast@2.0.1':
     resolution: {integrity: sha512-jej2mzRGwhR9wu4woAtgTwqsKADlegZYlQ+M5qVHRojvjoyJVFkLrSbhBKRr8HR+fVW5nCz0qX7kNa0tSpAY+A==}
@@ -2934,11 +2934,11 @@ packages:
     engines: {node: '>=16.20.0'}
     hasBin: true
 
-  '@vitest/coverage-v8@4.1.11':
-    resolution: {integrity: sha512-8MVGEFnJIcdGjcbfKmeq8z0pZHH0JlVtoVZH9Q/qwUp6wyFnEJUBMrw9DCaj+ra3vShGmhavjalMIhPNxZAUcw==}
+  '@vitest/coverage-v8@5.0.0':
+    resolution: {integrity: sha512-toMg6PZGCIa/lQNCDoASrfb1ly4hsUKXFtFYC9kD4t78o5Y6LyNJU7AENt8eHPr3quYdxaxK7hj2mnbFfUk9NA==}
     peerDependencies:
-      '@vitest/browser': 4.1.11
-      vitest: 4.1.11
+      '@vitest/browser': 5.0.0
+      vitest: 5.0.0
     peerDependenciesMeta:
       '@vitest/browser':
         optional: true
@@ -2959,11 +2959,16 @@ packages:
       vitest:
         optional: true
 
-  '@vitest/expect@4.1.11':
-    resolution: {integrity: sha512-VX2x5vNJXET47KAFzwERI+KRMtTTCSWTfSMKsW7JsUsXV4psq++e3DvZpuTDOpHcxytiDs6p2nhVb2tVDiiUYw==}
+  '@vitest/istanbul-lib-coverage@1.0.1':
+    resolution: {integrity: sha512-k3DJZ8LhMBK9NS4SclF1ASD3OgXEWDorbIcPTRDK0/Zae6fRvu+fJRxtFdLfHsa9Y24beCdPnoNZ4LviTNstfA==}
+    engines: {node: '>=22'}
 
-  '@vitest/mocker@4.1.11':
-    resolution: {integrity: sha512-2XJVD55d1o5AZous5CCGKS74g/riOj9odEt2bQpCVZeblHyHdnMeFl4jl0XjU21stf4mbjUkew2eXQZt65g5CQ==}
+  '@vitest/istanbul-lib-report@1.0.1':
+    resolution: {integrity: sha512-1EOLRfsTMnyAr3+kEAsP4o9dhaDlGPpD7H5iLBBeq//YpNB1VIahkPhB+eRp9N2Dkfw8oySROjE3yf9XDeaIkQ==}
+    engines: {node: '>=22'}
+
+  '@vitest/mocker@5.0.0':
+    resolution: {integrity: sha512-66PGTMIiVJP3t4a5yxU9qPtf7MdTBs8jmToMvy+HVflB3Yy13WJZTtPePdvU+wjRV02SKK5doLbSA6o9pwOmiA==}
     peerDependencies:
       msw: ^2.4.9
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -2973,20 +2978,8 @@ packages:
       vite:
         optional: true
 
-  '@vitest/pretty-format@4.1.11':
-    resolution: {integrity: sha512-yiZzPbGTS9Sr/JpFl8zHrcIkAofNbFV6k21vIgQN/cY/oxZeXhJv5sc/MBJ5jFKWmWs+oJHw0UXLZjmf931+Vw==}
-
-  '@vitest/runner@4.1.11':
-    resolution: {integrity: sha512-LztvUgdwMNJMIkj3hQnnxiC2Xy1zNxq928W/xhjCLaNCzqTZOudjwbQf6v9IntZGPw132i2Lq2rgTRZHD3JHNw==}
-
-  '@vitest/snapshot@4.1.11':
-    resolution: {integrity: sha512-pN7ikn1ON7h8ee4gIAp4AzyK+zBtJPzVbqOgu5LCEh4VaJVbPQcgYQYJIMGQPXVeJJq1fnfazis7a5pFNPahog==}
-
-  '@vitest/spy@4.1.11':
-    resolution: {integrity: sha512-apNa/prQy2qCeywhnixOHPRCgGNhvg7T4Dapfl1GahLp/R+uhBm5cPyFoNVyqsNd2h1nJxL6BqqdIjiABL60YA==}
-
-  '@vitest/utils@4.1.11':
-    resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
+  '@vitest/spy@5.0.0':
+    resolution: {integrity: sha512-uy+luWBAPw9XfthoHi5AkfHUnuPYEESjl0p/r+meoBnU8bxg5GDQ3Ey8MjcJ6sqahkL4PFyrvfMJJBw7LbU06g==}
 
   '@vue/compiler-core@3.5.40':
     resolution: {integrity: sha512-39E8IgOhTbVDnoJFMKc2DvYnypcZwUqgUhQkccva/0m6FUwtIKSGV7n1hpVmYcFaoRAwf9pBcwnKlCEsN63ZEQ==}
@@ -3454,8 +3447,8 @@ packages:
     resolution: {integrity: sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==}
     engines: {node: '>= 0.4'}
 
-  es-module-lexer@2.3.1:
-    resolution: {integrity: sha512-shc1dbU90Yl/xq1QrC7QRtfcwURZuVRfPhZbDoldJ1cn1gzDvBaBWlv0eFolj5+0znnPJz5TXLxsN77X/12KTA==}
+  es-module-lexer@2.3.2:
+    resolution: {integrity: sha512-poHGpORABojJJucnV9KbOavETW8lBVnphkW77ER5/BQ5Fz7oXSoCNek7IH3vR5nRjdsEz926ibFYX8KtLQmdyw==}
 
   escalade@3.2.0:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
@@ -4329,8 +4322,11 @@ packages:
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
-  magicast@0.5.3:
-    resolution: {integrity: sha512-pVKE4UdSQ7DvHzivsCIFx2BJn1mHG6KsyrFcaxFx6tONdneEuThrDx0Cj3AMg58KyN4pzYT+LHOotxDQDjNvkw==}
+  magic-string@1.2.3:
+    resolution: {integrity: sha512-Bpb0W2TbLKOZ7vJnOUnVRGq3WL2p+ISV29M6hYPL1AFCpyKZpdr5ytiXoTSSxRVhg8YW7f65+6gbG8WG6PCa/g==}
+
+  magicast@0.5.4:
+    resolution: {integrity: sha512-llBEhWm1SacoRwgHUoQJYtwp4PBLF4faQi5TCpIGyGs9n4y5+juI0tDgyKIfpqxckRHaHzouUEph3THklWh03w==}
 
   make-asynchronous@1.1.0:
     resolution: {integrity: sha512-ayF7iT+44LXdxJLTrTd3TLQpFDDvPCBxXxbv+pMUSuHA5Q8zyAfwkRP6aHHwNVFBUFWtxAHqwNJxF8vMZLAbVg==}
@@ -4695,6 +4691,10 @@ packages:
     resolution: {integrity: sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A==}
     engines: {node: '>=12'}
 
+  picomatch@4.0.7:
+    resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
+    engines: {node: '>=12'}
+
   pkg-types@1.3.1:
     resolution: {integrity: sha512-/Jm5M4RvtBFVkKWRu2BLUTNP8/M2a+UwuAX+ae4770q1qVGtfjG+WTCupoZixokjmHiry8uI+dlY8KXYV5HVVQ==}
 
@@ -5036,11 +5036,16 @@ packages:
     resolution: {integrity: sha512-75voc/9G4rDIJleOo4jPvN4/YC4GRZrY8yy1uU4lwrB3XEQbWve8zXoO5No4eFrGcTAMYyoY67p8jRQdtA1HbA==}
     engines: {node: '>=12'}
 
-  tinybench@2.9.0:
-    resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
+  tinybench@6.1.4:
+    resolution: {integrity: sha512-9APumHG7r4yOk4X4WlkmE71aZcv1gvin1czO3OQ1U9iJcFA5Ja/ygyb0vPOVHTthFozUYs8CLoLUlM8grb2lTQ==}
+    engines: {node: '>=20.0.0'}
 
   tinyexec@1.2.4:
     resolution: {integrity: sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg==}
+    engines: {node: '>=18'}
+
+  tinyexec@1.3.0:
+    resolution: {integrity: sha512-QKAl9m8gWWGHV8jZcPeym6j+XULi6tOf1mT83WYJ4Lk2ytW/uwAWkrP0uFsdoYMdueVJ0qs26wZ+23xeB4ibNQ==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.17:
@@ -5053,6 +5058,10 @@ packages:
 
   tinyrainbow@3.1.0:
     resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
+    engines: {node: '>=14.0.0'}
+
+  tinyrainbow@3.1.1:
+    resolution: {integrity: sha512-yau8yJdTt989Mm0Bd/236QnzEiPf2xLLTqUZRUJOo/3CB078LSwzei343DgtJVmfJKJE3TMINY1u42SQsP6mXw==}
     engines: {node: '>=14.0.0'}
 
   to-valid-identifier@1.0.0:
@@ -5218,23 +5227,23 @@ packages:
       yaml:
         optional: true
 
-  vitest@4.1.11:
-    resolution: {integrity: sha512-fhACrNXUidIbGSBr5FlbuBkO7VWC1ZyLl0DO4CU2DrQoAPxX84Ysxs+HeGQpii5lZWV1Q4gBZTTu49mF+A6Edw==}
-    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
+  vitest@5.0.0:
+    resolution: {integrity: sha512-gpsMNoRhMjMktVxPtstOH4/PJuPyovVaMDr4oDilXaGH1EcqM2OE96SoHT2VIQ6fTGtTjqmHDrEu2X9RQiXf8Q==}
+    engines: {node: ^22.12.0 || ^24.0.0 || >=26.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@opentelemetry/api': ^1.9.0
-      '@types/node': ^20.0.0 || ^22.0.0 || >=24.0.0
-      '@vitest/browser-playwright': 4.1.11
-      '@vitest/browser-preview': 4.1.11
-      '@vitest/browser-webdriverio': 4.1.11
-      '@vitest/coverage-istanbul': 4.1.11
-      '@vitest/coverage-v8': 4.1.11
-      '@vitest/ui': 4.1.11
+      '@types/node': ^22.0.0 || >=24.0.0
+      '@vitest/browser-playwright': 5.0.0
+      '@vitest/browser-preview': 5.0.0
+      '@vitest/browser-webdriverio': ^5.0.0-beta.5 || >=5.0.0
+      '@vitest/coverage-istanbul': 5.0.0
+      '@vitest/coverage-v8': 5.0.0
+      '@vitest/ui': 5.0.0
       happy-dom: '*'
       jsdom: '*'
-      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
+      vite: ^6.4.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
@@ -6076,9 +6085,9 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@isentinel/dict-rbxts@1.0.21': {}
+  '@isentinel/dict-rbxts@1.0.22': {}
 
-  '@isentinel/dict-roblox@1.0.14': {}
+  '@isentinel/dict-roblox@1.0.15': {}
 
   '@isentinel/eslint-config@6.0.0-beta.22(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/estree@1.0.9)(@vitest/eslint-plugin@1.6.27)(eslint-plugin-jest-extended@3.0.1)(eslint-plugin-jest@29.15.5)(eslint-plugin-n@18.3.0)(eslint-plugin-react-jsx@5.18.7)(eslint-plugin-react-naming-convention@5.18.7)(eslint-plugin-react-x@5.18.7)(eslint@10.9.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.78.0)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
@@ -6088,8 +6097,8 @@ snapshots:
       '@e18e/eslint-plugin': 0.5.1(eslint@10.9.1)(oxlint@1.78.0)
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.9.1)
       '@eslint/markdown': 8.0.3(supports-color@10.2.2)
-      '@isentinel/dict-rbxts': 1.0.21
-      '@isentinel/dict-roblox': 1.0.14
+      '@isentinel/dict-rbxts': 1.0.22
+      '@isentinel/dict-roblox': 1.0.15
       '@oxlint/plugins': 1.74.0
       '@pobammer-ts/small-rules': 2.7.0(typescript@6.0.3)
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.9.1)
@@ -6137,7 +6146,7 @@ snapshots:
       yaml-eslint-parser: 2.1.0
       yargs: 18.0.0
     optionalDependencies:
-      '@vitest/eslint-plugin': 1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.11)
+      '@vitest/eslint-plugin': 1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@5.0.0)
       eslint-plugin-jest: 29.15.5(patch_hash=8469da233ba2db97c9b0224be8b3ece95e63e8f96417ffba6c1f2c03bd2f0eec)(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-jest-extended: 3.0.1(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)
       eslint-plugin-n: 18.3.0(eslint@10.9.1)(typescript@6.0.3)
@@ -6169,12 +6178,12 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/jest-roblox@0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)':
+  '@isentinel/jest-roblox@0.3.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.4)':
     dependencies:
       '@bedrock-rbx/ocale': 0.1.0
       '@jridgewell/trace-mapping': 0.3.31
       arktype: 2.2.0
-      c12: 4.0.0-beta.5(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3)
+      c12: 4.0.0-beta.5(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.4)
       confbox: 0.2.4
       defu: 6.1.7
       get-tsconfig: 4.14.0
@@ -7161,7 +7170,7 @@ snapshots:
 
   '@rbxts/services@1.6.0': {}
 
-  '@rbxts/types@1.0.948': {}
+  '@rbxts/types@1.0.951': {}
 
   '@roblox-ts/luau-ast@2.0.1': {}
 
@@ -7737,21 +7746,19 @@ snapshots:
       '@typescript/native-preview-win32-arm64': 7.0.0-dev.20260707.2
       '@typescript/native-preview-win32-x64': 7.0.0-dev.20260707.2
 
-  '@vitest/coverage-v8@4.1.11(vitest@4.1.11)':
+  '@vitest/coverage-v8@5.0.0(vitest@5.0.0)':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
-      '@vitest/utils': 4.1.11
+      '@vitest/istanbul-lib-coverage': 1.0.1
+      '@vitest/istanbul-lib-report': 1.0.1
       ast-v8-to-istanbul: 1.0.5
-      istanbul-lib-coverage: 3.2.2
-      istanbul-lib-report: 3.0.1
-      istanbul-reports: 3.2.0
-      magicast: 0.5.3
+      magicast: 0.5.4
       obug: 2.1.4
       std-env: 4.2.0
-      tinyrainbow: 3.1.0
-      vitest: 4.1.11(@types/node@24.13.3)(@vitest/coverage-v8@4.1.11)(vite@8.1.5)
+      tinyrainbow: 3.1.1
+      vitest: 5.0.0(@types/node@24.13.3)(@vitest/coverage-v8@5.0.0)(vite@8.1.5)
 
-  '@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@4.1.11)':
+  '@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.65.0)(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)(vitest@5.0.0)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.66.0
       '@typescript-eslint/utils': 8.66.0(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)
@@ -7759,50 +7766,26 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.65.0(@typescript-eslint/parser@8.65.0)(eslint@10.9.1)(supports-color@10.2.2)(typescript@6.0.3)
       typescript: 6.0.3
-      vitest: 4.1.11(@types/node@24.13.3)(@vitest/coverage-v8@4.1.11)(vite@8.1.5)
+      vitest: 5.0.0(@types/node@24.13.3)(@vitest/coverage-v8@5.0.0)(vite@8.1.5)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/expect@4.1.11':
-    dependencies:
-      '@standard-schema/spec': 1.1.0
-      '@types/chai': 5.2.3
-      '@vitest/spy': 4.1.11
-      '@vitest/utils': 4.1.11
-      chai: 6.2.2
-      tinyrainbow: 3.1.0
+  '@vitest/istanbul-lib-coverage@1.0.1': {}
 
-  '@vitest/mocker@4.1.11(vite@8.1.5)':
+  '@vitest/istanbul-lib-report@1.0.1':
     dependencies:
-      '@vitest/spy': 4.1.11
+      '@vitest/istanbul-lib-coverage': 1.0.1
+
+  '@vitest/mocker@5.0.0(vite@8.1.5)':
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      '@vitest/spy': 5.0.0
       estree-walker: 3.0.3
-      magic-string: 0.30.21
+      magic-string: 1.2.3
     optionalDependencies:
       vite: 8.1.5(@types/node@24.13.3)(jiti@2.7.0)(yaml@2.9.0)
 
-  '@vitest/pretty-format@4.1.11':
-    dependencies:
-      tinyrainbow: 3.1.0
-
-  '@vitest/runner@4.1.11':
-    dependencies:
-      '@vitest/utils': 4.1.11
-      pathe: 2.0.3
-
-  '@vitest/snapshot@4.1.11':
-    dependencies:
-      '@vitest/pretty-format': 4.1.11
-      '@vitest/utils': 4.1.11
-      magic-string: 0.30.21
-      pathe: 2.0.3
-
-  '@vitest/spy@4.1.11': {}
-
-  '@vitest/utils@4.1.11':
-    dependencies:
-      '@vitest/pretty-format': 4.1.11
-      convert-source-map: 2.0.0
-      tinyrainbow: 3.1.0
+  '@vitest/spy@5.0.0': {}
 
   '@vue/compiler-core@3.5.40':
     dependencies:
@@ -7970,7 +7953,7 @@ snapshots:
 
   bytes@3.1.2: {}
 
-  c12@4.0.0-beta.5(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.3):
+  c12@4.0.0-beta.5(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.4):
     dependencies:
       confbox: 0.2.4
       defu: 6.1.7
@@ -7981,7 +7964,7 @@ snapshots:
     optionalDependencies:
       chokidar: 5.0.0
       jiti: 2.7.0
-      magicast: 0.5.3
+      magicast: 0.5.4
 
   cac@7.0.0: {}
 
@@ -8297,7 +8280,7 @@ snapshots:
 
   es-errors@1.3.0: {}
 
-  es-module-lexer@2.3.1: {}
+  es-module-lexer@2.3.2: {}
 
   escalade@3.2.0: {}
 
@@ -9222,7 +9205,11 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  magicast@0.5.3:
+  magic-string@1.2.3:
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.5.5
+
+  magicast@0.5.4:
     dependencies:
       '@babel/parser': 7.29.7
       '@babel/types': 7.29.7
@@ -9899,6 +9886,8 @@ snapshots:
 
   picomatch@4.0.5: {}
 
+  picomatch@4.0.7: {}
+
   pkg-types@1.3.1:
     dependencies:
       confbox: 0.1.8
@@ -10243,9 +10232,11 @@ snapshots:
     dependencies:
       convert-hrtime: 5.0.0
 
-  tinybench@2.9.0: {}
+  tinybench@6.1.4: {}
 
   tinyexec@1.2.4: {}
+
+  tinyexec@1.3.0: {}
 
   tinyglobby@0.2.17:
     dependencies:
@@ -10255,6 +10246,8 @@ snapshots:
   tinypool@2.1.0: {}
 
   tinyrainbow@3.1.0: {}
+
+  tinyrainbow@3.1.1: {}
 
   to-valid-identifier@1.0.0:
     dependencies:
@@ -10398,31 +10391,25 @@ snapshots:
       jiti: 2.7.0
       yaml: 2.9.0
 
-  vitest@4.1.11(@types/node@24.13.3)(@vitest/coverage-v8@4.1.11)(vite@8.1.5):
+  vitest@5.0.0(@types/node@24.13.3)(@vitest/coverage-v8@5.0.0)(vite@8.1.5):
     dependencies:
-      '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.1.5)
-      '@vitest/pretty-format': 4.1.11
-      '@vitest/runner': 4.1.11
-      '@vitest/snapshot': 4.1.11
-      '@vitest/spy': 4.1.11
-      '@vitest/utils': 4.1.11
-      es-module-lexer: 2.3.1
+      '@types/chai': 5.2.3
+      '@vitest/mocker': 5.0.0(vite@8.1.5)
+      chai: 6.2.2
+      es-module-lexer: 2.3.2
       expect-type: 1.4.0
-      magic-string: 0.30.21
+      magic-string: 1.2.3
       obug: 2.1.4
-      pathe: 2.0.3
-      picomatch: 4.0.5
+      picomatch: 4.0.7
       std-env: 4.2.0
-      tinybench: 2.9.0
-      tinyexec: 1.2.4
+      tinybench: 6.1.4
+      tinyexec: 1.3.0
       tinyglobby: 0.2.17
-      tinyrainbow: 3.1.0
       vite: 8.1.5(@types/node@24.13.3)(jiti@2.7.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.13.3
-      '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
+      '@vitest/coverage-v8': 5.0.0(vitest@5.0.0)
     transitivePeerDependencies:
       - msw
 
