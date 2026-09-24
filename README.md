@@ -155,20 +155,20 @@ Docs are in progress. These cover the current design:
 Flux is early. If you run into issues or have ideas, open an issue or start a
 discussion.
 
-Git hooks come from [hk](https://hk.jdx.dev). Install them once for each
-machine, not once for each clone:
+Git hooks come from [hk](https://hk.jdx.dev), installed once for each machine.
+Run this from inside the clone: hk reads `hk.pkl` to decide which events to
+register.
 
 ```bash
 hk install --global --mise
-git config --global hook.hk-post-merge.event post-merge
-git config --global hook.hk-post-merge.command 'test "${HK:-1}" = "0" || mise x hk -- hk run post-merge --from-hook'
 ```
 
-The first command writes `commit-msg`, `pre-commit`, `pre-push` and
-`prepare-commit-msg` into `~/.gitconfig`. It does not write `post-merge`, which
-this repo uses to reinstall dependencies after a lockfile change, so add that
-one manually. Worktrees share `.git/config` with the main clone. In a repo with
-no `hk.pkl` the hooks exit silently.
+That writes `pre-commit`, `commit-msg` and `post-merge` into `~/.gitconfig`. Git
+2.54 or newer reads them for every repository and every worktree; older Git
+rejects the command, and `hk install --mise` is the per-clone fallback.
+
+A later `hk install --global` in a different hk project replaces the whole set
+with that project's events. A repository with no `hk.pkl` is a silent no-op.
 
 ## License
 
