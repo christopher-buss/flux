@@ -16,6 +16,7 @@ corepack = true
 "github:rojo-rbx/rojo" = "v7.7.0"
 "npm:@antfu/ni" = "latest"
 "npm:corepack" = "latest"
-hk = "latest"
+# Pinned: hk.pkl amends the 1.x Config schema, which hk 2.x cannot evaluate.
+hk = "1.57.0"
 node = { version = "lts", postinstall = "corepack enable" }
 pkl = "latest"
