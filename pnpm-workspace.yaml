@@ -106,7 +106,7 @@ catalogs:
   types:
     "@rbxts/compiler-types": 3.0.0-types.0
     "@rbxts/types": latest
-    "@types/node": 24.13.3
+    "@types/node": 24.13.6
     type-fest: 5.9.0
 
 allowBuilds:
