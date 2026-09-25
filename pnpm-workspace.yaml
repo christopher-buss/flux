@@ -60,7 +60,7 @@ catalogs:
     "@isentinel/hooks": 1.6.0
     "@vitest/eslint-plugin": 1.6.27
     eslint: 10.9.1
-    eslint-plugin-jest: 29.15.5
+    eslint-plugin-jest: 29.16.6
     eslint-plugin-jest-extended: 3.0.1
     eslint-plugin-n: 18.3.0
     eslint-plugin-pnpm: 1.9.1
