@@ -224,12 +224,12 @@ interface BaseBindingConfig {
 /** Shared properties for directional (1D/2D/3D) binding configs. */
 interface DirectionalBindingConfig extends BaseBindingConfig {
 	/**
-	 * Whether to normalize the output vector to unit length.
+	 * Whether to clamp the output vector to a maximum magnitude of 1.
 	 * @see https://create.roblox.com/docs/reference/engine/classes/InputBinding#ClampMagnitudeToOne
 	 */
 	readonly clampMagnitudeToOne?: boolean;
 	/**
-	 * Exponent applied to the input magnitude for non-linear response.
+	 * Quadratic response curve value (1-10) applied to thumbstick Direction2D inputs.
 	 * @see https://create.roblox.com/docs/reference/engine/classes/InputBinding#ResponseCurve
 	 */
 	readonly responseCurve?: number;
