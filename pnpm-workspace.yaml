@@ -73,7 +73,7 @@ catalogs:
     get-tsconfig: 4.14.3
     madge: 8.0.0
     oxlint: 1.78.0
-    oxlint-tsgolint: 7.0.2001
+    oxlint-tsgolint: 7.0.2002
   node:
     rimraf: 6.1.3
   peer:
