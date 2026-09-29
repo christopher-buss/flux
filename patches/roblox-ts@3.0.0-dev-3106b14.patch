@@ -23,7 +23,7 @@ index ac8ef01..8c2f054 100644
              if (referencesOnly && state.project === this.graph.root) {
                  continue;
 diff --git a/out/Project/classes/ProjectGraph.js b/out/Project/classes/ProjectGraph.js
-index 81e033e..d642bf6 100644
+index 81e033e..9972e55 100644
 --- a/out/Project/classes/ProjectGraph.js
 +++ b/out/Project/classes/ProjectGraph.js
 @@ -23,9 +23,12 @@ const typescript_1 = __importDefault(require("typescript"));
@@ -163,7 +163,7 @@ index 81e033e..d642bf6 100644
                  for (const fileName of reference.config.fileNames) {
                      if (typescript_1.default.isDeclarationFileName(fileName) &&
                          !(0, isPathDescendantOf_1.isPathDescendantOf)(fileName, reference.pathTranslator.rootDir)) {
-@@ -143,6 +199,13 @@ class ProjectGraph {
+@@ -143,16 +199,33 @@ class ProjectGraph {
                      }
                      paths.add(reference.pathTranslator.getImportPath(fileName));
                  }
@@ -177,7 +177,15 @@ index 81e033e..d642bf6 100644
                  paths.add(path_1.default.join(reference.data.projectOptions.includePath, "RuntimeLib.lua"));
                  for (const filePath of paths) {
                      const ownerPath = owner.getRbxPathFromFilePath(filePath);
-@@ -153,6 +216,11 @@ class ProjectGraph {
+                     const consumerPath = consumer === null || consumer === void 0 ? void 0 : consumer.getRbxPathFromFilePath(filePath);
+                     if (JSON.stringify(ownerPath) !== JSON.stringify(consumerPath)) {
++                        if (isPackageProject(project) && !project.config.raw.rbxts.rojo && !referenceIsPackage) {
++                            throw new DiagnosticError_1.DiagnosticError([
++                                (0, createTextDiagnostic_1.createTextDiagnostic)(`Package project "${project.data.tsConfigPath}" references non-package project "${reference.data.tsConfigPath}". Set rbxts.rojo on the package or compile the reference as a package.`),
++                            ]);
++                        }
+                         throw new DiagnosticError_1.DiagnosticError([
+                             (0, createTextDiagnostic_1.createTextDiagnostic)(`Project "${project.data.tsConfigPath}" must mount "${filePath}" at the same Roblox path as "${reference.data.rojoConfigPath}" (${(_a = ownerPath === null || ownerPath === void 0 ? void 0 : ownerPath.join(".")) !== null && _a !== void 0 ? _a : "unmapped"}). Referenced projects with their own rbxts.rojo require consistent module and runtime mounts.`),
                          ]);
                      }
                  }
@@ -190,16 +198,17 @@ index 81e033e..d642bf6 100644
          }
      }
 diff --git a/out/Project/functions/checkRojoConfig.js b/out/Project/functions/checkRojoConfig.js
-index 9de3ebe..0c218cc 100644
+index 9de3ebe..215ddcf 100644
 --- a/out/Project/functions/checkRojoConfig.js
 +++ b/out/Project/functions/checkRojoConfig.js
-@@ -8,17 +8,16 @@ const path_1 = __importDefault(require("path"));
+@@ -8,17 +8,21 @@ const path_1 = __importDefault(require("path"));
  const diagnostics_1 = require("../../Shared/diagnostics");
  const isPathDescendantOf_1 = require("../../Shared/util/isPathDescendantOf");
  const DiagnosticService_1 = require("../../TSTransformer/classes/DiagnosticService");
 -function checkRojoConfig(data, rojoResolver, rootDirs, pathTranslator) {
-+function checkRojoConfig(data, rojoResolver, sourceFiles, pathTranslator) {
++function checkRojoConfig(data, rojoResolver, rootDirs, inputFileNames, pathTranslator) {
      if (data.rojoConfigPath !== undefined) {
++        const inputs = inputFileNames.filter(fileName => rootDirs.some(rootDir => (0, isPathDescendantOf_1.isPathDescendantOf)(fileName, rootDir)));
          for (const partition of rojoResolver.getPartitions()) {
 -            for (const rootDir of rootDirs) {
 -                if ((0, isPathDescendantOf_1.isPathDescendantOf)(partition.fsPath, rootDir)) {
@@ -209,8 +218,12 @@ index 9de3ebe..0c218cc 100644
 -                    const suggestedPath = path_1.default.relative(rojoConfigDir, outPath);
 -                    DiagnosticService_1.DiagnosticService.addDiagnostic(diagnostics_1.errors.rojoPathInSrc(inputPath, suggestedPath));
 -                }
-+            const coversInput = sourceFiles.some(sourceFile => !sourceFile.isDeclarationFile && (0, isPathDescendantOf_1.isPathDescendantOf)(sourceFile.fileName, partition.fsPath));
-+            if (coversInput) {
++            if ((0, isPathDescendantOf_1.isPathDescendantOf)(partition.fsPath, pathTranslator.outDir))
++                continue;
++            if (!rootDirs.some(rootDir => (0, isPathDescendantOf_1.isPathDescendantOf)(partition.fsPath, rootDir) || (0, isPathDescendantOf_1.isPathDescendantOf)(rootDir, partition.fsPath))) {
++                continue;
++            }
++            if (inputs.some(fileName => (0, isPathDescendantOf_1.isPathDescendantOf)(fileName, partition.fsPath))) {
 +                const rojoConfigDir = path_1.default.dirname(data.rojoConfigPath);
 +                const outPath = pathTranslator.getOutputPath(partition.fsPath);
 +                const inputPath = path_1.default.relative(rojoConfigDir, partition.fsPath);
@@ -220,23 +233,15 @@ index 9de3ebe..0c218cc 100644
          }
      }
 diff --git a/out/Project/functions/compileFiles.js b/out/Project/functions/compileFiles.js
-index 2107213..087f44f 100644
+index 2107213..cfc602c 100644
 --- a/out/Project/functions/compileFiles.js
 +++ b/out/Project/functions/compileFiles.js
-@@ -22,7 +22,6 @@ const constants_1 = require("../../Shared/constants");
- const assert_1 = require("../../Shared/util/assert");
- const benchmark_1 = require("../../Shared/util/benchmark");
- const createTextDiagnostic_1 = require("../../Shared/util/createTextDiagnostic");
--const getRootDirs_1 = require("../../Shared/util/getRootDirs");
- const hasErrors_1 = require("../../Shared/util/hasErrors");
- const TSTransformer_1 = require("../../TSTransformer");
- const DiagnosticService_1 = require("../../TSTransformer/classes/DiagnosticService");
-@@ -55,7 +54,7 @@ function compileFiles(program, data, pathTranslator, sourceFiles) {
+@@ -55,7 +55,7 @@ function compileFiles(program, data, pathTranslator, sourceFiles) {
      for (const warning of rojoResolver.getWarnings()) {
          LogService_1.LogService.warn(warning);
      }
 -    (0, checkRojoConfig_1.checkRojoConfig)(data, rojoResolver, (0, getRootDirs_1.getRootDirs)(compilerOptions), pathTranslator);
-+    (0, checkRojoConfig_1.checkRojoConfig)(data, rojoResolver, sourceFiles, pathTranslator);
++    (0, checkRojoConfig_1.checkRojoConfig)(data, rojoResolver, (0, getRootDirs_1.getRootDirs)(compilerOptions), program.getRootFileNames(), pathTranslator);
      for (const sourceFile of program.getSourceFiles()) {
          if (!path_1.default.normalize(sourceFile.fileName).startsWith(data.nodeModulesPath)) {
              (0, checkFileName_1.checkFileName)(sourceFile.fileName);
@@ -266,6 +271,24 @@ index 3f42911..75da79e 100644
      }
      if (translator.buildInfoOutputPath) {
          files.set((0, ProjectGraph_1.projectPathKey)(translator.buildInfoOutputPath), undefined);
+diff --git a/out/Project/functions/getRojoProject.js b/out/Project/functions/getRojoProject.js
+index 5786c91..791dd7f 100644
+--- a/out/Project/functions/getRojoProject.js
++++ b/out/Project/functions/getRojoProject.js
+@@ -47,7 +47,12 @@ function getRojoProject(configPath) {
+                 const directory = typeof value === "string" ? value : value === null || value === void 0 ? void 0 : value.optional;
+                 if (typeof directory === "string") {
+                     const resolved = path_1.default.resolve(basePath, directory);
+-                    if (!/\.(?:lua|luau|json|toml)$/.test(resolved)) {
++                    if (/\.project\.json$/.test(resolved)) {
++                        if (fs_extra_1.default.existsSync(resolved)) {
++                            visitConfig(resolved);
++                        }
++                    }
++                    else if (!/\.(?:lua|luau|json|toml)$/.test(resolved)) {
+                         visitDirectory(resolved);
+                     }
+                 }
 diff --git a/out/Project/functions/validateCompilerOptions.js b/out/Project/functions/validateCompilerOptions.js
 index 8c10cab..9d89088 100644
 --- a/out/Project/functions/validateCompilerOptions.js
@@ -283,7 +306,7 @@ index 8c10cab..9d89088 100644
      if (opts.allowSyntheticDefaultImports !== ENFORCED_OPTIONS.allowSyntheticDefaultImports) {
          errors.push(`${y(`"allowSyntheticDefaultImports"`)} must be ${y(`true`)}`);
 diff --git a/out/TSTransformer/util/createImportExpression.js b/out/TSTransformer/util/createImportExpression.js
-index 78c22d6..f25f65f 100644
+index 78c22d6..23ceedc 100644
 --- a/out/TSTransformer/util/createImportExpression.js
 +++ b/out/TSTransformer/util/createImportExpression.js
 @@ -13,6 +13,7 @@ const diagnostics_1 = require("../../Shared/diagnostics");
@@ -301,9 +324,9 @@ index 78c22d6..f25f65f 100644
 -        const moduleRbxPath = state.rojoResolver.getRbxPathFromFilePath(moduleOutPath);
 +        let moduleRbxPath = state.rojoResolver.getRbxPathFromFilePath(moduleOutPath);
 +        if (!moduleRbxPath) {
-+            const realModuleOutPath = (0, realPathExistsSync_1.realPathExistsSync)(moduleOutPath);
-+            if (realModuleOutPath !== undefined) {
-+                moduleRbxPath = state.rojoResolver.getRbxPathFromFilePath(realModuleOutPath);
++            const realModuleDir = (0, realPathExistsSync_1.realPathExistsSync)(path_1.default.dirname(moduleOutPath));
++            if (realModuleDir !== undefined) {
++                moduleRbxPath = state.rojoResolver.getRbxPathFromFilePath(path_1.default.join(realModuleDir, path_1.default.basename(moduleOutPath)));
 +            }
 +        }
          if (!moduleRbxPath) {
