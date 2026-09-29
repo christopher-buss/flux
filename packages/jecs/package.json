@@ -52,7 +52,6 @@
 	"devDependencies": {
 		"@flux/test-utils": "workspace:*",
 		"@isentinel/jest-roblox": "catalog:test",
-		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
 		"@rbxts/flux": "workspace:*",
@@ -65,6 +64,7 @@
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
 		"rimraf": "catalog:node",
+		"roblox-ts": "catalog:build",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
 	},

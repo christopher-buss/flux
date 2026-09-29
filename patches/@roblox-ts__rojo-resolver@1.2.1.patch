@@ -1,0 +1,29 @@
+diff --git a/out/RojoResolver.js b/out/RojoResolver.js
+index 6a3ede2..25bd186 100644
+--- a/out/RojoResolver.js
++++ b/out/RojoResolver.js
+@@ -189,20 +189,24 @@ class RojoResolver {
+             this.isGame = true;
+         }
+         for (const childName of Object.keys(tree).filter(v => !v.startsWith("$"))) {
+             this.parseTree(basePath, childName, tree[childName]);
+         }
+         if (!doNotPush)
+             this.rbxPath.pop();
+     }
+     parsePath(itemPath) {
+         itemPath = convertToLuau(itemPath);
++        if (ROJO_FILE_REGEX.test(path_1.default.basename(itemPath))) {
++            this.parseConfig(itemPath, true);
++            return;
++        }
+         const realPath = fs_extra_1.default.pathExistsSync(itemPath) ? fs_extra_1.default.realpathSync(itemPath) : itemPath;
+         const ext = path_1.default.extname(itemPath);
+         if (ROJO_MODULE_EXTS.has(ext)) {
+             this.filePathToRbxPathMap.set(itemPath, [...this.rbxPath]);
+         }
+         else {
+             const isDirectory = fs_extra_1.default.pathExistsSync(realPath) && fs_extra_1.default.statSync(realPath).isDirectory();
+             if (isDirectory && fs_extra_1.default.readdirSync(realPath).includes(ROJO_DEFAULT_NAME)) {
+                 this.parseConfig(path_1.default.join(itemPath, ROJO_DEFAULT_NAME), true);
+             }

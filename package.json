@@ -29,7 +29,6 @@
 		"@isentinel/eslint-config": "catalog:lint",
 		"@isentinel/hooks": "catalog:lint",
 		"@isentinel/jest-roblox": "catalog:test",
-		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@roblox-ts/rojo-resolver": "catalog:test",
 		"@types/node": "catalog:types",
@@ -55,6 +54,7 @@
 		"pncat": "catalog:cli",
 		"rbxts-transformer-jest": "catalog:test",
 		"rimraf": "catalog:node",
+		"roblox-ts": "catalog:build",
 		"turbo": "catalog:build",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
