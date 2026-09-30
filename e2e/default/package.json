@@ -22,12 +22,12 @@
 		"@rbxts/services": "catalog:prod"
 	},
 	"devDependencies": {
-		"@isentinel/roblox-ts": "catalog:build",
 		"@isentinel/tsconfig": "catalog:tsc",
 		"@rbxts/compiler-types": "catalog:types",
 		"@rbxts/types": "catalog:types",
 		"@typescript/native-preview": "catalog:tsc",
 		"rimraf": "catalog:node",
+		"roblox-ts": "catalog:build",
 		"typescript": "catalog:tsc"
 	}
 }
