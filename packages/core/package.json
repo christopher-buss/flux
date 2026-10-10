@@ -73,7 +73,7 @@
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tsc"
 	},
-	"packageManager": "pnpm@11.25.0+sha512.5cde925b4f075f725eb71fbae18a42ffe784524789f19b61c731cb8721ec28aaee160e01a8d5af4fedb2a42cdbf300efe23db356b0d4a17b4d63e11f8ab7c956",
+	"packageManager": "pnpm@12.10.1+sha512.ba40a37eb1a370d60fea8c4cf1d364c13bcccef518e98ad2bcee954f539d38da37458e58261a3fa55e06523450ea0ffff9f497b135be41f2c15c1642bacace6c",
 	"publishConfig": {
 		"access": "public",
 		"provenance": true
