@@ -22,7 +22,13 @@ export type NativeReact = typeof ReactNamespace & {
 export declare const React: NativeReact;
 
 /** The renderer bound to {@link React}. Use its `act`, not the stock one. */
-export declare const ReactRoblox: typeof ReactRobloxNamespace;
+export declare const ReactRoblox: typeof ReactRobloxNamespace & {
+	/** Renders native updates synchronously, discarding interrupted work. */
+	readonly flushSync: <T>(callback: () => T) => T;
+};
+
+/** Mock scheduler used by the native reconciler. */
+export declare const Scheduler: typeof import("@flux/test-utils/scheduler");
 
 /**
  * `@rbxts/flux-react`'s public surface, compiled once and mounted here, so it

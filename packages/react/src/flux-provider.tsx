@@ -29,16 +29,19 @@ export interface FluxProviderProps<T extends ActionMap, Contexts extends string 
  * @template Contexts - Union of valid context name literals.
  * @param FluxContext - The React context that backs this provider.
  * @param subscribe - Update-signal subscribe function.
+ * @param getVersion - Reads the update signal's publication version.
  * @returns A FluxProvider component.
  */
 export function createFluxProvider<T extends ActionMap, Contexts extends string = string>(
 	FluxContext: React.Context<FluxContextValue<T, Contexts> | undefined>,
 	subscribe: (listener: () => void) => Disconnect,
+	getVersion: () => number,
 ): (props: FluxProviderProps<T, Contexts>) => React.ReactNode {
 	return ({ core, handle, children }: FluxProviderProps<T, Contexts>): React.ReactNode => {
 		const contextValue = useMemo<FluxContextValue<T, Contexts>>(() => {
 			return {
 				core,
+				getVersion,
 				handle,
 				subscribe,
 			};

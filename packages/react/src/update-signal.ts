@@ -23,6 +23,9 @@ export interface UpdateSignal {
 	 */
 	readonly fire: () => void;
 
+	/** Reads the latest explicit-flush publication version. */
+	readonly getVersion: () => number;
+
 	/**
 	 * Subscribe to updates.
 	 * @returns A disconnect function.
@@ -36,6 +39,7 @@ export interface UpdateSignal {
  */
 export function createUpdateSignal(): UpdateSignal {
 	const listeners = new Set<UpdateListener>();
+	let version = 0;
 
 	/** Runs every listener. Hoisted to keep firing free of allocation. */
 	const notifyAll = (): void => {
@@ -46,6 +50,8 @@ export function createUpdateSignal(): UpdateSignal {
 
 	return {
 		fire: () => {
+			version += 1;
+
 			// A game drives `flush()` off Heartbeat, so this runs every frame
 			// whether or not any Flux hook is mounted. Entering a batch with
 			// nothing to notify would still cost a protected call and a priority
@@ -56,6 +62,8 @@ export function createUpdateSignal(): UpdateSignal {
 
 			batchSync(notifyAll);
 		},
+
+		getVersion: () => version,
 
 		subscribe: (listener: UpdateListener): Disconnect => {
 			listeners.add(listener);

@@ -20,7 +20,7 @@
 							"$path": "node_modules/@rbxts/flux"
 						},
 						"flux-jecs": {
-							"$path": "../../packages/jecs/dist"
+							"$path": "node_modules/@rbxts/flux-jecs"
 						}
 					},
 					"@rbxts-js": {
