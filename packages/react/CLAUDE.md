@@ -84,7 +84,7 @@ second, patched react-lua is mounted beside it at
 `rbxts_include.native_store_hook` — built at postinstall by
 `scripts/generate-native-store-hook.ts` from the `patches/@rbxts-js__*` files —
 and reached through `#test/native-stack`. `src/native-store-hook.spec.tsx` and
-`src/hooks/use-action.native.spec.tsx` use it. See
+the `native store hook` block in `src/hooks/use-action.spec.tsx` use it. See
 `docs/adr/0007-native-store-hook-on-a-concurrent-root.md`.
 
 **Native-leg specs build elements with `NativeStack.React.createElement`, not
