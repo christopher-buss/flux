@@ -72,6 +72,22 @@ describe("createFluxJecs", () => {
 		expect(world.has(entity, flux.contexts.ui)).toBeTrue();
 	});
 
+	it("should keep a context tag the entity already carries", () => {
+		expect.assertions(1);
+
+		const world = Jecs.world();
+		const flux = createFluxJecs(world, {
+			actions: TEST_ACTIONS,
+			contexts: TEST_CONTEXTS,
+		});
+
+		const entity = world.entity();
+		world.add(entity, flux.contexts.gameplay);
+		flux.register(entity, new Instance("Folder"), "gameplay");
+
+		expect(world.has(entity, flux.contexts.gameplay)).toBeTrue();
+	});
+
 	it("should use provided actionStateComponent", () => {
 		expect.assertions(1);
 
