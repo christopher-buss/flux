@@ -144,7 +144,7 @@ export function createFluxReact<T extends ActionMap, Contexts extends string = s
 
 	return {
 		flush: signal.fire,
-		FluxProvider: createFluxProvider(FluxContext, signal.subscribe),
+		FluxProvider: createFluxProvider(FluxContext, signal.subscribe, signal.getVersion),
 		useAction: createUseAction(useFluxContext),
 		useActiveContext: createUseActiveContext<T, Contexts>(useFluxContext),
 		useBindings: createUseBindings(useFluxContext),

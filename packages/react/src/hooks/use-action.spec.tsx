@@ -13,6 +13,7 @@ import {
 	TEST_ACTIONS,
 	TEST_CONTEXTS,
 } from "#test/fixtures";
+import type { FluxActionState } from "#test/probes";
 import { createCountingProbe, createLabeledJumpProbe } from "#test/probes";
 import { createFluxReact } from "../create-flux-react";
 
@@ -226,7 +227,91 @@ describe("useAction", () => {
 	});
 
 	describe("handle and rerender resync", () => {
-		it("should delay resync when the Provider handle prop changes until the next flush", () => {
+		it("should read a replacement explicit handle before the next flush", () => {
+			expect.assertions(2);
+
+			afterThis(cleanup);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const firstHandle = core.register(new Instance("Folder"), "gameplay");
+			const secondHandle = core.register(new Instance("Folder"), "gameplay");
+			const { FluxProvider, useAction } = createFluxReact<
+				typeof TEST_ACTIONS,
+				TestContexts
+			>();
+			const selectJump = (state: FluxActionState): boolean => state.pressed("jump");
+
+			core.simulateAction(firstHandle, "jump", true);
+			core.update(FRAME_TIME);
+
+			function Host({ handle }: { readonly handle: InputHandle }): React.ReactNode {
+				return (
+					<FluxProvider core={core} handle={firstHandle}>
+						<Probe handle={handle} />
+					</FluxProvider>
+				);
+			}
+
+			function Probe({ handle }: { readonly handle: InputHandle }): React.ReactNode {
+				const isJumping = useAction(handle, selectJump);
+				return <textlabel Text={`explicit:${tostring(isJumping)}`} />;
+			}
+
+			const { queryByText, rerender } = render(<Host handle={firstHandle} />);
+			expect(queryByText("explicit:true")).toBeDefined();
+
+			rerender(<Host handle={secondHandle} />);
+
+			expect(queryByText("explicit:false")).toBeDefined();
+		});
+
+		it("should read a replacement action selector before the next flush", () => {
+			expect.assertions(2);
+
+			afterThis(cleanup);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const { FluxProvider, useAction } = createFluxReact<
+				typeof TEST_ACTIONS,
+				TestContexts
+			>();
+			const selectJump = (state: FluxActionState): boolean => state.pressed("jump");
+			const selectInteract = (state: FluxActionState): boolean => state.pressed("interact");
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+
+			function Host({
+				selector,
+			}: {
+				readonly selector: (state: FluxActionState) => boolean;
+			}): React.ReactNode {
+				return (
+					<FluxProvider core={core} handle={handle}>
+						<Probe selector={selector} />
+					</FluxProvider>
+				);
+			}
+
+			function Probe({
+				selector,
+			}: {
+				readonly selector: (state: FluxActionState) => boolean;
+			}): React.ReactNode {
+				const isSelected = useAction(selector);
+				return <textlabel Text={`selected:${tostring(isSelected)}`} />;
+			}
+
+			const { queryByText, rerender } = render(<Host selector={selectJump} />);
+			expect(queryByText("selected:true")).toBeDefined();
+
+			rerender(<Host selector={selectInteract} />);
+
+			expect(queryByText("selected:false")).toBeDefined();
+		});
+
+		it("should read the replacement Provider handle before the next flush", () => {
 			expect.assertions(3);
 
 			afterThis(() => {
@@ -259,7 +344,7 @@ describe("useAction", () => {
 
 			rerender(<Host handle={handleB} />);
 
-			expect(queryByText("probe:true")).toBeDefined();
+			expect(queryByText("probe:false")).toBeDefined();
 
 			flux.flush();
 

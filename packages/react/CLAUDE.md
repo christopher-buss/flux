@@ -36,17 +36,15 @@ Shared fixtures and probes: `test/fixtures.ts`, `test/probes.tsx`.
 
 ## Constraints
 
-**`useAction` bail-out uses a ref, not `setValue(prev)`.** React-Lua's bail-out
-doesn't reliably skip the first post-change flush when the updater returns
-`previous`. The wrapper compares `lastValueRef.current` and calls `setValue`
-only on real change. Don't "simplify" back to
-`setValue((prev) => prev === x ? prev : x)` — it reintroduces spurious
-rerenders.
-
-**`useAction` resyncs late on handle/selector change.** A Provider `handle` swap
-or new selector identity does not update the rendered value immediately — the
-next `flush()` catches it via the subscribe callback. Locked by the
-`handle and rerender resync` block in `src/hooks/use-action.spec.tsx`.
+**Action snapshots are cached per reader and explicit flush.** `useAction` and
+`useCaptureAction` use the native/shim store hook with a memoized closure owning
+each reader's cache. Changed core, handle, selector, or token dependencies read
+immediately; unchanged dependencies keep changes without a flush cached. Each
+`flush()` advances the publication version, even with no listeners. Fresh-table
+selectors produce a new snapshot each flush; unchanged primitive selections do
+not rerender. Keep caches inside their memoized closures: a shared cell lets an
+abandoned alternate reader invalidate the committed snapshot. Locked by the
+replacement and selector-semantics specs.
 
 **`useCapture`'s `enabled` rides on the request, not the effect alone.** The
 facade decides liveness during render by comparing request identity, so gating
@@ -85,8 +83,8 @@ so `selectStoreHook` answers with the shim exactly as it does for a consumer. A
 second, patched react-lua is mounted beside it at
 `rbxts_include.native_store_hook` — built at postinstall by
 `scripts/generate-native-store-hook.ts` from the `patches/@rbxts-js__*` files —
-and reached through `#test/native-stack`. `src/native-store-hook.spec.tsx` is
-the only spec that uses it. See
+and reached through `#test/native-stack`. `src/native-store-hook.spec.tsx` and
+`src/hooks/use-action.native.spec.tsx` use it. See
 `docs/adr/0007-native-store-hook-on-a-concurrent-root.md`.
 
 **Native-leg specs build elements with `NativeStack.React.createElement`, not
@@ -108,11 +106,10 @@ Flux bug — it is React 18's own timing, and neither path shows a torn tree.
 
 **Batch through `batchSync`, never `flushSync` directly.** react-lua drains the
 sync queue in every `flushSync`'s finally block, including one nested inside
-another (`ReactFiberWorkLoop.new.lua:1471`). A second `flushSync` therefore
-commits whatever the listener set scheduled before it, splitting one `flush()`
-in two: shim consumers first at sync lane, `useAction`/`useCaptureAction` after
-at default lane. `batchSync` runs nested calls inline, so one `flush()` stays
-one commit. Locked by `src/flush-batching.spec.tsx`.
+another. A second `flushSync` commits whatever the listener set has already
+scheduled, splitting one publication across commits. `batchSync` runs nested
+calls inline, so the native/shim readers notified by one `flush()` share one
+commit. Locked by the flush-batching specs.
 
 **JSX intrinsics exclude `Name` and `Parent`.** `InstanceAttributes` in
 `@rbxts/react` omits them. Distinguish test probes by `Text` + `queryByText`,

@@ -189,6 +189,38 @@ export function selectStoreHook(react: MaybeStoreReact): StoreHook {
 export const useSyncExternalStore: StoreHook = selectStoreHook(React);
 
 /**
+ * Caches a reader's snapshot for each explicit-flush publication version.
+ *
+ * Each memoized reader owns its cache, so an abandoned render with another
+ * reader cannot invalidate the committed render's snapshot. Source changes
+ * without a flush stay cached until the version or reader changes.
+ *
+ * @template T - The selected snapshot type.
+ * @param getVersion - Reads the store's publication version.
+ * @param read - Selects the value for this reader.
+ * @returns A snapshot reader stable for the same version and reader.
+ */
+export function useVersionedSnapshot<T>(getVersion: () => number, read: () => T): () => T {
+	return useMemo(() => {
+		let hasValue = false;
+		let version = 0;
+		let value: T;
+
+		return (): T => {
+			const currentVersion = getVersion();
+			if (hasValue && version === currentVersion) {
+				return value;
+			}
+
+			value = read();
+			version = currentVersion;
+			hasValue = true;
+			return value;
+		};
+	}, [getVersion, read]);
+}
+
+/**
  * - Wraps a reader that builds a fresh value per call in an identity cache.
  * - Returns a stable reader that hands back the previous reference whenever
  *   `isEqual` says the store has not moved, which is what

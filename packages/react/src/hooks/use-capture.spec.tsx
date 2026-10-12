@@ -1542,6 +1542,93 @@ describe("useCapture", () => {
 	});
 
 	describe("useCaptureAction", () => {
+		it("should read a replacement capture token before the next flush", () => {
+			expect.assertions(2);
+
+			afterThis(cleanup);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const firstHandle = core.register(new Instance("Folder"), "gameplay");
+			const secondHandle = core.register(new Instance("Folder"), "gameplay");
+			const firstToken = core.getState(firstHandle).capture("jump");
+			const secondToken = core.getState(secondHandle).capture("jump");
+			const { FluxProvider, useCaptureAction } = createFluxReact<
+				typeof TEST_ACTIONS,
+				TestContexts
+			>();
+			const selectPressed = (token: JumpToken): boolean => token.pressed();
+
+			core.simulateAction(firstHandle, "jump", true);
+			core.update(FRAME_TIME);
+
+			function Host({ token }: { readonly token: JumpToken }): React.ReactNode {
+				return (
+					<FluxProvider core={core} handle={firstHandle}>
+						<Probe token={token} />
+					</FluxProvider>
+				);
+			}
+
+			function Probe({ token }: { readonly token: JumpToken }): React.ReactNode {
+				const isPressed = useCaptureAction(token, selectPressed);
+				return <textlabel Text={`captured:${tostring(isPressed)}`} />;
+			}
+
+			const { queryByText, rerender } = render(<Host token={firstToken} />);
+			expect(queryByText("captured:true")).toBeDefined();
+
+			rerender(<Host token={secondToken} />);
+
+			expect(queryByText("captured:false")).toBeDefined();
+		});
+
+		it("should read a replacement capture selector before the next flush", () => {
+			expect.assertions(2);
+
+			afterThis(cleanup);
+
+			const core = createCore({ actions: TEST_ACTIONS, contexts: TEST_CONTEXTS });
+			const handle = core.register(new Instance("Folder"), "gameplay");
+			const token = core.getState(handle).capture("jump");
+			const { FluxProvider, useCaptureAction } = createFluxReact<
+				typeof TEST_ACTIONS,
+				TestContexts
+			>();
+			const selectPressed = (owned: JumpToken): boolean => owned.pressed();
+			const selectReleased = (owned: JumpToken): boolean => !owned.pressed();
+
+			core.simulateAction(handle, "jump", true);
+			core.update(FRAME_TIME);
+
+			function Host({
+				selector,
+			}: {
+				readonly selector: (owned: JumpToken) => boolean;
+			}): React.ReactNode {
+				return (
+					<FluxProvider core={core} handle={handle}>
+						<Probe selector={selector} />
+					</FluxProvider>
+				);
+			}
+
+			function Probe({
+				selector,
+			}: {
+				readonly selector: (owned: JumpToken) => boolean;
+			}): React.ReactNode {
+				const isSelected = useCaptureAction(token, selector);
+				return <textlabel Text={`selected:${tostring(isSelected)}`} />;
+			}
+
+			const { queryByText, rerender } = render(<Host selector={selectPressed} />);
+			expect(queryByText("selected:true")).toBeDefined();
+
+			rerender(<Host selector={selectReleased} />);
+
+			expect(queryByText("selected:false")).toBeDefined();
+		});
+
 		it("should re-render when the selected value changes and bail out when it does not", () => {
 			expect.assertions(4);
 

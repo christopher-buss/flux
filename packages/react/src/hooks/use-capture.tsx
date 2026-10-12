@@ -2,6 +2,7 @@ import type { ActionMap, AllActions, CaptureToken, FluxCore, InputHandle } from 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "@rbxts/react";
 
 import type { FluxContextValue } from "../flux-context";
+import { useSyncExternalStore, useVersionedSnapshot } from "../use-sync-external-store";
 
 /**
  * Options accepted by `useCapture`.
@@ -369,10 +370,11 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 }
 
 /**
- * - Builds the `useCaptureAction` hook for a FluxReact instance.
- * - Uses ref-based bail-out (NOT `setValue(prev)`) for the same reason
- *   `useAction` does: React-Lua does not reliably skip the first post-change
- *   flush when the functional updater returns the previous value.
+ * Builds the `useCaptureAction` hook for a FluxReact instance.
+ *
+ * Snapshots refresh on explicit flushes or a changed token or selector.
+ * With unchanged dependencies, token changes without a flush remain cached,
+ * including capture acquisition in an effect.
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
@@ -386,28 +388,11 @@ export function createUseCaptureAction<T extends ActionMap, Contexts extends str
 		token: Token,
 		selector: (token: Token) => R,
 	): R {
-		const { subscribe } = useFluxContext();
+		const { getVersion, subscribe } = useFluxContext();
+		const read = useMemo(() => () => selector(token), [token, selector]);
+		const getSnapshot = useVersionedSnapshot(getVersion, read);
 
-		const [value, setValue] = useState(() => selector(token));
-		const lastValueRef = useRef(value);
-
-		useEffect(() => {
-			lastValueRef.current = value;
-		});
-
-		useEffect(() => {
-			return subscribe(() => {
-				const updated = selector(token);
-				if (lastValueRef.current === updated) {
-					return;
-				}
-
-				lastValueRef.current = updated;
-				setValue(updated);
-			});
-		}, [subscribe, token, selector]);
-
-		return value;
+		return useSyncExternalStore(subscribe, getSnapshot);
 	}
 
 	return useCaptureAction;

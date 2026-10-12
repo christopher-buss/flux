@@ -28,5 +28,6 @@ return {
 	FluxReact = TS.import(script, rbxts, "flux-react"),
 	React = require(rbxts.react),
 	ReactRoblox = require(rbxts["react-roblox"]),
+	Scheduler = require(rbxtsJs.Scheduler),
 	StoreHook = TS.import(script, rbxts["flux-react"], "use-sync-external-store"),
 }

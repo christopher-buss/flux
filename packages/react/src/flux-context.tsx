@@ -13,6 +13,8 @@ import type { Disconnect } from "./update-signal";
 export interface FluxContextValue<T extends ActionMap, Contexts extends string = string> {
 	/** The FluxCore instance supplied to the FluxProvider. */
 	readonly core: FluxCore<T, Contexts>;
+	/** Reads the latest explicit-flush publication version. */
+	readonly getVersion: () => number;
 	/** Default InputHandle to use when a hook omits the handle argument. */
 	readonly handle: InputHandle;
 	/** Subscribes a listener to update-signal flushes. */
