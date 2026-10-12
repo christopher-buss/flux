@@ -434,15 +434,6 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>({
 	releasedRef,
 	requestRef,
 }: CaptureReader<T, Contexts>): CaptureTokenSurface {
-	function current(): CaptureHold<T, Contexts> | undefined {
-		const hold = holdRef.current;
-		if (hold?.request !== requestRef.current) {
-			return undefined;
-		}
-
-		return hold;
-	}
-
 	function currentForCancel(): CaptureHold<T, Contexts> | undefined {
 		const hold = holdRef.current;
 		if (hold === undefined) {
@@ -470,7 +461,11 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>({
 			return undefined;
 		}
 
-		return current()?.token;
+		// The acquiring effect sets the hold before it clears `releasedRef`, and
+		// nothing clears the hold, so an unreleased facade always has one.
+		const hold = holdRef.current;
+		assert(hold !== undefined, "an unreleased capture has no hold");
+		return hold.request === requestRef.current ? hold.token : undefined;
 	}
 
 	return {

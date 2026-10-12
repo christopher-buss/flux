@@ -427,6 +427,18 @@ describe("loadBindings", () => {
 		expect(getKeyCodes(secondParent, "gameplay", "jump")).toContain(Enum.KeyCode.Space);
 		expect(getKeyCodes(secondParent, "ui", "jump")).toContain(Enum.KeyCode.Return);
 	});
+
+	it("should record no override for an entry with no platform buckets", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: REBIND_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.loadBindings(handle, { jump: {} });
+
+		expect(core.serializeBindings(handle).jump).toBeUndefined();
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([Enum.KeyCode.Space]);
+	});
 });
 
 describe("loadBindings unknown action", () => {
@@ -696,6 +708,21 @@ describe("resetBindingsForPlatform", () => {
 
 		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
 			Enum.KeyCode.F,
+			Enum.KeyCode.ButtonA,
+		]);
+	});
+
+	it("should be a no-op for an action with no overrides at all", () => {
+		expect.assertions(2);
+
+		const parent = new Instance("Folder");
+		const core = createCore({ actions: REBIND_ACTIONS, contexts: PLATFORM_CONTEXTS });
+		const handle = core.register(parent, "gameplay");
+		core.resetBindingsForPlatform(handle, "jump", "gamepad");
+
+		expect(core.serializeBindings(handle).jump).toBeUndefined();
+		expect(getKeyCodes(parent, "gameplay", "jump")).toStrictEqual([
+			Enum.KeyCode.Space,
 			Enum.KeyCode.ButtonA,
 		]);
 	});

@@ -4,7 +4,7 @@ import { afterThis } from "@rbxts/jest-utils";
 import React, { useEffect, useLayoutEffect, useState } from "@rbxts/react";
 
 import type { ExternalStore } from "#test/probes";
-import { createExternalStore, makeRenderCounter } from "#test/probes";
+import { createExternalStore, makeLog, makeRenderCounter } from "#test/probes";
 import type { StoreHook } from "./use-sync-external-store";
 import {
 	selectStoreHook,
@@ -211,6 +211,35 @@ describe("useSyncExternalStore", () => {
 		expect(() => render(<Probe />)).toThrow(
 			"the result of getSnapshot must be cached, or the component re-renders forever",
 		);
+	});
+
+	it("should read the snapshot once per render outside dev", () => {
+		expect.assertions(1);
+
+		_G.__DEV__ = false;
+		afterThis(() => {
+			_G.__DEV__ = true;
+		});
+		afterThis(cleanup);
+
+		const store = createExternalStore("initial");
+		const reads = makeRenderCounter();
+		const readsPerRender = makeLog<number>();
+		function getSnapshot(): string {
+			reads.tick();
+			return store.getState();
+		}
+
+		function Probe(): React.ReactNode {
+			const before = reads.get();
+			const value = useSyncExternalStoreShim(store.subscribe, getSnapshot);
+			readsPerRender.push(reads.get() - before);
+			return <textlabel Text={`value:${value}`} />;
+		}
+
+		render(<Probe />);
+
+		expect(readsPerRender.entries()).toEqual([1]);
 	});
 });
 
