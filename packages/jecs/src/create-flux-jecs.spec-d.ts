@@ -1,4 +1,4 @@
-import type { ActionState, FluxCore } from "@rbxts/flux";
+import type { ActionState, FluxCore, InputHandle } from "@rbxts/flux";
 import { bool, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import type { Entity, Tag } from "@rbxts/jecs";
 import Jecs from "@rbxts/jecs";
@@ -6,6 +6,7 @@ import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { createFluxJecs } from "./create-flux-jecs";
+import type { FluxJecs } from "./types";
 
 const actions = defineActions({
 	jump: bool(),
@@ -261,6 +262,24 @@ describe("createFluxJecs", () => {
 			expectTypeOf<typeof flux.update>().parameter(0).toEqualTypeOf<number>();
 			expectTypeOf<typeof flux.update>().returns.toEqualTypeOf<void>();
 		});
+	});
+});
+
+describe("FluxJecs coverage of FluxCore", () => {
+	it("should forward every FluxCore method that takes a handle", () => {
+		type Core = FluxCore<typeof actions, "gameplay" | "ui">;
+		type HandleMethods = {
+			[K in keyof Core]: Parameters<Core[K]> extends [InputHandle, ...Array<unknown>]
+				? K
+				: never;
+		}[keyof Core];
+		// `registerAs`/`subscribeAs` surface as `register`/`subscribe`.
+		type Missing = Exclude<
+			HandleMethods,
+			"registerAs" | "subscribeAs" | keyof FluxJecs<typeof actions, typeof contexts>
+		>;
+
+		expectTypeOf<Missing>().toBeNever();
 	});
 });
 

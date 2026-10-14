@@ -384,17 +384,12 @@ export function createUseCapture<
  * With unchanged dependencies, token changes without a flush remain cached,
  * including capture acquisition in an effect.
  *
- * @template T - The action map type.
- * @template Contexts - Union of valid context name literals.
- * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useCaptureAction` hook.
  */
-export function createUseCaptureAction<
-	T extends ActionMap,
-	Contexts extends string = string,
-	Handle extends number = InputHandle,
->(useFluxContext: () => FluxContextValue<T, Contexts, Handle>): FluxUseCaptureAction {
+export function createUseCaptureAction(
+	useFluxContext: () => Pick<FluxContextValue<ActionMap>, "getVersion" | "subscribe">,
+): FluxUseCaptureAction {
 	function useCaptureAction<Token extends CaptureTokenLike, R>(
 		token: Token,
 		selector: (token: Token) => R,

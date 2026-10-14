@@ -1,6 +1,4 @@
-import type { ActionMap, InputHandle } from "@rbxts/flux";
-
-import type { FluxContextValue } from "../flux-context";
+import type { InputHandle } from "@rbxts/flux";
 
 /**
  * `useFluxHandle` hook type.
@@ -12,12 +10,9 @@ export type FluxUseFluxHandle<Handle extends number = InputHandle> = () => Handl
 /**
  * - Builds the `useFluxHandle` hook for a FluxReact instance.
  * - Returns the default handle supplied to the nearest `<FluxProvider>`, typed
- *   by the source: an `InputHandle` for `FluxCore`, an `Entity` for
- *   `FluxJecs`. Pair it with `useFluxCore` for imperative calls on the
- *   Provider's consumer.
+ *   by the source (see `FluxSource`). Pair it with `useFluxCore` for
+ *   imperative calls on the Provider's consumer.
  *
- * @template T - The action map type.
- * @template Contexts - Union of valid context name literals.
  * @template Handle - The handle type the source is keyed by.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useFluxHandle` hook.
@@ -28,10 +23,8 @@ export type FluxUseFluxHandle<Handle extends number = InputHandle> = () => Handl
  * return <textbutton Event={{ Activated: () => flux.addContext(handle, "placement") }} />;
  * ```
  */
-export function createUseFluxHandle<
-	T extends ActionMap,
-	Contexts extends string,
-	Handle extends number,
->(useFluxContext: () => FluxContextValue<T, Contexts, Handle>): FluxUseFluxHandle<Handle> {
+export function createUseFluxHandle<Handle extends number>(
+	useFluxContext: () => { readonly handle: Handle },
+): FluxUseFluxHandle<Handle> {
 	return (): Handle => useFluxContext().handle;
 }

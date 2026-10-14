@@ -184,18 +184,21 @@ export function createFluxReact<
 	FluxContext.displayName = "FluxContext";
 
 	const useFluxContext = createUseFluxContext(FluxContext);
+	// Hooks only read through the `FluxSource` surface; widening once lets
+	// every factory infer its type arguments.
+	const useHookContext: () => FluxContextValue<T, Contexts, Handle> = useFluxContext;
 
 	return {
 		flush: signal.fire,
 		FluxProvider: createFluxProvider(FluxContext, signal.subscribe, signal.getVersion),
-		useAction: createUseAction<T, Contexts, Handle>(useFluxContext),
-		useActiveContext: createUseActiveContext<T, Contexts, Handle>(useFluxContext),
-		useBindings: createUseBindings<T, Contexts, Handle>(useFluxContext),
-		useCapture: createUseCapture<T, Contexts, Handle>(useFluxContext),
-		useCaptureAction: createUseCaptureAction<T, Contexts, Handle>(useFluxContext),
-		useFluxCore: createUseFluxCore<T, Contexts, Source>(useFluxContext),
-		useFluxHandle: createUseFluxHandle<T, Contexts, Handle>(useFluxContext),
-		useInputContext: createUseInputContext<T, Contexts, Handle>(useFluxContext),
+		useAction: createUseAction(useHookContext),
+		useActiveContext: createUseActiveContext(useHookContext),
+		useBindings: createUseBindings(useHookContext),
+		useCapture: createUseCapture(useHookContext),
+		useCaptureAction: createUseCaptureAction(useFluxContext),
+		useFluxCore: createUseFluxCore(useFluxContext),
+		useFluxHandle: createUseFluxHandle(useFluxContext),
+		useInputContext: createUseInputContext(useHookContext),
 		useInputPlatform,
 	};
 }
