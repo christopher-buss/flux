@@ -2,9 +2,16 @@ import type {
 	ActionMap,
 	ActionState,
 	ActionValue,
+	AllActions,
+	BindingForAction,
+	BindingLike,
+	BindingOrigin,
+	BindingState,
 	ContextConfig,
 	CreateCoreOptions,
 	FluxCore,
+	InputPlatform,
+	RebindPlatform,
 } from "@rbxts/flux";
 import type { Entity, Tag } from "@rbxts/jecs";
 
@@ -73,12 +80,97 @@ export interface FluxJecs<
 	destroy(): void;
 
 	/**
+	 * Returns the effective bindings for all actions on the given entity.
+	 *
+	 * @param entity - The entity to query.
+	 * @param context - Optional context to scope the query.
+	 * @returns A record mapping every action name to its effective bindings.
+	 * @see FluxCore.getAllBindings
+	 */
+	getAllBindings(
+		entity: Entity,
+		context?: keyof C & string,
+	): Record<AllActions<T>, ReadonlyArray<BindingLike>>;
+
+	/**
+	 * Reports where one platform's bindings for an action come from.
+	 *
+	 * @param entity - The entity to query.
+	 * @param action - The action name to query.
+	 * @param platform - The platform whose row is being rendered.
+	 * @param context - Optional context to scope the query.
+	 * @returns `"undeclared"`, `"override"`, or `"default"`.
+	 * @see FluxCore.getBindingOrigin
+	 */
+	getBindingOrigin(
+		entity: Entity,
+		action: AllActions<T>,
+		platform: InputPlatform,
+		context?: keyof C & string,
+	): BindingOrigin;
+
+	/**
+	 * Returns the effective bindings for a single action on the given entity.
+	 *
+	 * @param entity - The entity to query.
+	 * @param action - The action name to query.
+	 * @param context - Optional context to scope the query.
+	 * @returns The effective bindings for the action.
+	 * @see FluxCore.getBindings
+	 */
+	getBindings(
+		entity: Entity,
+		action: AllActions<T>,
+		context?: keyof C & string,
+	): ReadonlyArray<BindingLike>;
+
+	/**
+	 * Returns the effective bindings for a single action on one platform.
+	 *
+	 * @param entity - The entity to query.
+	 * @param action - The action name to query.
+	 * @param platform - The platform to read.
+	 * @param context - Optional context to scope the query.
+	 * @returns That platform's effective bindings.
+	 * @see FluxCore.getBindingsForPlatform
+	 */
+	getBindingsForPlatform(
+		entity: Entity,
+		action: AllActions<T>,
+		platform: InputPlatform,
+		context?: keyof C & string,
+	): ReadonlyArray<BindingLike>;
+
+	/**
+	 * Returns info about a context for the given entity.
+	 *
+	 * @param entity - The entity to query.
+	 * @param context - The context name to query.
+	 * @returns Context info record with `active`, `priority`, `sink`, and `actions`.
+	 * @see FluxCore.getContextInfo
+	 */
+	getContextInfo(
+		entity: Entity,
+		context: keyof C & string,
+	): ReturnType<FluxCore<T, keyof C & string>["getContextInfo"]>;
+
+	/**
 	 * Returns the active contexts for the given entity.
 	 *
 	 * @param entity - The entity to query.
 	 * @returns Read-only array of active context names.
 	 */
 	getContexts(entity: Entity): ReadonlyArray<keyof C & string>;
+
+	/**
+	 * Returns the value an inert read of the action reports.
+	 *
+	 * @template A - The action name, narrowing the returned value type.
+	 * @param action - The action to resolve.
+	 * @returns The action type's neutral value.
+	 * @see FluxCore.getNeutralValue
+	 */
+	getNeutralValue<A extends AllActions<T>>(action: A): ActionValue<T, A>;
 
 	/**
 	 * Returns the action state query interface for the given entity.
@@ -96,6 +188,58 @@ export interface FluxJecs<
 	 * @returns True if the context is active.
 	 */
 	hasContext(entity: Entity, context: keyof C & string): boolean;
+
+	/**
+	 * Loads serialized bindings for the given entity, merging with defaults.
+	 *
+	 * @param entity - The entity to load bindings into.
+	 * @param data - The serialized binding state to load.
+	 * @see FluxCore.loadBindings
+	 */
+	loadBindings(entity: Entity, data: BindingState<T>): void;
+
+	/**
+	 * Replaces all bindings for a single action on the given entity.
+	 *
+	 * @template A - The action name.
+	 * @param entity - The entity to rebind.
+	 * @param action - The action to rebind.
+	 * @param bindings - The new bindings for the action.
+	 * @see FluxCore.rebind
+	 */
+	rebind<A extends AllActions<T>>(
+		entity: Entity,
+		action: A,
+		bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
+	): void;
+
+	/**
+	 * Replaces all bindings for all actions on the given entity.
+	 *
+	 * @param entity - The entity to rebind.
+	 * @param bindings - The complete binding state to apply.
+	 * @see FluxCore.rebindAll
+	 */
+	rebindAll(entity: Entity, bindings: BindingState<T>): void;
+
+	/**
+	 * Replaces one platform's bindings for a single action on the given
+	 * entity, leaving every other platform untouched.
+	 *
+	 * @template A - The action name.
+	 * @param entity - The entity to rebind.
+	 * @param action - The action to rebind.
+	 * @param platform - The platform whose bindings to replace.
+	 * @param bindings - The new bindings for that platform.
+	 * @throws If called on a subscribed entity.
+	 * @see FluxCore.rebindForPlatform
+	 */
+	rebindForPlatform<A extends AllActions<T>>(
+		entity: Entity,
+		action: A,
+		platform: RebindPlatform,
+		bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
+	): void;
 
 	/**
 	 * Registers an entity as an input consumer and activates contexts.
@@ -124,6 +268,54 @@ export interface FluxJecs<
 	 * @param context - The context name to deactivate.
 	 */
 	removeContext(entity: Entity, context: keyof C & string): void;
+
+	/**
+	 * Resets all action bindings for the given entity to their defaults.
+	 *
+	 * @param entity - The entity to reset.
+	 * @see FluxCore.resetAllBindings
+	 */
+	resetAllBindings(entity: Entity): void;
+
+	/**
+	 * Resets one platform's bindings for every action on the given entity.
+	 *
+	 * @param entity - The entity to reset.
+	 * @param platform - The platform to restore to its defaults.
+	 * @throws If called on a subscribed entity.
+	 * @see FluxCore.resetAllBindingsForPlatform
+	 */
+	resetAllBindingsForPlatform(entity: Entity, platform: RebindPlatform): void;
+
+	/**
+	 * Resets bindings for a single action on the given entity to its default.
+	 *
+	 * @param entity - The entity to reset.
+	 * @param action - The action whose bindings to reset.
+	 * @see FluxCore.resetBindings
+	 */
+	resetBindings(entity: Entity, action: AllActions<T>): void;
+
+	/**
+	 * Resets one platform's bindings for a single action on the given entity.
+	 *
+	 * @param entity - The entity to reset.
+	 * @param action - The action whose bindings to reset.
+	 * @param platform - The platform to restore to its defaults.
+	 * @throws If called on a subscribed entity.
+	 * @see FluxCore.resetBindingsForPlatform
+	 */
+	resetBindingsForPlatform(entity: Entity, action: AllActions<T>, platform: RebindPlatform): void;
+
+	/**
+	 * Serializes the entity's active binding overrides for persistence.
+	 *
+	 * @param entity - The entity to serialize.
+	 * @returns A sparse record of per-platform overrides keyed by action name.
+	 * @throws If called on a subscribed entity.
+	 * @see FluxCore.serializeBindings
+	 */
+	serializeBindings(entity: Entity): BindingState<T>;
 
 	/**
 	 * Injects a synthetic action value for testing or replay.
