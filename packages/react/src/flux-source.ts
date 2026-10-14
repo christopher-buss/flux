@@ -24,29 +24,53 @@ import type {
  * @template Handle - The handle type every read is keyed by.
  */
 export interface FluxSource<T extends ActionMap, Contexts extends string, Handle extends number> {
-	/** @see FluxCore.getBindings */
+	/**
+	 * Returns the effective bindings for one action.
+	 *
+	 * @see FluxCore.getBindings
+	 */
 	getBindings(handle: Handle, action: AllActions<T>): ReadonlyArray<BindingLike>;
 
-	/** @see FluxCore.getBindingsForPlatform */
+	/**
+	 * Returns one platform's effective bindings for one action.
+	 *
+	 * @see FluxCore.getBindingsForPlatform
+	 */
 	getBindingsForPlatform(
 		handle: Handle,
 		action: AllActions<T>,
 		platform: InputPlatform,
 	): ReadonlyArray<BindingLike>;
 
-	/** @see FluxCore.getContextInfo */
+	/**
+	 * Returns static config plus active state for a context.
+	 *
+	 * @see FluxCore.getContextInfo
+	 */
 	getContextInfo(
 		handle: Handle,
 		context: Contexts,
 	): ReturnType<FluxCore<T, Contexts>["getContextInfo"]>;
 
-	/** @see FluxCore.getNeutralValue */
+	/**
+	 * Returns the value an inert read of the action reports.
+	 *
+	 * @see FluxCore.getNeutralValue
+	 */
 	readonly getNeutralValue: FluxCore<T, Contexts>["getNeutralValue"];
 
-	/** @see FluxCore.getState */
+	/**
+	 * Returns the action state for a handle.
+	 *
+	 * @see FluxCore.getState
+	 */
 	getState(handle: Handle): ActionState<T>;
 
-	/** @see FluxCore.hasContext */
+	/**
+	 * Checks whether a context is active for a handle.
+	 *
+	 * @see FluxCore.hasContext
+	 */
 	hasContext(handle: Handle, context: Contexts): boolean;
 }
 

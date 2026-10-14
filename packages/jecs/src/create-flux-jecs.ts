@@ -126,10 +126,7 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			return core.getBindingsForPlatform(toHandle(entity), action, platform, context);
 		},
 
-		getContextInfo(
-			entity: Entity,
-			context: Contexts,
-		): ReturnType<FluxJecs<T, C>["getContextInfo"]> {
+		getContextInfo(entity: Entity, context: Contexts): ReturnType<typeof core.getContextInfo> {
 			return core.getContextInfo(toHandle(entity), context);
 		},
 

@@ -281,6 +281,19 @@ describe("FluxJecs coverage of FluxCore", () => {
 
 		expectTypeOf<Missing>().toBeNever();
 	});
+
+	it("should take an Entity where FluxCore takes a handle", () => {
+		type Jecs = FluxJecs<typeof actions, typeof contexts>;
+		type NotEntity = {
+			[K in keyof Jecs]: Parameters<Jecs[K]> extends [infer First, ...Array<unknown>]
+				? First extends InputHandle
+					? K
+					: never
+				: never;
+		}[keyof Jecs];
+
+		expectTypeOf<NotEntity>().toBeNever();
+	});
 });
 
 describe("FluxJecsOptions", () => {

@@ -18,7 +18,7 @@ recovers the handle type from the source.
 - `flux-context.tsx` — internal `FluxContextValue` + `createUseFluxContext`.
 - `flux-provider.tsx` — `FluxProviderProps` + Provider factory.
 - `flux-source.ts` — `FluxSource`, the read surface hooks need from the
-  Provider's source, + `FluxSourceHandle`.
+  Provider's source, + `AnyFluxSource` and `FluxSourceHandle`.
 - `update-signal.ts` — subscribe/fire plumbing the wrapper drives.
 - `use-sync-external-store.tsx` — React's store hook when the running react-lua
   has one, else the ported shim. `selectStoreHook` picks, once, at module load.
@@ -37,6 +37,8 @@ recovers the handle type from the source.
 - **Integration** (`src/*.spec.tsx`) — colocated per module: provider lifecycle,
   selector semantics, handle/rerender resync, context/triggers/StrictMode. Real
   `createCore`, no mocks.
+- **jecs seam** (`src/flux-jecs.spec.tsx`, `.spec-d.ts`) — real `FluxJecs` as
+  the Provider source. Only reason react devDepends on `@rbxts/flux-jecs`.
 - **E2E** (`e2e/react/`) — full game with real input devices.
 
 Shared fixtures and probes: `test/fixtures.ts`, `test/probes.tsx`.
