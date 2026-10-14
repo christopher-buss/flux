@@ -1,28 +1,35 @@
 ## Package
 
 `@rbxts/flux-react` — thin React wrapper over `@rbxts/flux`. Exports
-`createFluxReact<Actions, Contexts>()` returning
-`{ flush, FluxProvider, useAction, useActiveContext, useBindings, useCapture, useCaptureAction, useFluxCore, useInputContext, useInputPlatform }`.
+`createFluxReact<Actions, Contexts, Source?>()` returning
+`{ flush, FluxProvider, useAction, useActiveContext, useBindings, useCapture, useCaptureAction, useFluxCore, useFluxHandle, useInputContext, useInputPlatform }`.
 Core is injected at render time via
 `<FluxProvider core={core} handle={handle}>`, so the factory can live in a
 shared module that never touches a world or core at import time.
+
+`Source` defaults to `FluxCore`. Any `FluxSource` works: `FluxJecs` makes the
+Provider take an `Entity` and `useFluxCore` return the wrapper, so jecs apps
+never cast to `InputHandle`. Hooks never import jecs; `FluxSourceHandle`
+recovers the handle type from the source.
 
 ## Layout (`src/`)
 
 - `create-flux-react.tsx` — factory assembling the return object.
 - `flux-context.tsx` — internal `FluxContextValue` + `createUseFluxContext`.
 - `flux-provider.tsx` — `FluxProviderProps` + Provider factory.
+- `flux-source.ts` — `FluxSource`, the read surface hooks need from the
+  Provider's source, + `FluxSourceHandle`.
 - `update-signal.ts` — subscribe/fire plumbing the wrapper drives.
 - `use-sync-external-store.tsx` — React's store hook when the running react-lua
   has one, else the ported shim. `selectStoreHook` picks, once, at module load.
 - `batch-sync.ts` — re-entrant `flushSync` the signal and the shim share.
 - `hooks/` — one hook per file: `use-action`, `use-bindings`, `use-capture`
   (exports `useCapture` + `useCaptureAction`), `use-flux-core`,
-  `use-input-context` (exports `useActiveContext` + `useInputContext`),
-  `use-input-platform`. `useInputPlatform` is the odd one out: it reads core's
-  module-level platform signal, so it takes no `FluxContextValue`, is a plain
-  hook rather than a `createUseX` factory, and is exported from the package
-  index as well as hanging off `createFluxReact()`.
+  `use-flux-handle`, `use-input-context` (exports `useActiveContext` +
+  `useInputContext`), `use-input-platform`. `useInputPlatform` is the odd one
+  out: it reads core's module-level platform signal, so it takes no
+  `FluxContextValue`, is a plain hook rather than a `createUseX` factory, and is
+  exported from the package index as well as hanging off `createFluxReact()`.
 
 ## Testing
 

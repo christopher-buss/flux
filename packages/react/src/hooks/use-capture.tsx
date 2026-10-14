@@ -1,7 +1,8 @@
-import type { ActionMap, AllActions, CaptureToken, FluxCore, InputHandle } from "@rbxts/flux";
+import type { ActionMap, AllActions, CaptureToken, InputHandle } from "@rbxts/flux";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "@rbxts/react";
 
 import type { FluxContextValue } from "../flux-context";
+import type { FluxSource } from "../flux-source";
 import { useSyncExternalStore, useVersionedSnapshot } from "../use-sync-external-store";
 
 /**
@@ -46,8 +47,9 @@ export interface UseCaptureOptions {
  * Overloaded `useCapture` hook type.
  *
  * @template T - The action map type.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  */
-export interface FluxUseCapture<T extends ActionMap> {
+export interface FluxUseCapture<T extends ActionMap, Handle extends number = InputHandle> {
 	/**
 	 * Captures an action for as long as the component is mounted.
 	 *
@@ -62,13 +64,13 @@ export interface FluxUseCapture<T extends ActionMap> {
 	 * Captures an action for the component's lifetime, on an explicit handle.
 	 *
 	 * @template A - The captured action name, narrowing the token's reads.
-	 * @param handle - The InputHandle to capture on (overrides Provider default).
+	 * @param handle - The handle to capture on (overrides Provider default).
 	 * @param action - The action to capture.
 	 * @param options - Optional capture options.
 	 * @returns A stable token, inert until the capture lands.
 	 */
 	<A extends AllActions<T>>(
-		handle: InputHandle,
+		handle: Handle,
 		action: A,
 		options?: UseCaptureOptions,
 	): CaptureToken<T, A>;
@@ -162,12 +164,13 @@ type CaptureValue = boolean | number | Vector2 | Vector3;
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type the source is keyed by.
  */
-interface CaptureRequest<T extends ActionMap, Contexts extends string> {
+interface CaptureRequest<T extends ActionMap, Contexts extends string, Handle extends number> {
 	/** The action to capture. */
 	readonly action: AllActions<T>;
-	/** The core owning the action. */
-	readonly core: FluxCore<T, Contexts>;
+	/** The source owning the action. */
+	readonly core: FluxSource<T, Contexts, Handle>;
 	/**
 	 * Whether this render asks to hold the capture at all.
 	 *
@@ -177,7 +180,7 @@ interface CaptureRequest<T extends ActionMap, Contexts extends string> {
 	 */
 	readonly enabled: boolean;
 	/** The handle the capture is scoped to. */
-	readonly handle: InputHandle;
+	readonly handle: Handle;
 	/**
 	 * The neutral value an uncaptured `getState()` reports for this action.
 	 *
@@ -193,15 +196,16 @@ interface CaptureRequest<T extends ActionMap, Contexts extends string> {
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type the source is keyed by.
  */
-interface CaptureHold<T extends ActionMap, Contexts extends string> {
+interface CaptureHold<T extends ActionMap, Contexts extends string, Handle extends number> {
 	/**
 	 * The request this capture was acquired for.
 	 *
 	 * A request object is only rebuilt when what the hook captures actually
 	 * changes, so identity alone answers "is this hold still current?".
 	 */
-	readonly request: CaptureRequest<T, Contexts>;
+	readonly request: CaptureRequest<T, Contexts, Handle>;
 	/** The core token acquired for that request. */
 	readonly token: CaptureTokenSurface;
 }
@@ -211,14 +215,15 @@ interface CaptureHold<T extends ActionMap, Contexts extends string> {
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type the source is keyed by.
  */
-interface CaptureReader<T extends ActionMap, Contexts extends string> {
+interface CaptureReader<T extends ActionMap, Contexts extends string, Handle extends number> {
 	/** Ref holding the acquired capture, absent until the effect runs. */
-	readonly holdRef: { current: CaptureHold<T, Contexts> | undefined };
+	readonly holdRef: { current: CaptureHold<T, Contexts, Handle> | undefined };
 	/** Ref recording whether the held capture has been released. */
 	readonly releasedRef: { current: boolean };
 	/** Ref holding what the latest render asks to capture. */
-	readonly requestRef: { current: CaptureRequest<T, Contexts> };
+	readonly requestRef: { current: CaptureRequest<T, Contexts, Handle> };
 }
 
 /**
@@ -255,23 +260,26 @@ interface CaptureReader<T extends ActionMap, Contexts extends string> {
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useCapture` hook.
  */
-export function createUseCapture<T extends ActionMap, Contexts extends string = string>(
-	useFluxContext: () => FluxContextValue<T, Contexts>,
-): FluxUseCapture<T> {
+export function createUseCapture<
+	T extends ActionMap,
+	Contexts extends string = string,
+	Handle extends number = InputHandle,
+>(useFluxContext: () => FluxContextValue<T, Contexts, Handle>): FluxUseCapture<T, Handle> {
 	function useCapture<A extends AllActions<T>>(
 		action: A,
 		options?: UseCaptureOptions,
 	): CaptureToken<T, A>;
 	function useCapture<A extends AllActions<T>>(
-		handle: InputHandle,
+		handle: Handle,
 		action: A,
 		options?: UseCaptureOptions,
 	): CaptureToken<T, A>;
 	function useCapture<A extends AllActions<T>>(
-		handleOrAction: A | InputHandle,
+		handleOrAction: A | Handle,
 		actionOrOptions?: A | UseCaptureOptions,
 		maybeOptions?: UseCaptureOptions,
 	): CaptureToken<T, A> {
@@ -285,7 +293,7 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
 		const isEnabled = options?.enabled ?? true;
 		const debugLabel = options?.debugLabel;
 
-		const holdRef = useRef<CaptureHold<T, Contexts> | undefined>(undefined);
+		const holdRef = useRef<CaptureHold<T, Contexts, Handle> | undefined>(undefined);
 		const releasedRef = useRef(true);
 
 		// The neutral value is a property of the captured triple alone, so
@@ -378,12 +386,15 @@ export function createUseCapture<T extends ActionMap, Contexts extends string = 
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useCaptureAction` hook.
  */
-export function createUseCaptureAction<T extends ActionMap, Contexts extends string = string>(
-	useFluxContext: () => FluxContextValue<T, Contexts>,
-): FluxUseCaptureAction {
+export function createUseCaptureAction<
+	T extends ActionMap,
+	Contexts extends string = string,
+	Handle extends number = InputHandle,
+>(useFluxContext: () => FluxContextValue<T, Contexts, Handle>): FluxUseCaptureAction {
 	function useCaptureAction<Token extends CaptureTokenLike, R>(
 		token: Token,
 		selector: (token: Token) => R,
@@ -411,15 +422,16 @@ export function createUseCaptureAction<T extends ActionMap, Contexts extends str
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type the source is keyed by.
  * @param reader - The refs the facade reads the current capture through.
  * @returns A token-shaped reader that outlives any single capture.
  */
-function createCaptureFacade<T extends ActionMap, Contexts extends string>({
+function createCaptureFacade<T extends ActionMap, Contexts extends string, Handle extends number>({
 	holdRef,
 	releasedRef,
 	requestRef,
-}: CaptureReader<T, Contexts>): CaptureTokenSurface {
-	function currentForCancel(): CaptureHold<T, Contexts> | undefined {
+}: CaptureReader<T, Contexts, Handle>): CaptureTokenSurface {
+	function currentForCancel(): CaptureHold<T, Contexts, Handle> | undefined {
 		const hold = holdRef.current;
 		if (hold === undefined) {
 			return undefined;
@@ -546,15 +558,16 @@ function createCaptureFacade<T extends ActionMap, Contexts extends string>({
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
- * @param core - The core owning the action.
+ * @template Handle - The handle type the source is keyed by.
+ * @param core - The source owning the action.
  * @param handle - The handle the capture is scoped to.
  * @param action - The action to capture.
  * @returns The request less `enabled`, which the caller layers on.
  */
-function makeCaptured<T extends ActionMap, Contexts extends string>(
-	core: FluxCore<T, Contexts>,
-	handle: InputHandle,
+function makeCaptured<T extends ActionMap, Contexts extends string, Handle extends number>(
+	core: FluxSource<T, Contexts, Handle>,
+	handle: Handle,
 	action: AllActions<T>,
-): Omit<CaptureRequest<T, Contexts>, "enabled"> {
+): Omit<CaptureRequest<T, Contexts, Handle>, "enabled"> {
 	return { action, core, handle, inert: core.getNeutralValue(action) };
 }

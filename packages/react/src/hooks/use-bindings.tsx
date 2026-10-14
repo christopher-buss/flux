@@ -9,8 +9,9 @@ import { useCachedSnapshot, useSyncExternalStore } from "../use-sync-external-st
  * Overloaded `useBindings` hook type.
  *
  * @template T - The action map type.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  */
-export interface FluxUseBindings<T extends ActionMap> {
+export interface FluxUseBindings<T extends ActionMap, Handle extends number = InputHandle> {
 	/**
 	 * Subscribe to binding changes for an action, optionally scoped to one
 	 * platform.
@@ -28,16 +29,12 @@ export interface FluxUseBindings<T extends ActionMap> {
 	/**
 	 * Subscribe to binding changes for an action with explicit handle.
 	 *
-	 * @param handle - The InputHandle to query (overrides Provider default).
+	 * @param handle - The handle to query (overrides Provider default).
 	 * @param action - The action name to query bindings for.
 	 * @param platform - Optional platform to scope the read to.
 	 * @returns Read-only array of bindings for the action.
 	 */
-	(
-		handle: InputHandle,
-		action: AllActions<T>,
-		platform?: InputPlatform,
-	): ReadonlyArray<BindingLike>;
+	(handle: Handle, action: AllActions<T>, platform?: InputPlatform): ReadonlyArray<BindingLike>;
 }
 
 /**
@@ -47,23 +44,26 @@ export interface FluxUseBindings<T extends ActionMap> {
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useBindings` hook.
  */
-export function createUseBindings<T extends ActionMap, Contexts extends string = string>(
-	useFluxContext: () => FluxContextValue<T, Contexts>,
-): FluxUseBindings<T> {
+export function createUseBindings<
+	T extends ActionMap,
+	Contexts extends string = string,
+	Handle extends number = InputHandle,
+>(useFluxContext: () => FluxContextValue<T, Contexts, Handle>): FluxUseBindings<T, Handle> {
 	function useBindings(
 		action: AllActions<T>,
 		platform?: InputPlatform,
 	): ReadonlyArray<BindingLike>;
 	function useBindings(
-		handle: InputHandle,
+		handle: Handle,
 		action: AllActions<T>,
 		platform?: InputPlatform,
 	): ReadonlyArray<BindingLike>;
 	function useBindings(
-		handleOrAction: AllActions<T> | InputHandle,
+		handleOrAction: AllActions<T> | Handle,
 		actionOrPlatform?: AllActions<T> | InputPlatform,
 		maybePlatform?: InputPlatform,
 	): ReadonlyArray<BindingLike> {

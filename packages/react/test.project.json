@@ -35,6 +35,9 @@
 						"flux": {
 							"$path": "../core/out"
 						},
+						"flux-jecs": {
+							"$path": "../jecs/out"
+						},
 						"flux-react": {
 							"$path": "out"
 						}

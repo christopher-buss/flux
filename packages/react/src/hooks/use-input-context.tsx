@@ -8,8 +8,12 @@ import { useCachedSnapshot, useSyncExternalStore } from "../use-sync-external-st
  * Overloaded `useActiveContext` hook type.
  *
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  */
-export interface FluxUseActiveContext<Contexts extends string> {
+export interface FluxUseActiveContext<
+	Contexts extends string,
+	Handle extends number = InputHandle,
+> {
 	/**
 	 * Subscribe to whether a context is active for the Provider's handle.
 	 *
@@ -21,11 +25,11 @@ export interface FluxUseActiveContext<Contexts extends string> {
 	/**
 	 * Subscribe to whether a context is active for an explicit handle.
 	 *
-	 * @param handle - The InputHandle to query (overrides Provider default).
+	 * @param handle - The handle to query (overrides Provider default).
 	 * @param context - The context name to check.
 	 * @returns True if the context is currently active.
 	 */
-	(handle: InputHandle, context: Contexts): boolean;
+	(handle: Handle, context: Contexts): boolean;
 }
 
 /**
@@ -50,8 +54,13 @@ export interface FluxInputContextInfo<T extends ActionMap> {
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  */
-export interface FluxUseInputContext<T extends ActionMap, Contexts extends string> {
+export interface FluxUseInputContext<
+	T extends ActionMap,
+	Contexts extends string,
+	Handle extends number = InputHandle,
+> {
 	/**
 	 * Subscribe to a context's info for the Provider's handle.
 	 *
@@ -63,11 +72,11 @@ export interface FluxUseInputContext<T extends ActionMap, Contexts extends strin
 	/**
 	 * Subscribe to a context's info for an explicit handle.
 	 *
-	 * @param handle - The InputHandle to query (overrides Provider default).
+	 * @param handle - The handle to query (overrides Provider default).
 	 * @param context - The context name to query.
 	 * @returns Combined static config plus live `isActive` state.
 	 */
-	(handle: InputHandle, context: Contexts): FluxInputContextInfo<T>;
+	(handle: Handle, context: Contexts): FluxInputContextInfo<T>;
 }
 
 /**
@@ -77,16 +86,21 @@ export interface FluxUseInputContext<T extends ActionMap, Contexts extends strin
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useActiveContext` hook.
  */
-export function createUseActiveContext<T extends ActionMap, Contexts extends string>(
-	useFluxContext: () => FluxContextValue<T, Contexts>,
-): FluxUseActiveContext<Contexts> {
+export function createUseActiveContext<
+	T extends ActionMap,
+	Contexts extends string,
+	Handle extends number = InputHandle,
+>(
+	useFluxContext: () => FluxContextValue<T, Contexts, Handle>,
+): FluxUseActiveContext<Contexts, Handle> {
 	function useActiveContext(context: Contexts): boolean;
-	function useActiveContext(handle: InputHandle, context: Contexts): boolean;
+	function useActiveContext(handle: Handle, context: Contexts): boolean;
 	function useActiveContext(
-		handleOrContext: Contexts | InputHandle,
+		handleOrContext: Contexts | Handle,
 		maybeContext?: Contexts,
 	): boolean {
 		const { core, handle: defaultHandle, subscribe } = useFluxContext();
@@ -117,16 +131,21 @@ export function createUseActiveContext<T extends ActionMap, Contexts extends str
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useInputContext` hook.
  */
-export function createUseInputContext<T extends ActionMap, Contexts extends string>(
-	useFluxContext: () => FluxContextValue<T, Contexts>,
-): FluxUseInputContext<T, Contexts> {
+export function createUseInputContext<
+	T extends ActionMap,
+	Contexts extends string,
+	Handle extends number = InputHandle,
+>(
+	useFluxContext: () => FluxContextValue<T, Contexts, Handle>,
+): FluxUseInputContext<T, Contexts, Handle> {
 	function useInputContext(context: Contexts): FluxInputContextInfo<T>;
-	function useInputContext(handle: InputHandle, context: Contexts): FluxInputContextInfo<T>;
+	function useInputContext(handle: Handle, context: Contexts): FluxInputContextInfo<T>;
 	function useInputContext(
-		handleOrContext: Contexts | InputHandle,
+		handleOrContext: Contexts | Handle,
 		maybeContext?: Contexts,
 	): FluxInputContextInfo<T> {
 		const { core, handle: defaultHandle, subscribe } = useFluxContext();
