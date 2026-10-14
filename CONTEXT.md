@@ -136,6 +136,12 @@ operates on handles, never on players or entities directly; integration layers
 (JECS, React) map their own concepts to handles. _Avoid_: id, entity, player,
 token.
 
+**Handle key**: An integration layer's own identifier for a consumer — a jecs
+entity, for example — mapped one-to-one onto a handle. Consumers of an
+integration speak only in handle keys; the mapping to handles stays inside the
+integration and never surfaces as a cast or helper call. _Avoid_: id, entity,
+ref.
+
 **Owned handle**: A handle created by `register` — Flux created the underlying
 IAS instances for it and drives them. The authoritative or local-input side.
 _Avoid_: local handle, server handle.
