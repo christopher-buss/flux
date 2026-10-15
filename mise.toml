@@ -13,7 +13,7 @@ corepack = true
 
 [tools]
 "github:luau-lang/lute" = "1.0.0"
-"github:rojo-rbx/rojo" = "v7.7.0"
+"github:rojo-rbx/rojo" = "v7.7.1"
 "npm:@antfu/ni" = "latest"
 "npm:corepack" = "latest"
 hk = "1.57.0"
