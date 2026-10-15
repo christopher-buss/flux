@@ -8,8 +8,9 @@ import { useSyncExternalStore, useVersionedSnapshot } from "../use-sync-external
  * Overloaded `useAction` hook type.
  *
  * @template T - The action map type.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  */
-export interface FluxUseAction<T extends ActionMap> {
+export interface FluxUseAction<T extends ActionMap, Handle extends number = InputHandle> {
 	/**
 	 * Subscribe to ActionState changes via a selector.
 	 *
@@ -23,11 +24,11 @@ export interface FluxUseAction<T extends ActionMap> {
 	 * Subscribe to ActionState changes via a selector with explicit handle.
 	 *
 	 * @template R - The selected value type.
-	 * @param handle - The InputHandle to query (overrides Provider default).
+	 * @param handle - The handle to query (overrides Provider default).
 	 * @param selector - Function that extracts a value from ActionState.
 	 * @returns The selected value.
 	 */
-	<R>(handle: InputHandle, selector: (state: ActionState<T>) => R): R;
+	<R>(handle: Handle, selector: (state: ActionState<T>) => R): R;
 }
 
 /**
@@ -38,16 +39,19 @@ export interface FluxUseAction<T extends ActionMap> {
  *
  * @template T - The action map type.
  * @template Contexts - Union of valid context name literals.
+ * @template Handle - The handle type; `InputHandle` for `FluxCore`.
  * @param useFluxContext - Shared accessor for the Provider context value.
  * @returns A typed `useAction` hook.
  */
-export function createUseAction<T extends ActionMap, Contexts extends string = string>(
-	useFluxContext: () => FluxContextValue<T, Contexts>,
-): FluxUseAction<T> {
+export function createUseAction<
+	T extends ActionMap,
+	Contexts extends string = string,
+	Handle extends number = InputHandle,
+>(useFluxContext: () => FluxContextValue<T, Contexts, Handle>): FluxUseAction<T, Handle> {
 	function useAction<R>(selector: (state: ActionState<T>) => R): R;
-	function useAction<R>(handle: InputHandle, selector: (state: ActionState<T>) => R): R;
+	function useAction<R>(handle: Handle, selector: (state: ActionState<T>) => R): R;
 	function useAction<R>(
-		handleOrSelector: ((state: ActionState<T>) => R) | InputHandle,
+		handleOrSelector: ((state: ActionState<T>) => R) | Handle,
 		maybeSelector?: (state: ActionState<T>) => R,
 	): R {
 		const context = useFluxContext();

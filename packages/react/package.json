@@ -66,6 +66,8 @@
 		"@rbxts-js/react-testing-library-lua": "catalog:test",
 		"@rbxts/compiler-types": "catalog:types",
 		"@rbxts/flux": "workspace:*",
+		"@rbxts/flux-jecs": "workspace:*",
+		"@rbxts/jecs": "catalog:peer",
 		"@rbxts/jest": "catalog:test",
 		"@rbxts/jest-extended": "catalog:test",
 		"@rbxts/jest-globals": "catalog:test",

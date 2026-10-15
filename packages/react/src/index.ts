@@ -1,6 +1,7 @@
 export { createFluxReact } from "./create-flux-react";
 export type { FluxReact } from "./create-flux-react";
 export type { FluxProviderProps } from "./flux-provider";
+export type { AnyFluxSource, FluxSource, FluxSourceHandle } from "./flux-source";
 export type { FluxUseAction } from "./hooks/use-action";
 export type { FluxUseBindings } from "./hooks/use-bindings";
 export type {
@@ -10,6 +11,7 @@ export type {
 	UseCaptureOptions,
 } from "./hooks/use-capture";
 export type { FluxUseFluxCore } from "./hooks/use-flux-core";
+export type { FluxUseFluxHandle } from "./hooks/use-flux-handle";
 export type {
 	FluxInputContextInfo,
 	FluxUseActiveContext,

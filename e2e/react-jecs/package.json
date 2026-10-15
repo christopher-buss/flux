@@ -1,0 +1,39 @@
+{
+	"name": "@flux/e2e-react-jecs",
+	"version": "0.0.0",
+	"private": true,
+	"description": "End-to-end test game for Flux React wrapper on a jecs source",
+	"keywords": [
+		"roblox",
+		"e2e",
+		"flux",
+		"jecs",
+		"react"
+	],
+	"type": "commonjs",
+	"scripts": {
+		"build": "rbxtsc --project ./tsconfig.game.json --type game && rojo build default.project.json -o flux-e2e-react-jecs.rbxl",
+		"clean": "rimraf out/",
+		"serve": "rojo serve default.project.json",
+		"typecheck": "tsgo --noEmit --project tsconfig.game.json",
+		"watch": "rbxtsc --watch --project ./tsconfig.game.json --type game"
+	},
+	"dependencies": {
+		"@rbxts/flux": "workspace:*",
+		"@rbxts/flux-jecs": "workspace:*",
+		"@rbxts/flux-react": "workspace:*",
+		"@rbxts/jecs": "catalog:peer",
+		"@rbxts/react": "catalog:peer",
+		"@rbxts/react-roblox": "catalog:peer",
+		"@rbxts/services": "catalog:prod"
+	},
+	"devDependencies": {
+		"@isentinel/roblox-ts": "catalog:build",
+		"@isentinel/tsconfig": "catalog:tsc",
+		"@rbxts/compiler-types": "catalog:types",
+		"@rbxts/types": "catalog:types",
+		"@typescript/native-preview": "catalog:tsc",
+		"rimraf": "catalog:node",
+		"typescript": "catalog:tsc"
+	}
+}

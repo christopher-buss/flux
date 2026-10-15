@@ -21,6 +21,9 @@
 			"path": "e2e/react"
 		},
 		{
+			"path": "e2e/react-jecs"
+		},
+		{
 			"path": "e2e/server-authority"
 		},
 		{

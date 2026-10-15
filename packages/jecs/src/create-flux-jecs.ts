@@ -1,4 +1,17 @@
-import type { ActionMap, ActionState, ActionValue, ContextConfig, InputHandle } from "@rbxts/flux";
+import type {
+	ActionMap,
+	ActionState,
+	ActionValue,
+	AllActions,
+	BindingForAction,
+	BindingLike,
+	BindingOrigin,
+	BindingState,
+	ContextConfig,
+	InputHandle,
+	InputPlatform,
+	RebindPlatform,
+} from "@rbxts/flux";
 import { createCore } from "@rbxts/flux";
 import type { Entity, Tag, World } from "@rbxts/jecs";
 
@@ -80,8 +93,49 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 			core.destroy();
 		},
 
+		getAllBindings(
+			entity: Entity,
+			context?: Contexts,
+		): Record<AllActions<T>, ReadonlyArray<BindingLike>> {
+			return core.getAllBindings(toHandle(entity), context);
+		},
+
+		getBindingOrigin(
+			entity: Entity,
+			action: AllActions<T>,
+			platform: InputPlatform,
+			context?: Contexts,
+		): BindingOrigin {
+			return core.getBindingOrigin(toHandle(entity), action, platform, context);
+		},
+
+		getBindings(
+			entity: Entity,
+			action: AllActions<T>,
+			context?: Contexts,
+		): ReadonlyArray<BindingLike> {
+			return core.getBindings(toHandle(entity), action, context);
+		},
+
+		getBindingsForPlatform(
+			entity: Entity,
+			action: AllActions<T>,
+			platform: InputPlatform,
+			context?: Contexts,
+		): ReadonlyArray<BindingLike> {
+			return core.getBindingsForPlatform(toHandle(entity), action, platform, context);
+		},
+
+		getContextInfo(entity: Entity, context: Contexts): ReturnType<typeof core.getContextInfo> {
+			return core.getContextInfo(toHandle(entity), context);
+		},
+
 		getContexts(entity: Entity): ReadonlyArray<Contexts> {
 			return core.getContexts(toHandle(entity));
+		},
+
+		getNeutralValue<A extends AllActions<T>>(action: A): ActionValue<T, A> {
+			return core.getNeutralValue(action);
 		},
 
 		getState(entity: Entity): ActionState<T> {
@@ -90,6 +144,31 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 
 		hasContext(entity: Entity, context: Contexts): boolean {
 			return core.hasContext(toHandle(entity), context);
+		},
+
+		loadBindings(entity: Entity, data: BindingState<T>): void {
+			core.loadBindings(toHandle(entity), data);
+		},
+
+		rebind<A extends AllActions<T>>(
+			entity: Entity,
+			action: A,
+			bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
+		): void {
+			core.rebind(toHandle(entity), action, bindings);
+		},
+
+		rebindAll(entity: Entity, bindings: BindingState<T>): void {
+			core.rebindAll(toHandle(entity), bindings);
+		},
+
+		rebindForPlatform<A extends AllActions<T>>(
+			entity: Entity,
+			action: A,
+			platform: RebindPlatform,
+			bindings: ReadonlyArray<BindingForAction<T[A]["type"]>>,
+		): void {
+			core.rebindForPlatform(toHandle(entity), action, platform, bindings);
 		},
 
 		register(
@@ -109,6 +188,30 @@ export function createFluxJecs<T extends ActionMap, C extends Record<string, Con
 		removeContext(entity: Entity, context: Contexts): void {
 			core.removeContext(toHandle(entity), context);
 			world.remove(entity, contextTags[context]);
+		},
+
+		resetAllBindings(entity: Entity): void {
+			core.resetAllBindings(toHandle(entity));
+		},
+
+		resetAllBindingsForPlatform(entity: Entity, platform: RebindPlatform): void {
+			core.resetAllBindingsForPlatform(toHandle(entity), platform);
+		},
+
+		resetBindings(entity: Entity, action: AllActions<T>): void {
+			core.resetBindings(toHandle(entity), action);
+		},
+
+		resetBindingsForPlatform(
+			entity: Entity,
+			action: AllActions<T>,
+			platform: RebindPlatform,
+		): void {
+			core.resetBindingsForPlatform(toHandle(entity), action, platform);
+		},
+
+		serializeBindings(entity: Entity): BindingState<T> {
+			return core.serializeBindings(toHandle(entity));
 		},
 
 		simulateAction<A extends keyof T & string>(

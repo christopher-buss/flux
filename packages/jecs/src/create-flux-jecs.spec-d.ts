@@ -1,4 +1,4 @@
-import type { ActionState, FluxCore } from "@rbxts/flux";
+import type { ActionState, FluxCore, InputHandle } from "@rbxts/flux";
 import { bool, defineActions, defineContexts, direction2d } from "@rbxts/flux";
 import type { Entity, Tag } from "@rbxts/jecs";
 import Jecs from "@rbxts/jecs";
@@ -6,6 +6,7 @@ import { describe, it } from "@rbxts/jest-globals";
 import { expectTypeOf } from "@rbxts/jest-utils/type-testing";
 
 import { createFluxJecs } from "./create-flux-jecs";
+import type { FluxJecs } from "./types";
 
 const actions = defineActions({
 	jump: bool(),
@@ -201,11 +202,97 @@ describe("createFluxJecs", () => {
 		});
 	});
 
+	describe("binding reads", () => {
+		it("should accept entity for binding reads", () => {
+			expectTypeOf<typeof flux.getBindings>().toBeCallableWith(entity, "jump");
+			expectTypeOf<typeof flux.getBindingsForPlatform>().toBeCallableWith(
+				entity,
+				"jump",
+				"keyboard",
+			);
+			expectTypeOf<typeof flux.getAllBindings>().toBeCallableWith(entity, GAMEPLAY);
+			expectTypeOf<typeof flux.getBindingOrigin>().toBeCallableWith(entity, "jump", "touch");
+			expectTypeOf<typeof flux.getContextInfo>().toBeCallableWith(entity, UI);
+		});
+
+		it("should type context info actions by action name", () => {
+			expectTypeOf(flux.getContextInfo(entity, GAMEPLAY).actions).toEqualTypeOf<
+				ReadonlyArray<"jump" | "move">
+			>();
+		});
+
+		it("should narrow the neutral value by action", () => {
+			expectTypeOf(flux.getNeutralValue("jump")).toEqualTypeOf<boolean>();
+			expectTypeOf(flux.getNeutralValue("move")).toEqualTypeOf<Vector2>();
+		});
+
+		it("should reject unknown context for getContextInfo", () => {
+			// @ts-expect-error unknown context
+			flux.getContextInfo(entity, INVALID);
+		});
+	});
+
+	describe("rebind", () => {
+		it("should accept bindings matching the action type", () => {
+			expectTypeOf<typeof flux.rebind<"jump">>().toBeCallableWith(entity, "jump", [
+				Enum.KeyCode.J,
+			]);
+		});
+
+		it("should reject a Direction2D preset on a Bool action", () => {
+			flux.rebind(entity, "jump", [
+				{
+					// @ts-expect-error Direction2D preset on Bool action
+					down: Enum.KeyCode.S,
+					left: Enum.KeyCode.A,
+					right: Enum.KeyCode.D,
+					up: Enum.KeyCode.W,
+				},
+			]);
+		});
+
+		it("should reject touch for rebindForPlatform", () => {
+			// @ts-expect-error touch is not a RebindPlatform
+			flux.rebindForPlatform(entity, "jump", "touch", []);
+		});
+	});
+
 	describe("update", () => {
 		it("should accept deltaTime number", () => {
 			expectTypeOf<typeof flux.update>().parameter(0).toEqualTypeOf<number>();
 			expectTypeOf<typeof flux.update>().returns.toEqualTypeOf<void>();
 		});
+	});
+});
+
+describe("FluxJecs coverage of FluxCore", () => {
+	it("should forward every FluxCore method that takes a handle", () => {
+		type Core = FluxCore<typeof actions, "gameplay" | "ui">;
+		type HandleMethods = {
+			[K in keyof Core]: Parameters<Core[K]> extends [InputHandle, ...Array<unknown>]
+				? K
+				: never;
+		}[keyof Core];
+		// `registerAs`/`subscribeAs` surface as `register`/`subscribe`.
+		type Missing = Exclude<
+			HandleMethods,
+			"registerAs" | "subscribeAs" | keyof FluxJecs<typeof actions, typeof contexts>
+		>;
+
+		expectTypeOf<Missing>().toBeNever();
+	});
+
+	it("should take an Entity where FluxCore takes a handle", () => {
+		type Jecs = FluxJecs<typeof actions, typeof contexts>;
+		type NotEntity = {
+			[K in keyof Jecs]: Parameters<Jecs[K]> extends [infer First, ...Array<unknown>]
+				? First extends InputHandle
+					? K
+					: never
+				: never;
+		}[keyof Jecs];
+
+		expectTypeOf<NotEntity>().toBeNever();
 	});
 });
 

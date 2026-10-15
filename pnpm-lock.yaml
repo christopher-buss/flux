@@ -391,6 +391,52 @@ importers:
         specifier: catalog:tsc
         version: 6.0.3
 
+  e2e/react-jecs:
+    dependencies:
+      '@rbxts/flux':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@rbxts/flux-jecs':
+        specifier: workspace:*
+        version: link:../../packages/jecs
+      '@rbxts/flux-react':
+        specifier: workspace:*
+        version: link:../../packages/react
+      '@rbxts/jecs':
+        specifier: catalog:peer
+        version: 0.11.0
+      '@rbxts/react':
+        specifier: catalog:peer
+        version: 17.3.7-ts.2
+      '@rbxts/react-roblox':
+        specifier: catalog:peer
+        version: 17.3.7-ts.2(@rbxts/react@17.3.7-ts.2)
+      '@rbxts/services':
+        specifier: catalog:prod
+        version: 1.6.0
+    devDependencies:
+      '@isentinel/roblox-ts':
+        specifier: catalog:build
+        version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
+      '@isentinel/tsconfig':
+        specifier: catalog:tsc
+        version: 1.2.0(typescript@6.0.3)
+      '@rbxts/compiler-types':
+        specifier: catalog:types
+        version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
+      '@rbxts/types':
+        specifier: catalog:types
+        version: 1.0.957
+      '@typescript/native-preview':
+        specifier: catalog:tsc
+        version: 7.0.0-dev.20260707.2
+      rimraf:
+        specifier: catalog:node
+        version: 6.1.3
+      typescript:
+        specifier: catalog:tsc
+        version: 6.0.3
+
   e2e/server-authority:
     dependencies:
       '@flux/core':
@@ -554,6 +600,12 @@ importers:
       '@rbxts/flux':
         specifier: workspace:*
         version: link:../core
+      '@rbxts/flux-jecs':
+        specifier: workspace:*
+        version: link:../jecs
+      '@rbxts/jecs':
+        specifier: catalog:peer
+        version: 0.11.0
       '@rbxts/jest':
         specifier: catalog:test
         version: 3.16.0-ts.1

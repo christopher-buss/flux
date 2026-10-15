@@ -20,6 +20,9 @@
 			"path": "./tsconfig.lib.json"
 		},
 		{
+			"path": "../jecs/tsconfig.lib.json"
+		},
+		{
 			"path": "../test-utils/tsconfig.lib.json"
 		}
 	],
