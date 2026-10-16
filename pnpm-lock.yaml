@@ -115,8 +115,8 @@ catalogs:
       specifier: 17.3.7-ts.1
       version: 17.3.7-ts.1
     '@rbxts/jest':
-      specifier: 3.16.0-ts.1
-      version: 3.16.0-ts.1
+      specifier: 3.16.0-ts.2
+      version: 3.16.0-ts.2
     '@rbxts/jest-extended':
       specifier: 1.0.2
       version: 1.0.2
@@ -491,7 +491,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/jest':
         specifier: catalog:test
-        version: 3.16.0-ts.1
+        version: 3.16.0-ts.2
       '@rbxts/jest-extended':
         specifier: catalog:test
         version: 1.0.2
@@ -545,7 +545,7 @@ importers:
         version: 0.11.0
       '@rbxts/jest':
         specifier: catalog:test
-        version: 3.16.0-ts.1
+        version: 3.16.0-ts.2
       '@rbxts/jest-extended':
         specifier: catalog:test
         version: 1.0.2
@@ -608,7 +608,7 @@ importers:
         version: 0.11.0
       '@rbxts/jest':
         specifier: catalog:test
-        version: 3.16.0-ts.1
+        version: 3.16.0-ts.2
       '@rbxts/jest-extended':
         specifier: catalog:test
         version: 1.0.2
@@ -2441,8 +2441,8 @@ packages:
   '@rbxts/compiler-types@3.0.0-types.0':
     resolution: {integrity: sha512-VGOHJPoL7+56NTatMGqQj3K7xWuzEV+aP4QD5vZiHu+bcff3kiTmtoadaF6NkJrmwfFAvbsd4Dg764ZjWNceag==}
 
-  '@rbxts/emittery@3.16.0-ts.1':
-    resolution: {integrity: sha512-eqfRdvvN6sdoeboXsN7glTWboZCzMiK+MSd6rz/hnvwZqo73xmrsKyqtT+C1iFg5tpKqwqF0KhNfrrtPml+ZRA==}
+  '@rbxts/emittery@3.16.0-ts.2':
+    resolution: {integrity: sha512-toyHM4HrAPPqsOJaa8ffF69HMAQnbGRcKSXzyqJfucqmViiNa9tQLTADMWBpoZ9c0mOg2Trzlff6T6NLDt+9NA==}
 
   '@rbxts/jecs@0.11.0':
     resolution: {integrity: sha512-rJPZkqrL8PXVX5YP5a9gMcddm8U7TeXZDYEbBTAXs81r9IKhTWNVxGoFRPTbsDT4BhwM0LMvydvWDAqHvWzHpA==}
@@ -2454,22 +2454,31 @@ packages:
   '@rbxts/jest-globals@3.16.0-ts.1':
     resolution: {integrity: sha512-DXTgUbSgK7evchCI0sMKam1EzY2aTTlpaSQEMFs4ng5rNYIRCRS90w8t/b01WxGeXipZTMwfqB2PG4yPbmkzcg==}
 
+  '@rbxts/jest-globals@3.16.0-ts.2':
+    resolution: {integrity: sha512-xNArx8ZCIi2hswKiuOvQXo3IMC1TpWw1EQo3iq2dT6gnMfH6s2tdgguC1xjoGzNendsoTpiB3iP67Z8yMjkI5Q==}
+
   '@rbxts/jest-matcher-utils@3.16.0-ts.1':
     resolution: {integrity: sha512-NYdDe3v/7jgK2bNNccrmgItQcsmW25FXFbnjGRrvc3G9D/vNVPAwV4+PM23b+eLQyxbqFKWt8TKF+4FS7P7PRA==}
+
+  '@rbxts/jest-matcher-utils@3.16.0-ts.2':
+    resolution: {integrity: sha512-2Yq9gwyrWPkk3hkvAR3XronuORSzFwgbTednQuY3WlhnWbU1IO//SunsY9kGzSbqtldetg2U9ibSvLaMz1phRA==}
 
   '@rbxts/jest-utils@0.1.3':
     resolution: {integrity: sha512-nQP99SIyXFe0dEXsZ3REqsVn+rMdQAcASC0fXgHgYgkE4X8/k/6fPplRjpQ03sBbLudc37xFGEDuQrEeZDGGZg==}
     peerDependencies:
       '@rbxts/jest-globals': '*'
 
-  '@rbxts/jest@3.16.0-ts.1':
-    resolution: {integrity: sha512-ah5fZE9UlkFedGKNU55jyFlZSpUkfGXFhv3n0avq9e2iggnRvEG5OzblS3IgMCH9VcH+RE5vuAHdCXSxKb20Lg==}
+  '@rbxts/jest@3.16.0-ts.2':
+    resolution: {integrity: sha512-aafN1l1syRg306gjSJQrkmJGefz6FXZMSW+q/6+Ndw4v0+hxyB4FuEG18POTZN4PcnVKA3s0RsiP8rHgEPjdEw==}
 
   '@rbxts/luau-polyfill@1.1.3':
     resolution: {integrity: sha512-HhTeV1aeCDrr6PoTCc0khnAAxyBcDm0iXeu/t7l96u2Mr1fyA+0ugZd66A1xpThZwz/7YbTSFpiFp5SIFeu2Ug==}
 
   '@rbxts/pretty-format@3.16.0-ts.1':
     resolution: {integrity: sha512-zi68DwNLjMB8F7HaeWul4gMeqy4+W3d9PYlkVRCPZBE0+f/qR/G1PKMpzmJoT3SSHSbGpZk9El9gMKDfde4n4w==}
+
+  '@rbxts/pretty-format@3.16.0-ts.2':
+    resolution: {integrity: sha512-EDyn1hQOCIE0JVC6iI0NGUemRzvRQdgN174kNzaFMdqq7h/sYs0BmUKJUPg0k2+CCb8QztXa3gozG0qfqOyp1g==}
 
   '@rbxts/react-roblox@17.3.7-ts.2':
     resolution: {integrity: sha512-T5a9noru9M0Ye4+k8Py43z2lLfnsLfxoigssIiDkU7+776BsnG2IlQVRiM7ICZaMFAlckIQj2HxYL5oyNK4HQQ==}
@@ -7157,7 +7166,7 @@ snapshots:
 
   '@rbxts/compiler-types@3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)': {}
 
-  '@rbxts/emittery@3.16.0-ts.1':
+  '@rbxts/emittery@3.16.0-ts.2':
     dependencies:
       '@rbxts-js/emittery': 3.16.0-ts.1(patch_hash=497d0cd5bf9e422c2955f51b8c9a28e030f5d4b68882ffba4770166ff3f8c496)
 
@@ -7175,10 +7184,21 @@ snapshots:
       '@rbxts/jest-matcher-utils': 3.16.0-ts.1
       '@rbxts/pretty-format': 3.16.0-ts.1
 
+  '@rbxts/jest-globals@3.16.0-ts.2':
+    dependencies:
+      '@rbxts-js/jest-globals': 3.16.0-ts.1
+      '@rbxts/jest-matcher-utils': 3.16.0-ts.2
+      '@rbxts/pretty-format': 3.16.0-ts.2
+
   '@rbxts/jest-matcher-utils@3.16.0-ts.1':
     dependencies:
       '@rbxts-js/jest-matcher-utils': 3.16.0-ts.1
       '@rbxts/pretty-format': 3.16.0-ts.1
+
+  '@rbxts/jest-matcher-utils@3.16.0-ts.2':
+    dependencies:
+      '@rbxts-js/jest-matcher-utils': 3.16.0-ts.1
+      '@rbxts/pretty-format': 3.16.0-ts.2
 
   '@rbxts/jest-utils@0.1.3(@rbxts/jest-globals@3.16.0-ts.1)':
     dependencies:
@@ -7186,16 +7206,20 @@ snapshots:
       expect-type: 1.4.0
       type-fest: 5.9.0
 
-  '@rbxts/jest@3.16.0-ts.1':
+  '@rbxts/jest@3.16.0-ts.2':
     dependencies:
       '@rbxts-js/jest': 3.16.0-ts.1
-      '@rbxts/emittery': 3.16.0-ts.1
-      '@rbxts/jest-globals': 3.16.0-ts.1(patch_hash=d42fa3158b6373f2ccc3e1d6b4a349da546dbc66e3412add2bc04fe7c973caf0)
-      '@rbxts/pretty-format': 3.16.0-ts.1
+      '@rbxts/emittery': 3.16.0-ts.2
+      '@rbxts/jest-globals': 3.16.0-ts.2
+      '@rbxts/pretty-format': 3.16.0-ts.2
 
   '@rbxts/luau-polyfill@1.1.3': {}
 
   '@rbxts/pretty-format@3.16.0-ts.1':
+    dependencies:
+      '@rbxts-js/pretty-format': 3.16.0-ts.1
+
+  '@rbxts/pretty-format@3.16.0-ts.2':
     dependencies:
       '@rbxts-js/pretty-format': 3.16.0-ts.1
 
