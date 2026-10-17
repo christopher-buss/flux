@@ -103,8 +103,8 @@ catalogs:
       version: 2.7.0
   test:
     '@isentinel/jest-roblox':
-      specifier: 0.4.6
-      version: 0.4.6
+      specifier: 0.4.7
+      version: 0.4.7
     '@rbxts-js/dom-testing-library-lua':
       specifier: 8.16.0-ts.3
       version: 8.16.0-ts.3
@@ -160,7 +160,7 @@ catalogs:
       version: 3.0.0-types.0
     '@rbxts/types':
       specifier: latest
-      version: 1.0.957
+      version: 1.0.958
     '@types/node':
       specifier: 24.13.6
       version: 24.13.6
@@ -194,7 +194,7 @@ importers:
         version: 1.6.0(@typescript/native-preview@7.0.0-dev.20260707.2)(jiti@2.7.0)(supports-color@10.2.2)(typescript@6.0.3)
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.4.6(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
+        version: 0.4.7(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -303,7 +303,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -340,7 +340,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -380,7 +380,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -426,7 +426,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -457,7 +457,7 @@ importers:
         version: 3.0.0-types.0(patch_hash=0d8d8eb4669cdbb61dfb75f418335f53dded4eeb9a5780274767148143949def)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -479,7 +479,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.4.6(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
+        version: 0.4.7(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -506,7 +506,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -527,7 +527,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.4.6(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
+        version: 0.4.7(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -560,7 +560,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -581,7 +581,7 @@ importers:
         version: link:../test-utils
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.4.6(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
+        version: 0.4.7(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -629,7 +629,7 @@ importers:
         version: 0.2.1-ts.4
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       '@typescript/native-preview':
         specifier: catalog:tsc
         version: 7.0.0-dev.20260707.2
@@ -647,7 +647,7 @@ importers:
     devDependencies:
       '@isentinel/jest-roblox':
         specifier: catalog:test
-        version: 0.4.6(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
+        version: 0.4.7(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)
       '@isentinel/roblox-ts':
         specifier: catalog:build
         version: 4.0.11(patch_hash=114e6ec722f8ff85e00c90b00935afe2acf79ff2ed722accf587f562fc58fba0)
@@ -677,7 +677,7 @@ importers:
         version: 0.1.3(@rbxts/jest-globals@3.16.0-ts.1)
       '@rbxts/types':
         specifier: catalog:types
-        version: 1.0.957
+        version: 1.0.958
       rimraf:
         specifier: catalog:node
         version: 6.1.3
@@ -1391,8 +1391,8 @@ packages:
       '@typescript/native-preview':
         optional: true
 
-  '@isentinel/jest-roblox@0.4.6':
-    resolution: {integrity: sha512-S/OYHLT+x/myU6QBOh6wi0ry15t58aNDbW51kpjhEaoQw5Mqh40yR+WVKEWbUQdGJRM0shJTpzXANeMWBZygAg==}
+  '@isentinel/jest-roblox@0.4.7':
+    resolution: {integrity: sha512-Q1tfaPnRK6w4UEWehZ/9/OOYTgAFcIQMLMD7aysZaMWwNrD4PK4mK2OMi8sq51GT8orFfZTBx7DzasHjH0NrQA==}
     engines: {node: '>=24.12.0'}
     hasBin: true
     peerDependencies:
@@ -2485,8 +2485,8 @@ packages:
   '@rbxts/services@1.6.0':
     resolution: {integrity: sha512-YH02E1/tGHeMXB0Mam8qPdAZa2fjQWdylEscSL4Zn0RIaQeByYImA2qUsXM3nBdhcyKHDwltzSznDKyCGfFEWA==}
 
-  '@rbxts/types@1.0.957':
-    resolution: {integrity: sha512-nqJMT4blRms/Bi1gC/T4x0SVOgr9nZWWz0f7f+Zx1d4ez4QwOWFG3FfKkz1HQCC0SmhKhXJSoZaPpTsweuikaQ==}
+  '@rbxts/types@1.0.958':
+    resolution: {integrity: sha512-/0G554MPBxX5ydA+KUSLHu2INK/QkpbohtDMHugJ0BW8Lp6UIwkZCqFhcaFYTg6o8i7qhDNtBaRVl5w7TXyZbw==}
 
   '@roblox-ts/luau-ast@2.0.1':
     resolution: {integrity: sha512-jej2mzRGwhR9wu4woAtgTwqsKADlegZYlQ+M5qVHRojvjoyJVFkLrSbhBKRr8HR+fVW5nCz0qX7kNa0tSpAY+A==}
@@ -6225,7 +6225,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@isentinel/jest-roblox@0.4.6(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)':
+  '@isentinel/jest-roblox@0.4.7(@typescript/native-preview@7.0.0-dev.20260707.2)(chokidar@5.0.0)(jiti@2.7.0)(magicast@0.5.5)(typescript@6.0.3)':
     dependencies:
       '@bedrock-rbx/ocale': 0.3.4
       '@jridgewell/trace-mapping': 0.3.31
@@ -7212,7 +7212,7 @@ snapshots:
 
   '@rbxts/services@1.6.0': {}
 
-  '@rbxts/types@1.0.957': {}
+  '@rbxts/types@1.0.958': {}
 
   '@roblox-ts/luau-ast@2.0.1': {}
 
