@@ -1,0 +1,195 @@
+diff --git a/src/circus/combined.lua b/src/circus/combined.lua
+index 98b7fc4eef760f4188f7da77082c9fbefa9c618c..d784ce5a87f4a17bc2321922e4c684779bdb0ceb 100644
+--- a/src/circus/combined.lua
++++ b/src/circus/combined.lua
+@@ -32,6 +32,62 @@ do
+ 
+ 	local RegExp = require(Packages.RegExp)
+ 
++	-- ROBLOX DEVIATION: equals the escape set of the mutation tester that emits these group patterns.
++	local ESCAPABLE = {}
++	for _, character in string.split("$()*+.?[]^{|}\\", "") do
++		ESCAPABLE[character] = true
++	end
++
++	local function literalAlternation(pattern: string): { string }?
++		if string.sub(pattern, 1, 1) ~= "(" or string.sub(pattern, -1) ~= ")" then
++			return nil
++		end
++		local literals = {}
++		local current = {}
++		local index = 2
++		local last = #pattern - 1
++		while index <= last do
++			local character = string.sub(pattern, index, index)
++			if character == "\\" then
++				local escaped = string.sub(pattern, index + 1, index + 1)
++				if index + 1 > last or not ESCAPABLE[escaped] then
++					return nil
++				end
++				table.insert(current, escaped)
++				index += 2
++			elseif character == "|" then
++				table.insert(literals, string.lower(table.concat(current)))
++				current = {}
++				index += 1
++			elseif ESCAPABLE[character] then
++				return nil
++			else
++				table.insert(current, character)
++				index += 1
++			end
++		end
++		table.insert(literals, string.lower(table.concat(current)))
++		return literals
++	end
++
++	local function buildTestNamePattern(pattern: string): any
++		local literals = literalAlternation(pattern)
++		if literals == nil then
++			return RegExp(pattern, "i")
++		end
++		return {
++			test = function(_self: any, value: string): boolean
++				local lowered = string.lower(value)
++				for _, literal in literals do
++					if string.find(lowered, literal, 1, true) ~= nil then
++						return true
++					end
++				end
++				return false
++			end,
++		}
++	end
++
+ 	type Circus_EventHandler = typesModule.Circus_EventHandler
+ 	type Circus_Event = typesModule.Circus_Event
+ 	type Circus_State = typesModule.Circus_State
+@@ -271,7 +327,7 @@ do
+ 				-- state.originalGlobalErrorHandlers = injectGlobalErrorHandlers(state.parentProcess)
+ 				-- ROBLOX deviation END
+ 				if Boolean.toJSBoolean(event.testNamePattern) then
+-					state.testNamePattern = RegExp(event.testNamePattern, "i")
++					state.testNamePattern = buildTestNamePattern(event.testNamePattern)
+ 				end
+ 				break
+ 			elseif event.name == "teardown" then
+diff --git a/src/circus/init.lua b/src/circus/init.lua
+index 4fe90080af063ce0b748283dde07b06ea3caa97a..81acfc31f1d47e052f46828017840dbe950da7f2 100644
+--- a/src/circus/init.lua
++++ b/src/circus/init.lua
+@@ -236,7 +236,10 @@ local test: Global_It = (function()
+ 		return failing
+ 	end
+ 
+-	test.todo = function(testName: Circus_TestName, ...: any): ()
++	-- ROBLOX DEVIATION: declared with `function test.todo` rather than assigned, so the
++	-- function carries a debug name. `captureStackTrace` trims the callsite's frames by
++	-- name, and an anonymous callsite leaves the stack untrimmed.
++	function test.todo(testName: Circus_TestName, ...: any): ()
+ 		local rest = { ... }
+ 		if #rest > 0 or typeof(testName) ~= "string" then
+ 			error(ErrorWithStack.new("Todo must be called with only a description.", test.todo))
+diff --git a/src/circus/utils.lua b/src/circus/utils.lua
+index eeba97004b8271f0b0c9fec20a07761796710074..b27b8467ce165d35be6042258647cd18918428cf 100644
+--- a/src/circus/utils.lua
++++ b/src/circus/utils.lua
+@@ -12,6 +12,7 @@ local LuauPolyfill = require(Packages.LuauPolyfill)
+ local Array = LuauPolyfill.Array
+ local Boolean = LuauPolyfill.Boolean
+ local Error = LuauPolyfill.Error
++local String = LuauPolyfill.String
+ type Array<T> = LuauPolyfill.Array<T>
+ type Error = LuauPolyfill.Error
+ type Promise<T> = LuauPolyfill.Promise<T>
+@@ -30,6 +31,29 @@ local invariant
+ local RegExp = require(Packages.RegExp)
+ -- ROBLOX deviation END
+ 
++-- ROBLOX DEVIATION: upstream resolves jest-each's directory on disk. Here a frame's
++-- source is the chunk name of the script it runs in, so the jest-each frames are
++-- recognised by the chunk name of the one jest-each function a test file calls.
++local jestEachBindSource: string = debug.info(require(Packages.JestEach).bind, "s")
++
++type ParsedLine = { file: string, line: number, column: number, functionName: string? }
++
++-- ROBLOX DEVIATION: stands in for `stack-utils`' `parseLine`. A Luau frame is
++-- `source:line function name` or `source:line`, and carries no column.
++local function parseLine(stackLine: string?): ParsedLine?
++	if stackLine == nil then
++		return nil
++	end
++	local file, line, functionName = string.match(stackLine, "^(.-):(%d+) function (.+)$")
++	if file == nil then
++		file, line = string.match(stackLine, "^(.-):(%d+)$")
++	end
++	if file == nil then
++		return nil
++	end
++	return { file = file, line = tonumber(line) :: number, column = 0, functionName = functionName }
++end
++
+ -- ROBLOX deviation START: add function to extract bare string message from stacktrace line
+ local function separateMessageFromStack(content: string): { message: string, stack: string }
+ 	if not content then
+@@ -446,7 +470,7 @@ end
+ exports.makeRunResult = makeRunResult
+ 
+ local function makeSingleTestResult(test: Circus_TestEntry): Circus_TestResult
+-	local _includeTestLocationInResult = getState().includeTestLocationInResult
++	local includeTestLocationInResult = getState().includeTestLocationInResult
+ 	local testPath = {}
+ 	local parent: Circus_TestEntry | Circus_DescribeBlock | nil = test
+ 
+@@ -466,27 +490,30 @@ local function makeSingleTestResult(test: Circus_TestEntry): Circus_TestResult
+ 	until parent == nil
+ 
+ 	local location = nil
+-	-- ROBLOX TODO START: uncomment when implemented relevant pieces of stackUtils
+-	-- if includeTestLocationInResult then
+-	-- 	local stackLines = String.split(test.asyncError.stack, "\n")
+-	-- 	local stackLine = stackLines[2]
+-	-- 	local parsedLine = stackUtils:parseLine(stackLine)
+-	-- 	if parsedLine ~= nil and parsedLine.file ~= nil and String.startsWith(parsedLine.file, jestEachBuildDir) then
+-	-- 		local stackLine = stackLines[5]
+-	-- 		parsedLine = stackUtils:parseLine(stackLine)
+-	-- 	end
+-	-- 	if
+-	-- 		Boolean.toJSBoolean(parsedLine)
+-	-- 		and typeof(parsedLine.column) == "number"
+-	-- 		and typeof(parsedLine.line) == "number"
+-	-- 	then
+-	-- 		location = {
+-	-- 			column = parsedLine.column,
+-	-- 			line = parsedLine.line,
+-	-- 		}
+-	-- 	end
+-	-- end
+-	-- ROBLOX TODO END
++	if includeTestLocationInResult then
++		local stackLines = String.split(test.asyncError.stack, "\n")
++		local stackLine = stackLines[2]
++		local parsedLine = parseLine(stackLine)
++		if parsedLine ~= nil and parsedLine.file == jestEachBindSource then
++			-- ROBLOX DEVIATION: upstream takes the fixed frame `stackLines[5]`. The Luau
++			-- depth between jest-each's inner callback and the test file is not fixed
++			-- (`Array.forEach` and `pcall` sit in between), so take the frame after the
++			-- one for `eachBind`, the jest-each function the test file called.
++			local eachBindIndex = Array.findIndex(stackLines, function(line)
++				local frame = parseLine(line)
++				return frame ~= nil and frame.file == jestEachBindSource and frame.functionName == "eachBind"
++			end)
++			parsedLine = if eachBindIndex ~= -1 then parseLine(stackLines[eachBindIndex + 1]) else nil
++		end
++		-- ROBLOX DEVIATION: Luau frames carry no column, so `parsedLine.column` is
++		-- always 0 and only the line gates the result.
++		if parsedLine ~= nil and typeof(parsedLine.line) == "number" then
++			location = {
++				column = parsedLine.column,
++				line = parsedLine.line,
++			}
++		end
++	end
+ 
+ 	local errorsDetailed = Array.map(test.errors, _getError)
+ 
